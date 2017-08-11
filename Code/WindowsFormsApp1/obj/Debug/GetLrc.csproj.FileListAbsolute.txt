@@ -1,0 +1,68 @@
+E:\myC#\WindowsFormsApp1\WindowsFormsApp1\bin\Debug\WindowsFormsApp1.exe.config
+E:\myC#\WindowsFormsApp1\WindowsFormsApp1\bin\Debug\WindowsFormsApp1.exe
+E:\myC#\WindowsFormsApp1\WindowsFormsApp1\bin\Debug\WindowsFormsApp1.pdb
+E:\myC#\WindowsFormsApp1\WindowsFormsApp1\obj\Debug\GetLrc.csprojResolveAssemblyReference.cache
+E:\myC#\WindowsFormsApp1\WindowsFormsApp1\obj\Debug\WindowsFormsApp1.Form1.resources
+E:\myC#\WindowsFormsApp1\WindowsFormsApp1\obj\Debug\WindowsFormsApp1.Properties.Resources.resources
+E:\myC#\WindowsFormsApp1\WindowsFormsApp1\obj\Debug\GetLrc.csproj.GenerateResource.Cache
+E:\myC#\WindowsFormsApp1\WindowsFormsApp1\obj\Debug\WindowsFormsApp1.exe
+E:\myC#\WindowsFormsApp1\WindowsFormsApp1\obj\Debug\WindowsFormsApp1.pdb
+E:\大学\软件开发\C#\WindowsFormsApp1\WindowsFormsApp1\bin\Debug\WindowsFormsApp1.exe.config
+E:\大学\软件开发\C#\WindowsFormsApp1\WindowsFormsApp1\bin\Debug\WindowsFormsApp1.exe.manifest
+E:\大学\软件开发\C#\WindowsFormsApp1\WindowsFormsApp1\bin\Debug\WindowsFormsApp1.application
+E:\大学\软件开发\C#\WindowsFormsApp1\WindowsFormsApp1\bin\Debug\WindowsFormsApp1.exe
+E:\大学\软件开发\C#\WindowsFormsApp1\WindowsFormsApp1\bin\Debug\WindowsFormsApp1.pdb
+E:\大学\软件开发\C#\WindowsFormsApp1\WindowsFormsApp1\bin\Debug\Newtonsoft.Json.dll
+E:\大学\软件开发\C#\WindowsFormsApp1\WindowsFormsApp1\bin\Debug\Newtonsoft.Json.xml
+E:\大学\软件开发\C#\WindowsFormsApp1\WindowsFormsApp1\obj\Debug\WindowsFormsApp1.Form1.resources
+E:\大学\软件开发\C#\WindowsFormsApp1\WindowsFormsApp1\obj\Debug\WindowsFormsApp1.Properties.Resources.resources
+E:\大学\软件开发\C#\WindowsFormsApp1\WindowsFormsApp1\obj\Debug\GetLrc.csproj.GenerateResource.Cache
+E:\大学\软件开发\C#\WindowsFormsApp1\WindowsFormsApp1\obj\Debug\WindowsFormsApp1.exe.manifest
+E:\大学\软件开发\C#\WindowsFormsApp1\WindowsFormsApp1\obj\Debug\WindowsFormsApp1.application
+E:\大学\软件开发\C#\WindowsFormsApp1\WindowsFormsApp1\obj\Debug\WindowsFormsApp1.exe
+E:\大学\软件开发\C#\WindowsFormsApp1\WindowsFormsApp1\obj\Debug\WindowsFormsApp1.pdb
+E:\大学\软件开发\C#\网易云歌词提取\WindowsFormsApp1\bin\Debug\网易云歌词提取.exe.config
+E:\大学\软件开发\C#\网易云歌词提取\WindowsFormsApp1\bin\Debug\网易云歌词提取.exe.manifest
+E:\大学\软件开发\C#\网易云歌词提取\WindowsFormsApp1\bin\Debug\网易云歌词提取.application
+E:\大学\软件开发\C#\网易云歌词提取\WindowsFormsApp1\bin\Debug\网易云歌词提取.exe
+E:\大学\软件开发\C#\网易云歌词提取\WindowsFormsApp1\bin\Debug\网易云歌词提取.pdb
+E:\大学\软件开发\C#\网易云歌词提取\WindowsFormsApp1\bin\Debug\Newtonsoft.Json.dll
+E:\大学\软件开发\C#\网易云歌词提取\WindowsFormsApp1\bin\Debug\Newtonsoft.Json.xml
+E:\大学\软件开发\C#\网易云歌词提取\WindowsFormsApp1\obj\Debug\WindowsFormsApp1.Form1.resources
+E:\大学\软件开发\C#\网易云歌词提取\WindowsFormsApp1\obj\Debug\网易云歌词提取.Properties.Resources.resources
+E:\大学\软件开发\C#\网易云歌词提取\WindowsFormsApp1\obj\Debug\GetLrc.csproj.GenerateResource.Cache
+E:\大学\软件开发\C#\网易云歌词提取\WindowsFormsApp1\obj\Debug\网易云歌词提取.exe.manifest
+E:\大学\软件开发\C#\网易云歌词提取\WindowsFormsApp1\obj\Debug\网易云歌词提取.application
+E:\大学\软件开发\C#\网易云歌词提取\WindowsFormsApp1\obj\Debug\网易云歌词提取.exe
+E:\大学\软件开发\C#\网易云歌词提取\WindowsFormsApp1\obj\Debug\网易云歌词提取.pdb
+E:\大学\软件开发\C#\网易云歌词提取\WindowsFormsApp1\obj\Debug\GetLrc.csprojResolveAssemblyReference.cache
+E:\大学\软件开发 20170524\C#\网易云歌词提取\安装版\WindowsFormsApp1\obj\Debug\GetLrc.csprojResolveAssemblyReference.cache
+E:\大学\软件开发 20170524\C#\网易云歌词提取\安装版\WindowsFormsApp1\obj\Debug\WindowsFormsApp1.Form1.resources
+E:\大学\软件开发 20170524\C#\网易云歌词提取\安装版\WindowsFormsApp1\obj\Debug\网易云歌词提取.Properties.Resources.resources
+E:\大学\软件开发 20170524\C#\网易云歌词提取\安装版\WindowsFormsApp1\obj\Debug\GetLrc.csproj.GenerateResource.Cache
+E:\大学\软件开发 20170524\C#\网易云歌词提取\安装版\WindowsFormsApp1\bin\Debug\Newtonsoft.Json.dll
+E:\大学\软件开发 20170524\C#\网易云歌词提取\安装版\WindowsFormsApp1\bin\Debug\Newtonsoft.Json.xml
+E:\大学\软件开发 20170524\C#\网易云歌词提取\安装版\WindowsFormsApp1\bin\Debug\163MusicLyrics.exe.config
+E:\大学\软件开发 20170524\C#\网易云歌词提取\安装版\WindowsFormsApp1\bin\Debug\163MusicLyrics.exe.manifest
+E:\大学\软件开发 20170524\C#\网易云歌词提取\安装版\WindowsFormsApp1\bin\Debug\163MusicLyrics.application
+E:\大学\软件开发 20170524\C#\网易云歌词提取\安装版\WindowsFormsApp1\bin\Debug\163MusicLyrics.exe
+E:\大学\软件开发 20170524\C#\网易云歌词提取\安装版\WindowsFormsApp1\bin\Debug\163MusicLyrics.pdb
+E:\大学\软件开发 20170524\C#\网易云歌词提取\安装版\WindowsFormsApp1\obj\Debug\163MusicLyrics.exe.manifest
+E:\大学\软件开发 20170524\C#\网易云歌词提取\安装版\WindowsFormsApp1\obj\Debug\163MusicLyrics.application
+E:\大学\软件开发 20170524\C#\网易云歌词提取\安装版\WindowsFormsApp1\obj\Debug\163MusicLyrics.exe
+E:\大学\软件开发 20170524\C#\网易云歌词提取\安装版\WindowsFormsApp1\obj\Debug\163MusicLyrics.pdb
+C:\Users\wxs\Desktop\新建文件夹\Code\WindowsFormsApp1\bin\Debug\163MusicLyrics.exe.config
+C:\Users\wxs\Desktop\新建文件夹\Code\WindowsFormsApp1\bin\Debug\163MusicLyrics.exe.manifest
+C:\Users\wxs\Desktop\新建文件夹\Code\WindowsFormsApp1\bin\Debug\163MusicLyrics.application
+C:\Users\wxs\Desktop\新建文件夹\Code\WindowsFormsApp1\bin\Debug\163MusicLyrics.exe
+C:\Users\wxs\Desktop\新建文件夹\Code\WindowsFormsApp1\bin\Debug\163MusicLyrics.pdb
+C:\Users\wxs\Desktop\新建文件夹\Code\WindowsFormsApp1\bin\Debug\Newtonsoft.Json.dll
+C:\Users\wxs\Desktop\新建文件夹\Code\WindowsFormsApp1\bin\Debug\Newtonsoft.Json.xml
+C:\Users\wxs\Desktop\新建文件夹\Code\WindowsFormsApp1\obj\Debug\GetLrc.csprojResolveAssemblyReference.cache
+C:\Users\wxs\Desktop\新建文件夹\Code\WindowsFormsApp1\obj\Debug\WindowsFormsApp1.Form1.resources
+C:\Users\wxs\Desktop\新建文件夹\Code\WindowsFormsApp1\obj\Debug\网易云歌词提取.Properties.Resources.resources
+C:\Users\wxs\Desktop\新建文件夹\Code\WindowsFormsApp1\obj\Debug\GetLrc.csproj.GenerateResource.Cache
+C:\Users\wxs\Desktop\新建文件夹\Code\WindowsFormsApp1\obj\Debug\163MusicLyrics.exe.manifest
+C:\Users\wxs\Desktop\新建文件夹\Code\WindowsFormsApp1\obj\Debug\163MusicLyrics.application
+C:\Users\wxs\Desktop\新建文件夹\Code\WindowsFormsApp1\obj\Debug\163MusicLyrics.exe
+C:\Users\wxs\Desktop\新建文件夹\Code\WindowsFormsApp1\obj\Debug\163MusicLyrics.pdb
