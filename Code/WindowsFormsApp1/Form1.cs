@@ -36,8 +36,19 @@ namespace WindowsFormsApp1
                 String lrc_url = "http://music.163.com/api/song/lyric?os=pc&id=" + id + "&lv=-1&kv=-1&tv=-1";
 
                 String temp = getResult(httpHelper(lrc_url).Replace("\\n", ""));
-                String result = sortLyric(temp);
 
+                String result = "";
+
+                if(temp == "" || temp == null)
+                {
+                    MessageBox.Show("获取歌曲发生错误，请检查歌曲id是否输入正确。","异常");
+                }
+                else
+                {
+                    result = sortLyric(temp);
+                }
+
+                
                 String song_url = "http://music.163.com/api/song/detail/?id=" + id + "&ids=[" + id + "]";
 
                 getInfo(httpHelper(song_url));
@@ -71,6 +82,7 @@ namespace WindowsFormsApp1
         //歌词排序
         private string sortLyric(string t)
         {
+         
             String result = null;
 
             String[] tmp = t.Split('\n');

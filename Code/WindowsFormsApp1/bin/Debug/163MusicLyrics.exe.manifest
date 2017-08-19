@@ -1,7 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <asmv1:assembly xsi:schemaLocation="urn:schemas-microsoft-com:asm.v1 assembly.adaptive.xsd" manifestVersion="1.0" xmlns:asmv1="urn:schemas-microsoft-com:asm.v1" xmlns="urn:schemas-microsoft-com:asm.v2" xmlns:asmv2="urn:schemas-microsoft-com:asm.v2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:co.v1="urn:schemas-microsoft-com:clickonce.v1" xmlns:asmv3="urn:schemas-microsoft-com:asm.v3" xmlns:dsig="http://www.w3.org/2000/09/xmldsig#" xmlns:co.v2="urn:schemas-microsoft-com:clickonce.v2">
-  <asmv1:assemblyIdentity name="163MusicLyrics.exe" version="1.0.0.9" publicKeyToken="0000000000000000" language="neutral" processorArchitecture="msil" type="win32" />
-  <description asmv2:iconFile="www.ico.la_c592395db7e9e8b0b2efaf83c5c193f3_128X128.ico" xmlns="urn:schemas-microsoft-com:asm.v1" />
+  <asmv1:assemblyIdentity name="163MusicLyrics.exe" version="1.1.0.9" publicKeyToken="0000000000000000" language="neutral" processorArchitecture="msil" type="win32" />
   <application />
   <entryPoint>
     <assemblyIdentity name="163MusicLyrics" version="1.0.0.0" language="neutral" processorArchitecture="msil" />
@@ -43,14 +42,14 @@
     </dependentAssembly>
   </dependency>
   <dependency>
-    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="163MusicLyrics.exe" size="81880">
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="163MusicLyrics.exe" size="14296">
       <assemblyIdentity name="163MusicLyrics" version="1.0.0.0" language="neutral" processorArchitecture="msil" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-        <dsig:DigestValue>rm+nH5yvPCgdOyScYgT6wmYOhwH43fBoalksRbuhJAw=</dsig:DigestValue>
+        <dsig:DigestValue>M0NssAm/s/8nsivaFM7jZL9MbhCIceKam9ns9B8X2MM=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
@@ -66,15 +65,6 @@
       </hash>
     </dependentAssembly>
   </dependency>
-  <file name="163Music.ico" size="1150">
-    <hash>
-      <dsig:Transforms>
-        <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
-      </dsig:Transforms>
-      <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-      <dsig:DigestValue>+boklKipDECxWBvFxYpS5M1ADeO30NZPD/TGZYNe2i8=</dsig:DigestValue>
-    </hash>
-  </file>
   <file name="163MusicLyrics.exe.config" size="184">
     <hash>
       <dsig:Transforms>
@@ -82,15 +72,6 @@
       </dsig:Transforms>
       <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
       <dsig:DigestValue>FqWy0dfMmRS85zkU1NlW07p6LsNOPUHodvLiZcFdgJY=</dsig:DigestValue>
-    </hash>
-  </file>
-  <file name="www.ico.la_c592395db7e9e8b0b2efaf83c5c193f3_128X128.ico" size="67646">
-    <hash>
-      <dsig:Transforms>
-        <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
-      </dsig:Transforms>
-      <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-      <dsig:DigestValue>/9tgntAdOh77VHScvY/kAHUjMu8bpyw2FeNB5qnuFLM=</dsig:DigestValue>
     </hash>
   </file>
 </asmv1:assembly>
