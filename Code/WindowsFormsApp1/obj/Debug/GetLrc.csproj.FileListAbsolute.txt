@@ -81,3 +81,4 @@ C:\Users\wxs\Documents\GitHub\163MusicLyrics\Code\WindowsFormsApp1\obj\Debug\163
 C:\Users\wxs\Documents\GitHub\163MusicLyrics\Code\WindowsFormsApp1\obj\Debug\163MusicLyrics.application
 C:\Users\wxs\Documents\GitHub\163MusicLyrics\Code\WindowsFormsApp1\obj\Debug\163MusicLyrics.exe
 C:\Users\wxs\Documents\GitHub\163MusicLyrics\Code\WindowsFormsApp1\obj\Debug\163MusicLyrics.pdb
+C:\Users\wxs\Documents\GitHub\163MusicLyrics\Code\WindowsFormsApp1\obj\Debug\GetLrc.csproj.CoreCompileInputs.cache

@@ -14,7 +14,7 @@
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <HockeyAppResourceId>acc69dd7bfff48a8819c4259c5d105cc</HockeyAppResourceId>
     <TargetFrameworkProfile />
-    <PublishUrl>C:\Users\wxs\Desktop\163MusicLyrics\</PublishUrl>
+    <PublishUrl>C:\Users\wxs\Desktop\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
     <UpdateEnabled>false</UpdateEnabled>
@@ -26,8 +26,8 @@
     <MapFileExtensions>true</MapFileExtensions>
     <ProductName>163MusicLyrics</ProductName>
     <PublisherName>jitwxs</PublisherName>
-    <ApplicationRevision>10</ApplicationRevision>
-    <ApplicationVersion>1.1.0.%2a</ApplicationVersion>
+    <ApplicationRevision>13</ApplicationRevision>
+    <ApplicationVersion>1.2.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
     <PublishWizardCompleted>true</PublishWizardCompleted>

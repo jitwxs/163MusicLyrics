@@ -38,6 +38,7 @@
             this.textBox_song = new System.Windows.Forms.TextBox();
             this.textBox_singer = new System.Windows.Forms.TextBox();
             this.comboBox = new System.Windows.Forms.ComboBox();
+            this.dotCheckBox = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // label1
@@ -54,14 +55,14 @@
             // 
             this.textBox_id.Location = new System.Drawing.Point(61, 21);
             this.textBox_id.Name = "textBox_id";
-            this.textBox_id.Size = new System.Drawing.Size(122, 21);
+            this.textBox_id.Size = new System.Drawing.Size(123, 21);
             this.textBox_id.TabIndex = 1;
             // 
             // confirmBtn
             // 
-            this.confirmBtn.Location = new System.Drawing.Point(218, 14);
+            this.confirmBtn.Location = new System.Drawing.Point(212, 14);
             this.confirmBtn.Name = "confirmBtn";
-            this.confirmBtn.Size = new System.Drawing.Size(76, 33);
+            this.confirmBtn.Size = new System.Drawing.Size(100, 33);
             this.confirmBtn.TabIndex = 2;
             this.confirmBtn.Text = "搜索";
             this.confirmBtn.UseVisualStyleBackColor = true;
@@ -69,17 +70,17 @@
             // 
             // textBox_lrc
             // 
-            this.textBox_lrc.Location = new System.Drawing.Point(15, 87);
+            this.textBox_lrc.Location = new System.Drawing.Point(12, 85);
             this.textBox_lrc.Multiline = true;
             this.textBox_lrc.Name = "textBox_lrc";
             this.textBox_lrc.ReadOnly = true;
             this.textBox_lrc.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox_lrc.Size = new System.Drawing.Size(291, 249);
+            this.textBox_lrc.Size = new System.Drawing.Size(300, 238);
             this.textBox_lrc.TabIndex = 3;
             // 
             // saveBtn
             // 
-            this.saveBtn.Location = new System.Drawing.Point(231, 342);
+            this.saveBtn.Location = new System.Drawing.Point(237, 342);
             this.saveBtn.Name = "saveBtn";
             this.saveBtn.Size = new System.Drawing.Size(75, 23);
             this.saveBtn.TabIndex = 4;
@@ -115,7 +116,7 @@
             // 
             // textBox_singer
             // 
-            this.textBox_singer.Location = new System.Drawing.Point(207, 58);
+            this.textBox_singer.Location = new System.Drawing.Point(212, 58);
             this.textBox_singer.Name = "textBox_singer";
             this.textBox_singer.ReadOnly = true;
             this.textBox_singer.Size = new System.Drawing.Size(100, 21);
@@ -129,17 +130,28 @@
             "歌曲名 - 歌手",
             "歌手 - 歌曲名",
             "歌曲名"});
-            this.comboBox.Location = new System.Drawing.Point(15, 344);
+            this.comboBox.Location = new System.Drawing.Point(12, 344);
             this.comboBox.Name = "comboBox";
-            this.comboBox.Size = new System.Drawing.Size(121, 20);
+            this.comboBox.Size = new System.Drawing.Size(101, 20);
             this.comboBox.TabIndex = 9;
             this.comboBox.SelectedIndexChanged += new System.EventHandler(this.comboBox_SelectedIndexChanged);
+            // 
+            // dotCheckBox
+            // 
+            this.dotCheckBox.AutoSize = true;
+            this.dotCheckBox.Location = new System.Drawing.Point(135, 346);
+            this.dotCheckBox.Name = "dotCheckBox";
+            this.dotCheckBox.Size = new System.Drawing.Size(96, 16);
+            this.dotCheckBox.TabIndex = 10;
+            this.dotCheckBox.Text = "强制两位小数";
+            this.dotCheckBox.UseVisualStyleBackColor = true;
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(318, 377);
+            this.Controls.Add(this.dotCheckBox);
             this.Controls.Add(this.comboBox);
             this.Controls.Add(this.textBox_singer);
             this.Controls.Add(this.textBox_song);
@@ -170,6 +182,7 @@
         private System.Windows.Forms.TextBox textBox_song;
         private System.Windows.Forms.TextBox textBox_singer;
         private System.Windows.Forms.ComboBox comboBox;
+        private System.Windows.Forms.CheckBox dotCheckBox;
     }
 }
 
