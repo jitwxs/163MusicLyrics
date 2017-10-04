@@ -19,6 +19,8 @@ namespace WindowsFormsApp1
         
         int index = 0;//保存文件名类型索引
 
+        Boolean forcedSort; //强制排序
+
         public Form1()
         {
             InitializeComponent();
@@ -50,6 +52,15 @@ namespace WindowsFormsApp1
                     }
                     else
                     {
+                        //查看是否开启强制排序功能
+                        if (sortCheckBox.CheckState == CheckState.Checked)
+                        {
+                            forcedSort = true;
+                        }
+                        else if(sortCheckBox.CheckState == CheckState.Unchecked)
+                        {
+                            forcedSort = false;
+                        }
                         result = sortLyric();
                     }
                     
@@ -104,31 +115,53 @@ namespace WindowsFormsApp1
         //歌词排序
         private String sortLyric()
         {
-
             String result = "";
+            Boolean sortFlag; //仅当翻译歌词不为空时才排序，优先级大于强制排序
             String[] tmp = song.getLrcAndTlyric().Split('[');
 
             String[] lyric = new String[tmp.Length - 1];
+
+            if(song.getTlyric() == "")
+            {
+                sortFlag = false;
+            }
+            else
+            {
+                sortFlag = true;
+            }
 
             for(int i = 1; i < tmp.Length; i++)
             {
                 lyric[i - 1] = "[" + tmp[i];
             }
-            Boolean flag = false;
-
-            for(int i = 0; i < lyric.Length; i++)
+            
+            //是否排序
+            if(sortFlag == true)
             {
-                if(Regex.IsMatch(lyric[i], "^\\[\\d+:\\d+\\.\\d+\\]$") == true)
+                //是否强制排序
+                if (forcedSort == true)
                 {
-                    flag = true;
-                    break;
+                    Array.Sort(lyric);
                 }
-            }
+                else
+                {
+                    Boolean flag = false;
 
-            //仅对没有重复歌词进行排序（典型例子id：428642270）
-            if (flag == false)
-            {
-                Array.Sort(lyric);
+                    for (int i = 0; i < lyric.Length; i++)
+                    {
+                        if (Regex.IsMatch(lyric[i], "^\\[\\d+:\\d+\\.\\d+\\]$") == true)
+                        {
+                            flag = true;
+                            break;
+                        }
+                    }
+
+                    //仅对没有重复歌词进行排序（典型例子id：428642270）
+                    if (flag == false)
+                    {
+                        Array.Sort(lyric);
+                    }
+                }
             }
 
             foreach (String i in lyric)
@@ -137,7 +170,7 @@ namespace WindowsFormsApp1
             return result;
         }
 
-        //设置时间戳两位小数
+        //设置时间戳小数位数
         private String setDot(string ss,int value)
         {
             String result = "";

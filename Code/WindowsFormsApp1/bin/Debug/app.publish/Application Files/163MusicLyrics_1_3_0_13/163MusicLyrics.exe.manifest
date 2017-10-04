@@ -1,0 +1,77 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<asmv1:assembly xsi:schemaLocation="urn:schemas-microsoft-com:asm.v1 assembly.adaptive.xsd" manifestVersion="1.0" xmlns:asmv1="urn:schemas-microsoft-com:asm.v1" xmlns="urn:schemas-microsoft-com:asm.v2" xmlns:asmv2="urn:schemas-microsoft-com:asm.v2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:co.v1="urn:schemas-microsoft-com:clickonce.v1" xmlns:asmv3="urn:schemas-microsoft-com:asm.v3" xmlns:dsig="http://www.w3.org/2000/09/xmldsig#" xmlns:co.v2="urn:schemas-microsoft-com:clickonce.v2">
+  <asmv1:assemblyIdentity name="163MusicLyrics.exe" version="1.3.0.13" publicKeyToken="4d5388c8df315401" language="neutral" processorArchitecture="msil" type="win32" />
+  <application />
+  <entryPoint>
+    <assemblyIdentity name="163MusicLyrics" version="1.0.0.0" language="neutral" processorArchitecture="msil" />
+    <commandLine file="163MusicLyrics.exe" parameters="" />
+  </entryPoint>
+  <trustInfo>
+    <security>
+      <applicationRequestMinimum>
+        <PermissionSet Unrestricted="true" ID="Custom" SameSite="site" />
+        <defaultAssemblyRequest permissionSetReference="Custom" />
+      </applicationRequestMinimum>
+      <requestedPrivileges xmlns="urn:schemas-microsoft-com:asm.v3">
+        <!--
+          UAC 清单选项
+         若想要更改 Windows 用户帐户控制级别，请
+         将 requestedExecutionLevel 节点替换为下述某项。
+
+       <requestedExecutionLevel  level="asInvoker" uiAccess="false" />
+       <requestedExecutionLevel  level="requireAdministrator" uiAccess="false" />
+       <requestedExecutionLevel  level="highestAvailable" uiAccess="false" />
+
+        若想要使用文件和注册表虚拟化以实现向后
+        兼容，请删除 requestedExecutionLevel 节点。
+    -->
+        <requestedExecutionLevel level="asInvoker" uiAccess="false" />
+      </requestedPrivileges>
+    </security>
+  </trustInfo>
+  <dependency>
+    <dependentOS>
+      <osVersionInfo>
+        <os majorVersion="5" minorVersion="1" buildNumber="2600" servicePackMajor="0" />
+      </osVersionInfo>
+    </dependentOS>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="preRequisite" allowDelayedBinding="true">
+      <assemblyIdentity name="Microsoft.Windows.CommonLanguageRuntime" version="4.0.30319.0" />
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="163MusicLyrics.exe" size="17368">
+      <assemblyIdentity name="163MusicLyrics" version="1.0.0.0" language="neutral" processorArchitecture="msil" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+        <dsig:DigestValue>D4auGV7EjWrGJvZnFyDlJt9O3RzZ+rH24NEQWF2B674=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="Newtonsoft.Json.dll" size="652288">
+      <assemblyIdentity name="Newtonsoft.Json" version="10.0.0.0" publicKeyToken="30AD4FE6B2A6AEED" language="neutral" processorArchitecture="msil" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+        <dsig:DigestValue>bMDLzVxHCcahyX9VgcNH2T5YbnzA1kv/tNMsbnU0dqQ=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <file name="163MusicLyrics.exe.config" size="184">
+    <hash>
+      <dsig:Transforms>
+        <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+      </dsig:Transforms>
+      <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+      <dsig:DigestValue>FqWy0dfMmRS85zkU1NlW07p6LsNOPUHodvLiZcFdgJY=</dsig:DigestValue>
+    </hash>
+  </file>
+<publisherIdentity name="CN=DESKTOP-GD1KV4T\wxs" issuerKeyHash="444d5aa4895687bcf22baa5e90764529d25a678f" /><Signature Id="StrongNameSignature" xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#" /><SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha256" /><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" /><Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#" /></Transforms><DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" /><DigestValue>LKaHSFOYit3nULnvNxaTbwSeg/UM+64dP0F35QZUxjw=</DigestValue></Reference></SignedInfo><SignatureValue>q9sP+wshLiyB7+VdskXxfHYhgX87DDUno3WIMMy9c1paI3BUWpcQal/FW57rf1rPezX2gsyq+DzmYfqqeaEqjjHk5QHby530VV7raJA9eSeGVo3MAV4WQngbAXDFffDsKtil1dv7J3jCGR9OT3K6uNgki+9tVH+NK0yCrx+uUM0=</SignatureValue><KeyInfo Id="StrongNameKeyInfo"><KeyValue><RSAKeyValue><Modulus>sd2PwjoTZCSPHS1s4TsLAFTZZSZSyGJrcpySJiKEeHTYFysT0FVOPfj0ns36nCzk6mFUJxFcOE5sudjbbjEvPoW9KLHFrWWoBD0fkA6iXrlhVg/0CyFeJL3dSK2wyauqazbS9tApEIX3Uk4B5Xndl1OgqHfenT5HEf5dtNwpGyE=</Modulus><Exponent>AQAB</Exponent></RSAKeyValue></KeyValue><msrel:RelData xmlns:msrel="http://schemas.microsoft.com/windows/rel/2005/reldata"><r:license xmlns:r="urn:mpeg:mpeg21:2003:01-REL-R-NS" xmlns:as="http://schemas.microsoft.com/windows/pki/2005/Authenticode"><r:grant><as:ManifestInformation Hash="3cc65406e577413f1daefb0cf5839e046f931637efb950e7dd8a98534887a62c" Description="" Url=""><as:assemblyIdentity name="163MusicLyrics.exe" version="1.3.0.13" publicKeyToken="4d5388c8df315401" language="neutral" processorArchitecture="msil" type="win32" /></as:ManifestInformation><as:SignedBy /><as:AuthenticodePublisher><as:X509SubjectName>CN=DESKTOP-GD1KV4T\wxs</as:X509SubjectName></as:AuthenticodePublisher></r:grant><r:issuer><Signature Id="AuthenticodeSignature" xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#" /><SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha256" /><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" /><Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#" /></Transforms><DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" /><DigestValue>gc7UXhvplTVwqoQ7tm1awJtGWxENovsDi3FYoAgY+y0=</DigestValue></Reference></SignedInfo><SignatureValue>aBozwfq13rlnve+czNxdt0LwsBHOieWksD/40SyP+oxyqsvHiBtGeHWSzsCycohwsFuLq9nnn1fFWcosrxGjeq5Kbx2R34V/yYEU5Zx2mD7CGXzCOPY6de7ECF0zy9CHT6flur9DEuInwmBObBVlRS/GYvf0UpbRr4V5suDHmXY=</SignatureValue><KeyInfo><KeyValue><RSAKeyValue><Modulus>sd2PwjoTZCSPHS1s4TsLAFTZZSZSyGJrcpySJiKEeHTYFysT0FVOPfj0ns36nCzk6mFUJxFcOE5sudjbbjEvPoW9KLHFrWWoBD0fkA6iXrlhVg/0CyFeJL3dSK2wyauqazbS9tApEIX3Uk4B5Xndl1OgqHfenT5HEf5dtNwpGyE=</Modulus><Exponent>AQAB</Exponent></RSAKeyValue></KeyValue><X509Data><X509Certificate>MIIB5TCCAU6gAwIBAgIQaWC1eVpxUZZNcfSn6WiHRDANBgkqhkiG9w0BAQsFADAxMS8wLQYDVQQDHiYARABFAFMASwBUAE8AUAAtAEcARAAxAEsAVgA0AFQAXAB3AHgAczAeFw0xNzA1MDgxMDU5NTlaFw0xODA1MDgxNjU5NTlaMDExLzAtBgNVBAMeJgBEAEUAUwBLAFQATwBQAC0ARwBEADEASwBWADQAVABcAHcAeABzMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCx3Y/COhNkJI8dLWzhOwsAVNllJlLIYmtynJImIoR4dNgXKxPQVU49+PSezfqcLOTqYVQnEVw4Tmy52NtuMS8+hb0oscWtZagEPR+QDqJeuWFWD/QLIV4kvd1IrbDJq6prNtL20CkQhfdSTgHled2XU6Cod96dPkcR/l203CkbIQIDAQABMA0GCSqGSIb3DQEBCwUAA4GBAKafj+Xw+jYTLicgPJWfb0kfrp3CkjyjDaa4ASOMz80TU/rr9R3kHvOxRVB0yMWgTxZ2C7mx1rNDNUzWY77rGGy4S19yEhzZItrOMuOPm6hN87K0KYMnlYk8QR7GLC60TzDAfRYwmw2jyKK7A70TFnj6E2NIXNy/kOM6a0GRIa9l</X509Certificate></X509Data></KeyInfo></Signature></r:issuer></r:license></msrel:RelData></KeyInfo></Signature></asmv1:assembly>

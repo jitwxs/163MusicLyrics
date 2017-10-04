@@ -39,13 +39,14 @@
             this.textBox_singer = new System.Windows.Forms.TextBox();
             this.comboBox = new System.Windows.Forms.ComboBox();
             this.dotCheckBox = new System.Windows.Forms.CheckBox();
+            this.sortCheckBox = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // label1
             // 
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("宋体", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.label1.Location = new System.Drawing.Point(12, 22);
+            this.label1.Location = new System.Drawing.Point(10, 28);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(28, 14);
             this.label1.TabIndex = 0;
@@ -53,14 +54,14 @@
             // 
             // textBox_id
             // 
-            this.textBox_id.Location = new System.Drawing.Point(61, 21);
+            this.textBox_id.Location = new System.Drawing.Point(59, 21);
             this.textBox_id.Name = "textBox_id";
             this.textBox_id.Size = new System.Drawing.Size(123, 21);
             this.textBox_id.TabIndex = 1;
             // 
             // confirmBtn
             // 
-            this.confirmBtn.Location = new System.Drawing.Point(212, 14);
+            this.confirmBtn.Location = new System.Drawing.Point(210, 14);
             this.confirmBtn.Name = "confirmBtn";
             this.confirmBtn.Size = new System.Drawing.Size(100, 33);
             this.confirmBtn.TabIndex = 2;
@@ -70,7 +71,7 @@
             // 
             // textBox_lrc
             // 
-            this.textBox_lrc.Location = new System.Drawing.Point(12, 85);
+            this.textBox_lrc.Location = new System.Drawing.Point(10, 86);
             this.textBox_lrc.Multiline = true;
             this.textBox_lrc.Name = "textBox_lrc";
             this.textBox_lrc.ReadOnly = true;
@@ -80,9 +81,9 @@
             // 
             // saveBtn
             // 
-            this.saveBtn.Location = new System.Drawing.Point(237, 342);
+            this.saveBtn.Location = new System.Drawing.Point(235, 330);
             this.saveBtn.Name = "saveBtn";
-            this.saveBtn.Size = new System.Drawing.Size(75, 23);
+            this.saveBtn.Size = new System.Drawing.Size(75, 36);
             this.saveBtn.TabIndex = 4;
             this.saveBtn.Text = "保存";
             this.saveBtn.UseVisualStyleBackColor = true;
@@ -91,7 +92,7 @@
             // label_singer
             // 
             this.label_singer.AutoSize = true;
-            this.label_singer.Location = new System.Drawing.Point(160, 61);
+            this.label_singer.Location = new System.Drawing.Point(163, 56);
             this.label_singer.Name = "label_singer";
             this.label_singer.Size = new System.Drawing.Size(41, 12);
             this.label_singer.TabIndex = 5;
@@ -100,7 +101,7 @@
             // label_song
             // 
             this.label_song.AutoSize = true;
-            this.label_song.Location = new System.Drawing.Point(13, 61);
+            this.label_song.Location = new System.Drawing.Point(11, 56);
             this.label_song.Name = "label_song";
             this.label_song.Size = new System.Drawing.Size(41, 12);
             this.label_song.TabIndex = 6;
@@ -108,7 +109,7 @@
             // 
             // textBox_song
             // 
-            this.textBox_song.Location = new System.Drawing.Point(61, 58);
+            this.textBox_song.Location = new System.Drawing.Point(58, 53);
             this.textBox_song.Name = "textBox_song";
             this.textBox_song.ReadOnly = true;
             this.textBox_song.Size = new System.Drawing.Size(93, 21);
@@ -116,7 +117,7 @@
             // 
             // textBox_singer
             // 
-            this.textBox_singer.Location = new System.Drawing.Point(212, 58);
+            this.textBox_singer.Location = new System.Drawing.Point(210, 53);
             this.textBox_singer.Name = "textBox_singer";
             this.textBox_singer.ReadOnly = true;
             this.textBox_singer.Size = new System.Drawing.Size(100, 21);
@@ -130,7 +131,7 @@
             "歌曲名 - 歌手",
             "歌手 - 歌曲名",
             "歌曲名"});
-            this.comboBox.Location = new System.Drawing.Point(12, 344);
+            this.comboBox.Location = new System.Drawing.Point(10, 339);
             this.comboBox.Name = "comboBox";
             this.comboBox.Size = new System.Drawing.Size(101, 20);
             this.comboBox.TabIndex = 9;
@@ -139,18 +140,29 @@
             // dotCheckBox
             // 
             this.dotCheckBox.AutoSize = true;
-            this.dotCheckBox.Location = new System.Drawing.Point(135, 346);
+            this.dotCheckBox.Location = new System.Drawing.Point(133, 330);
             this.dotCheckBox.Name = "dotCheckBox";
             this.dotCheckBox.Size = new System.Drawing.Size(96, 16);
             this.dotCheckBox.TabIndex = 10;
             this.dotCheckBox.Text = "强制两位小数";
             this.dotCheckBox.UseVisualStyleBackColor = true;
             // 
+            // sortCheckBox
+            // 
+            this.sortCheckBox.AutoSize = true;
+            this.sortCheckBox.Location = new System.Drawing.Point(133, 352);
+            this.sortCheckBox.Name = "sortCheckBox";
+            this.sortCheckBox.Size = new System.Drawing.Size(72, 16);
+            this.sortCheckBox.TabIndex = 12;
+            this.sortCheckBox.Text = "强制排序";
+            this.sortCheckBox.UseVisualStyleBackColor = true;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(318, 377);
+            this.ClientSize = new System.Drawing.Size(318, 374);
+            this.Controls.Add(this.sortCheckBox);
             this.Controls.Add(this.dotCheckBox);
             this.Controls.Add(this.comboBox);
             this.Controls.Add(this.textBox_singer);
@@ -183,6 +195,7 @@
         private System.Windows.Forms.TextBox textBox_singer;
         private System.Windows.Forms.ComboBox comboBox;
         private System.Windows.Forms.CheckBox dotCheckBox;
+        private System.Windows.Forms.CheckBox sortCheckBox;
     }
 }
 
