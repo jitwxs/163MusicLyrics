@@ -1,11 +1,11 @@
-# 网易云音乐歌词获取
+![](https://img.shields.io/badge/version-2.0-brightgreen.svg)
+![](https://img.shields.io/github/license/jitwxs/163MusicLyrics.svg)
 
 ## 一、使用方法
 
 ### 1.1 起步
 
-1. 下载项目
-2. 打开 `Software` 目录，`Green Version` 版免安装，直接运行即可；`Install Version` 版需要安装。
+进入 `Release` 页下载最新版本即可。
 
 ### 1.2 基本使用
 
