@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26730.16
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GetLrc", "WindowsFormsApp1\GetLrc.csproj", "{A8897401-6EE2-4C86-A56A-59CCF37A5974}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "163MusicLyrics", "WindowsFormsApp1\163MusicLyrics.csproj", "{A8897401-6EE2-4C86-A56A-59CCF37A5974}"
+EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "163MusicLyricsSetup", "163MusicLyricsSetup\163MusicLyricsSetup.vdproj", "{069C937B-EED1-4178-91D8-AD9305612386}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,8 @@ Global
 		{A8897401-6EE2-4C86-A56A-59CCF37A5974}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A8897401-6EE2-4C86-A56A-59CCF37A5974}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A8897401-6EE2-4C86-A56A-59CCF37A5974}.Release|Any CPU.Build.0 = Release|Any CPU
+		{069C937B-EED1-4178-91D8-AD9305612386}.Debug|Any CPU.ActiveCfg = Debug
+		{069C937B-EED1-4178-91D8-AD9305612386}.Release|Any CPU.ActiveCfg = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
