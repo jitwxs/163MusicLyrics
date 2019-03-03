@@ -1,4 +1,4 @@
-![](https://img.shields.io/badge/version-2.0-brightgreen.svg)
+![](https://img.shields.io/badge/version-2.2-brightgreen.svg)
 ![](https://img.shields.io/github/license/jitwxs/163MusicLyrics.svg)
 
 ## 一、使用方法
@@ -126,6 +126,12 @@
 将多个歌曲 ID，使用英文下的逗号（,）分割，点击批量保存后。**只需要选择路径和保存类型即可，无需修改文件名。**
 
 ## 二、更新日志
+
+#### 2019.3.3 Release 2.2
+
+- 增加批量保存输出日志
+
+- 处理文件名非法字符
 
 #### 2019.2.10 Release 2.1
 
