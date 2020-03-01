@@ -275,7 +275,7 @@ namespace WindowsFormsApp1
             string originLrc = song.GetLyric();
             string translateLrc = song.GetTlyric();
 
-            // 如果不存在翻译歌词，或者选择返回原歌词，直接返回原歌词
+            // 如果不存在翻译歌词，或者选择返回原歌词
             string[] originLrcs = SplitLrc(originLrc);
             if (translateLrc  == null || translateLrc == "" || diglossiaLrcType == (int)DIGLOSSIA_LRC_TYPE.ONLY_ORIGIN)
             {
@@ -430,7 +430,7 @@ namespace WindowsFormsApp1
         // 搜索按钮点击事件
         private void searchBtn_Click(object sender, EventArgs e)
         {
-            string id = textBox_id.Text;
+            string id = textBox_id.Text.Trim();
             if (id == "" || id == null || !CheckNum(id))
             {
                 MessageBox.Show("【警告】ID 为空或格式非法！", "提示");
@@ -643,11 +643,11 @@ namespace WindowsFormsApp1
 
     enum DIGLOSSIA_LRC_TYPE
     {
-        ONLY_ORIGIN,
-        ONLY_TRANSLATE,
-        ORIGIN_PRIOR,
-        TRANSLATE_PRIOR,
-        MERGE
+        ONLY_ORIGIN, // 仅显示原文
+        ONLY_TRANSLATE, // 仅显示译文
+        ORIGIN_PRIOR, // 优先原文
+        TRANSLATE_PRIOR, // 优先译文
+        MERGE // 合并显示
     }
 
     enum OUTPUT_FILENAME_TYPE
