@@ -3,9 +3,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net;
+using System.Net.Http;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace WindowsFormsApp1
@@ -35,21 +36,14 @@ namespace WindowsFormsApp1
             comboBox_diglossia_lrc.SelectedIndex = 0;
         }
 
-        // GET请求服务器
+        /// <summary>
+        /// GET请求服务器
+        /// </summary>
+        /// <param name="url"></param>
+        /// <returns></returns>
         public string HttpHelper(string url)
         {
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
-            request.Timeout = 2000;
-            request.Method = "GET";
-            request.ContentType = "text/html;charset=UTF-8";
-
-            HttpWebResponse response = (HttpWebResponse)request.GetResponse();
-            Stream myResponseStream = response.GetResponseStream();
-            StreamReader myStreamReader = new StreamReader(myResponseStream, Encoding.UTF8);
-            string retString = myStreamReader.ReadToEnd();
-            myStreamReader.Close();
-            myResponseStream.Close();
-            return retString;
+            return HttpClientHelper.HttpGet(url);
         }
 
         // 获取歌曲名、歌手名
@@ -83,7 +77,7 @@ namespace WindowsFormsApp1
                 }
                 catch (Exception ew)
                 {
-                    Console.WriteLine("获取歌曲信息错误：" + ew);
+                    Console.WriteLine("获取歌曲信息错误：" + ew.StackTrace);
                 }
             }
 
@@ -356,7 +350,7 @@ namespace WindowsFormsApp1
             }
             catch (Exception ew)
             {
-                Console.WriteLine("解析HTTP返回错误：" + ew);
+                Console.WriteLine("解析HTTP返回错误：" + ew.StackTrace);
                 return new HttpStatus(HTTP_STATUS_INTERNAL_ERROR, "解析 HTTP 返回失败");
             }
         }
@@ -476,6 +470,7 @@ namespace WindowsFormsApp1
             }
             catch (Exception ew)
             {
+                Console.WriteLine("搜索失败，错误信息：" + ew.StackTrace);
                 MessageBox.Show("搜索失败，错误信息：\n" + ew.Message);
             }
         }
