@@ -198,15 +198,10 @@ namespace WindowsFormsApp1
                     }
                 }
                 return 0;
-            }
-
-            // 是否原文歌词优先
-            if(hasOriginLrcPrior)
+            } 
+            else
             {
-                return string.Compare(originLrc.Substring(str1Index), translateLrc.Substring(str2Index));
-            } else
-            {
-                return string.Compare(translateLrc.Substring(str2Index), originLrc.Substring(str1Index));
+                return hasOriginLrcPrior ? -1 : 1;
             }
         }
 
@@ -222,9 +217,17 @@ namespace WindowsFormsApp1
             while (i < lena && j < lenb)
             {
                 if (Compare(originLrcs[i], translateLrcs[j], hasOriginLrcPrior) == 1)
+                {
                     c[k++] = translateLrcs[j++];
-                else
+                }  
+                else if (Compare(originLrcs[i], translateLrcs[j], hasOriginLrcPrior) == -1)
+                {
                     c[k++] = originLrcs[i++];
+                }
+                else
+                {
+                    c[k++] = hasOriginLrcPrior ? originLrcs[i++] : translateLrcs[j++];
+                }
             }
             
             while (i < lena)
@@ -235,9 +238,9 @@ namespace WindowsFormsApp1
         }
 
         // 双语歌词合并
-        private static string[] MergeLrc(string[] originLrcs, string[] translateLrcs, string splitStr)
+        private static string[] MergeLrc(string[] originLrcs, string[] translateLrcs, string splitStr, bool hasOriginLrcPrior)
         {
-            string[] c = SortLrc(originLrcs, translateLrcs, true);
+            string[] c = SortLrc(originLrcs, translateLrcs, hasOriginLrcPrior);
             List<string> list = new List<string>
             {
                 c[0]
@@ -291,8 +294,11 @@ namespace WindowsFormsApp1
                 case (int)DIGLOSSIA_LRC_TYPE.TRANSLATE_PRIOR: // 先显示译文，后显示原文
                     res = SortLrc(originLrcs, translateLrcs, false);
                     break;
-                case (int)DIGLOSSIA_LRC_TYPE.MERGE: // 合并显示
-                    res = MergeLrc(originLrcs, translateLrcs, splitTextBox.Text);
+                case (int)DIGLOSSIA_LRC_TYPE.MERGE_ORIGIN: // 合并显示，优先原文
+                    res = MergeLrc(originLrcs, translateLrcs, splitTextBox.Text, true);
+                    break;
+                case (int)DIGLOSSIA_LRC_TYPE.MERGE_TRANSLATE: // 合并显示，优先译文
+                    res = MergeLrc(originLrcs, translateLrcs, splitTextBox.Text, false);
                     break;
             }
 
@@ -624,7 +630,7 @@ namespace WindowsFormsApp1
         private void comboBox_diglossia_lrc_SelectedIndexChanged(object sender, EventArgs e)
         {
             diglossiaLrcType = comboBox_diglossia_lrc.SelectedIndex;
-            if(diglossiaLrcType == (int)DIGLOSSIA_LRC_TYPE.MERGE)
+            if(diglossiaLrcType == (int)DIGLOSSIA_LRC_TYPE.MERGE_ORIGIN || diglossiaLrcType == (int)DIGLOSSIA_LRC_TYPE.MERGE_TRANSLATE)
             {
                 splitTextBox.ReadOnly = false;
             }
@@ -642,7 +648,8 @@ namespace WindowsFormsApp1
         ONLY_TRANSLATE, // 仅显示译文
         ORIGIN_PRIOR, // 优先原文
         TRANSLATE_PRIOR, // 优先译文
-        MERGE // 合并显示
+        MERGE_ORIGIN, // 合并显示，优先原文
+        MERGE_TRANSLATE, // 合并显示，优先译文
     }
 
     enum OUTPUT_FILENAME_TYPE

@@ -174,7 +174,8 @@
             "仅显示译文",
             "优先原文",
             "优先译文",
-            "合并显示"});
+            "合并显示，优先原文",
+            "合并显示，优先译文"});
             this.comboBox_diglossia_lrc.Location = new System.Drawing.Point(106, 270);
             this.comboBox_diglossia_lrc.Name = "comboBox_diglossia_lrc";
             this.comboBox_diglossia_lrc.Size = new System.Drawing.Size(207, 20);
