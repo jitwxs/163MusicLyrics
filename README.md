@@ -1,5 +1,5 @@
-![](https://img.shields.io/badge/version-2.2-brightgreen.svg)
-![](https://img.shields.io/github/license/jitwxs/163MusicLyrics.svg)
+[![Release](https://img.shields.io/github/v/release/jitwxs/163MusicLyrics.svg)](https://github.com/jitwxs/163MusicLyrics/releases)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 ## 一、使用方法
 
