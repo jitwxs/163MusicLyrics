@@ -1,12 +1,11 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net.Http;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace WindowsFormsApp1
@@ -52,13 +51,14 @@ namespace WindowsFormsApp1
             JObject obj = JObject.Parse(jsonStr);
             HttpStatus httpStatus = GetHttpStatus(obj);
 
-            if(httpStatus.GetCode() == HTTP_STATUS_SUCCESS)
+            if (httpStatus.GetCode() == HTTP_STATUS_SUCCESS)
             {
                 JToken songName = obj["songs"][0]["name"];
                 if (songName != null)
                 {
                     song.SetName(songName.ToString());
-                } else
+                }
+                else
                 {
                     Console.WriteLine("歌曲名为空");
                 }
@@ -87,7 +87,7 @@ namespace WindowsFormsApp1
         // 获取歌曲原文歌词、译文歌词
         public HttpStatus GetSongLrc(string jsonStr, ref Song song)
         {
-            JObject obj = JObject.Parse(jsonStr);
+            JObject obj = (JObject)JsonConvert.DeserializeObject(jsonStr);
             HttpStatus httpStatus = GetHttpStatus(obj);
 
             if (httpStatus.GetCode() == HTTP_STATUS_SUCCESS)
@@ -112,22 +112,14 @@ namespace WindowsFormsApp1
                     Console.WriteLine("译文歌词为空");
                 }
             }
-            
+
             return httpStatus;
         }
-        
+
         // 将歌词切割为数组
         private string[] SplitLrc(string lrc)
         {
-            string[] tmp = lrc.Split('[');
-            string[] lyric = new string[tmp.Length - 1];
-
-            for (int i = 1; i < tmp.Length; i++)
-            {
-                lyric[i - 1] = "[" + tmp[i];
-            }
-
-            return lyric;
+            return lrc.Split('\n').Where(s => !string.IsNullOrEmpty(s)).ToArray();
         }
 
         // 将歌词数组转为字符串
@@ -137,7 +129,7 @@ namespace WindowsFormsApp1
 
             foreach (string i in lrcs)
                 result += i + "\r\n";
-            
+
             return result;
         }
 
@@ -161,7 +153,7 @@ namespace WindowsFormsApp1
             }
             return outputFileName;
         }
- 
+
         // 歌词排序函数
         private static int Compare(string originLrc, string translateLrc, bool hasOriginLrcPrior)
         {
@@ -198,7 +190,7 @@ namespace WindowsFormsApp1
                     }
                 }
                 return 0;
-            } 
+            }
             else
             {
                 return hasOriginLrcPrior ? -1 : 1;
@@ -219,7 +211,7 @@ namespace WindowsFormsApp1
                 if (Compare(originLrcs[i], translateLrcs[j], hasOriginLrcPrior) == 1)
                 {
                     c[k++] = translateLrcs[j++];
-                }  
+                }
                 else if (Compare(originLrcs[i], translateLrcs[j], hasOriginLrcPrior) == -1)
                 {
                     c[k++] = originLrcs[i++];
@@ -229,7 +221,7 @@ namespace WindowsFormsApp1
                     c[k++] = hasOriginLrcPrior ? originLrcs[i++] : translateLrcs[j++];
                 }
             }
-            
+
             while (i < lena)
                 c[k++] = originLrcs[i++];
             while (j < lenb)
@@ -246,13 +238,13 @@ namespace WindowsFormsApp1
                 c[0]
             };
 
-            for (int i=1;i<c.Length;i++)
+            for (int i = 1; i < c.Length; i++)
             {
-                int str1Index = c[i-1].IndexOf("]") + 1;
+                int str1Index = c[i - 1].IndexOf("]") + 1;
                 int str2Index = c[i].IndexOf("]") + 1;
-                string str1Timestamp = c[i-1].Substring(0, str1Index);
+                string str1Timestamp = c[i - 1].Substring(0, str1Index);
                 string str2Timestamp = c[i].Substring(0, str2Index);
-                if(str1Timestamp != str2Timestamp)
+                if (str1Timestamp != str2Timestamp)
                 {
                     list.Add(c[i]);
                 }
@@ -274,18 +266,18 @@ namespace WindowsFormsApp1
 
             // 如果不存在翻译歌词，或者选择返回原歌词
             string[] originLrcs = SplitLrc(originLrc);
-            if (translateLrc  == null || translateLrc == "" || diglossiaLrcType == (int)DIGLOSSIA_LRC_TYPE.ONLY_ORIGIN)
+            if (translateLrc == null || translateLrc == "" || diglossiaLrcType == (int)DIGLOSSIA_LRC_TYPE.ONLY_ORIGIN)
             {
                 return originLrcs;
             }
-            
+
             // 如果选择仅译文
             string[] translateLrcs = SplitLrc(translateLrc);
             if (diglossiaLrcType == (int)DIGLOSSIA_LRC_TYPE.ONLY_TRANSLATE)
             {
                 return translateLrcs;
             }
-            
+
             switch (diglossiaLrcType)
             {
                 case (int)DIGLOSSIA_LRC_TYPE.ORIGIN_PRIOR: // 先显示原文，后显示译文
@@ -308,7 +300,7 @@ namespace WindowsFormsApp1
         // 设置时间戳小数位数
         public void SetTimeStamp2Dot(ref string[] lrcStr)
         {
-            for(int i=0;i<lrcStr.Length;i++)
+            for (int i = 0; i < lrcStr.Length; i++)
             {
                 int index = lrcStr[i].IndexOf("]");
                 string timestamp = lrcStr[i].Substring(1, index - 1);
@@ -318,7 +310,7 @@ namespace WindowsFormsApp1
                 string tmp = "[";
                 foreach (string t in ts)
                 {
-                    if(double.TryParse(t, out double num))
+                    if (double.TryParse(t, out double num))
                     {
                         tmp = tmp + num.ToString("00.##") + ":";
                     }
@@ -328,7 +320,7 @@ namespace WindowsFormsApp1
                         break;
                     }
                 }
-                if(hasNum)
+                if (hasNum)
                 {
                     lrcStr[i] = tmp.Substring(0, tmp.Length - 1) + "]" + lrcStr[i].Substring(index + 1);
                 }
@@ -347,7 +339,7 @@ namespace WindowsFormsApp1
                 }
 
                 JToken uncollected = obj["uncollected"];
-                if(uncollected != null && (bool)uncollected)
+                if (uncollected != null && (bool)uncollected)
                 {
                     return new HttpStatus(HTTP_STATUS_NOT_FOUND, "歌词未被收集");
                 }
@@ -443,7 +435,7 @@ namespace WindowsFormsApp1
                 Song song = new Song();
                 string lrc_url = string.Format(LRC_URL, id);
 
-                HttpStatus status = GetSongLrc(HttpHelper(lrc_url).Replace("\\n", ""), ref song);
+                HttpStatus status = GetSongLrc(HttpHelper(lrc_url), ref song);
                 if (status.GetCode() != HTTP_STATUS_SUCCESS)
                 {
                     MessageBox.Show("获取歌词失败，错误信息：" + status.GetMsg(), "异常");
@@ -484,7 +476,7 @@ namespace WindowsFormsApp1
         // 保存按钮点击事件
         private void saveBtn_Click(object sender, EventArgs e)
         {
-            if(currentSong == null)
+            if (currentSong == null)
             {
                 MessageBox.Show("请先点击搜索按钮", "提示");
                 return;
@@ -498,7 +490,8 @@ namespace WindowsFormsApp1
                 {
                     MessageBox.Show("命名格式发生错误！", "错误");
                     return;
-                } else
+                }
+                else
                 {
                     outputFileName = GetSafeFilename(outputFileName);
                 }
@@ -540,7 +533,7 @@ namespace WindowsFormsApp1
                         throw new Exception("ID不合法");
                     }
 
-                    HttpStatus status = GetSongLrc(HttpHelper(string.Format(LRC_URL, id)).Replace("\\n", ""), ref song);
+                    HttpStatus status = GetSongLrc(HttpHelper(string.Format(LRC_URL, id)), ref song);
 
                     if (status.GetCode() == HTTP_STATUS_SUCCESS)
                     {
@@ -578,7 +571,7 @@ namespace WindowsFormsApp1
             // 输出歌词缓存日志
             StringBuilder log = new StringBuilder();
             log.Append("---Total：" + ids.Length + ", Success：" + resultMaps.Count + ", Failure：" + failureMaps.Count + "---\r\n");
-            if(failureMaps.Count > 0)
+            if (failureMaps.Count > 0)
             {
                 foreach (KeyValuePair<string, string> kvp in failureMaps)
                 {
@@ -588,7 +581,7 @@ namespace WindowsFormsApp1
             textBox_lrc.Text = log.ToString();
 
             // 保存
-            if(resultMaps.Count > 0)
+            if (resultMaps.Count > 0)
             {
                 SaveFileDialog saveDialog = new SaveFileDialog();
                 try
@@ -630,7 +623,7 @@ namespace WindowsFormsApp1
         private void comboBox_diglossia_lrc_SelectedIndexChanged(object sender, EventArgs e)
         {
             diglossiaLrcType = comboBox_diglossia_lrc.SelectedIndex;
-            if(diglossiaLrcType == (int)DIGLOSSIA_LRC_TYPE.MERGE_ORIGIN || diglossiaLrcType == (int)DIGLOSSIA_LRC_TYPE.MERGE_TRANSLATE)
+            if (diglossiaLrcType == (int)DIGLOSSIA_LRC_TYPE.MERGE_ORIGIN || diglossiaLrcType == (int)DIGLOSSIA_LRC_TYPE.MERGE_TRANSLATE)
             {
                 splitTextBox.ReadOnly = false;
             }
@@ -669,7 +662,7 @@ namespace WindowsFormsApp1
         private string lyric; //原文歌词
 
         private string tlyric; //翻译歌词
-        
+
         public string GetName()
         {
             return this.name;
