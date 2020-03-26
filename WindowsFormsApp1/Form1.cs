@@ -25,6 +25,8 @@ namespace WindowsFormsApp1
         int outputFileNameType = 0;
         // 双语歌词类型
         int diglossiaLrcType = 0;
+        // 输出文件编码
+        string outputFileEncode = "UTF-8";
         // 每次点击搜索后，当前的 Song 对象
         private Song currentSong = null;
 
@@ -32,6 +34,7 @@ namespace WindowsFormsApp1
         {
             InitializeComponent();
             comboBox_output_name.SelectedIndex = 0;
+            comboBox_output_encode.SelectedIndex = 0;
             comboBox_diglossia_lrc.SelectedIndex = 0;
         }
 
@@ -501,7 +504,7 @@ namespace WindowsFormsApp1
                 if (saveDialog.ShowDialog() == DialogResult.OK)
                 {
                     string fileName = saveDialog.FileName;
-                    StreamWriter sw = File.AppendText(fileName);
+                    StreamWriter sw = new StreamWriter(fileName, false, Encoding.GetEncoding(outputFileEncode));
                     sw.Write(textBox_lrc.Text);
                     sw.Flush();
                     sw.Close();
@@ -600,7 +603,7 @@ namespace WindowsFormsApp1
                         foreach (KeyValuePair<string, string> kvp in resultMaps)
                         {
                             string path = filePath + "/" + GetSafeFilename(kvp.Key) + fileSuffix;
-                            StreamWriter sw = new StreamWriter(path, false, Encoding.UTF8);
+                            StreamWriter sw = new StreamWriter(path, false, Encoding.GetEncoding(outputFileEncode));
                             sw.Write(kvp.Value);
                             sw.Flush();
                             sw.Close();
@@ -618,6 +621,11 @@ namespace WindowsFormsApp1
         private void comboBox_output_name_SelectedIndexChanged(object sender, EventArgs e)
         {
             outputFileNameType = comboBox_output_name.SelectedIndex;
+        }
+
+        private void comboBox_output_encode_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            outputFileEncode = comboBox_output_encode.SelectedItem.ToString();
         }
 
         private void comboBox_diglossia_lrc_SelectedIndexChanged(object sender, EventArgs e)

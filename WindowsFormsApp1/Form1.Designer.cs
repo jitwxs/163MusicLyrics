@@ -49,12 +49,14 @@
             this.splitTextBox = new System.Windows.Forms.TextBox();
             this.textBox_song = new System.Windows.Forms.TextBox();
             this.label4 = new System.Windows.Forms.Label();
+            this.label_encode = new System.Windows.Forms.Label();
+            this.comboBox_output_encode = new System.Windows.Forms.ComboBox();
             this.SuspendLayout();
             // 
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(12, 405);
+            this.label2.Location = new System.Drawing.Point(12, 411);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(47, 12);
             this.label2.TabIndex = 0;
@@ -62,14 +64,14 @@
             // 
             // idsTextbox
             // 
-            this.idsTextbox.Location = new System.Drawing.Point(65, 402);
+            this.idsTextbox.Location = new System.Drawing.Point(67, 408);
             this.idsTextbox.Name = "idsTextbox";
             this.idsTextbox.Size = new System.Drawing.Size(143, 21);
             this.idsTextbox.TabIndex = 1;
             // 
             // batchBtn
             // 
-            this.batchBtn.Location = new System.Drawing.Point(216, 393);
+            this.batchBtn.Location = new System.Drawing.Point(216, 399);
             this.batchBtn.Name = "batchBtn";
             this.batchBtn.Size = new System.Drawing.Size(98, 36);
             this.batchBtn.TabIndex = 2;
@@ -80,7 +82,7 @@
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(11, 432);
+            this.label3.Location = new System.Drawing.Point(12, 446);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(281, 12);
             this.label3.TabIndex = 3;
@@ -134,9 +136,9 @@
             // 
             // saveBtn
             // 
-            this.saveBtn.Location = new System.Drawing.Point(213, 329);
+            this.saveBtn.Location = new System.Drawing.Point(213, 334);
             this.saveBtn.Name = "saveBtn";
-            this.saveBtn.Size = new System.Drawing.Size(100, 36);
+            this.saveBtn.Size = new System.Drawing.Size(100, 47);
             this.saveBtn.TabIndex = 4;
             this.saveBtn.Text = "保存";
             this.saveBtn.UseVisualStyleBackColor = true;
@@ -159,7 +161,7 @@
             "歌曲名 - 歌手",
             "歌手 - 歌曲名",
             "歌曲名"});
-            this.comboBox_output_name.Location = new System.Drawing.Point(106, 338);
+            this.comboBox_output_name.Location = new System.Drawing.Point(106, 334);
             this.comboBox_output_name.Name = "comboBox_output_name";
             this.comboBox_output_name.Size = new System.Drawing.Size(101, 20);
             this.comboBox_output_name.TabIndex = 9;
@@ -202,7 +204,7 @@
             // label_output
             // 
             this.label_output.AutoSize = true;
-            this.label_output.Location = new System.Drawing.Point(11, 341);
+            this.label_output.Location = new System.Drawing.Point(12, 337);
             this.label_output.Name = "label_output";
             this.label_output.Size = new System.Drawing.Size(77, 12);
             this.label_output.TabIndex = 11;
@@ -229,6 +231,7 @@
             // 
             // splitTextBox
             // 
+            this.splitTextBox.BackColor = System.Drawing.SystemColors.Control;
             this.splitTextBox.Location = new System.Drawing.Point(213, 305);
             this.splitTextBox.Name = "splitTextBox";
             this.splitTextBox.ReadOnly = true;
@@ -246,17 +249,44 @@
             // label4
             // 
             this.label4.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.label4.Location = new System.Drawing.Point(12, 378);
+            this.label4.Location = new System.Drawing.Point(13, 394);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(300, 2);
             this.label4.TabIndex = 16;
             this.label4.Text = "label4";
             // 
+            // label_encode
+            // 
+            this.label_encode.AutoSize = true;
+            this.label_encode.Location = new System.Drawing.Point(12, 364);
+            this.label_encode.Name = "label_encode";
+            this.label_encode.Size = new System.Drawing.Size(65, 12);
+            this.label_encode.TabIndex = 17;
+            this.label_encode.Text = "文件编码：";
+            // 
+            // comboBox_output_encode
+            // 
+            this.comboBox_output_encode.AutoCompleteCustomSource.AddRange(new string[] {
+            "UTF-8",
+            "GB2312"});
+            this.comboBox_output_encode.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBox_output_encode.FormattingEnabled = true;
+            this.comboBox_output_encode.Items.AddRange(new object[] {
+            "UTF-8",
+            "GB2312"});
+            this.comboBox_output_encode.Location = new System.Drawing.Point(105, 361);
+            this.comboBox_output_encode.Name = "comboBox_output_encode";
+            this.comboBox_output_encode.Size = new System.Drawing.Size(102, 20);
+            this.comboBox_output_encode.TabIndex = 18;
+            this.comboBox_output_encode.SelectedIndexChanged += new System.EventHandler(this.comboBox_output_encode_SelectedIndexChanged);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(325, 455);
+            this.ClientSize = new System.Drawing.Size(325, 467);
+            this.Controls.Add(this.comboBox_output_encode);
+            this.Controls.Add(this.label_encode);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.textBox_song);
             this.Controls.Add(this.label3);
@@ -280,7 +310,7 @@
             this.Controls.Add(this.comboBox_output_name);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Name = "Form1";
-            this.Text = "网易云歌词提取";
+            this.Text = "网易云歌词提取 V2.6";
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -309,6 +339,8 @@
         private System.Windows.Forms.TextBox splitTextBox;
         private System.Windows.Forms.TextBox textBox_song;
         private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.Label label_encode;
+        private System.Windows.Forms.ComboBox comboBox_output_encode;
     }
 }
 
