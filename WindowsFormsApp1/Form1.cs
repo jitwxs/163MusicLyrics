@@ -254,7 +254,18 @@ namespace WindowsFormsApp1
                 else
                 {
                     int index = list.Count - 1;
-                    list[index] = list[index] + splitStr + c[i].Substring(str2Index);
+                    string subStr1 = list[index];
+                    string subStr2 = c[i].Substring(str2Index);
+
+                    // 如果任意一方歌词不存在，则不显示分隔符
+                    if (string.IsNullOrEmpty(subStr1) || string.IsNullOrEmpty(subStr2))
+                    {
+                        list[index] = subStr1 + subStr2;
+                    } 
+                    else
+                    {
+                        list[index] = subStr1 + splitStr + subStr2;
+                    }
                 }
             }
             return list.ToArray();
