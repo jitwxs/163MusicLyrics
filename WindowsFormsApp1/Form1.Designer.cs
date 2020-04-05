@@ -310,7 +310,7 @@
             this.Controls.Add(this.comboBox_output_name);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Name = "Form1";
-            this.Text = "网易云歌词提取 V2.7";
+            this.Text = "网易云歌词提取 V2.8";
             this.ResumeLayout(false);
             this.PerformLayout();
 

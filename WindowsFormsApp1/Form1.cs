@@ -165,6 +165,12 @@ namespace WindowsFormsApp1
             int str2Index = translateLrc.IndexOf("]");
             string str2Timestamp = translateLrc.Substring(0, str2Index + 1);
 
+            // Fix: https://github.com/jitwxs/163MusicLyrics/issues/8
+            if (string.IsNullOrEmpty(str1Timestamp) || string.IsNullOrEmpty(str2Timestamp))
+            {
+                return 1;
+            }
+
             if (str1Timestamp != str2Timestamp)
             {
                 str1Timestamp = str1Timestamp.Substring(1, str1Timestamp.Length - 2);
@@ -257,7 +263,7 @@ namespace WindowsFormsApp1
                     string subStr1 = list[index];
                     string subStr2 = c[i].Substring(str2Index);
 
-                    // 如果任意一方歌词不存在，则不显示分隔符
+                    // Fix: https://github.com/jitwxs/163MusicLyrics/issues/7
                     if (string.IsNullOrEmpty(subStr1) || string.IsNullOrEmpty(subStr2))
                     {
                         list[index] = subStr1 + subStr2;
