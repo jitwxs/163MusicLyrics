@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.label2 = new System.Windows.Forms.Label();
             this.idsTextbox = new System.Windows.Forms.TextBox();
             this.batchBtn = new System.Windows.Forms.Button();
@@ -309,6 +310,7 @@
             this.Controls.Add(this.labe_translate);
             this.Controls.Add(this.comboBox_output_name);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "Form1";
             this.Text = "网易云歌词提取 V2.8";
             this.ResumeLayout(false);
