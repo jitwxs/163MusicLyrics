@@ -56,14 +56,21 @@ namespace WindowsFormsApp1
 
             if (httpStatus.GetCode() == HTTP_STATUS_SUCCESS)
             {
-                JToken songName = obj["songs"][0]["name"];
-                if (songName != null)
+                try
                 {
-                    song.SetName(songName.ToString());
+                    JToken songName = obj["songs"][0]["name"];
+                    if (songName != null)
+                    {
+                        song.SetName(songName.ToString());
+                    }
+                    else
+                    {
+                        return new HttpStatus(HTTP_STATUS_NOT_FOUND, "歌曲不存在");
+                    }
                 }
-                else
+                catch (Exception ew)
                 {
-                    Console.WriteLine("歌曲名为空");
+                    return new HttpStatus(HTTP_STATUS_NOT_FOUND, "歌曲不存在");
                 }
 
                 try
@@ -80,7 +87,7 @@ namespace WindowsFormsApp1
                 }
                 catch (Exception ew)
                 {
-                    Console.WriteLine("获取歌曲信息错误：" + ew.StackTrace);
+                    return new HttpStatus(HTTP_STATUS_NOT_FOUND, "歌曲不存在");
                 }
             }
 
@@ -95,24 +102,23 @@ namespace WindowsFormsApp1
 
             if (httpStatus.GetCode() == HTTP_STATUS_SUCCESS)
             {
-                JToken lyric = obj["lrc"]["lyric"];
-                if (lyric != null)
+                try
                 {
-                    song.SetLyric(lyric.ToString());
-                }
-                else
-                {
-                    Console.WriteLine("歌词为空");
-                }
+                    JToken lyric = obj["lrc"]["lyric"];
+                    if (lyric != null)
+                    {
+                        song.SetLyric(lyric.ToString());
+                    }
 
-                JToken tlyric = obj["tlyric"]["lyric"];
-                if (tlyric != null)
+                    JToken tlyric = obj["tlyric"]["lyric"];
+                    if (tlyric != null)
+                    {
+                        song.SetTlyric(tlyric.ToString());
+                    }
+                } 
+                catch(Exception ew)
                 {
-                    song.SetTlyric(tlyric.ToString());
-                }
-                else
-                {
-                    Console.WriteLine("译文歌词为空");
+                    return new HttpStatus(HTTP_STATUS_NOT_FOUND, "歌词不存在");
                 }
             }
 
@@ -458,7 +464,7 @@ namespace WindowsFormsApp1
                 HttpStatus status = GetSongLrc(HttpHelper(lrc_url), ref song);
                 if (status.GetCode() != HTTP_STATUS_SUCCESS)
                 {
-                    MessageBox.Show("获取歌词失败，错误信息：" + status.GetMsg(), "异常");
+                    MessageBox.Show("搜索失败：" + status.GetMsg(), "异常");
                     return;
                 }
 
@@ -477,7 +483,7 @@ namespace WindowsFormsApp1
                 status = GetSongBasicInfo(HttpHelper(song_url), ref song);
                 if (status.GetCode() != HTTP_STATUS_SUCCESS)
                 {
-                    MessageBox.Show("请求歌曲信息失败，错误信息：" + status.GetMsg(), "异常");
+                    MessageBox.Show("搜索失败：" + status.GetMsg(), "异常");
                     return;
                 }
 
