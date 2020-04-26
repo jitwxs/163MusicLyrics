@@ -312,7 +312,7 @@
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "Form1";
-            this.Text = "网易云歌词提取 V2.8";
+            this.Text = "网易云歌词提取 V2.9";
             this.ResumeLayout(false);
             this.PerformLayout();
 
