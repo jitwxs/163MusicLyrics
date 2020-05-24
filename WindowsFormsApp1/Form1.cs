@@ -1,387 +1,66 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Windows.Forms;
+using 网易云歌词提取;
 
 namespace WindowsFormsApp1
 {
     public partial class Form1 : Form
     {
-        private static string HTTP_STATUS_SUCCESS = "200";
-        private static string HTTP_STATUS_NOT_FOUND = "404";
-        private static string HTTP_STATUS_INTERNAL_ERROR = "500";
+        NeteaseMusicAPI api = null;
+        SaveVO saveVO = null;
 
-        // 获取歌词 URL
-        public static string LRC_URL = "http://music.163.com/api/song/lyric?os=pc&id={0}&lv=-1&kv=-1&tv=-1";
-        // 获取歌曲信息 URL
-        public static string SONG_INFO_URL = "http://music.163.com/api/song/detail/?id={0}&ids=[{1}]";
-
-        // 输出文件名类型
-        int outputFileNameType = 0;
-        // 双语歌词类型
-        int diglossiaLrcType = 0;
         // 输出文件编码
-        string outputFileEncode = "UTF-8";
-        // 每次点击搜索后，当前的 Song 对象
-        private Song currentSong = null;
+        string output_file_encoding = "UTF-8";
+        // 搜索类型
+        SEARCH_TYPE_ENUM search_type_enum;
+        // 展示歌词类型
+        SHOW_LRC_TYPE_ENUM show_lrc_type_enum;
+        // 输出文件名类型
+        OUTPUT_FILENAME_TYPE_ENUM output_filename_type_enum;
 
         public Form1()
         {
             InitializeComponent();
+            
             comboBox_output_name.SelectedIndex = 0;
             comboBox_output_encode.SelectedIndex = 0;
             comboBox_diglossia_lrc.SelectedIndex = 0;
+            comboBox_search_type.SelectedIndex = 0;
+
+            api = new NeteaseMusicAPI();
         }
 
-        /// <summary>
-        /// GET请求服务器
-        /// </summary>
-        /// <param name="url"></param>
-        /// <returns></returns>
-        public string HttpHelper(string url)
+        private SearchInfo reloadConfig()
         {
-            return HttpClientHelper.HttpGet(url);
+            SearchInfo searchInfo = new SearchInfo();
+
+            searchInfo.SearchId = search_id_text.Text.Trim();
+            searchInfo.SerchType = search_type_enum;
+            searchInfo.OutputFileNameType = output_filename_type_enum;
+            searchInfo.ShowLrcType = show_lrc_type_enum;
+            searchInfo.Encoding = output_file_encoding;
+            searchInfo.Constraint2Dot = dotCheckBox.CheckState == CheckState.Checked;
+            searchInfo.BatchSearch = batchSearchCheckBox.CheckState == CheckState.Checked;
+            searchInfo.LrcMergeSeparator = splitTextBox.Text;
+
+            return searchInfo;
         }
 
-        // 获取歌曲名、歌手名
-        public HttpStatus GetSongBasicInfo(string jsonStr, ref Song song)
+        private SongVO RequestSongVO(long songId)
         {
-            JObject obj = JObject.Parse(jsonStr);
-            HttpStatus httpStatus = GetHttpStatus(obj);
+            SongUrls songUrls = api.GetSongsUrl(new long[] { songId });
+            DetailResult detailResult = api.GetDetail(songId);
 
-            if (httpStatus.GetCode() == HTTP_STATUS_SUCCESS)
-            {
-                try
-                {
-                    JToken songName = obj["songs"][0]["name"];
-                    if (songName != null)
-                    {
-                        song.SetName(songName.ToString());
-                    }
-                    else
-                    {
-                        return new HttpStatus(HTTP_STATUS_NOT_FOUND, "歌曲不存在");
-                    }
-                }
-                catch (Exception ew)
-                {
-                    return new HttpStatus(HTTP_STATUS_NOT_FOUND, "歌曲不存在");
-                }
-
-                try
-                {
-                    List<string> singerList = new List<string>();
-
-                    var names = from staff in obj["songs"][0]["artists"].Children() select (string)staff["name"];
-                    foreach (var name in names)
-                    {
-                        singerList.Add(name);
-                    }
-
-                    song.SetSinger(string.Join(",", singerList.ToArray()));
-                }
-                catch (Exception ew)
-                {
-                    return new HttpStatus(HTTP_STATUS_NOT_FOUND, "歌曲不存在");
-                }
-            }
-
-            return httpStatus;
+            return NeteaseMusicUtils.GetSongVO(songUrls, detailResult);
         }
 
-        // 获取歌曲原文歌词、译文歌词
-        public HttpStatus GetSongLrc(string jsonStr, ref Song song)
+        public LyricVO RequestLyricVO(long songId, SearchInfo searchInfo)
         {
-            JObject obj = (JObject)JsonConvert.DeserializeObject(jsonStr);
-            HttpStatus httpStatus = GetHttpStatus(obj);
-
-            if (httpStatus.GetCode() == HTTP_STATUS_SUCCESS)
-            {
-                try
-                {
-                    JToken lyric = obj["lrc"]["lyric"];
-                    if (lyric != null)
-                    {
-                        song.SetLyric(lyric.ToString());
-                    }
-
-                    JToken tlyric = obj["tlyric"]["lyric"];
-                    if (tlyric != null)
-                    {
-                        song.SetTlyric(tlyric.ToString());
-                    }
-                } 
-                catch(Exception ew)
-                {
-                    return new HttpStatus(HTTP_STATUS_NOT_FOUND, "歌词不存在");
-                }
-            }
-
-            return httpStatus;
-        }
-
-        // 将歌词切割为数组
-        private string[] SplitLrc(string lrc)
-        {
-            return lrc.Split('\n').Where(s => !string.IsNullOrEmpty(s)).ToArray();
-        }
-
-        // 将歌词数组转为字符串
-        private string TrimLrc(string[] lrcs)
-        {
-            string result = "";
-
-            foreach (string i in lrcs)
-                result += i + "\r\n";
-
-            return result;
-        }
-
-        private string GetOutputFileName(ref Song song)
-        {
-            string outputFileName = null;
-            switch (outputFileNameType)
-            {
-                case (int)OUTPUT_FILENAME_TYPE.NAME_SINGER:
-                    // 歌曲名 - 歌手
-                    outputFileName = song.GetName() + " - " + song.GetSinger();
-                    break;
-                case (int)OUTPUT_FILENAME_TYPE.SINGER_NAME:
-                    // 歌手 - 歌曲名
-                    outputFileName = song.GetSinger() + " - " + song.GetName();
-                    break;
-                case (int)OUTPUT_FILENAME_TYPE.NAME:
-                    // 歌曲名
-                    outputFileName = song.GetName();
-                    break;
-            }
-            return outputFileName;
-        }
-
-        // 歌词排序函数
-        private static int Compare(string originLrc, string translateLrc, bool hasOriginLrcPrior)
-        {
-            int str1Index = originLrc.IndexOf("]");
-            string str1Timestamp = originLrc.Substring(0, str1Index + 1);
-            int str2Index = translateLrc.IndexOf("]");
-            string str2Timestamp = translateLrc.Substring(0, str2Index + 1);
-
-            // Fix: https://github.com/jitwxs/163MusicLyrics/issues/8
-            if (string.IsNullOrEmpty(str1Timestamp) || string.IsNullOrEmpty(str2Timestamp))
-            {
-                return 1;
-            }
-
-            if (str1Timestamp != str2Timestamp)
-            {
-                str1Timestamp = str1Timestamp.Substring(1, str1Timestamp.Length - 2);
-                str2Timestamp = str2Timestamp.Substring(1, str2Timestamp.Length - 2);
-                string[] t1s = str1Timestamp.Split(':');
-                string[] t2s = str2Timestamp.Split(':');
-                for (int i = 0; i < t1s.Length; i++)
-                {
-                    if (double.TryParse(t1s[i], out double t1))
-                    {
-                        if (double.TryParse(t2s[i], out double t2))
-                        {
-                            if (t1 > t2)
-                                return 1;
-                            else if (t1 < t2)
-                                return -1;
-                        }
-                        else
-                        {
-                            return 1;
-                        }
-                    }
-                    else
-                    {
-                        return -1;
-                    }
-                }
-                return 0;
-            }
-            else
-            {
-                return hasOriginLrcPrior ? -1 : 1;
-            }
-        }
-
-        // 双语歌词排序
-        private static string[] SortLrc(string[] originLrcs, string[] translateLrcs, bool hasOriginLrcPrior)
-        {
-            int lena = originLrcs.Length;
-            int lenb = translateLrcs.Length;
-            string[] c = new string[lena + lenb];
-            //分别代表数组a ,b , c 的索引
-            int i = 0, j = 0, k = 0;
-
-            while (i < lena && j < lenb)
-            {
-                if (Compare(originLrcs[i], translateLrcs[j], hasOriginLrcPrior) == 1)
-                {
-                    c[k++] = translateLrcs[j++];
-                }
-                else if (Compare(originLrcs[i], translateLrcs[j], hasOriginLrcPrior) == -1)
-                {
-                    c[k++] = originLrcs[i++];
-                }
-                else
-                {
-                    c[k++] = hasOriginLrcPrior ? originLrcs[i++] : translateLrcs[j++];
-                }
-            }
-
-            while (i < lena)
-                c[k++] = originLrcs[i++];
-            while (j < lenb)
-                c[k++] = translateLrcs[j++];
-            return c;
-        }
-
-        // 双语歌词合并
-        private static string[] MergeLrc(string[] originLrcs, string[] translateLrcs, string splitStr, bool hasOriginLrcPrior)
-        {
-            string[] c = SortLrc(originLrcs, translateLrcs, hasOriginLrcPrior);
-            List<string> list = new List<string>
-            {
-                c[0]
-            };
-
-            for (int i = 1; i < c.Length; i++)
-            {
-                int str1Index = c[i - 1].IndexOf("]") + 1;
-                int str2Index = c[i].IndexOf("]") + 1;
-                string str1Timestamp = c[i - 1].Substring(0, str1Index);
-                string str2Timestamp = c[i].Substring(0, str2Index);
-                if (str1Timestamp != str2Timestamp)
-                {
-                    list.Add(c[i]);
-                }
-                else
-                {
-                    int index = list.Count - 1;
-                    string subStr1 = list[index];
-                    string subStr2 = c[i].Substring(str2Index);
-
-                    // Fix: https://github.com/jitwxs/163MusicLyrics/issues/7
-                    if (string.IsNullOrEmpty(subStr1) || string.IsNullOrEmpty(subStr2))
-                    {
-                        list[index] = subStr1 + subStr2;
-                    } 
-                    else
-                    {
-                        list[index] = subStr1 + splitStr + subStr2;
-                    }
-                }
-            }
-            return list.ToArray();
-        }
-
-        // 处理双语歌词
-        public string[] ParserDiglossiaLrc(ref Song song)
-        {
-            string[] res = null;
-            string originLrc = song.GetLyric();
-            string translateLrc = song.GetTlyric();
-
-            // 如果不存在翻译歌词，或者选择返回原歌词
-            string[] originLrcs = SplitLrc(originLrc);
-            if (translateLrc == null || translateLrc == "" || diglossiaLrcType == (int)DIGLOSSIA_LRC_TYPE.ONLY_ORIGIN)
-            {
-                return originLrcs;
-            }
-
-            // 如果选择仅译文
-            string[] translateLrcs = SplitLrc(translateLrc);
-            if (diglossiaLrcType == (int)DIGLOSSIA_LRC_TYPE.ONLY_TRANSLATE)
-            {
-                return translateLrcs;
-            }
-
-            switch (diglossiaLrcType)
-            {
-                case (int)DIGLOSSIA_LRC_TYPE.ORIGIN_PRIOR: // 先显示原文，后显示译文
-                    res = SortLrc(originLrcs, translateLrcs, true);
-                    break;
-                case (int)DIGLOSSIA_LRC_TYPE.TRANSLATE_PRIOR: // 先显示译文，后显示原文
-                    res = SortLrc(originLrcs, translateLrcs, false);
-                    break;
-                case (int)DIGLOSSIA_LRC_TYPE.MERGE_ORIGIN: // 合并显示，优先原文
-                    res = MergeLrc(originLrcs, translateLrcs, splitTextBox.Text, true);
-                    break;
-                case (int)DIGLOSSIA_LRC_TYPE.MERGE_TRANSLATE: // 合并显示，优先译文
-                    res = MergeLrc(originLrcs, translateLrcs, splitTextBox.Text, false);
-                    break;
-            }
-
-            return res;
-        }
-
-        // 设置时间戳小数位数
-        public void SetTimeStamp2Dot(ref string[] lrcStr)
-        {
-            for (int i = 0; i < lrcStr.Length; i++)
-            {
-                int index = lrcStr[i].IndexOf("]");
-                string timestamp = lrcStr[i].Substring(1, index - 1);
-                string[] ts = timestamp.Split(':');
-
-                bool hasNum = true;
-                string tmp = "[";
-                foreach (string t in ts)
-                {
-                    if (double.TryParse(t, out double num))
-                    {
-                        tmp = tmp + num.ToString("00.##") + ":";
-                    }
-                    else
-                    {
-                        hasNum = false;
-                        break;
-                    }
-                }
-                if (hasNum)
-                {
-                    lrcStr[i] = tmp.Substring(0, tmp.Length - 1) + "]" + lrcStr[i].Substring(index + 1);
-                }
-            }
-        }
-
-        // HTTP 返回
-        private HttpStatus GetHttpStatus(JObject obj)
-        {
-            try
-            {
-                string code = obj["code"].ToString();
-                if (code != HTTP_STATUS_SUCCESS)
-                {
-                    return new HttpStatus(code, obj["msg"].ToString());
-                }
-
-                JToken uncollected = obj["uncollected"];
-                if (uncollected != null && (bool)uncollected)
-                {
-                    return new HttpStatus(HTTP_STATUS_NOT_FOUND, "歌词未被收集");
-                }
-
-                return new HttpStatus(HTTP_STATUS_SUCCESS, "成功");
-            }
-            catch (Exception ew)
-            {
-                Console.WriteLine("解析HTTP返回错误：" + ew.StackTrace);
-                return new HttpStatus(HTTP_STATUS_INTERNAL_ERROR, "解析 HTTP 返回失败");
-            }
-        }
-
-        private bool CheckNum(string s)
-        {
-            return Regex.Match(s, "^\\d+$").Success;
+            LyricResult lyricResult = api.GetLyric(songId);
+            return NeteaseMusicUtils.GetLyricVO(lyricResult, searchInfo);
         }
 
         public static string GetSafeFilename(string arbitraryString)
@@ -448,61 +127,57 @@ namespace WindowsFormsApp1
         // 搜索按钮点击事件
         private void searchBtn_Click(object sender, EventArgs e)
         {
-            string id = textBox_id.Text.Trim();
-            if (id == "" || id == null || !CheckNum(id))
+            SearchInfo searchInfo = reloadConfig();
+
+            SEARCH_TYPE_ENUM type = searchInfo.SerchType;
+            if(type == SEARCH_TYPE_ENUM.SONG_ID)
             {
-                MessageBox.Show("【警告】ID 为空或格式非法！", "提示");
+                string songIdStr = searchInfo.SearchId;
+                if (songIdStr == "" || songIdStr == null || !NeteaseMusicUtils.CheckNum(songIdStr))
+                {
+                    MessageBox.Show("【警告】ID 为空或格式非法！", "提示");
+                    return;
+                }
+
+                long songId = long.Parse(songIdStr);
+
+                SongVO songVO = RequestSongVO(songId);
+                if(songVO.Success)
+                {
+                    textBox_song.Text = songVO.Name;
+                    textBox_singer.Text = songVO.Singer;
+                    textBox_album.Text = songVO.Album;
+                } 
+                else
+                {
+                    MessageBox.Show("【错误】" + songVO.Message, "提示");
+                    return;
+                }
+                
+                LyricVO lyricVO = RequestLyricVO(songId, searchInfo);
+                if(lyricVO.Success)
+                {
+                    textBox_lrc.Text = lyricVO.Output;
+                } 
+                else
+                {
+                    MessageBox.Show("【错误】" + songVO.Message, "提示");
+                    return;
+                }
+
+                saveVO = new SaveVO(songVO, lyricVO, searchInfo);
+            }
+            else
+            {
+                MessageBox.Show("暂不支持", "提示");
                 return;
-            }
-
-            try
-            {
-                //歌曲类实例
-                Song song = new Song();
-                string lrc_url = string.Format(LRC_URL, id);
-
-                HttpStatus status = GetSongLrc(HttpHelper(lrc_url), ref song);
-                if (status.GetCode() != HTTP_STATUS_SUCCESS)
-                {
-                    MessageBox.Show("搜索失败：" + status.GetMsg(), "异常");
-                    return;
-                }
-
-                // 双语歌词处理
-                string[] lrcResult = ParserDiglossiaLrc(ref song);
-
-                // 强制两位小数
-                if (dotCheckBox.CheckState == CheckState.Checked)
-                {
-                    //设置时间戳两位小数
-                    SetTimeStamp2Dot(ref lrcResult);
-                }
-
-                string song_url = string.Format(SONG_INFO_URL, id, id);
-
-                status = GetSongBasicInfo(HttpHelper(song_url), ref song);
-                if (status.GetCode() != HTTP_STATUS_SUCCESS)
-                {
-                    MessageBox.Show("搜索失败：" + status.GetMsg(), "异常");
-                    return;
-                }
-
-                currentSong = song;
-                textBox_lrc.Text = TrimLrc(lrcResult);
-                textBox_song.Text = song.GetName();
-                textBox_singer.Text = song.GetSinger();
-            }
-            catch (Exception ew)
-            {
-                Console.WriteLine("搜索失败，错误信息：" + ew.StackTrace);
-                MessageBox.Show("搜索失败，错误信息：\n" + ew.Message);
             }
         }
 
         // 保存按钮点击事件
         private void saveBtn_Click(object sender, EventArgs e)
         {
-            if (currentSong == null)
+            if (saveVO == null)
             {
                 MessageBox.Show("请先点击搜索按钮", "提示");
                 return;
@@ -511,7 +186,7 @@ namespace WindowsFormsApp1
             SaveFileDialog saveDialog = new SaveFileDialog();
             try
             {
-                string outputFileName = GetOutputFileName(ref currentSong);
+                string outputFileName = NeteaseMusicUtils.GetOutputName(saveVO.songVO, saveVO.searchInfo);
                 if (outputFileName == null)
                 {
                     MessageBox.Show("命名格式发生错误！", "错误");
@@ -527,7 +202,7 @@ namespace WindowsFormsApp1
                 if (saveDialog.ShowDialog() == DialogResult.OK)
                 {
                     string fileName = saveDialog.FileName;
-                    StreamWriter sw = new StreamWriter(fileName, false, Encoding.GetEncoding(outputFileEncode));
+                    StreamWriter sw = new StreamWriter(fileName, false, Encoding.GetEncoding(saveVO.searchInfo.Encoding));
                     sw.Write(textBox_lrc.Text);
                     sw.Flush();
                     sw.Close();
@@ -540,7 +215,7 @@ namespace WindowsFormsApp1
             }
         }
 
-        // 批量保存按钮点击事件
+        /* 批量保存按钮点击事件
         private void batchBtn_Click(object sender, EventArgs e)
         {
             string[] ids = idsTextbox.Text.Split(',');
@@ -639,22 +314,23 @@ namespace WindowsFormsApp1
                     MessageBox.Show("批量保存失败，错误信息：\n" + ew.Message);
                 }
             }
-        }
+        } */
 
         private void comboBox_output_name_SelectedIndexChanged(object sender, EventArgs e)
         {
-            outputFileNameType = comboBox_output_name.SelectedIndex;
+            output_filename_type_enum = (OUTPUT_FILENAME_TYPE_ENUM)(comboBox_output_name.SelectedIndex + 1);
         }
 
         private void comboBox_output_encode_SelectedIndexChanged(object sender, EventArgs e)
         {
-            outputFileEncode = comboBox_output_encode.SelectedItem.ToString();
+            output_file_encoding = comboBox_output_encode.SelectedItem.ToString();
         }
 
         private void comboBox_diglossia_lrc_SelectedIndexChanged(object sender, EventArgs e)
         {
-            diglossiaLrcType = comboBox_diglossia_lrc.SelectedIndex;
-            if (diglossiaLrcType == (int)DIGLOSSIA_LRC_TYPE.MERGE_ORIGIN || diglossiaLrcType == (int)DIGLOSSIA_LRC_TYPE.MERGE_TRANSLATE)
+            show_lrc_type_enum = (SHOW_LRC_TYPE_ENUM)(comboBox_diglossia_lrc.SelectedIndex + 1);
+            
+            if (show_lrc_type_enum == SHOW_LRC_TYPE_ENUM.MERGE_ORIGIN || show_lrc_type_enum == SHOW_LRC_TYPE_ENUM.MERGE_TRANSLATE)
             {
                 splitTextBox.ReadOnly = false;
             }
@@ -664,115 +340,11 @@ namespace WindowsFormsApp1
                 splitTextBox.ReadOnly = true;
             }
         }
-    }
-
-    enum DIGLOSSIA_LRC_TYPE
-    {
-        ONLY_ORIGIN, // 仅显示原文
-        ONLY_TRANSLATE, // 仅显示译文
-        ORIGIN_PRIOR, // 优先原文
-        TRANSLATE_PRIOR, // 优先译文
-        MERGE_ORIGIN, // 合并显示，优先原文
-        MERGE_TRANSLATE, // 合并显示，优先译文
-    }
-
-    enum OUTPUT_FILENAME_TYPE
-    {
-        NAME_SINGER,
-        SINGER_NAME,
-        NAME
-    }
-
-    //歌曲类
-    public class Song
-    {
-        private string name; //歌曲名
-
-        private string singer; //歌手名
-
-        private string lyric; //原文歌词
-
-        private string tlyric; //翻译歌词
-
-        public string GetName()
+        
+        private void comboBox_search_type_SelectedIndexChanged(object sender, EventArgs e)
         {
-            return this.name;
-        }
-
-        public void SetName(string s)
-        {
-            this.name = s;
-        }
-
-        public string GetSinger()
-        {
-            return this.singer;
-        }
-
-        public void SetSinger(string s)
-        {
-            this.singer = s;
-        }
-
-        public string GetLyric()
-        {
-            return this.lyric;
-        }
-
-        public void SetLyric(string s)
-        {
-            this.lyric = s;
-        }
-
-        public string GetTlyric()
-        {
-            return this.tlyric;
-        }
-
-        public void SetTlyric(string s)
-        {
-            this.tlyric = s;
+            search_type_enum = (SEARCH_TYPE_ENUM)(comboBox_search_type.SelectedIndex + 1);
         }
     }
 
-    public class HttpStatus
-    {
-        private string code;
-
-        private string msg;
-
-        public HttpStatus()
-        {
-        }
-
-        public HttpStatus(string code) : this(code, null)
-        {
-        }
-
-        public HttpStatus(string code, string msg)
-        {
-            this.code = code;
-            this.msg = msg;
-        }
-
-        public string GetCode()
-        {
-            return code;
-        }
-
-        public void setCode(string s)
-        {
-            code = s;
-        }
-
-        public string GetMsg()
-        {
-            return msg;
-        }
-
-        public void setMsg(string s)
-        {
-            msg = s;
-        }
-    }
 }

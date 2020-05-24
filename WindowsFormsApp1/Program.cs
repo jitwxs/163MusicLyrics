@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using 网易云歌词提取;
 
 namespace WindowsFormsApp1
 {
