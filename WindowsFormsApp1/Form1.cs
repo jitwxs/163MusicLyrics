@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Windows.Forms;
@@ -11,6 +10,7 @@ namespace WindowsFormsApp1
     {
         NeteaseMusicAPI api = null;
         SaveVO saveVO = null;
+        SearchInfo searchInfo = null;
 
         // 输出文件编码
         string output_file_encoding = "UTF-8";
@@ -127,7 +127,7 @@ namespace WindowsFormsApp1
         // 搜索按钮点击事件
         private void searchBtn_Click(object sender, EventArgs e)
         {
-            SearchInfo searchInfo = reloadConfig();
+            searchInfo = reloadConfig();
 
             SEARCH_TYPE_ENUM type = searchInfo.SerchType;
             if(type == SEARCH_TYPE_ENUM.SONG_ID)
@@ -135,7 +135,7 @@ namespace WindowsFormsApp1
                 string songIdStr = searchInfo.SearchId;
                 if (songIdStr == "" || songIdStr == null || !NeteaseMusicUtils.CheckNum(songIdStr))
                 {
-                    MessageBox.Show("【警告】ID 为空或格式非法！", "提示");
+                    MessageBox.Show(ErrorMsg.INPUT_ID_ILLEGAG, "提示");
                     return;
                 }
 
@@ -150,28 +150,41 @@ namespace WindowsFormsApp1
                 } 
                 else
                 {
-                    MessageBox.Show("【错误】" + songVO.Message, "提示");
+                    MessageBox.Show(songVO.Message, "提示");
                     return;
                 }
                 
                 LyricVO lyricVO = RequestLyricVO(songId, searchInfo);
                 if(lyricVO.Success)
                 {
-                    textBox_lrc.Text = lyricVO.Output;
+                    textBox_lrc.Text = lyricVO.Output == "" ? ErrorMsg.LRC_NOT_EXIST : lyricVO.Output;
                 } 
                 else
                 {
-                    MessageBox.Show("【错误】" + songVO.Message, "提示");
+                    MessageBox.Show(songVO.Message, "提示");
                     return;
                 }
 
-                saveVO = new SaveVO(songVO, lyricVO, searchInfo);
+                saveVO = new SaveVO(songVO, lyricVO);
             }
             else
             {
-                MessageBox.Show("暂不支持", "提示");
+                MessageBox.Show(ErrorMsg.FUNCTION_NOT_SUPPORT, "提示");
                 return;
             }
+        }
+
+        // 获取直链点击事件
+        private void songUrlBtn_Click(object sender, EventArgs e)
+        {
+            if (saveVO == null)
+            {
+                MessageBox.Show(ErrorMsg.MUST_SEARCH_BEFORE_COPY_SONG_URL, "提示");
+                return;
+            }
+
+            Clipboard.SetDataObject(saveVO.songVO.Links);
+            MessageBox.Show(ErrorMsg.SONG_URL_COPY_SUCESS, "提示");
         }
 
         // 保存按钮点击事件
@@ -179,17 +192,17 @@ namespace WindowsFormsApp1
         {
             if (saveVO == null)
             {
-                MessageBox.Show("请先点击搜索按钮", "提示");
+                MessageBox.Show(ErrorMsg.MUST_SEARCH_BEFORE_SAVE, "提示");
                 return;
             }
 
             SaveFileDialog saveDialog = new SaveFileDialog();
             try
             {
-                string outputFileName = NeteaseMusicUtils.GetOutputName(saveVO.songVO, saveVO.searchInfo);
+                string outputFileName = NeteaseMusicUtils.GetOutputName(saveVO.songVO, searchInfo);
                 if (outputFileName == null)
                 {
-                    MessageBox.Show("命名格式发生错误！", "错误");
+                    MessageBox.Show(ErrorMsg.FILE_NAME_IS_EMPTY, "提示");
                     return;
                 }
                 else
@@ -202,7 +215,7 @@ namespace WindowsFormsApp1
                 if (saveDialog.ShowDialog() == DialogResult.OK)
                 {
                     string fileName = saveDialog.FileName;
-                    StreamWriter sw = new StreamWriter(fileName, false, Encoding.GetEncoding(saveVO.searchInfo.Encoding));
+                    StreamWriter sw = new StreamWriter(fileName, false, Encoding.GetEncoding(searchInfo.Encoding));
                     sw.Write(textBox_lrc.Text);
                     sw.Flush();
                     sw.Close();
@@ -318,32 +331,50 @@ namespace WindowsFormsApp1
 
         private void comboBox_output_name_SelectedIndexChanged(object sender, EventArgs e)
         {
-            output_filename_type_enum = (OUTPUT_FILENAME_TYPE_ENUM)(comboBox_output_name.SelectedIndex + 1);
+            output_filename_type_enum = (OUTPUT_FILENAME_TYPE_ENUM)comboBox_output_name.SelectedIndex;
+            searchInfo = reloadConfig();
         }
 
         private void comboBox_output_encode_SelectedIndexChanged(object sender, EventArgs e)
         {
             output_file_encoding = comboBox_output_encode.SelectedItem.ToString();
+            searchInfo = reloadConfig();
         }
 
         private void comboBox_diglossia_lrc_SelectedIndexChanged(object sender, EventArgs e)
         {
-            show_lrc_type_enum = (SHOW_LRC_TYPE_ENUM)(comboBox_diglossia_lrc.SelectedIndex + 1);
+            show_lrc_type_enum = (SHOW_LRC_TYPE_ENUM)comboBox_diglossia_lrc.SelectedIndex;
             
             if (show_lrc_type_enum == SHOW_LRC_TYPE_ENUM.MERGE_ORIGIN || show_lrc_type_enum == SHOW_LRC_TYPE_ENUM.MERGE_TRANSLATE)
             {
                 splitTextBox.ReadOnly = false;
+                splitTextBox.BackColor = System.Drawing.Color.White;
             }
             else
             {
                 splitTextBox.Text = null;
                 splitTextBox.ReadOnly = true;
+                splitTextBox.BackColor = System.Drawing.Color.FromArgb(240, 240, 240);
             }
+            searchInfo = reloadConfig();
         }
         
         private void comboBox_search_type_SelectedIndexChanged(object sender, EventArgs e)
         {
-            search_type_enum = (SEARCH_TYPE_ENUM)(comboBox_search_type.SelectedIndex + 1);
+            search_type_enum = (SEARCH_TYPE_ENUM)comboBox_search_type.SelectedIndex;
+            searchInfo = reloadConfig();
+        }
+
+        // 项目主页item
+        private void homeMenuItem_Click(object sender, EventArgs e)
+        {
+            System.Diagnostics.Process.Start("https://github.com/jitwxs/163MusicLyrics");
+        }
+
+        // 最新版本item
+        private void latestVersionMenuItem_Click(object sender, EventArgs e)
+        {
+            System.Diagnostics.Process.Start("https://github.com/jitwxs/163MusicLyrics/releases");
         }
     }
 

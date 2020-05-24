@@ -23,7 +23,15 @@ namespace 网易云歌词提取
                 }
                 if(detailResult.Code == 200)
                 {
-                    Song song = detailResult.Songs[0];
+                    Song[] songArray = detailResult.Songs;
+                    if(songArray == null || songArray.Length == 0)
+                    {
+                        vo.Success = false;
+                        vo.Message = ErrorMsg.SONG_NOT_EXIST;
+                        return vo;
+                    }
+
+                    Song song = songArray[0];
                     vo.Name = song.Name;
                     vo.Singer = ContractSinger(song.Ar);
                     vo.Album = song.Al.Name;
@@ -49,8 +57,16 @@ namespace 网易云歌词提取
             {
                 if(lyricResult.Code == 200)
                 {
-                    string originLyric = lyricResult.Lrc.Lyric, originTLyric = lyricResult.Tlyric.Lyric;
-
+                    string originLyric = "", originTLyric = "";
+                    if(lyricResult.Lrc != null)
+                    {
+                        originLyric = lyricResult.Lrc.Lyric;
+                    }
+                    if(lyricResult.Tlyric != null) 
+                    {
+                        originTLyric = lyricResult.Tlyric.Lyric;
+                    }
+                    
                     // 歌词合并
                     string[] formatLyrics = FormatLyric(originLyric, originTLyric, searchInfo);
                     

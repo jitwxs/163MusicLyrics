@@ -53,14 +53,14 @@
             this.comboBox_output_encode = new System.Windows.Forms.ComboBox();
             this.textBox_album = new System.Windows.Forms.TextBox();
             this.label5 = new System.Windows.Forms.Label();
-            this.button1 = new System.Windows.Forms.Button();
+            this.songUrlBtn = new System.Windows.Forms.Button();
             this.comboBox_search_type = new System.Windows.Forms.ComboBox();
             this.label6 = new System.Windows.Forms.Label();
             this.batchSearchCheckBox = new System.Windows.Forms.CheckBox();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
-            this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
-            this.更新历史ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.赞助作者ToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.homeMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.latestVersionMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.更新历史ToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -297,14 +297,15 @@
             this.label5.TabIndex = 19;
             this.label5.Text = "专辑：";
             // 
-            // button1
+            // songUrlBtn
             // 
-            this.button1.Location = new System.Drawing.Point(375, 80);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(93, 21);
-            this.button1.TabIndex = 21;
-            this.button1.Text = "获取直链";
-            this.button1.UseVisualStyleBackColor = true;
+            this.songUrlBtn.Location = new System.Drawing.Point(375, 80);
+            this.songUrlBtn.Name = "songUrlBtn";
+            this.songUrlBtn.Size = new System.Drawing.Size(93, 21);
+            this.songUrlBtn.TabIndex = 21;
+            this.songUrlBtn.Text = "获取直链";
+            this.songUrlBtn.UseVisualStyleBackColor = true;
+            this.songUrlBtn.Click += new System.EventHandler(this.songUrlBtn_Click);
             // 
             // comboBox_search_type
             // 
@@ -340,32 +341,34 @@
             // menuStrip1
             // 
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripMenuItem1,
-            this.更新历史ToolStripMenuItem,
-            this.赞助作者ToolStripMenuItem1});
+            this.homeMenuItem,
+            this.latestVersionMenuItem,
+            this.更新历史ToolStripMenuItem1});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Size = new System.Drawing.Size(480, 25);
             this.menuStrip1.TabIndex = 25;
             this.menuStrip1.Text = "menuStrip1";
             // 
-            // toolStripMenuItem1
+            // homeMenuItem
             // 
-            this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(68, 21);
-            this.toolStripMenuItem1.Text = "项目主页";
+            this.homeMenuItem.Name = "homeMenuItem";
+            this.homeMenuItem.Size = new System.Drawing.Size(68, 21);
+            this.homeMenuItem.Text = "项目主页";
+            this.homeMenuItem.Click += new System.EventHandler(this.homeMenuItem_Click);
             // 
-            // 更新历史ToolStripMenuItem
+            // latestVersionMenuItem
             // 
-            this.更新历史ToolStripMenuItem.Name = "更新历史ToolStripMenuItem";
-            this.更新历史ToolStripMenuItem.Size = new System.Drawing.Size(68, 21);
-            this.更新历史ToolStripMenuItem.Text = "更新历史";
+            this.latestVersionMenuItem.Name = "latestVersionMenuItem";
+            this.latestVersionMenuItem.Size = new System.Drawing.Size(68, 21);
+            this.latestVersionMenuItem.Text = "最新版本";
+            this.latestVersionMenuItem.Click += new System.EventHandler(this.latestVersionMenuItem_Click);
             // 
-            // 赞助作者ToolStripMenuItem1
+            // 更新历史ToolStripMenuItem1
             // 
-            this.赞助作者ToolStripMenuItem1.Name = "赞助作者ToolStripMenuItem1";
-            this.赞助作者ToolStripMenuItem1.Size = new System.Drawing.Size(68, 21);
-            this.赞助作者ToolStripMenuItem1.Text = "赞助作者";
+            this.更新历史ToolStripMenuItem1.Name = "更新历史ToolStripMenuItem1";
+            this.更新历史ToolStripMenuItem1.Size = new System.Drawing.Size(68, 21);
+            this.更新历史ToolStripMenuItem1.Text = "赞助作者";
             // 
             // Form1
             // 
@@ -375,7 +378,7 @@
             this.Controls.Add(this.batchSearchCheckBox);
             this.Controls.Add(this.label6);
             this.Controls.Add(this.comboBox_search_type);
-            this.Controls.Add(this.button1);
+            this.Controls.Add(this.songUrlBtn);
             this.Controls.Add(this.textBox_album);
             this.Controls.Add(this.label5);
             this.Controls.Add(this.comboBox_output_encode);
@@ -439,14 +442,14 @@
         private System.Windows.Forms.ComboBox comboBox_output_encode;
         private System.Windows.Forms.TextBox textBox_album;
         private System.Windows.Forms.Label label5;
-        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button songUrlBtn;
         private System.Windows.Forms.ComboBox comboBox_search_type;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.CheckBox batchSearchCheckBox;
         private System.Windows.Forms.MenuStrip menuStrip1;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem1;
-        private System.Windows.Forms.ToolStripMenuItem 更新历史ToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem 赞助作者ToolStripMenuItem1;
+        private System.Windows.Forms.ToolStripMenuItem homeMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem latestVersionMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem 更新历史ToolStripMenuItem1;
     }
 }
 
