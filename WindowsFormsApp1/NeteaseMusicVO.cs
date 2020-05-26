@@ -34,14 +34,17 @@ namespace 网易云歌词提取
 
     public class ErrorMsg
     {
+        public static string SEARCH_RESULT_STAGE = "查询成功，结果已暂存";
         public static string MUST_SEARCH_BEFORE_SAVE = "您必须先搜索，才能保存内容";
         public static string MUST_SEARCH_BEFORE_COPY_SONG_URL = "您必须先搜索，才能获取直链";
         public static string INPUT_ID_ILLEGAG = "您输入的 ID 号不合法";
         public static string SONG_NOT_EXIST = "歌曲信息暂未被收录";
         public static string LRC_NOT_EXIST = "歌词信息暂未被收录";
         public static string FUNCTION_NOT_SUPPORT = "该功能暂不可用，请等待后续更新";
-        public static string SONG_URL_COPY_SUCESS = "歌曲直链，复制成功";
+        public static string SONG_URL_COPY_SUCESS = "歌曲直链，已复制到剪切板";
+        public static string BATCH_SONG_URL_COPY_SUCESS = "批量歌曲直链，已复制到剪切板";
         public static string FILE_NAME_IS_EMPTY = "输出文件名不能为空";
+        public static string SAVE_SUCCESS = "保存成功";
     }
 
     public class SaveVO

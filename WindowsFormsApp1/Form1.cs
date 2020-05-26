@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Windows.Forms;
@@ -9,8 +10,8 @@ namespace WindowsFormsApp1
     public partial class Form1 : Form
     {
         NeteaseMusicAPI api = null;
-        SaveVO saveVO = null;
-        SearchInfo searchInfo = null;
+        SaveVO globalSaveVO = null;
+        SearchInfo globalSearchInfo = new SearchInfo();
 
         // 输出文件编码
         string output_file_encoding = "UTF-8";
@@ -33,20 +34,16 @@ namespace WindowsFormsApp1
             api = new NeteaseMusicAPI();
         }
 
-        private SearchInfo reloadConfig()
+        private void ReloadConfig()
         {
-            SearchInfo searchInfo = new SearchInfo();
-
-            searchInfo.SearchId = search_id_text.Text.Trim();
-            searchInfo.SerchType = search_type_enum;
-            searchInfo.OutputFileNameType = output_filename_type_enum;
-            searchInfo.ShowLrcType = show_lrc_type_enum;
-            searchInfo.Encoding = output_file_encoding;
-            searchInfo.Constraint2Dot = dotCheckBox.CheckState == CheckState.Checked;
-            searchInfo.BatchSearch = batchSearchCheckBox.CheckState == CheckState.Checked;
-            searchInfo.LrcMergeSeparator = splitTextBox.Text;
-
-            return searchInfo;
+            globalSearchInfo.SearchId = search_id_text.Text.Trim();
+            globalSearchInfo.SerchType = search_type_enum;
+            globalSearchInfo.OutputFileNameType = output_filename_type_enum;
+            globalSearchInfo.ShowLrcType = show_lrc_type_enum;
+            globalSearchInfo.Encoding = output_file_encoding;
+            globalSearchInfo.Constraint2Dot = dotCheckBox.CheckState == CheckState.Checked;
+            globalSearchInfo.BatchSearch = batchSearchCheckBox.CheckState == CheckState.Checked;
+            globalSearchInfo.LrcMergeSeparator = splitTextBox.Text;
         }
 
         private SongVO RequestSongVO(long songId)
@@ -57,115 +54,120 @@ namespace WindowsFormsApp1
             return NeteaseMusicUtils.GetSongVO(songUrls, detailResult);
         }
 
-        public LyricVO RequestLyricVO(long songId, SearchInfo searchInfo)
+        private LyricVO RequestLyricVO(long songId, SearchInfo searchInfo)
         {
             LyricResult lyricResult = api.GetLyric(songId);
             return NeteaseMusicUtils.GetLyricVO(lyricResult, searchInfo);
         }
 
-        public static string GetSafeFilename(string arbitraryString)
+        // 单个歌曲搜索
+        private void SingleSearch()
         {
-            var invalidChars = System.IO.Path.GetInvalidFileNameChars();
-            var replaceIndex = arbitraryString.IndexOfAny(invalidChars, 0);
-            if (replaceIndex == -1) return arbitraryString;
-
-            var r = new StringBuilder();
-            var i = 0;
-
-            do
+            string songIdStr = globalSearchInfo.SearchId;
+            if (songIdStr == "" || songIdStr == null || !NeteaseMusicUtils.CheckNum(songIdStr))
             {
-                r.Append(arbitraryString, i, replaceIndex - i);
+                MessageBox.Show(ErrorMsg.INPUT_ID_ILLEGAG, "提示");
+                return;
+            }
 
-                switch (arbitraryString[replaceIndex])
-                {
-                    case '"':
-                        r.Append("''");
-                        break;
-                    case '<':
-                        r.Append('\u02c2'); // '˂' (modifier letter left arrowhead)
-                        break;
-                    case '>':
-                        r.Append('\u02c3'); // '˃' (modifier letter right arrowhead)
-                        break;
-                    case '|':
-                        r.Append('\u2223'); // '∣' (divides)
-                        break;
-                    case ':':
-                        r.Append('-');
-                        break;
-                    case '*':
-                        r.Append('\u2217'); // '∗' (asterisk operator)
-                        break;
-                    case '\\':
-                    case '/':
-                        r.Append('\u2044'); // '⁄' (fraction slash)
-                        break;
-                    case '\0':
-                    case '\f':
-                    case '?':
-                        break;
-                    case '\t':
-                    case '\n':
-                    case '\r':
-                    case '\v':
-                        r.Append(' ');
-                        break;
-                    default:
-                        r.Append('_');
-                        break;
-                }
-
-                i = replaceIndex + 1;
-                replaceIndex = arbitraryString.IndexOfAny(invalidChars, i);
-            } while (replaceIndex != -1);
-
-            r.Append(arbitraryString, i, arbitraryString.Length - i);
-
-            return r.ToString();
-        }
-
-        // 搜索按钮点击事件
-        private void searchBtn_Click(object sender, EventArgs e)
-        {
-            searchInfo = reloadConfig();
-
-            SEARCH_TYPE_ENUM type = searchInfo.SerchType;
-            if(type == SEARCH_TYPE_ENUM.SONG_ID)
+            long songId = long.Parse(songIdStr);
+            if(NeteaseMusicResultCache.Contains(songId))
             {
-                string songIdStr = searchInfo.SearchId;
-                if (songIdStr == "" || songIdStr == null || !NeteaseMusicUtils.CheckNum(songIdStr))
-                {
-                    MessageBox.Show(ErrorMsg.INPUT_ID_ILLEGAG, "提示");
-                    return;
-                }
-
-                long songId = long.Parse(songIdStr);
-
+                globalSaveVO = NeteaseMusicResultCache.Get(songId);
+            } 
+            else
+            {
                 SongVO songVO = RequestSongVO(songId);
-                if(songVO.Success)
-                {
-                    textBox_song.Text = songVO.Name;
-                    textBox_singer.Text = songVO.Singer;
-                    textBox_album.Text = songVO.Album;
-                } 
-                else
+                if (!songVO.Success)
                 {
                     MessageBox.Show(songVO.Message, "提示");
                     return;
                 }
                 
-                LyricVO lyricVO = RequestLyricVO(songId, searchInfo);
-                if(lyricVO.Success)
-                {
-                    textBox_lrc.Text = lyricVO.Output == "" ? ErrorMsg.LRC_NOT_EXIST : lyricVO.Output;
-                } 
-                else
+                LyricVO lyricVO = RequestLyricVO(songId, globalSearchInfo);
+                if (!lyricVO.Success)
                 {
                     MessageBox.Show(songVO.Message, "提示");
                     return;
                 }
 
-                saveVO = new SaveVO(songVO, lyricVO);
+                globalSaveVO = new SaveVO(songVO, lyricVO);
+                NeteaseMusicResultCache.Put(songId, globalSaveVO);
+            }
+
+            // 前端设置
+            textBox_song.Text = globalSaveVO.songVO.Name;
+            textBox_singer.Text = globalSaveVO.songVO.Singer;
+            textBox_album.Text = globalSaveVO.songVO.Album;
+            UpdateLrcTextBox("");
+        }
+
+        // 批量歌曲搜索
+        private void BatchSearch()
+        {
+            string[] ids = globalSearchInfo.SearchId.Split(',');
+
+            int successCount = 0;
+            Dictionary<string, string> resultMaps = new Dictionary<string, string>();
+            foreach (string songIdStr in ids)
+            {
+                if (songIdStr == "" || songIdStr == null || !NeteaseMusicUtils.CheckNum(songIdStr))
+                {
+                    resultMaps.Add(songIdStr, ErrorMsg.INPUT_ID_ILLEGAG);
+                    continue;
+                }
+
+                long songId = long.Parse(songIdStr);
+                if (!NeteaseMusicResultCache.Contains(songId))
+                {
+                    SongVO songVO = RequestSongVO(songId);
+                    if (!songVO.Success)
+                    {
+                        resultMaps.Add(songIdStr, songVO.Message);
+                        continue;
+                    }
+
+                    LyricVO lyricVO = RequestLyricVO(songId, globalSearchInfo);
+                    if (!lyricVO.Success)
+                    {
+                        resultMaps.Add(songIdStr, lyricVO.Message);
+                        continue;
+                    }
+
+                    NeteaseMusicResultCache.Put(songId, new SaveVO(songVO, lyricVO));
+                }
+
+                successCount++;
+                resultMaps.Add(songIdStr, ErrorMsg.SEARCH_RESULT_STAGE);
+            }
+
+            // 输出日志
+            StringBuilder log = new StringBuilder();
+            log.Append("---Total：" + resultMaps.Count + ", Success：" + successCount + ", Failure：" + (resultMaps.Count - successCount) + "---\r\n");
+            foreach (KeyValuePair<string, string> kvp in resultMaps)
+            {
+                log.Append("ID: " + kvp.Key + ", Result: " + kvp.Value + "\r\n");
+            }
+            UpdateLrcTextBox(log.ToString());
+        }
+
+        // 搜索按钮点击事件
+        private void searchBtn_Click(object sender, EventArgs e)
+        {
+            ReloadConfig();
+            UpdateLrcTextBox("  ");
+
+            SEARCH_TYPE_ENUM type = globalSearchInfo.SerchType;
+            if(type == SEARCH_TYPE_ENUM.SONG_ID)
+            {
+                if(globalSearchInfo.BatchSearch)
+                {
+                    BatchSearch();
+                }
+                else
+                {
+                    SingleSearch();
+                }
             }
             else
             {
@@ -177,20 +179,56 @@ namespace WindowsFormsApp1
         // 获取直链点击事件
         private void songUrlBtn_Click(object sender, EventArgs e)
         {
-            if (saveVO == null)
+            if (globalSearchInfo.BatchSearch) 
             {
-                MessageBox.Show(ErrorMsg.MUST_SEARCH_BEFORE_COPY_SONG_URL, "提示");
-                return;
-            }
+                // 数据准备
+                string[] ids = globalSearchInfo.SearchId.Split(',');
+                Dictionary<string, string> resultMaps = new Dictionary<string, string>();
+                int successCount = 0;
+                foreach (string songIdStr in ids)
+                {
+                    if (songIdStr == "" || songIdStr == null || !NeteaseMusicUtils.CheckNum(songIdStr))
+                    {
+                        resultMaps.Add(songIdStr, ErrorMsg.INPUT_ID_ILLEGAG);
+                        continue;
+                    }
 
-            Clipboard.SetDataObject(saveVO.songVO.Links);
-            MessageBox.Show(ErrorMsg.SONG_URL_COPY_SUCESS, "提示");
+                    long songId = long.Parse(songIdStr);
+                    if (!NeteaseMusicResultCache.Contains(songId))
+                    {
+                        resultMaps.Add(songIdStr, ErrorMsg.MUST_SEARCH_BEFORE_SAVE);
+                        continue;
+                    }
+
+                    successCount++;
+                    resultMaps.Add(songIdStr, NeteaseMusicResultCache.Get(songId).songVO.Links);
+                }
+
+                // 输出日志
+                StringBuilder log = new StringBuilder();
+                log.Append("---Total：" + resultMaps.Count + ", Success：" + successCount + ", Failure：" + (resultMaps.Count - successCount) + "---\r\n");
+                foreach (KeyValuePair<string, string> kvp in resultMaps)
+                {
+                    log.Append("ID: " + kvp.Key + ", Result: " + kvp.Value + "\r\n");
+                }
+                UpdateLrcTextBox(log.ToString());
+            }
+            else
+            {
+                if (globalSaveVO == null)
+                {
+                    MessageBox.Show(ErrorMsg.MUST_SEARCH_BEFORE_COPY_SONG_URL, "提示");
+                    return;
+                }
+
+                Clipboard.SetDataObject(globalSaveVO.songVO.Links);
+                MessageBox.Show(ErrorMsg.SONG_URL_COPY_SUCESS, "提示");
+            }
         }
 
-        // 保存按钮点击事件
-        private void saveBtn_Click(object sender, EventArgs e)
+        private void SingleSave()
         {
-            if (saveVO == null)
+            if (globalSaveVO == null)
             {
                 MessageBox.Show(ErrorMsg.MUST_SEARCH_BEFORE_SAVE, "提示");
                 return;
@@ -199,7 +237,7 @@ namespace WindowsFormsApp1
             SaveFileDialog saveDialog = new SaveFileDialog();
             try
             {
-                string outputFileName = NeteaseMusicUtils.GetOutputName(saveVO.songVO, searchInfo);
+                string outputFileName = NeteaseMusicUtils.GetOutputName(globalSaveVO.songVO, globalSearchInfo);
                 if (outputFileName == null)
                 {
                     MessageBox.Show(ErrorMsg.FILE_NAME_IS_EMPTY, "提示");
@@ -207,7 +245,7 @@ namespace WindowsFormsApp1
                 }
                 else
                 {
-                    outputFileName = GetSafeFilename(outputFileName);
+                    outputFileName = NeteaseMusicUtils.GetSafeFilename(outputFileName);
                 }
 
                 saveDialog.FileName = outputFileName;
@@ -215,11 +253,11 @@ namespace WindowsFormsApp1
                 if (saveDialog.ShowDialog() == DialogResult.OK)
                 {
                     string fileName = saveDialog.FileName;
-                    StreamWriter sw = new StreamWriter(fileName, false, Encoding.GetEncoding(searchInfo.Encoding));
+                    StreamWriter sw = new StreamWriter(fileName, false, Encoding.GetEncoding(globalSearchInfo.Encoding));
                     sw.Write(textBox_lrc.Text);
                     sw.Flush();
                     sw.Close();
-                    MessageBox.Show("保存成功！", "提示");
+                    MessageBox.Show(ErrorMsg.SAVE_SUCCESS, "提示");
                 }
             }
             catch (Exception ew)
@@ -228,74 +266,33 @@ namespace WindowsFormsApp1
             }
         }
 
-        /* 批量保存按钮点击事件
-        private void batchBtn_Click(object sender, EventArgs e)
+        private void BatchSave()
         {
-            string[] ids = idsTextbox.Text.Split(',');
+            // 数据准备
+            string[] ids = globalSearchInfo.SearchId.Split(',');
             Dictionary<string, string> resultMaps = new Dictionary<string, string>();
-            Dictionary<string, string> failureMaps = new Dictionary<string, string>();
-
-            // 准备数据
-            foreach (string id in ids)
+            Dictionary<long, SaveVO> successMaps = new Dictionary<long, SaveVO>();
+            foreach (string songIdStr in ids)
             {
-                Song song = new Song();
-
-                try
+                if (songIdStr == "" || songIdStr == null || !NeteaseMusicUtils.CheckNum(songIdStr))
                 {
-                    if (id == "" || id == null || !CheckNum(id))
-                    {
-                        throw new Exception("ID不合法");
-                    }
-
-                    HttpStatus status = GetSongLrc(HttpHelper(string.Format(LRC_URL, id)), ref song);
-
-                    if (status.GetCode() == HTTP_STATUS_SUCCESS)
-                    {
-                        // 双语歌词处理
-                        string[] lrcResult = ParserDiglossiaLrc(ref song);
-                        // 强制两位小数
-                        if (dotCheckBox.CheckState == CheckState.Checked)
-                        {
-                            SetTimeStamp2Dot(ref lrcResult);
-                        }
-
-                        status = GetSongBasicInfo(HttpHelper(string.Format(SONG_INFO_URL, id, id)), ref song);
-                        if (status.GetCode() == HTTP_STATUS_SUCCESS)
-                        {
-                            string outputFileName = GetOutputFileName(ref song);
-                            resultMaps.Add(outputFileName, TrimLrc(lrcResult));
-                        }
-                        else
-                        {
-                            throw new Exception(status.GetMsg());
-                        }
-                    }
-                    else
-                    {
-                        throw new Exception(status.GetMsg());
-                    }
+                    resultMaps.Add(songIdStr, ErrorMsg.INPUT_ID_ILLEGAG);
+                    continue;
                 }
-                catch (Exception ew)
+
+                long songId = long.Parse(songIdStr);
+                if (!NeteaseMusicResultCache.Contains(songId))
                 {
-                    failureMaps.Add(id, ew.Message);
-                    Console.WriteLine(ew);
+                    resultMaps.Add(songIdStr, ErrorMsg.MUST_SEARCH_BEFORE_SAVE);
+                    continue;
                 }
+
+                resultMaps.Add(songIdStr, ErrorMsg.SAVE_SUCCESS);
+                successMaps.Add(songId, NeteaseMusicResultCache.Get(songId));
             }
 
-            // 输出歌词缓存日志
-            StringBuilder log = new StringBuilder();
-            log.Append("---Total：" + ids.Length + ", Success：" + resultMaps.Count + ", Failure：" + failureMaps.Count + "---\r\n");
-            if (failureMaps.Count > 0)
-            {
-                foreach (KeyValuePair<string, string> kvp in failureMaps)
-                {
-                    log.Append("ID: " + kvp.Key + ", Reason: " + kvp.Value + "\r\n");
-                }
-            }
-            textBox_lrc.Text = log.ToString();
-
-            // 保存
-            if (resultMaps.Count > 0)
+            // 弹窗保存
+            if (successMaps.Count > 0)
             {
                 SaveFileDialog saveDialog = new SaveFileDialog();
                 try
@@ -311,15 +308,16 @@ namespace WindowsFormsApp1
                         //获取文件路径，不带文件名 
                         string filePath = localFilePath.Substring(0, localFilePath.LastIndexOf("\\"));
 
-                        foreach (KeyValuePair<string, string> kvp in resultMaps)
+                        foreach (KeyValuePair<long, SaveVO> kvp in successMaps)
                         {
-                            string path = filePath + "/" + GetSafeFilename(kvp.Key) + fileSuffix;
-                            StreamWriter sw = new StreamWriter(path, false, Encoding.GetEncoding(outputFileEncode));
-                            sw.Write(kvp.Value);
+                            string outputFileName = NeteaseMusicUtils.GetOutputName(kvp.Value.songVO, globalSearchInfo);
+                            string path = filePath + "/" + NeteaseMusicUtils.GetSafeFilename(outputFileName) + fileSuffix;
+                            StreamWriter sw = new StreamWriter(path, false, Encoding.GetEncoding(globalSearchInfo.Encoding));
+                            sw.Write(NeteaseMusicUtils.GetOutputLyric(kvp.Value.lyricVO.Lyric, kvp.Value.lyricVO.TLyric, globalSearchInfo));
                             sw.Flush();
                             sw.Close();
                         }
-                        MessageBox.Show("保存成功！", "提示");
+                        MessageBox.Show(ErrorMsg.SAVE_SUCCESS, "提示");
                     }
                 }
                 catch (Exception ew)
@@ -327,18 +325,40 @@ namespace WindowsFormsApp1
                     MessageBox.Show("批量保存失败，错误信息：\n" + ew.Message);
                 }
             }
-        } */
+
+            // 输出日志
+            StringBuilder log = new StringBuilder();
+            log.Append("---Total：" + resultMaps.Count + ", Success：" + successMaps.Count + ", Failure：" + (resultMaps.Count - successMaps.Count) + "---\r\n");
+            foreach (KeyValuePair<string, string> kvp in resultMaps)
+            {
+                log.Append("ID: " + kvp.Key + ", Result: " + kvp.Value + "\r\n");
+            }
+            UpdateLrcTextBox(log.ToString());
+        }
+
+        // 保存按钮点击事件
+        private void saveBtn_Click(object sender, EventArgs e)
+        {
+            if (globalSearchInfo.BatchSearch)
+            {
+                BatchSave();
+            }
+            else
+            {
+                SingleSave();
+            }
+        }
 
         private void comboBox_output_name_SelectedIndexChanged(object sender, EventArgs e)
         {
             output_filename_type_enum = (OUTPUT_FILENAME_TYPE_ENUM)comboBox_output_name.SelectedIndex;
-            searchInfo = reloadConfig();
+            ReloadConfig();
         }
 
         private void comboBox_output_encode_SelectedIndexChanged(object sender, EventArgs e)
         {
             output_file_encoding = comboBox_output_encode.SelectedItem.ToString();
-            searchInfo = reloadConfig();
+            ReloadConfig();
         }
 
         private void comboBox_diglossia_lrc_SelectedIndexChanged(object sender, EventArgs e)
@@ -356,13 +376,17 @@ namespace WindowsFormsApp1
                 splitTextBox.ReadOnly = true;
                 splitTextBox.BackColor = System.Drawing.Color.FromArgb(240, 240, 240);
             }
-            searchInfo = reloadConfig();
+            
+            ReloadConfig();
+            UpdateLrcTextBox("");
         }
         
         private void comboBox_search_type_SelectedIndexChanged(object sender, EventArgs e)
         {
             search_type_enum = (SEARCH_TYPE_ENUM)comboBox_search_type.SelectedIndex;
-            searchInfo = reloadConfig();
+            
+            ReloadConfig();
+            UpdateLrcTextBox("");
         }
 
         // 项目主页item
@@ -375,6 +399,51 @@ namespace WindowsFormsApp1
         private void latestVersionMenuItem_Click(object sender, EventArgs e)
         {
             System.Diagnostics.Process.Start("https://github.com/jitwxs/163MusicLyrics/releases");
+        }
+
+        private void batchSearchCheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            ReloadConfig();
+            CleanTextBox();
+        }
+
+        private void dotCheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            ReloadConfig();
+            UpdateLrcTextBox("");
+        }
+
+        private void splitTextBox_TextChanged(object sender, EventArgs e)
+        {
+            ReloadConfig();
+            UpdateLrcTextBox("");
+        }
+
+        // 更新前端歌词
+        private void UpdateLrcTextBox(string replace)
+        {
+            if (replace != "")
+            {
+                textBox_lrc.Text = replace;
+            }
+            else
+            {
+                if (!globalSearchInfo.BatchSearch && globalSaveVO != null)
+                {
+                    // 根据最新配置，更新输出歌词
+                    string outputLyric = NeteaseMusicUtils.GetOutputLyric(globalSaveVO.lyricVO.Lyric, globalSaveVO.lyricVO.TLyric, globalSearchInfo);
+                    textBox_lrc.Text = outputLyric == "" ? ErrorMsg.LRC_NOT_EXIST : outputLyric;
+                }
+            }
+        }
+
+        // 清空前端内容
+        private void CleanTextBox()
+        {
+            textBox_lrc.Text = "";
+            textBox_song.Text = "";
+            textBox_singer.Text = "";
+            textBox_album.Text = "";
         }
     }
 

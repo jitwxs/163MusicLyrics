@@ -67,24 +67,9 @@ namespace 网易云歌词提取
                         originTLyric = lyricResult.Tlyric.Lyric;
                     }
                     
-                    // 歌词合并
-                    string[] formatLyrics = FormatLyric(originLyric, originTLyric, searchInfo);
-                    
-                    // 两位小数
-                    if(searchInfo.Constraint2Dot)
-                    {
-                        SetTimeStamp2Dot(ref formatLyrics);
-                    }
-
-                    string result = "";
-                    foreach (string i in formatLyrics)
-                    {
-                        result += i + "\r\n";
-                    }
-
                     vo.Lyric = originLyric;
                     vo.TLyric = originTLyric;
-                    vo.Output = result;
+                    vo.Output = GetOutputLyric(originLyric, originTLyric, searchInfo);
                 }
                 vo.Success = true;
             }
@@ -97,6 +82,27 @@ namespace 网易云歌词提取
 
             return vo;
         }
+
+        public static string GetOutputLyric(string originLyric, string originTLyric, SearchInfo searchInfo)
+        {
+            // 歌词合并
+            string[] formatLyrics = FormatLyric(originLyric, originTLyric, searchInfo);
+
+            // 两位小数
+            if (searchInfo.Constraint2Dot)
+            {
+                SetTimeStamp2Dot(ref formatLyrics);
+            }
+
+            string result = "";
+            foreach (string i in formatLyrics)
+            {
+                result += i + "\r\n";
+            }
+
+            return result;
+        }
+
 
         // 获取输出文件名
         public static string GetOutputName(SongVO songVO, SearchInfo searchInfo)
@@ -177,7 +183,8 @@ namespace 网易云歌词提取
         // 将歌词切割为数组
         private static string[] SplitLrc(string lrc)
         {
-            return lrc.Split('\n').Where(s => !string.IsNullOrEmpty(s)).ToArray();
+            string[] ss = lrc.Split('\n').Where(s => !string.IsNullOrWhiteSpace(s)).ToArray();
+            return ss;
         }
 
         // 双语歌词排序
@@ -328,6 +335,67 @@ namespace 网易云歌词提取
                     lrcStr[i] = tmp.Substring(0, tmp.Length - 1) + "]" + lrcStr[i].Substring(index + 1);
                 }
             }
+        }
+
+        public static string GetSafeFilename(string arbitraryString)
+        {
+            var invalidChars = System.IO.Path.GetInvalidFileNameChars();
+            var replaceIndex = arbitraryString.IndexOfAny(invalidChars, 0);
+            if (replaceIndex == -1) return arbitraryString;
+
+            var r = new StringBuilder();
+            var i = 0;
+
+            do
+            {
+                r.Append(arbitraryString, i, replaceIndex - i);
+
+                switch (arbitraryString[replaceIndex])
+                {
+                    case '"':
+                        r.Append("''");
+                        break;
+                    case '<':
+                        r.Append('\u02c2'); // '˂' (modifier letter left arrowhead)
+                        break;
+                    case '>':
+                        r.Append('\u02c3'); // '˃' (modifier letter right arrowhead)
+                        break;
+                    case '|':
+                        r.Append('\u2223'); // '∣' (divides)
+                        break;
+                    case ':':
+                        r.Append('-');
+                        break;
+                    case '*':
+                        r.Append('\u2217'); // '∗' (asterisk operator)
+                        break;
+                    case '\\':
+                    case '/':
+                        r.Append('\u2044'); // '⁄' (fraction slash)
+                        break;
+                    case '\0':
+                    case '\f':
+                    case '?':
+                        break;
+                    case '\t':
+                    case '\n':
+                    case '\r':
+                    case '\v':
+                        r.Append(' ');
+                        break;
+                    default:
+                        r.Append('_');
+                        break;
+                }
+
+                i = replaceIndex + 1;
+                replaceIndex = arbitraryString.IndexOfAny(invalidChars, i);
+            } while (replaceIndex != -1);
+
+            r.Append(arbitraryString, i, arbitraryString.Length - i);
+
+            return r.ToString();
         }
     }
 }
