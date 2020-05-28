@@ -57,7 +57,8 @@
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.homeMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.latestVersionMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.更新历史ToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.issueMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.赞助作者ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -318,7 +319,8 @@
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.homeMenuItem,
             this.latestVersionMenuItem,
-            this.更新历史ToolStripMenuItem1});
+            this.issueMenuItem,
+            this.赞助作者ToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Size = new System.Drawing.Size(480, 25);
@@ -339,11 +341,18 @@
             this.latestVersionMenuItem.Text = "最新版本";
             this.latestVersionMenuItem.Click += new System.EventHandler(this.latestVersionMenuItem_Click);
             // 
-            // 更新历史ToolStripMenuItem1
+            // issueMenuItem
             // 
-            this.更新历史ToolStripMenuItem1.Name = "更新历史ToolStripMenuItem1";
-            this.更新历史ToolStripMenuItem1.Size = new System.Drawing.Size(68, 21);
-            this.更新历史ToolStripMenuItem1.Text = "赞助作者";
+            this.issueMenuItem.Name = "issueMenuItem";
+            this.issueMenuItem.Size = new System.Drawing.Size(68, 21);
+            this.issueMenuItem.Text = "问题反馈";
+            this.issueMenuItem.Click += new System.EventHandler(this.issueMenuItem_Click);
+            // 
+            // 赞助作者ToolStripMenuItem
+            // 
+            this.赞助作者ToolStripMenuItem.Name = "赞助作者ToolStripMenuItem";
+            this.赞助作者ToolStripMenuItem.Size = new System.Drawing.Size(68, 21);
+            this.赞助作者ToolStripMenuItem.Text = "赞助作者";
             // 
             // Form1
             // 
@@ -417,7 +426,8 @@
         private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.ToolStripMenuItem homeMenuItem;
         private System.Windows.Forms.ToolStripMenuItem latestVersionMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem 更新历史ToolStripMenuItem1;
+        private System.Windows.Forms.ToolStripMenuItem issueMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem 赞助作者ToolStripMenuItem;
     }
 }
 

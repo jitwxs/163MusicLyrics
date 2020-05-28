@@ -313,27 +313,19 @@ namespace 网易云歌词提取
             for (int i = 0; i < lrcStr.Length; i++)
             {
                 int index = lrcStr[i].IndexOf("]");
-                string timestamp = lrcStr[i].Substring(1, index - 1);
-                string[] ts = timestamp.Split(':');
-
-                bool hasNum = true;
-                string tmp = "[";
-                foreach (string t in ts)
+                int dot = lrcStr[i].IndexOf(".");
+                if(dot == -1)
                 {
-                    if (double.TryParse(t, out double num))
-                    {
-                        tmp = tmp + num.ToString("00.##") + ":";
-                    }
-                    else
-                    {
-                        hasNum = false;
-                        break;
-                    }
+                    continue;
                 }
-                if (hasNum)
+                string ms = lrcStr[i].Substring(dot + 1, index - dot - 1);
+                if (ms.Length == 3)
                 {
-                    lrcStr[i] = tmp.Substring(0, tmp.Length - 1) + "]" + lrcStr[i].Substring(index + 1);
+                    ms = ms.Substring(0, 2);
                 }
+                Console.WriteLine(ms + lrcStr[i]);
+                lrcStr[i] = lrcStr[i].Substring(0, dot)  + "." + ms + lrcStr[i].Substring(index);
+                Console.WriteLine(lrcStr[i]);
             }
         }
 

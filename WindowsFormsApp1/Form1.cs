@@ -401,6 +401,12 @@ namespace WindowsFormsApp1
             System.Diagnostics.Process.Start("https://github.com/jitwxs/163MusicLyrics/releases");
         }
 
+        // 问题反馈item
+        private void issueMenuItem_Click(object sender, EventArgs e)
+        {
+            System.Diagnostics.Process.Start("https://github.com/jitwxs/163MusicLyrics/issues");
+        }
+
         private void batchSearchCheckBox_CheckedChanged(object sender, EventArgs e)
         {
             ReloadConfig();
