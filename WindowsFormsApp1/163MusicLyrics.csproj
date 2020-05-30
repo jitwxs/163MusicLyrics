@@ -95,8 +95,8 @@
     <Compile Include="MainForm.Designer.cs">
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="HttpClientHelper.cs" />
-    <Compile Include="JsonExtends.cs" />
+    <Compile Include="HttpUtils.cs" />
+    <Compile Include="JsonUtils.cs" />
     <Compile Include="NeteaseMusicResultCache.cs" />
     <Compile Include="NeteaseMusicUtils.cs" />
     <Compile Include="NeteaseMusicVO.cs" />

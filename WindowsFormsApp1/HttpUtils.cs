@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace WindowsFormsApp1
 {
-    public class HttpClientHelper
+    public class HttpUtils
     {
         /// <summary>
         /// 发起POST同步请求
