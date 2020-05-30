@@ -7,7 +7,7 @@ using 网易云歌词提取;
 
 namespace WindowsFormsApp1
 {
-    public partial class Form1 : Form
+    public partial class MainForm : Form
     {
         NeteaseMusicAPI api = null;
         SaveVO globalSaveVO = null;
@@ -22,7 +22,7 @@ namespace WindowsFormsApp1
         // 输出文件名类型
         OUTPUT_FILENAME_TYPE_ENUM output_filename_type_enum;
 
-        public Form1()
+        public MainForm()
         {
             InitializeComponent();
             
@@ -450,6 +450,11 @@ namespace WindowsFormsApp1
             textBox_song.Text = "";
             textBox_singer.Text = "";
             textBox_album.Text = "";
+        }
+
+        private void donateMenuItem_Click(object sender, EventArgs e)
+        {
+
         }
     }
 

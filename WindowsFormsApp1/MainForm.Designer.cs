@@ -1,6 +1,6 @@
 ﻿namespace WindowsFormsApp1
 {
-    partial class Form1
+    partial class MainForm
     {
         /// <summary>
         /// 必需的设计器变量。
@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.textBox_lrc = new System.Windows.Forms.TextBox();
             this.textBox_singer = new System.Windows.Forms.TextBox();
             this.label_song = new System.Windows.Forms.Label();
@@ -58,7 +58,6 @@
             this.homeMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.latestVersionMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.issueMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.赞助作者ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -319,8 +318,7 @@
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.homeMenuItem,
             this.latestVersionMenuItem,
-            this.issueMenuItem,
-            this.赞助作者ToolStripMenuItem});
+            this.issueMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Size = new System.Drawing.Size(480, 25);
@@ -338,7 +336,7 @@
             // 
             this.latestVersionMenuItem.Name = "latestVersionMenuItem";
             this.latestVersionMenuItem.Size = new System.Drawing.Size(68, 21);
-            this.latestVersionMenuItem.Text = "最新版本";
+            this.latestVersionMenuItem.Text = "检查更新";
             this.latestVersionMenuItem.Click += new System.EventHandler(this.latestVersionMenuItem_Click);
             // 
             // issueMenuItem
@@ -348,13 +346,7 @@
             this.issueMenuItem.Text = "问题反馈";
             this.issueMenuItem.Click += new System.EventHandler(this.issueMenuItem_Click);
             // 
-            // 赞助作者ToolStripMenuItem
-            // 
-            this.赞助作者ToolStripMenuItem.Name = "赞助作者ToolStripMenuItem";
-            this.赞助作者ToolStripMenuItem.Size = new System.Drawing.Size(68, 21);
-            this.赞助作者ToolStripMenuItem.Text = "赞助作者";
-            // 
-            // Form1
+            // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -388,7 +380,7 @@
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.menuStrip1;
-            this.Name = "Form1";
+            this.Name = "MainForm";
             this.Text = "网易云歌词提取 V3.0";
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
@@ -427,7 +419,6 @@
         private System.Windows.Forms.ToolStripMenuItem homeMenuItem;
         private System.Windows.Forms.ToolStripMenuItem latestVersionMenuItem;
         private System.Windows.Forms.ToolStripMenuItem issueMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem 赞助作者ToolStripMenuItem;
     }
 }
 

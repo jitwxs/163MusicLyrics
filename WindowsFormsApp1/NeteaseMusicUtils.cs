@@ -323,9 +323,7 @@ namespace 网易云歌词提取
                 {
                     ms = ms.Substring(0, 2);
                 }
-                Console.WriteLine(ms + lrcStr[i]);
                 lrcStr[i] = lrcStr[i].Substring(0, dot)  + "." + ms + lrcStr[i].Substring(index);
-                Console.WriteLine(lrcStr[i]);
             }
         }
 
