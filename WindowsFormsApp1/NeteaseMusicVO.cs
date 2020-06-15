@@ -45,6 +45,10 @@ namespace 网易云歌词提取
         public static string BATCH_SONG_URL_COPY_SUCESS = "批量歌曲直链，已复制到剪切板";
         public static string FILE_NAME_IS_EMPTY = "输出文件名不能为空";
         public static string SAVE_SUCCESS = "保存成功";
+
+        public static string GET_LATEST_VERSION_FAILED = "获取最新版本失败";
+        public static string THIS_IS_LATEST_VERSION = "当前版本已经是最新版本";
+        public static string EXIST_LATEST_VERSION = "检测到最新版本，下载地址已复制到剪切板";
     }
 
     public class SaveVO

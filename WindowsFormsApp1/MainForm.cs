@@ -1,6 +1,9 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net;
 using System.Text;
 using System.Windows.Forms;
 using 网易云歌词提取;
@@ -21,6 +24,8 @@ namespace WindowsFormsApp1
         SHOW_LRC_TYPE_ENUM show_lrc_type_enum;
         // 输出文件名类型
         OUTPUT_FILENAME_TYPE_ENUM output_filename_type_enum;
+
+        const string VERSION = "v3.0";
 
         public MainForm()
         {
@@ -398,7 +403,39 @@ namespace WindowsFormsApp1
         // 最新版本item
         private void latestVersionMenuItem_Click(object sender, EventArgs e)
         {
-            System.Diagnostics.Process.Start("https://github.com/jitwxs/163MusicLyrics/releases");
+            // support https
+            System.Net.ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+            Dictionary<string, string> headers = new Dictionary<string, string>();
+            headers.Add("Accept", "application/vnd.github.v3+json");
+            headers.Add("User-Agent", NeteaseMusicAPI._USERAGENT);
+
+            string jsonStr = HttpUtils.HttpGet("http://api.github.com/repos/jitwxs/163MusicLyrics/releases/latest", "application/json", headers);
+            JObject obj = (JObject)JsonConvert.DeserializeObject(jsonStr);
+            OutputLatestTag(obj["tag_name"]);
+        }
+
+        private void OutputLatestTag(JToken latestTag)
+        {
+            if (latestTag == null)
+            {
+                MessageBox.Show(ErrorMsg.GET_LATEST_VERSION_FAILED, "提示");
+            } 
+            else
+            {
+                string bigV = latestTag.ToString().Substring(1, 2), smallV = latestTag.ToString().Substring(3);
+                string curBigV = VERSION.Substring(1, 2), curSmallV = VERSION.Substring(3);
+
+                if(bigV.CompareTo(curBigV) == 1 || (bigV.CompareTo(curBigV) == 0 && smallV.CompareTo(curSmallV) == 1))
+                {
+                    Clipboard.SetDataObject("https://github.com/jitwxs/163MusicLyrics/releases");
+                    MessageBox.Show(ErrorMsg.EXIST_LATEST_VERSION, "提示");
+                }
+                else
+                {
+                    MessageBox.Show(ErrorMsg.THIS_IS_LATEST_VERSION, "提示");
+                }
+
+            }
         }
 
         // 问题反馈item
@@ -450,11 +487,6 @@ namespace WindowsFormsApp1
             textBox_song.Text = "";
             textBox_singer.Text = "";
             textBox_album.Text = "";
-        }
-
-        private void donateMenuItem_Click(object sender, EventArgs e)
-        {
-
         }
     }
 
