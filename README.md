@@ -17,8 +17,6 @@
 
 建议无特殊需求情况下，使用 `3.x` 版本即可。
 
-{% note info, 由于 `3.x` 版本发布不久，有可能存在 `3.x` 存在而 `2.x` 不存在的 BUG，欢迎大家积极反馈问题，改进软件。 %}
-
 ## How to use
 
 [163MusicLyrics Wiki](https://www.jitwxs.cn/wiki/163-music-lyrics)
