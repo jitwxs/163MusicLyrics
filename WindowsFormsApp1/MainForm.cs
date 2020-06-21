@@ -444,6 +444,12 @@ namespace WindowsFormsApp1
             System.Diagnostics.Process.Start("https://github.com/jitwxs/163MusicLyrics/issues");
         }
 
+        // 使用手册
+        private void wikiItem_Click(object sender, EventArgs e)
+        {
+            System.Diagnostics.Process.Start("https://www.jitwxs.cn/wiki/163-music-lyrics");
+        }
+
         private void batchSearchCheckBox_CheckedChanged(object sender, EventArgs e)
         {
             ReloadConfig();

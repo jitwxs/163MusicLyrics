@@ -58,6 +58,7 @@
             this.homeMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.latestVersionMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.issueMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.wikiItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -317,8 +318,9 @@
             // 
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.homeMenuItem,
-            this.latestVersionMenuItem,
-            this.issueMenuItem});
+            this.wikiItem,
+            this.issueMenuItem,
+            this.latestVersionMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Size = new System.Drawing.Size(480, 25);
@@ -345,6 +347,13 @@
             this.issueMenuItem.Size = new System.Drawing.Size(68, 21);
             this.issueMenuItem.Text = "问题反馈";
             this.issueMenuItem.Click += new System.EventHandler(this.issueMenuItem_Click);
+            // 
+            // wikiItem
+            // 
+            this.wikiItem.Name = "wikiItem";
+            this.wikiItem.Size = new System.Drawing.Size(68, 21);
+            this.wikiItem.Text = "使用手册";
+            this.wikiItem.Click += new System.EventHandler(this.wikiItem_Click);
             // 
             // MainForm
             // 
@@ -419,6 +428,7 @@
         private System.Windows.Forms.ToolStripMenuItem homeMenuItem;
         private System.Windows.Forms.ToolStripMenuItem latestVersionMenuItem;
         private System.Windows.Forms.ToolStripMenuItem issueMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem wikiItem;
     }
 }
 
