@@ -32,6 +32,15 @@ namespace 网易云歌词提取
         ALBUM_ID = 1 // 专辑ID
     }
 
+    // 输出文件格式
+    public enum OUTPUT_ENCODING_ENUM
+    {
+        UTF_8 = 0,
+        UTF_8_BOM = 1,
+        GB_2312 = 2,
+        GBK = 3
+    }
+
     public class ErrorMsg
     {
         public static string SEARCH_RESULT_STAGE = "查询成功，结果已暂存";
@@ -102,7 +111,7 @@ namespace 网易云歌词提取
 
         public string SearchId { get; set; }
 
-        public string Encoding { get; set; }
+        public OUTPUT_ENCODING_ENUM Encoding { get; set; }
 
         public string LrcMergeSeparator { get; set; }
 
