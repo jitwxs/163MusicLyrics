@@ -56,9 +56,9 @@
             this.batchSearchCheckBox = new System.Windows.Forms.CheckBox();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.homeMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.latestVersionMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.issueMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.wikiItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.issueMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.latestVersionMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -248,7 +248,9 @@
             this.comboBox_output_encode.FormattingEnabled = true;
             this.comboBox_output_encode.Items.AddRange(new object[] {
             "UTF-8",
-            "GB2312"});
+            "UTF-8-BOM",
+            "GB2312",
+            "GBK"});
             this.comboBox_output_encode.Location = new System.Drawing.Point(100, 415);
             this.comboBox_output_encode.Name = "comboBox_output_encode";
             this.comboBox_output_encode.Size = new System.Drawing.Size(102, 20);
@@ -334,12 +336,12 @@
             this.homeMenuItem.Text = "项目主页";
             this.homeMenuItem.Click += new System.EventHandler(this.homeMenuItem_Click);
             // 
-            // latestVersionMenuItem
+            // wikiItem
             // 
-            this.latestVersionMenuItem.Name = "latestVersionMenuItem";
-            this.latestVersionMenuItem.Size = new System.Drawing.Size(68, 21);
-            this.latestVersionMenuItem.Text = "检查更新";
-            this.latestVersionMenuItem.Click += new System.EventHandler(this.latestVersionMenuItem_Click);
+            this.wikiItem.Name = "wikiItem";
+            this.wikiItem.Size = new System.Drawing.Size(68, 21);
+            this.wikiItem.Text = "使用手册";
+            this.wikiItem.Click += new System.EventHandler(this.wikiItem_Click);
             // 
             // issueMenuItem
             // 
@@ -348,12 +350,12 @@
             this.issueMenuItem.Text = "问题反馈";
             this.issueMenuItem.Click += new System.EventHandler(this.issueMenuItem_Click);
             // 
-            // wikiItem
+            // latestVersionMenuItem
             // 
-            this.wikiItem.Name = "wikiItem";
-            this.wikiItem.Size = new System.Drawing.Size(68, 21);
-            this.wikiItem.Text = "使用手册";
-            this.wikiItem.Click += new System.EventHandler(this.wikiItem_Click);
+            this.latestVersionMenuItem.Name = "latestVersionMenuItem";
+            this.latestVersionMenuItem.Size = new System.Drawing.Size(68, 21);
+            this.latestVersionMenuItem.Text = "检查更新";
+            this.latestVersionMenuItem.Click += new System.EventHandler(this.latestVersionMenuItem_Click);
             // 
             // MainForm
             // 

@@ -387,5 +387,21 @@ namespace 网易云歌词提取
 
             return r.ToString();
         }
+
+        public static Encoding GetEncoding(OUTPUT_ENCODING_ENUM encodingEnum)
+        {
+            switch(encodingEnum)
+            {
+                case OUTPUT_ENCODING_ENUM.GB_2312:
+                    return Encoding.GetEncoding("GB2312");
+                case OUTPUT_ENCODING_ENUM.GBK:
+                    return Encoding.GetEncoding("GBK");
+                case OUTPUT_ENCODING_ENUM.UTF_8_BOM:
+                    return new System.Text.UTF8Encoding(true);
+                default:
+                    // utf-8 and others
+                    return new System.Text.UTF8Encoding(false);
+            }
+        }
     }
 }

@@ -17,7 +17,7 @@ namespace WindowsFormsApp1
         SearchInfo globalSearchInfo = new SearchInfo();
 
         // 输出文件编码
-        string output_file_encoding = "UTF-8";
+        OUTPUT_ENCODING_ENUM output_encoding_enum;
         // 搜索类型
         SEARCH_TYPE_ENUM search_type_enum;
         // 展示歌词类型
@@ -25,7 +25,7 @@ namespace WindowsFormsApp1
         // 输出文件名类型
         OUTPUT_FILENAME_TYPE_ENUM output_filename_type_enum;
 
-        const string VERSION = "v3.0";
+        const string VERSION = "v3.1";
 
         public MainForm()
         {
@@ -45,7 +45,7 @@ namespace WindowsFormsApp1
             globalSearchInfo.SerchType = search_type_enum;
             globalSearchInfo.OutputFileNameType = output_filename_type_enum;
             globalSearchInfo.ShowLrcType = show_lrc_type_enum;
-            globalSearchInfo.Encoding = output_file_encoding;
+            globalSearchInfo.Encoding = output_encoding_enum;
             globalSearchInfo.Constraint2Dot = dotCheckBox.CheckState == CheckState.Checked;
             globalSearchInfo.BatchSearch = batchSearchCheckBox.CheckState == CheckState.Checked;
             globalSearchInfo.LrcMergeSeparator = splitTextBox.Text;
@@ -257,8 +257,7 @@ namespace WindowsFormsApp1
                 saveDialog.Filter = "lrc文件(*.lrc)|*.lrc|txt文件(*.txt)|*.txt";
                 if (saveDialog.ShowDialog() == DialogResult.OK)
                 {
-                    string fileName = saveDialog.FileName;
-                    StreamWriter sw = new StreamWriter(fileName, false, Encoding.GetEncoding(globalSearchInfo.Encoding));
+                    StreamWriter sw = new StreamWriter(saveDialog.FileName, false, NeteaseMusicUtils.GetEncoding(globalSearchInfo.Encoding));
                     sw.Write(textBox_lrc.Text);
                     sw.Flush();
                     sw.Close();
@@ -317,7 +316,7 @@ namespace WindowsFormsApp1
                         {
                             string outputFileName = NeteaseMusicUtils.GetOutputName(kvp.Value.songVO, globalSearchInfo);
                             string path = filePath + "/" + NeteaseMusicUtils.GetSafeFilename(outputFileName) + fileSuffix;
-                            StreamWriter sw = new StreamWriter(path, false, Encoding.GetEncoding(globalSearchInfo.Encoding));
+                            StreamWriter sw = new StreamWriter(path, false, NeteaseMusicUtils.GetEncoding(globalSearchInfo.Encoding));
                             sw.Write(NeteaseMusicUtils.GetOutputLyric(kvp.Value.lyricVO.Lyric, kvp.Value.lyricVO.TLyric, globalSearchInfo));
                             sw.Flush();
                             sw.Close();
@@ -362,7 +361,7 @@ namespace WindowsFormsApp1
 
         private void comboBox_output_encode_SelectedIndexChanged(object sender, EventArgs e)
         {
-            output_file_encoding = comboBox_output_encode.SelectedItem.ToString();
+            output_encoding_enum = (OUTPUT_ENCODING_ENUM)comboBox_output_encode.SelectedIndex;
             ReloadConfig();
         }
 
