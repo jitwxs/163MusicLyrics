@@ -104,7 +104,7 @@
             this.searchBtn.Name = "searchBtn";
             this.searchBtn.Size = new System.Drawing.Size(93, 46);
             this.searchBtn.TabIndex = 2;
-            this.searchBtn.Text = "搜索";
+            this.searchBtn.Text = "搜索 Enter";
             this.searchBtn.UseVisualStyleBackColor = true;
             this.searchBtn.Click += new System.EventHandler(this.searchBtn_Click);
             // 
@@ -360,6 +360,7 @@
             // 
             // MainForm
             // 
+            this.AcceptButton = this.searchBtn;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(480, 448);
