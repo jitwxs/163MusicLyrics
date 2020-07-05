@@ -10,10 +10,45 @@ namespace 网易云歌词提取
 
     class NeteaseMusicUtils
     {
+        // 输入参数校验
+        public static long CheckInputId(string input, SEARCH_TYPE_ENUM type, out string errorMsg)
+        {
+            long result = 0;
+            if(type == SEARCH_TYPE_ENUM.SONG_ID)
+            {
+                if (input == "" || input == null || !NeteaseMusicUtils.CheckNum(input))
+                {
+                    errorMsg = ErrorMsg.INPUT_ID_ILLEGAG;
+                }
+                else
+                {
+                    errorMsg = ErrorMsg.SUCCESS;
+                    result = long.Parse(input);
+                }
+            } else
+            {
+                errorMsg = ErrorMsg.FUNCTION_NOT_SUPPORT;
+            }
+
+            return result;
+        }
+
+
         // 获取歌曲基本信息
-        public static SongVO GetSongVO(SongUrls songUrls, DetailResult detailResult)
+        public static SongVO GetSongVO(SongUrls songUrls, DetailResult detailResult, out string errorMsg)
         {
             SongVO vo = new SongVO();
+
+            if(songUrls == null)
+            {
+                errorMsg = ErrorMsg.SONG_NOT_EXIST;
+                return vo;
+            }
+            if(detailResult == null)
+            {
+                errorMsg = ErrorMsg.LRC_NOT_EXIST;
+                return vo;
+            }
 
             try
             {
@@ -26,8 +61,7 @@ namespace 网易云歌词提取
                     Song[] songArray = detailResult.Songs;
                     if(songArray == null || songArray.Length == 0)
                     {
-                        vo.Success = false;
-                        vo.Message = ErrorMsg.SONG_NOT_EXIST;
+                        errorMsg = ErrorMsg.SONG_NOT_EXIST;
                         return vo;
                     }
 
@@ -36,12 +70,11 @@ namespace 网易云歌词提取
                     vo.Singer = ContractSinger(song.Ar);
                     vo.Album = song.Al.Name;
                 }
-                vo.Success = true;
+                errorMsg = ErrorMsg.SUCCESS;
             } 
             catch(Exception ew)
             {
-                vo.Success = false;
-                vo.Message = ew.Message;
+                errorMsg = ew.Message;
                 Console.WriteLine(ew);
             }
 
@@ -49,9 +82,20 @@ namespace 网易云歌词提取
         }
 
         // 获取歌词信息
-        public static LyricVO GetLyricVO(LyricResult lyricResult, SearchInfo searchInfo)
+        public static LyricVO GetLyricVO(LyricResult lyricResult, SearchInfo searchInfo, out string errorMsg)
         {
             LyricVO vo = new LyricVO();
+
+            if (searchInfo == null)
+            {
+                errorMsg = ErrorMsg.SONG_NOT_EXIST;
+                return vo;
+            }
+            if (lyricResult == null)
+            {
+                errorMsg = ErrorMsg.LRC_NOT_EXIST;
+                return vo;
+            }
 
             try
             {
@@ -71,12 +115,11 @@ namespace 网易云歌词提取
                     vo.TLyric = originTLyric;
                     vo.Output = GetOutputLyric(originLyric, originTLyric, searchInfo);
                 }
-                vo.Success = true;
+                errorMsg = ErrorMsg.SUCCESS;
             }
             catch(Exception ew)
             {
-                vo.Success = false;
-                vo.Message = ew.Message;
+                errorMsg = ew.Message;
                 Console.WriteLine(ew);
             }
 
@@ -89,10 +132,7 @@ namespace 网易云歌词提取
             string[] formatLyrics = FormatLyric(originLyric, originTLyric, searchInfo);
 
             // 两位小数
-            if (searchInfo.Constraint2Dot)
-            {
-                SetTimeStamp2Dot(ref formatLyrics);
-            }
+            SetTimeStamp2Dot(ref formatLyrics, searchInfo.DotType);
 
             string result = "";
             foreach (string i in formatLyrics)
@@ -308,22 +348,29 @@ namespace 网易云歌词提取
         }
 
         // 设置时间戳小数位数
-        public static void SetTimeStamp2Dot(ref string[] lrcStr)
+        public static void SetTimeStamp2Dot(ref string[] lrcStr, DOT_TYPE_ENUM dotTypeEnum)
         {
             for (int i = 0; i < lrcStr.Length; i++)
             {
                 int index = lrcStr[i].IndexOf("]");
                 int dot = lrcStr[i].IndexOf(".");
-                if(dot == -1)
+                if (dot == -1)
                 {
                     continue;
                 }
                 string ms = lrcStr[i].Substring(dot + 1, index - dot - 1);
                 if (ms.Length == 3)
                 {
-                    ms = ms.Substring(0, 2);
+                    if (dotTypeEnum == DOT_TYPE_ENUM.DOWN)
+                    {
+                        ms = ms.Substring(0, 2);
+                    }
+                    else if (dotTypeEnum == DOT_TYPE_ENUM.HALF_UP)
+                    {
+                        ms = Convert.ToDouble("0." + ms).ToString("0.00").Substring(2);
+                    }
                 }
-                lrcStr[i] = lrcStr[i].Substring(0, dot)  + "." + ms + lrcStr[i].Substring(index);
+                lrcStr[i] = lrcStr[i].Substring(0, dot) + "." + ms + lrcStr[i].Substring(index);
             }
         }
 
