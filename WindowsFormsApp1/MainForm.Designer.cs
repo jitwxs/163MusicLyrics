@@ -53,7 +53,6 @@
             this.songUrlBtn = new System.Windows.Forms.Button();
             this.comboBox_search_type = new System.Windows.Forms.ComboBox();
             this.label6 = new System.Windows.Forms.Label();
-            this.batchSearchCheckBox = new System.Windows.Forms.CheckBox();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.homeMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.wikiItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -305,17 +304,6 @@
             this.label6.Size = new System.Drawing.Size(0, 12);
             this.label6.TabIndex = 23;
             // 
-            // batchSearchCheckBox
-            // 
-            this.batchSearchCheckBox.AutoSize = true;
-            this.batchSearchCheckBox.Location = new System.Drawing.Point(208, 45);
-            this.batchSearchCheckBox.Name = "batchSearchCheckBox";
-            this.batchSearchCheckBox.Size = new System.Drawing.Size(72, 16);
-            this.batchSearchCheckBox.TabIndex = 24;
-            this.batchSearchCheckBox.Text = "批量搜索";
-            this.batchSearchCheckBox.UseVisualStyleBackColor = true;
-            this.batchSearchCheckBox.CheckedChanged += new System.EventHandler(this.batchSearchCheckBox_CheckedChanged);
-            // 
             // menuStrip1
             // 
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -362,7 +350,6 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(480, 448);
-            this.Controls.Add(this.batchSearchCheckBox);
             this.Controls.Add(this.label6);
             this.Controls.Add(this.comboBox_search_type);
             this.Controls.Add(this.songUrlBtn);
@@ -425,7 +412,6 @@
         private System.Windows.Forms.Button songUrlBtn;
         private System.Windows.Forms.ComboBox comboBox_search_type;
         private System.Windows.Forms.Label label6;
-        private System.Windows.Forms.CheckBox batchSearchCheckBox;
         private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.ToolStripMenuItem homeMenuItem;
         private System.Windows.Forms.ToolStripMenuItem latestVersionMenuItem;

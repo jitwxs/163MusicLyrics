@@ -43,12 +43,13 @@ namespace 网易云歌词提取
 
     public class ErrorMsg
     {
+        public static string SUCCESS = "成功";
         public static string SEARCH_RESULT_STAGE = "查询成功，结果已暂存";
         public static string MUST_SEARCH_BEFORE_SAVE = "您必须先搜索，才能保存内容";
         public static string MUST_SEARCH_BEFORE_COPY_SONG_URL = "您必须先搜索，才能获取直链";
         public static string INPUT_ID_ILLEGAG = "您输入的 ID 号不合法";
-        public static string SONG_NOT_EXIST = "歌曲信息暂未被收录";
-        public static string LRC_NOT_EXIST = "歌词信息暂未被收录";
+        public static string SONG_NOT_EXIST = "歌曲信息暂未被收录或查询失败";
+        public static string LRC_NOT_EXIST = "歌词信息暂未被收录或查询失败";
         public static string FUNCTION_NOT_SUPPORT = "该功能暂不可用，请等待后续更新";
         public static string SONG_URL_COPY_SUCESS = "歌曲直链，已复制到剪切板";
         public static string BATCH_SONG_URL_COPY_SUCESS = "批量歌曲直链，已复制到剪切板";
@@ -62,11 +63,19 @@ namespace 网易云歌词提取
 
     public class SaveVO
     {
-        public SaveVO(SongVO songVO, LyricVO lyricVO)
+        public SaveVO(string songId, SongVO songVO, LyricVO lyricVO)
         {
+            this.songId = songId;
             this.songVO = songVO;
             this.lyricVO = lyricVO;
         }
+
+        public SaveVO()
+        {
+
+        }
+
+        public string songId { get; set; }
 
         public SongVO songVO { get; set; }
 
@@ -75,10 +84,6 @@ namespace 网易云歌词提取
 
     public class SongVO
     {
-        public bool Success { get; set; }
-
-        public string Message { get; set; }
-
         public string Name { get; set; }
 
         public string Singer { get; set; }
@@ -90,10 +95,6 @@ namespace 网易云歌词提取
 
     public class LyricVO
     {
-        public bool Success { get; set; }
-
-        public string Message { get; set; }
-
         public string Lyric { get; set; }
 
         public string TLyric { get; set; }
@@ -109,13 +110,11 @@ namespace 网易云歌词提取
 
         public SHOW_LRC_TYPE_ENUM ShowLrcType { get; set; }
 
-        public string SearchId { get; set; }
+        public string[] SearchIds { get; set; }
 
         public OUTPUT_ENCODING_ENUM Encoding { get; set; }
 
         public string LrcMergeSeparator { get; set; }
-
-        public bool BatchSearch { get; set; }
 
         public bool Constraint2Dot { get; set; }
     }
