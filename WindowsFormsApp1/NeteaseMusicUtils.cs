@@ -132,10 +132,7 @@ namespace 网易云歌词提取
             string[] formatLyrics = FormatLyric(originLyric, originTLyric, searchInfo);
 
             // 两位小数
-            if (searchInfo.Constraint2Dot)
-            {
-                SetTimeStamp2Dot(ref formatLyrics);
-            }
+            SetTimeStamp2Dot(ref formatLyrics, searchInfo.DotType);
 
             string result = "";
             foreach (string i in formatLyrics)
@@ -351,22 +348,29 @@ namespace 网易云歌词提取
         }
 
         // 设置时间戳小数位数
-        public static void SetTimeStamp2Dot(ref string[] lrcStr)
+        public static void SetTimeStamp2Dot(ref string[] lrcStr, DOT_TYPE_ENUM dotTypeEnum)
         {
             for (int i = 0; i < lrcStr.Length; i++)
             {
                 int index = lrcStr[i].IndexOf("]");
                 int dot = lrcStr[i].IndexOf(".");
-                if(dot == -1)
+                if (dot == -1)
                 {
                     continue;
                 }
                 string ms = lrcStr[i].Substring(dot + 1, index - dot - 1);
                 if (ms.Length == 3)
                 {
-                    ms = ms.Substring(0, 2);
+                    if (dotTypeEnum == DOT_TYPE_ENUM.DOWN)
+                    {
+                        ms = ms.Substring(0, 2);
+                    }
+                    else if (dotTypeEnum == DOT_TYPE_ENUM.HALF_UP)
+                    {
+                        ms = Convert.ToDouble("0." + ms).ToString("0.00").Substring(2);
+                    }
                 }
-                lrcStr[i] = lrcStr[i].Substring(0, dot)  + "." + ms + lrcStr[i].Substring(index);
+                lrcStr[i] = lrcStr[i].Substring(0, dot) + "." + ms + lrcStr[i].Substring(index);
             }
         }
 

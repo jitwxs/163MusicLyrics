@@ -32,6 +32,14 @@ namespace 网易云歌词提取
         ALBUM_ID = 1 // 专辑ID
     }
 
+    // 强制两位类型
+    public enum DOT_TYPE_ENUM
+    {
+        DISABLE = 0, // 不启用
+        DOWN = 1, // 截位
+        HALF_UP = 2 // 四舍五入
+    }
+
     // 输出文件格式
     public enum OUTPUT_ENCODING_ENUM
     {
@@ -116,6 +124,6 @@ namespace 网易云歌词提取
 
         public string LrcMergeSeparator { get; set; }
 
-        public bool Constraint2Dot { get; set; }
+        public DOT_TYPE_ENUM DotType { get; set; }
     }
 }

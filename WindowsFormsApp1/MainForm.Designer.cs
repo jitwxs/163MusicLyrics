@@ -38,7 +38,6 @@
             this.labe_translate = new System.Windows.Forms.Label();
             this.comboBox_output_name = new System.Windows.Forms.ComboBox();
             this.comboBox_diglossia_lrc = new System.Windows.Forms.ComboBox();
-            this.dotCheckBox = new System.Windows.Forms.CheckBox();
             this.search_id_text = new System.Windows.Forms.TextBox();
             this.label_output = new System.Windows.Forms.Label();
             this.label_split = new System.Windows.Forms.Label();
@@ -58,6 +57,8 @@
             this.wikiItem = new System.Windows.Forms.ToolStripMenuItem();
             this.issueMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.latestVersionMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.comboBox_dot = new System.Windows.Forms.ComboBox();
+            this.label2 = new System.Windows.Forms.Label();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -120,7 +121,7 @@
             // labe_translate
             // 
             this.labe_translate.AutoSize = true;
-            this.labe_translate.Location = new System.Drawing.Point(12, 84);
+            this.labe_translate.Location = new System.Drawing.Point(11, 83);
             this.labe_translate.Name = "labe_translate";
             this.labe_translate.Size = new System.Drawing.Size(65, 12);
             this.labe_translate.TabIndex = 12;
@@ -151,22 +152,11 @@
             "优先译文",
             "合并显示，优先原文",
             "合并显示，优先译文"});
-            this.comboBox_diglossia_lrc.Location = new System.Drawing.Point(84, 81);
+            this.comboBox_diglossia_lrc.Location = new System.Drawing.Point(85, 80);
             this.comboBox_diglossia_lrc.Name = "comboBox_diglossia_lrc";
             this.comboBox_diglossia_lrc.Size = new System.Drawing.Size(134, 20);
             this.comboBox_diglossia_lrc.TabIndex = 13;
             this.comboBox_diglossia_lrc.SelectedIndexChanged += new System.EventHandler(this.comboBox_diglossia_lrc_SelectedIndexChanged);
-            // 
-            // dotCheckBox
-            // 
-            this.dotCheckBox.AutoSize = true;
-            this.dotCheckBox.Location = new System.Drawing.Point(297, 44);
-            this.dotCheckBox.Name = "dotCheckBox";
-            this.dotCheckBox.Size = new System.Drawing.Size(72, 16);
-            this.dotCheckBox.TabIndex = 10;
-            this.dotCheckBox.Text = "强制两位";
-            this.dotCheckBox.UseVisualStyleBackColor = true;
-            this.dotCheckBox.CheckedChanged += new System.EventHandler(this.dotCheckBox_CheckedChanged);
             // 
             // search_id_text
             // 
@@ -187,7 +177,7 @@
             // label_split
             // 
             this.label_split.AutoSize = true;
-            this.label_split.Location = new System.Drawing.Point(232, 84);
+            this.label_split.Location = new System.Drawing.Point(231, 83);
             this.label_split.Name = "label_split";
             this.label_split.Size = new System.Drawing.Size(77, 12);
             this.label_split.TabIndex = 14;
@@ -345,11 +335,36 @@
             this.latestVersionMenuItem.Text = "检查更新";
             this.latestVersionMenuItem.Click += new System.EventHandler(this.latestVersionMenuItem_Click);
             // 
+            // comboBox_dot
+            // 
+            this.comboBox_dot.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBox_dot.FormattingEnabled = true;
+            this.comboBox_dot.Items.AddRange(new object[] {
+            "不开启",
+            "截位",
+            "四舍五入"});
+            this.comboBox_dot.Location = new System.Drawing.Point(275, 43);
+            this.comboBox_dot.Name = "comboBox_dot";
+            this.comboBox_dot.Size = new System.Drawing.Size(94, 20);
+            this.comboBox_dot.TabIndex = 26;
+            this.comboBox_dot.SelectedIndexChanged += new System.EventHandler(this.comboBox_dot_SelectedIndexChanged);
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(204, 45);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(65, 12);
+            this.label2.TabIndex = 27;
+            this.label2.Text = "强制两位：";
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(480, 448);
+            this.Controls.Add(this.label2);
+            this.Controls.Add(this.comboBox_dot);
             this.Controls.Add(this.label6);
             this.Controls.Add(this.comboBox_search_type);
             this.Controls.Add(this.songUrlBtn);
@@ -370,7 +385,6 @@
             this.Controls.Add(this.label_output);
             this.Controls.Add(this.textBox_lrc);
             this.Controls.Add(this.comboBox_diglossia_lrc);
-            this.Controls.Add(this.dotCheckBox);
             this.Controls.Add(this.saveBtn);
             this.Controls.Add(this.labe_translate);
             this.Controls.Add(this.comboBox_output_name);
@@ -397,7 +411,6 @@
         private System.Windows.Forms.Label labe_translate;
         private System.Windows.Forms.ComboBox comboBox_output_name;
         private System.Windows.Forms.ComboBox comboBox_diglossia_lrc;
-        private System.Windows.Forms.CheckBox dotCheckBox;
         private System.Windows.Forms.TextBox search_id_text;
         private System.Windows.Forms.Label label_output;
         private System.Windows.Forms.Label label_split;
@@ -417,6 +430,8 @@
         private System.Windows.Forms.ToolStripMenuItem latestVersionMenuItem;
         private System.Windows.Forms.ToolStripMenuItem issueMenuItem;
         private System.Windows.Forms.ToolStripMenuItem wikiItem;
+        private System.Windows.Forms.ComboBox comboBox_dot;
+        private System.Windows.Forms.Label label2;
     }
 }
 

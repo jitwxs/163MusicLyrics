@@ -20,6 +20,8 @@ namespace WindowsFormsApp1
         OUTPUT_ENCODING_ENUM output_encoding_enum;
         // 搜索类型
         SEARCH_TYPE_ENUM search_type_enum;
+        // 强制两位类型
+        DOT_TYPE_ENUM dot_type_enum;
         // 展示歌词类型
         SHOW_LRC_TYPE_ENUM show_lrc_type_enum;
         // 输出文件名类型
@@ -35,6 +37,7 @@ namespace WindowsFormsApp1
             comboBox_output_encode.SelectedIndex = 0;
             comboBox_diglossia_lrc.SelectedIndex = 0;
             comboBox_search_type.SelectedIndex = 0;
+            comboBox_dot.SelectedIndex = 0;
 
             api = new NeteaseMusicAPI();
         }
@@ -46,7 +49,7 @@ namespace WindowsFormsApp1
             globalSearchInfo.OutputFileNameType = output_filename_type_enum;
             globalSearchInfo.ShowLrcType = show_lrc_type_enum;
             globalSearchInfo.Encoding = output_encoding_enum;
-            globalSearchInfo.Constraint2Dot = dotCheckBox.CheckState == CheckState.Checked;
+            globalSearchInfo.DotType = dot_type_enum;
             globalSearchInfo.LrcMergeSeparator = splitTextBox.Text;
         }
 
@@ -396,6 +399,13 @@ namespace WindowsFormsApp1
             UpdateLrcTextBox("");
         }
 
+        private void comboBox_dot_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            dot_type_enum = (DOT_TYPE_ENUM)comboBox_dot.SelectedIndex;
+            ReloadConfig();
+            UpdateLrcTextBox("");
+        }
+
         // 项目主页item
         private void homeMenuItem_Click(object sender, EventArgs e)
         {
@@ -450,12 +460,6 @@ namespace WindowsFormsApp1
         private void wikiItem_Click(object sender, EventArgs e)
         {
             System.Diagnostics.Process.Start("https://www.jitwxs.cn/wiki/163-music-lyrics");
-        }
-
-        private void dotCheckBox_CheckedChanged(object sender, EventArgs e)
-        {
-            ReloadConfig();
-            UpdateLrcTextBox("");
         }
 
         private void splitTextBox_TextChanged(object sender, EventArgs e)
