@@ -440,7 +440,7 @@ namespace WindowsFormsApp1
                 if(bigV.CompareTo(curBigV) == 1 || (bigV.CompareTo(curBigV) == 0 && smallV.CompareTo(curSmallV) == 1))
                 {
                     Clipboard.SetDataObject("https://github.com/jitwxs/163MusicLyrics/releases");
-                    MessageBox.Show(ErrorMsg.EXIST_LATEST_VERSION, "提示");
+                    MessageBox.Show(string.Format(ErrorMsg.EXIST_LATEST_VERSION, latestTag.ToString()), "提示");
                 }
                 else
                 {

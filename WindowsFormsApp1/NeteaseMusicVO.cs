@@ -66,7 +66,7 @@ namespace 网易云歌词提取
 
         public static string GET_LATEST_VERSION_FAILED = "获取最新版本失败";
         public static string THIS_IS_LATEST_VERSION = "当前版本已经是最新版本";
-        public static string EXIST_LATEST_VERSION = "检测到最新版本，下载地址已复制到剪切板";
+        public static string EXIST_LATEST_VERSION = "检测到最新版本 {0}，下载地址已复制到剪切板";
     }
 
     public class SaveVO
