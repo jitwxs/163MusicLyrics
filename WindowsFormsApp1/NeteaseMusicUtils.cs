@@ -16,6 +16,11 @@ namespace 网易云歌词提取
             long result = 0;
             if(type == SEARCH_TYPE_ENUM.SONG_ID)
             {
+                if(input.Contains("163.com"))
+                {
+                    input = Regex.Match(input, @"id=(\d+)").Value;
+                }
+                input = Regex.Replace(input, @"[^0-9]+", "");
                 if (input == "" || input == null || !NeteaseMusicUtils.CheckNum(input))
                 {
                     errorMsg = ErrorMsg.INPUT_ID_ILLEGAG;
