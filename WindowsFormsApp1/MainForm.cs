@@ -173,7 +173,7 @@ namespace WindowsFormsApp1
         private void searchBtn_Click(object sender, EventArgs e)
         {
             ReloadConfig();
-            UpdateLrcTextBox("  ");
+            CleanTextBox();
 
             SEARCH_TYPE_ENUM type = globalSearchInfo.SerchType;
             if(type == SEARCH_TYPE_ENUM.SONG_ID)
