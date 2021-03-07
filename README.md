@@ -19,4 +19,4 @@
 
 ## How to use
 
-[163MusicLyrics Wiki](https://www.jitwxs.cn/wiki/163-music-lyrics)
+[163MusicLyrics Wiki](https://github.com/jitwxs/163MusicLyrics/wiki)
