@@ -459,7 +459,7 @@ namespace WindowsFormsApp1
         // 使用手册
         private void wikiItem_Click(object sender, EventArgs e)
         {
-            System.Diagnostics.Process.Start("https://www.jitwxs.cn/wiki/163-music-lyrics");
+            System.Diagnostics.Process.Start("https://github.com/jitwxs/163MusicLyrics/wiki");
         }
 
         private void splitTextBox_TextChanged(object sender, EventArgs e)
