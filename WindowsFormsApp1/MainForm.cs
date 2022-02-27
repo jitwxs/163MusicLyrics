@@ -53,6 +53,33 @@ namespace 网易云歌词提取
         }
 
         /**
+         * 从专辑ID中获取歌曲ID列表
+         */
+        private List<string> RequestSongIdInAlbum(string albumIdStr, out string errorMsg)
+        {
+            List<string> songIds = new List<string>();
+            
+            var albumId = NeteaseMusicUtils.CheckInputId(albumIdStr, SEARCH_TYPE_ENUM.ALBUM_ID, out var inputErrorMsg);
+            
+            if (inputErrorMsg != ErrorMsg.SUCCESS)
+            {
+                errorMsg = inputErrorMsg;
+            }
+            else
+            {
+                errorMsg = ErrorMsg.SUCCESS;
+                
+                var albumResult = api.GetAlbum(albumId);
+                foreach (var song in albumResult.Songs)
+                {
+                    songIds.Add(song.Id + "");
+                }
+            }
+            
+            return songIds;
+        }
+        
+        /**
          * 获取歌曲信息
          */
         private SongVO RequestSongVo(long songId, out string errorMsg)
@@ -73,46 +100,103 @@ namespace 网易云歌词提取
         }
 
         /**
-         * 单个歌曲搜索
+         * 根据歌曲ID查询
          */
-        private void SingleSearchBySongId(string songIdStr)
+        private void SerachBySongId(IEnumerable<string> songIds, out Dictionary<string, string> errorMsgs)
         {
-            // 1、参数校验
-            long songId = NeteaseMusicUtils.CheckInputId(songIdStr, SEARCH_TYPE_ENUM.SONG_ID, out string inputErrorMsg);
-            if (inputErrorMsg != ErrorMsg.SUCCESS)
+            errorMsgs = new Dictionary<string, string>();
+
+            foreach (var songIdStr in songIds)
             {
-                MessageBox.Show(inputErrorMsg, "提示");
-                return;
+                // 1、参数校验
+                var songId = NeteaseMusicUtils.CheckInputId(songIdStr, SEARCH_TYPE_ENUM.SONG_ID, out var inputErrorMsg);
+                if (inputErrorMsg != ErrorMsg.SUCCESS)
+                {
+                    errorMsgs.Add(songIdStr, inputErrorMsg);
+                    continue;
+                }
+                
+                // 2、优先从缓存，获取歌曲内容
+                if (NeteaseMusicResultCache.Contains(songIdStr))
+                {
+                    errorMsgs.Add(songIdStr, ErrorMsg.SUCCESS);
+                    continue;
+                }
+                
+                // 3、查询服务器
+                var songVo = RequestSongVo(songId, out var songErrorMsg);
+                if (songErrorMsg != ErrorMsg.SUCCESS)
+                {
+                    errorMsgs.Add(songIdStr, songErrorMsg);
+                    continue;
+                }
+                
+                var lyricVo = RequestLyricVo(songId, globalSearchInfo, out var lyricErrorMsg);
+                if (lyricErrorMsg != ErrorMsg.SUCCESS)
+                {
+                    errorMsgs.Add(songIdStr, lyricErrorMsg);
+                    continue;
+                }
+
+                NeteaseMusicResultCache.Put(songIdStr, new SaveVO(songIdStr, songVo, lyricVo));
+                errorMsgs.Add(songIdStr, ErrorMsg.SUCCESS);
+            }
+        }
+
+        /**
+         * 获取要输入的歌曲 ID 列表
+         */
+        private string[] GetInputSongIds(out string errorMsg)
+        {
+            errorMsg = ErrorMsg.SUCCESS;
+            
+            var inputs = globalSearchInfo.SearchIds;
+            if(inputs.Length < 1)
+            {
+                errorMsg = ErrorMsg.INPUT_ID_ILLEGAG;
+                return null;
             }
 
-            // 2、获取歌曲内容
-            SaveVO result;
-            if (NeteaseMusicResultCache.Contains(songId))
+            string[] songIds;
+            if (globalSearchInfo.SerchType == SEARCH_TYPE_ENUM.ALBUM_ID)
             {
-                result = NeteaseMusicResultCache.Get(songId);
+                var songIdList = new List<string>();
+                foreach (var albumId in inputs)
+                {
+                    var singleResult = RequestSongIdInAlbum(albumId, out errorMsg);
+                    if (errorMsg == ErrorMsg.SUCCESS)
+                    {
+                        songIdList.AddRange(singleResult);
+                    }
+                }
+                songIds = songIdList.ToArray();
             }
             else
             {
-                SongVO songVo = RequestSongVo(songId, out string songErrorMsg);
-                if (songErrorMsg != ErrorMsg.SUCCESS)
-                {
-                    MessageBox.Show(songErrorMsg, "提示");
-                    return;
-                }
-                
-                LyricVO lyricVo = RequestLyricVo(songId, globalSearchInfo, out string lyricErrorMsg);
-                if (lyricErrorMsg != ErrorMsg.SUCCESS)
-                {
-                    MessageBox.Show(lyricErrorMsg, "提示");
-                    return;
-                }
-
-                result = new SaveVO(songIdStr, songVo, lyricVo);
-                NeteaseMusicResultCache.Put(songId, result);
+                songIds = inputs;
             }
 
+            return songIds;
+        }
+        
+        /**
+         * 单个歌曲搜索
+         */
+        private void SingleSearch(string songId)
+        {
+            SerachBySongId(new[]{songId}, out Dictionary<string, string> resultMaps);
+            
+            var message = resultMaps[songId];
+            if (message != ErrorMsg.SUCCESS)
+            {
+                MessageBox.Show(message, "提示");
+                return;
+            }
+
+            var result = NeteaseMusicResultCache.Get(songId);
+            
             // 3、加入结果集
-            globalSaveVOMap.Add(songIdStr, NeteaseMusicResultCache.Get(songId));
+            globalSaveVOMap.Add(songId, result);
 
             // 4、前端设置
             textBox_song.Text = result.songVO.Name;
@@ -126,55 +210,24 @@ namespace 网易云歌词提取
          */
         private void BatchSearch(string[] ids)
         {
-            Dictionary<string, string> resultMaps = new Dictionary<string, string>();
-            foreach (string songIdStr in ids)
-            {
-                // 1、参数校验
-                long songId = NeteaseMusicUtils.CheckInputId(songIdStr, SEARCH_TYPE_ENUM.SONG_ID, out string inputErrorMsg);
-                if (inputErrorMsg != ErrorMsg.SUCCESS)
-                {
-                    resultMaps.Add(songIdStr, inputErrorMsg);
-                    continue;
-                }
-
-                // 2、获取歌曲内容
-                SaveVO result;
-                if (NeteaseMusicResultCache.Contains(songId))
-                {
-                    result = NeteaseMusicResultCache.Get(songId);
-                }
-                else
-                {
-                    SongVO songVO = RequestSongVo(songId, out string songErrorMsg);
-                    if (songErrorMsg != ErrorMsg.SUCCESS)
-                    {
-                        resultMaps.Add(songIdStr, songErrorMsg);
-                        continue;
-                    }
-
-                    LyricVO lyricVO = RequestLyricVo(songId, globalSearchInfo, out string lyricErrorMsg);
-                    if (lyricErrorMsg != ErrorMsg.SUCCESS)
-                    {
-                        resultMaps.Add(songIdStr, lyricErrorMsg);
-                        continue;
-                    }
-
-                    result = new SaveVO(songIdStr, songVO, lyricVO);
-                    NeteaseMusicResultCache.Put(songId, result);
-                }
-
-                // 3、加入结果集
-                globalSaveVOMap.Add(songIdStr, NeteaseMusicResultCache.Get(songId));
-                resultMaps.Add(songIdStr, ErrorMsg.SEARCH_RESULT_STAGE);
-            }
-
+            SerachBySongId(ids, out Dictionary<string, string> resultMaps);
+            
             // 输出日志
             StringBuilder log = new StringBuilder();
-            log.Append("---Total：" + resultMaps.Count + ", Success：" + globalSaveVOMap.Count + ", Failure：" + (resultMaps.Count - globalSaveVOMap.Count) + "---\r\n");
+
             foreach (KeyValuePair<string, string> kvp in resultMaps)
             {
-                log.Append("ID: " + kvp.Key + ", Result: " + kvp.Value + "\r\n");
+                string songId = kvp.Key, message = kvp.Value;
+                
+                if (message == ErrorMsg.SUCCESS)
+                {
+                    globalSaveVOMap.Add(songId, NeteaseMusicResultCache.Get(songId));
+                }
+                log.Append("ID: " + songId + ", Result: " + message + "\r\n");
             }
+            
+            log.Append("---Total：" + resultMaps.Count + ", Success：" + globalSaveVOMap.Count + ", Failure：" + (resultMaps.Count - globalSaveVOMap.Count) + "---\r\n");
+            
             UpdateLrcTextBox(log.ToString());
         }
 
@@ -186,33 +239,24 @@ namespace 网易云歌词提取
             ReloadConfig();
             CleanTextBox();
 
-            SEARCH_TYPE_ENUM type = globalSearchInfo.SerchType;
-            if(type == SEARCH_TYPE_ENUM.SONG_ID)
+            string[] songIds = GetInputSongIds(out string errorMsg);
+
+            if (errorMsg != ErrorMsg.SUCCESS)
             {
-                string[] ids = globalSearchInfo.SearchIds;
-
-                if(ids.Length < 1)
-                {
-                    MessageBox.Show(ErrorMsg.INPUT_ID_ILLEGAG, "提示");
-                    return;
-                }
-
-                // 初始化结果 map
-                globalSaveVOMap = new Dictionary<string, SaveVO>();
-
-                if (ids.Length > 1)
-                {
-                    BatchSearch(ids);
-                }
-                else
-                {
-                    SingleSearchBySongId(ids[0]);
-                }
+                MessageBox.Show(errorMsg, "提示");
+                return;
+            }
+            
+            // 初始化结果 map
+            globalSaveVOMap = new Dictionary<string, SaveVO>();
+            
+            if (songIds.Length > 1)
+            {
+                BatchSearch(songIds);
             }
             else
             {
-                MessageBox.Show(ErrorMsg.FUNCTION_NOT_SUPPORT, "提示");
-                return;
+                SingleSearch(songIds[0]);
             }
         }
 
@@ -229,7 +273,6 @@ namespace 网易云歌词提取
 
             if(globalSaveVOMap.Count > 1)
             {
-
                 // 输出日志
                 StringBuilder log = new StringBuilder();
                 foreach (var songIdStr in globalSearchInfo.SearchIds)

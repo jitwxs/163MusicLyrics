@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace 网易云歌词提取
 {
@@ -15,21 +14,15 @@ namespace 网易云歌词提取
         public static long CheckInputId(string input, SEARCH_TYPE_ENUM type, out string errorMsg)
         {
             long result = 0;
-            if (type == SEARCH_TYPE_ENUM.SONG_ID)
+            
+            if (string.IsNullOrEmpty(input) || !CheckNum(input))
             {
-                if (string.IsNullOrEmpty(input) || !CheckNum(input))
-                {
-                    errorMsg = ErrorMsg.INPUT_ID_ILLEGAG;
-                }
-                else
-                {
-                    errorMsg = ErrorMsg.SUCCESS;
-                    result = long.Parse(input);
-                }
+                errorMsg = ErrorMsg.INPUT_ID_ILLEGAG;
             }
             else
             {
-                errorMsg = ErrorMsg.FUNCTION_NOT_SUPPORT;
+                errorMsg = ErrorMsg.SUCCESS;
+                result = long.Parse(input);
             }
 
             return result;
