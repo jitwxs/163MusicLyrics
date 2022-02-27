@@ -14,13 +14,13 @@ namespace 网易云歌词提取
     public class NeteaseMusicAPI
     {
         // General
-        private string _MODULUS = "00e0b509f6259df8642dbc35662901477df22677ec152b5ff68ace615bb7b725152b3ab17a876aea8a5aa76d2e417629ec4ee341f56135fccf695280104e0312ecbda92557c93870114af6c9d05c4f7f0c3685b7a46bee255932575cce10b424d813cfe4875d3e82047b97ddef52741d546b8e289dc6935b3ece0462db0a22b8e7";
-        private string _NONCE = "0CoJUm6Qyw8W8jud";
-        private string _PUBKEY = "010001";
-        private string _VI = "0102030405060708";
+        private const string _MODULUS = "00e0b509f6259df8642dbc35662901477df22677ec152b5ff68ace615bb7b725152b3ab17a876aea8a5aa76d2e417629ec4ee341f56135fccf695280104e0312ecbda92557c93870114af6c9d05c4f7f0c3685b7a46bee255932575cce10b424d813cfe4875d3e82047b97ddef52741d546b8e289dc6935b3ece0462db0a22b8e7";
+        private const string _NONCE = "0CoJUm6Qyw8W8jud";
+        private const string _PUBKEY = "010001";
+        private const string _VI = "0102030405060708";
         public static string _USERAGENT = "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Safari/537.36";
-        private string _COOKIE = "os=pc;osver=Microsoft-Windows-10-Professional-build-16299.125-64bit;appver=2.0.3.131777;channel=netease;__remember_me=true";
-        private string _REFERER = "http://music.163.com/";
+        private const string _COOKIE = "os=pc;osver=Microsoft-Windows-10-Professional-build-16299.125-64bit;appver=2.0.3.131777;channel=netease;__remember_me=true";
+        private const string _REFERER = "http://music.163.com/";
         // use keygen in c#
         private string _secretKey;
         private string _encSecKey;
@@ -102,13 +102,13 @@ namespace 网易云歌词提取
         private string CreateSecretKey(int length)
         {
             var str = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-            var r = "";
+            var sb = new StringBuilder(length);
             var rnd = new Random();
-            for (int i = 0; i < length; i++)
+            for (int i = 0; i < length; ++i)
             {
-                r += str[rnd.Next(0, str.Length)];
+                sb.Append(str[rnd.Next(0, str.Length)]);
             }
-            return r;
+            return sb.ToString();
         }
 
         private Dictionary<string, string> Prepare(string raw)
