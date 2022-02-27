@@ -8,7 +8,7 @@
     <OutputType>WinExe</OutputType>
     <RootNamespace>网易云歌词提取</RootNamespace>
     <AssemblyName>163MusicLyrics</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <IsWebBootstrapper>false</IsWebBootstrapper>
@@ -87,8 +87,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="NeteaseMusicAPI.cs" />
-    <Compile Include="NeteaseMusicBean.cs" />
+    <Compile Include="INeteaseMusicApi.cs" />
+    <Compile Include="NetEaseMusicApi.cs" />
+    <Compile Include="NetEaseMusicApiWrapper.cs" />
+    <Compile Include="NetEaseMusicBean.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -97,9 +99,9 @@
     </Compile>
     <Compile Include="HttpUtils.cs" />
     <Compile Include="JsonUtils.cs" />
-    <Compile Include="NeteaseMusicResultCache.cs" />
-    <Compile Include="NeteaseMusicUtils.cs" />
-    <Compile Include="NeteaseMusicVO.cs" />
+    <Compile Include="NetEaseMusicCache.cs" />
+    <Compile Include="NetEaseMusicUtils.cs" />
+    <Compile Include="NetEaseMusicVO.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="MainForm.resx">

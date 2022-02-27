@@ -3,94 +3,90 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace 网易云歌词提取
 {
-
-    class NeteaseMusicUtils
+    static class NetEaseMusicUtils
     {
-        // 输入参数校验
-        public static long CheckInputId(string input, SEARCH_TYPE_ENUM type, out string errorMsg)
+        /**
+         * 输入参数校验
+         */
+        public static long CheckInputId(string input, out string errorMsg)
         {
             long result = 0;
-            if(type == SEARCH_TYPE_ENUM.SONG_ID)
+
+            if (string.IsNullOrEmpty(input) || !CheckNum(input))
             {
-                if (input == "" || input == null || !NeteaseMusicUtils.CheckNum(input))
-                {
-                    errorMsg = ErrorMsg.INPUT_ID_ILLEGAG;
-                }
-                else
-                {
-                    errorMsg = ErrorMsg.SUCCESS;
-                    result = long.Parse(input);
-                }
-            } else
+                errorMsg = ErrorMsg.INPUT_ID_ILLEGAG;
+            }
+            else
             {
-                errorMsg = ErrorMsg.FUNCTION_NOT_SUPPORT;
+                errorMsg = ErrorMsg.SUCCESS;
+                result = long.Parse(input);
             }
 
             return result;
         }
 
-
-        // 获取歌曲基本信息
-        public static SongVO GetSongVO(SongUrls songUrls, DetailResult detailResult, out string errorMsg)
+        /**
+         * 从 DetailResult 获取 Song 对象
+         */
+        public static Song GetSongFromDetailResult(DetailResult detailResult)
         {
-            SongVO vo = new SongVO();
+            if (detailResult != null && detailResult.Code == 200)
+            {
+                var songArray = detailResult.Songs;
+                if (songArray != null && songArray.Length > 0)
+                {
+                    return songArray[0];
+                }
+            }
 
-            if(songUrls == null)
+            return null;
+        }
+
+        /**
+         * 获取歌曲基本信息
+         */
+        public static SongVo GetSongVo(Datum datum, Song song, out string errorMsg)
+        {
+            var vo = new SongVo();
+
+            if (datum == null)
             {
                 errorMsg = ErrorMsg.SONG_NOT_EXIST;
                 return vo;
             }
-            if(detailResult == null)
+
+            if (song == null)
+            {
+                errorMsg = ErrorMsg.SONG_NOT_EXIST;
+                return vo;
+            }
+
+            vo.Links = datum.Url;
+            vo.Name = song.Name;
+            vo.Singer = ContractSinger(song.Ar);
+            vo.Album = song.Al.Name;
+
+            errorMsg = ErrorMsg.SUCCESS;
+
+            return vo;
+        }
+
+        /**
+         * 获取歌词信息
+         */
+        public static LyricVo GetLyricVo(LyricResult lyricResult, SearchInfo searchInfo, out string errorMsg)
+        {
+            var vo = new LyricVo();
+
+            if (searchInfo == null)
             {
                 errorMsg = ErrorMsg.LRC_NOT_EXIST;
                 return vo;
             }
 
-            try
-            {
-                if(songUrls.Code == 200)
-                {
-                    vo.Links = songUrls.Data[0].Url;
-                }
-                if(detailResult.Code == 200)
-                {
-                    Song[] songArray = detailResult.Songs;
-                    if(songArray == null || songArray.Length == 0)
-                    {
-                        errorMsg = ErrorMsg.SONG_NOT_EXIST;
-                        return vo;
-                    }
-
-                    Song song = songArray[0];
-                    vo.Name = song.Name;
-                    vo.Singer = ContractSinger(song.Ar);
-                    vo.Album = song.Al.Name;
-                }
-                errorMsg = ErrorMsg.SUCCESS;
-            } 
-            catch(Exception ew)
-            {
-                errorMsg = ew.Message;
-                Console.WriteLine(ew);
-            }
-
-            return vo;
-        }
-
-        // 获取歌词信息
-        public static LyricVO GetLyricVO(LyricResult lyricResult, SearchInfo searchInfo, out string errorMsg)
-        {
-            LyricVO vo = new LyricVO();
-
-            if (searchInfo == null)
-            {
-                errorMsg = ErrorMsg.SONG_NOT_EXIST;
-                return vo;
-            }
             if (lyricResult == null)
             {
                 errorMsg = ErrorMsg.LRC_NOT_EXIST;
@@ -99,25 +95,27 @@ namespace 网易云歌词提取
 
             try
             {
-                if(lyricResult.Code == 200)
+                if (lyricResult.Code == 200)
                 {
                     string originLyric = "", originTLyric = "";
-                    if(lyricResult.Lrc != null)
+                    if (lyricResult.Lrc != null)
                     {
                         originLyric = lyricResult.Lrc.Lyric;
                     }
-                    if(lyricResult.Tlyric != null) 
+
+                    if (lyricResult.Tlyric != null)
                     {
                         originTLyric = lyricResult.Tlyric.Lyric;
                     }
-                    
+
                     vo.Lyric = originLyric;
                     vo.TLyric = originTLyric;
                     vo.Output = GetOutputLyric(originLyric, originTLyric, searchInfo);
                 }
+
                 errorMsg = ErrorMsg.SUCCESS;
             }
-            catch(Exception ew)
+            catch (Exception ew)
             {
                 errorMsg = ew.Message;
                 Console.WriteLine(ew);
@@ -129,7 +127,7 @@ namespace 网易云歌词提取
         public static string GetOutputLyric(string originLyric, string originTLyric, SearchInfo searchInfo)
         {
             // 歌词合并
-            string[] formatLyrics = FormatLyric(originLyric, originTLyric, searchInfo);
+            var formatLyrics = FormatLyric(originLyric, originTLyric, searchInfo);
 
             // 两位小数
             SetTimeStamp2Dot(ref formatLyrics, searchInfo.DotType);
@@ -144,28 +142,35 @@ namespace 网易云歌词提取
         }
 
 
-        // 获取输出文件名
-        public static string GetOutputName(SongVO songVO, SearchInfo searchInfo)
+        /**
+         * 获取输出文件名
+         */
+        public static string GetOutputName(SongVo songVo, SearchInfo searchInfo)
         {
             switch (searchInfo.OutputFileNameType)
             {
                 case OUTPUT_FILENAME_TYPE_ENUM.NAME_SINGER:
-                    return songVO.Name + " - " + songVO.Singer;
+                    return songVo.Name + " - " + songVo.Singer;
                 case OUTPUT_FILENAME_TYPE_ENUM.SINGER_NAME:
-                    return songVO.Singer + " - " + songVO.Name;
+                    return songVo.Singer + " - " + songVo.Name;
                 case OUTPUT_FILENAME_TYPE_ENUM.NAME:
-                    return songVO.Name;
+                    return songVo.Name;
                 default:
                     return "";
             }
         }
 
-        public static bool CheckNum(string s)
+        /*
+         * 检查字符串是否为数字
+         */
+        private static bool CheckNum(string s)
         {
             return Regex.Match(s, "^\\d+$").Success;
         }
 
-        // 拼接歌手名
+        /**
+         * 拼接歌手名
+         */
         private static string ContractSinger(List<Ar> arList)
         {
             if (!arList.Any())
@@ -178,17 +183,20 @@ namespace 网易云歌词提取
             {
                 sb.Append(ar.Name).Append(",");
             }
+
             return sb.Remove(sb.Length - 1, 1).ToString();
         }
 
-        // 歌词格式化
+        /**
+         * 歌词格式化
+         */
         private static string[] FormatLyric(string originLrc, string translateLrc, SearchInfo searchInfo)
         {
             SHOW_LRC_TYPE_ENUM showLrcType = searchInfo.ShowLrcType;
 
             // 如果不存在翻译歌词，或者选择返回原歌词
             string[] originLrcs = SplitLrc(originLrc);
-            if (translateLrc == null || translateLrc == "" || showLrcType == SHOW_LRC_TYPE_ENUM.ONLY_ORIGIN)
+            if (string.IsNullOrEmpty(translateLrc) || showLrcType == SHOW_LRC_TYPE_ENUM.ONLY_ORIGIN)
             {
                 return originLrcs;
             }
@@ -220,14 +228,18 @@ namespace 网易云歌词提取
             return res;
         }
 
-        // 将歌词切割为数组
+        /**
+         * 将歌词切割为数组
+         */
         private static string[] SplitLrc(string lrc)
         {
             string[] ss = lrc.Split('\n').Where(s => !string.IsNullOrWhiteSpace(s)).ToArray();
             return ss;
         }
 
-        // 双语歌词排序
+        /**
+         * 双语歌词排序
+         */
         private static string[] SortLrc(string[] originLrcs, string[] translateLrcs, bool hasOriginLrcPrior)
         {
             int lena = originLrcs.Length;
@@ -259,8 +271,11 @@ namespace 网易云歌词提取
             return c;
         }
 
-        // 双语歌词合并
-        private static string[] MergeLrc(string[] originLrcs, string[] translateLrcs, string splitStr, bool hasOriginLrcPrior)
+        /**
+         * 双语歌词合并
+         */
+        private static string[] MergeLrc(string[] originLrcs, string[] translateLrcs, string splitStr,
+            bool hasOriginLrcPrior)
         {
             string[] c = SortLrc(originLrcs, translateLrcs, hasOriginLrcPrior);
             List<string> list = new List<string>
@@ -295,10 +310,13 @@ namespace 网易云歌词提取
                     }
                 }
             }
+
             return list.ToArray();
         }
 
-        // 歌词排序函数
+        /**
+         * 歌词排序函数
+         */
         private static int Compare(string originLrc, string translateLrc, bool hasOriginLrcPrior)
         {
             int str1Index = originLrc.IndexOf("]");
@@ -339,6 +357,7 @@ namespace 网易云歌词提取
                         return -1;
                     }
                 }
+
                 return 0;
             }
             else
@@ -347,8 +366,10 @@ namespace 网易云歌词提取
             }
         }
 
-        // 设置时间戳小数位数
-        public static void SetTimeStamp2Dot(ref string[] lrcStr, DOT_TYPE_ENUM dotTypeEnum)
+        /**
+         * 设置时间戳小数位数
+         */
+        private static void SetTimeStamp2Dot(ref string[] lrcStr, DOT_TYPE_ENUM dotTypeEnum)
         {
             for (int i = 0; i < lrcStr.Length; i++)
             {
@@ -358,6 +379,7 @@ namespace 网易云歌词提取
                 {
                     continue;
                 }
+
                 string ms = lrcStr[i].Substring(dot + 1, index - dot - 1);
                 if (ms.Length == 3)
                 {
@@ -370,6 +392,7 @@ namespace 网易云歌词提取
                         ms = Convert.ToDouble("0." + ms).ToString("0.00").Substring(2);
                     }
                 }
+
                 lrcStr[i] = lrcStr[i].Substring(0, dot) + "." + ms + lrcStr[i].Substring(index);
             }
         }
@@ -437,17 +460,17 @@ namespace 网易云歌词提取
 
         public static Encoding GetEncoding(OUTPUT_ENCODING_ENUM encodingEnum)
         {
-            switch(encodingEnum)
+            switch (encodingEnum)
             {
                 case OUTPUT_ENCODING_ENUM.GB_2312:
                     return Encoding.GetEncoding("GB2312");
                 case OUTPUT_ENCODING_ENUM.GBK:
                     return Encoding.GetEncoding("GBK");
                 case OUTPUT_ENCODING_ENUM.UTF_8_BOM:
-                    return new System.Text.UTF8Encoding(true);
+                    return new UTF8Encoding(true);
                 default:
                     // utf-8 and others
-                    return new System.Text.UTF8Encoding(false);
+                    return new UTF8Encoding(false);
             }
         }
     }

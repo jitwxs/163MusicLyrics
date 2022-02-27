@@ -1,4 +1,4 @@
-﻿namespace WindowsFormsApp1
+﻿namespace 网易云歌词提取
 {
     partial class MainForm
     {
@@ -394,7 +394,7 @@
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "MainForm";
-            this.Text = "网易云歌词提取 " + MainForm.VERSION;
+            this.Text = "网易云歌词提取 " + MainForm.Version;
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             this.ResumeLayout(false);
