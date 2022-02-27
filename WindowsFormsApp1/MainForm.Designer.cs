@@ -1,4 +1,4 @@
-﻿namespace WindowsFormsApp1
+﻿namespace 网易云歌词提取
 {
     partial class MainForm
     {

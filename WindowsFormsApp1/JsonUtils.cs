@@ -1,7 +1,7 @@
-﻿using Newtonsoft.Json;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using Newtonsoft.Json;
 
-namespace WindowsFormsApp1
+namespace 网易云歌词提取
 {
     public static class JsonUtils
     {

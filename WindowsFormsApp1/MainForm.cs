@@ -1,18 +1,17 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Text;
 using System.Windows.Forms;
-using 网易云歌词提取;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
-namespace WindowsFormsApp1
+namespace 网易云歌词提取
 {
     public partial class MainForm : Form
     {
-        NeteaseMusicAPI api = null;
+        NeteaseMusicApi api = null;
         Dictionary<string, SaveVO> globalSaveVOMap = null;
         SearchInfo globalSearchInfo = new SearchInfo();
 
@@ -39,7 +38,7 @@ namespace WindowsFormsApp1
             comboBox_search_type.SelectedIndex = 0;
             comboBox_dot.SelectedIndex = 0;
 
-            api = new NeteaseMusicAPI();
+            api = new NeteaseMusicApi();
         }
 
         private void ReloadConfig()
@@ -419,7 +418,7 @@ namespace WindowsFormsApp1
             System.Net.ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
             Dictionary<string, string> headers = new Dictionary<string, string>();
             headers.Add("Accept", "application/vnd.github.v3+json");
-            headers.Add("User-Agent", NeteaseMusicAPI._USERAGENT);
+            headers.Add("User-Agent", NeteaseMusicApi._USERAGENT);
 
             string jsonStr = HttpUtils.HttpGet("http://api.github.com/repos/jitwxs/163MusicLyrics/releases/latest", "application/json", headers);
             JObject obj = (JObject)JsonConvert.DeserializeObject(jsonStr);
@@ -440,7 +439,7 @@ namespace WindowsFormsApp1
                 if(bigV.CompareTo(curBigV) == 1 || (bigV.CompareTo(curBigV) == 0 && smallV.CompareTo(curSmallV) == 1))
                 {
                     Clipboard.SetDataObject("https://github.com/jitwxs/163MusicLyrics/releases");
-                    MessageBox.Show(string.Format(ErrorMsg.EXIST_LATEST_VERSION, latestTag.ToString()), "提示");
+                    MessageBox.Show(string.Format(ErrorMsg.EXIST_LATEST_VERSION, latestTag), "提示");
                 }
                 else
                 {
