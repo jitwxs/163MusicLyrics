@@ -49,7 +49,10 @@ namespace 网易云歌词提取
         GBK = 3
     }
 
-    public class ErrorMsg
+    /**
+     * 错误码
+     */
+    public static class ErrorMsg
     {
         public static string SUCCESS = "成功";
         public static string SEARCH_RESULT_STAGE = "查询成功，结果已暂存";
