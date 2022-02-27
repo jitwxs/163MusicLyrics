@@ -33,7 +33,7 @@ namespace 网易云歌词提取
 
         public SongUrls GetSongsUrl(long[] song_id, long bitrate = 999000)
         {
-            string url = "http://music.163.com/weapi/song/enhance/player/url?csrf_token=";
+            string url = "https://music.163.com/weapi/song/enhance/player/url?csrf_token=";
 
             var data = new GetSongUrlJson
             {
@@ -49,7 +49,7 @@ namespace 网易云歌词提取
 
         public DetailResult GetDetail(long song_id)
         {
-            string url = "http://music.163.com/weapi/v3/song/detail?csrf_token=";
+            string url = "https://music.163.com/weapi/v3/song/detail?csrf_token=";
             var data = new Dictionary<string, string> {
                 { "c",
                     "[" + JsonConvert.SerializeObject(new Dictionary<string, string> {
@@ -66,7 +66,7 @@ namespace 网易云歌词提取
 
         public AlbumResult GetAlbum(long album_id)
         {
-            string url = "http://music.163.com/weapi/v1/album/" + album_id.ToString() + "?csrf_token=";
+            string url = "https://music.163.com/weapi/v1/album/" + album_id.ToString() + "?csrf_token=";
             var data = new Dictionary<string, string> {
                 { "csrf_token","" },
             };
@@ -77,7 +77,7 @@ namespace 网易云歌词提取
 
         public LyricResult GetLyric(long song_id)
         {
-            string url = "http://music.163.com/weapi/song/lyric?csrf_token=";
+            string url = "https://music.163.com/weapi/song/lyric?csrf_token=";
             var data = new Dictionary<string, string> {
                 { "id",song_id.ToString()},
                 { "os","pc" },
