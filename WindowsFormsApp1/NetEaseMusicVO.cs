@@ -72,28 +72,23 @@ namespace 网易云歌词提取
         public static string EXIST_LATEST_VERSION = "检测到最新版本 {0}，下载地址已复制到剪切板";
     }
 
-    public class SaveVO
+    public class SaveVo
     {
-        public SaveVO(string songId, SongVO songVO, LyricVO lyricVO)
+        public SaveVo(long songId, SongVo songVo, LyricVo lyricVo)
         {
-            this.songId = songId;
-            this.songVO = songVO;
-            this.lyricVO = lyricVO;
+            SongId = songId;
+            SongVo = songVo;
+            LyricVo = lyricVo;
         }
 
-        public SaveVO()
-        {
+        public long SongId { get; set; }
 
-        }
+        public SongVo SongVo { get; set; }
 
-        public string songId { get; set; }
-
-        public SongVO songVO { get; set; }
-
-        public LyricVO lyricVO { get; set; }
+        public LyricVo LyricVo { get; set; }
     }
 
-    public class SongVO
+    public class SongVo
     {
         public string Name { get; set; }
 
@@ -104,7 +99,7 @@ namespace 网易云歌词提取
         public string Links { get; set; }
     }
 
-    public class LyricVO
+    public class LyricVo
     {
         public string Lyric { get; set; }
 
@@ -115,13 +110,15 @@ namespace 网易云歌词提取
 
     public class SearchInfo
     {
-        public SEARCH_TYPE_ENUM SerchType { get; set; }
+        public SEARCH_TYPE_ENUM SearchType { get; set; }
 
         public OUTPUT_FILENAME_TYPE_ENUM OutputFileNameType { get; set; }
 
         public SHOW_LRC_TYPE_ENUM ShowLrcType { get; set; }
 
-        public string[] SearchIds { get; set; }
+        public string[] InputIds { get; set; }
+
+        public readonly List<long> SONG_IDS = new List<long>();
 
         public OUTPUT_ENCODING_ENUM Encoding { get; set; }
 
