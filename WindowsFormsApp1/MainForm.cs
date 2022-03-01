@@ -33,7 +33,7 @@ namespace 网易云歌词提取
         // 输出文件名类型
         OUTPUT_FILENAME_TYPE_ENUM output_filename_type_enum;
 
-        public const string Version = "v3.3";
+        public const string Version = "v3.4";
 
         public MainForm()
         {
@@ -52,7 +52,13 @@ namespace 网易云歌词提取
         {
             _globalSaveVoMap.Clear();
             
-            _globalSearchInfo.InputIds = search_id_text.Text.Trim().Split(',');
+            var ids = search_id_text.Text.Trim().Split(',');
+            _globalSearchInfo.InputIds = new string[ids.Length];
+            for (var i = 0; i < ids.Length; i++)
+            {
+                _globalSearchInfo.InputIds[i] = ids[i].Trim();
+            }
+            
             _globalSearchInfo.SONG_IDS.Clear();
             _globalSearchInfo.SearchType = search_type_enum;
             _globalSearchInfo.OutputFileNameType = output_filename_type_enum;
@@ -267,15 +273,14 @@ namespace 网易云歌词提取
                 // 输出日志
                 foreach (var songId in _globalSearchInfo.SONG_IDS)
                 {
-                    if (_globalSaveVoMap.ContainsKey(songId))
+                    _globalSaveVoMap.TryGetValue(songId, out var saveVo);
+
+                    var link = "failure";
+                    if (saveVo != null)
                     {
-                        _globalSaveVoMap.TryGetValue(songId, out var saveVo);
-                        log.Append("ID: " + songId + ", Links: " + saveVo.SongVo.Links + "\r\n");
-                    }
-                    else
-                    {
-                        log.Append("ID: " + songId + ", Links: failure\r\n");
-                    }
+                        link = saveVo.SongVo.Links ?? "failure";
+                    } 
+                    log.Append($"ID: {songId}, Links: {link}\r\n");
                 }
 
                 UpdateLrcTextBox(log.ToString());
@@ -285,8 +290,16 @@ namespace 网易云歌词提取
                 // only loop one times
                 foreach (var item in _globalSaveVoMap)
                 {
-                    Clipboard.SetDataObject(item.Value.SongVo.Links);
-                    MessageBox.Show(ErrorMsg.SONG_URL_COPY_SUCESS, "提示");
+                    var link = item.Value.SongVo.Links;
+                    if (link == null)
+                    {
+                        MessageBox.Show(ErrorMsg.SONG_URL_GET_FAILED, "提示");
+                    }
+                    else
+                    {
+                        Clipboard.SetDataObject(link);
+                        MessageBox.Show(ErrorMsg.SONG_URL_COPY_SUCESS, "提示");
+                    }
                 }
             }
         }
@@ -297,7 +310,6 @@ namespace 网易云歌词提取
         private void SingleSave(long songId)
         {
             var saveDialog = new SaveFileDialog();
-            var sw = new StreamWriter(saveDialog.FileName, false, NetEaseMusicUtils.GetEncoding(_globalSearchInfo.Encoding));
             try
             {
                 if (!_globalSaveVoMap.TryGetValue(songId, out var saveVo))
@@ -321,6 +333,7 @@ namespace 网易云歌词提取
                 saveDialog.Filter = "lrc文件(*.lrc)|*.lrc|txt文件(*.txt)|*.txt";
                 if (saveDialog.ShowDialog() == DialogResult.OK)
                 {
+                    var sw = new StreamWriter(saveDialog.FileName, false, NetEaseMusicUtils.GetEncoding(_globalSearchInfo.Encoding));
                     sw.Write(textBox_lrc.Text);
                     sw.Flush();
                     sw.Close();
