@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace 网易云歌词提取
 {
@@ -118,7 +114,7 @@ namespace 网易云歌词提取
 
         public string[] InputIds { get; set; }
 
-        public readonly List<long> SONG_IDS = new List<long>();
+        public readonly HashSet<long> SONG_IDS = new HashSet<long>();
 
         public OUTPUT_ENCODING_ENUM Encoding { get; set; }
 
