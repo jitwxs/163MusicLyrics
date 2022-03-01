@@ -33,7 +33,7 @@ namespace 网易云歌词提取
         // 输出文件名类型
         OUTPUT_FILENAME_TYPE_ENUM output_filename_type_enum;
 
-        public const string Version = "v3.3";
+        public const string Version = "v3.4";
 
         public MainForm()
         {
@@ -310,7 +310,6 @@ namespace 网易云歌词提取
         private void SingleSave(long songId)
         {
             var saveDialog = new SaveFileDialog();
-            var sw = new StreamWriter(saveDialog.FileName, false, NetEaseMusicUtils.GetEncoding(_globalSearchInfo.Encoding));
             try
             {
                 if (!_globalSaveVoMap.TryGetValue(songId, out var saveVo))
@@ -334,6 +333,7 @@ namespace 网易云歌词提取
                 saveDialog.Filter = "lrc文件(*.lrc)|*.lrc|txt文件(*.txt)|*.txt";
                 if (saveDialog.ShowDialog() == DialogResult.OK)
                 {
+                    var sw = new StreamWriter(saveDialog.FileName, false, NetEaseMusicUtils.GetEncoding(_globalSearchInfo.Encoding));
                     sw.Write(textBox_lrc.Text);
                     sw.Flush();
                     sw.Close();
