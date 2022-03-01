@@ -165,7 +165,10 @@ namespace 网易云歌词提取
                     var songIds = RequestSongIdInAlbum(id, out errorMsg);
                     if (errorMsg == ErrorMsg.SUCCESS)
                     {
-                        _globalSearchInfo.SONG_IDS.AddRange(songIds);
+                        foreach (var songId in songIds)
+                        {
+                            _globalSearchInfo.SONG_IDS.Add(songId);
+                        }
                     }
                 }
                 else
@@ -204,7 +207,7 @@ namespace 网易云歌词提取
         /**
          * 批量歌曲搜索
          */
-        private void BatchSearch(List<long> ids)
+        private void BatchSearch(IEnumerable<long> ids)
         {
             SearchBySongId(ids, out var resultMaps);
 
@@ -252,7 +255,11 @@ namespace 网易云歌词提取
             }
             else
             {
-                SingleSearch(songIds[0]);
+                // just loop once
+                foreach (var songId in songIds)
+                {
+                    SingleSearch(songId);
+                }
             }
         }
 
