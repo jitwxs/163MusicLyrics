@@ -33,7 +33,7 @@ namespace 网易云歌词提取
         // 输出文件名类型
         OUTPUT_FILENAME_TYPE_ENUM output_filename_type_enum;
 
-        public const string Version = "v3.4";
+        public const string Version = "v3.5";
 
         public MainForm()
         {
@@ -581,6 +581,14 @@ namespace 网易云歌词提取
             textBox_song.Text = "";
             textBox_singer.Text = "";
             textBox_album.Text = "";
+        }
+
+        private void textBox_lrc_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Control && e.KeyCode == Keys.A)
+            {
+                ((TextBox)sender).SelectAll();
+            }
         }
     }
 }

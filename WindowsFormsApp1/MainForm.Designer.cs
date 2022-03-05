@@ -23,8 +23,8 @@
         #region Windows 窗体设计器生成的代码
 
         /// <summary>
-        /// 设计器支持所需的方法 - 不要修改
-        /// 使用代码编辑器修改此方法的内容。
+        /// Required method for Designer support - do not modify
+        /// the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent()
         {
@@ -71,6 +71,7 @@
             this.textBox_lrc.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.textBox_lrc.Size = new System.Drawing.Size(457, 203);
             this.textBox_lrc.TabIndex = 3;
+            this.textBox_lrc.KeyDown += new System.Windows.Forms.KeyEventHandler(this.textBox_lrc_KeyDown);
             // 
             // textBox_singer
             // 
@@ -131,10 +132,7 @@
             // 
             this.comboBox_output_name.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBox_output_name.FormattingEnabled = true;
-            this.comboBox_output_name.Items.AddRange(new object[] {
-            "歌曲名 - 歌手",
-            "歌手 - 歌曲名",
-            "歌曲名"});
+            this.comboBox_output_name.Items.AddRange(new object[] { "歌曲名 - 歌手", "歌手 - 歌曲名", "歌曲名" });
             this.comboBox_output_name.Location = new System.Drawing.Point(101, 377);
             this.comboBox_output_name.Name = "comboBox_output_name";
             this.comboBox_output_name.Size = new System.Drawing.Size(101, 20);
@@ -145,13 +143,7 @@
             // 
             this.comboBox_diglossia_lrc.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBox_diglossia_lrc.FormattingEnabled = true;
-            this.comboBox_diglossia_lrc.Items.AddRange(new object[] {
-            "不显示译文",
-            "仅显示译文",
-            "优先原文",
-            "优先译文",
-            "合并显示，优先原文",
-            "合并显示，优先译文"});
+            this.comboBox_diglossia_lrc.Items.AddRange(new object[] { "不显示译文", "仅显示译文", "优先原文", "优先译文", "合并显示，优先原文", "合并显示，优先译文" });
             this.comboBox_diglossia_lrc.Location = new System.Drawing.Point(85, 80);
             this.comboBox_diglossia_lrc.Name = "comboBox_diglossia_lrc";
             this.comboBox_diglossia_lrc.Size = new System.Drawing.Size(134, 20);
@@ -230,16 +222,10 @@
             // 
             // comboBox_output_encode
             // 
-            this.comboBox_output_encode.AutoCompleteCustomSource.AddRange(new string[] {
-            "UTF-8",
-            "GB2312"});
+            this.comboBox_output_encode.AutoCompleteCustomSource.AddRange(new string[] { "UTF-8", "GB2312" });
             this.comboBox_output_encode.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBox_output_encode.FormattingEnabled = true;
-            this.comboBox_output_encode.Items.AddRange(new object[] {
-            "UTF-8",
-            "UTF-8-BOM",
-            "GB2312",
-            "GBK"});
+            this.comboBox_output_encode.Items.AddRange(new object[] { "UTF-8", "UTF-8-BOM", "GB2312", "GBK" });
             this.comboBox_output_encode.Location = new System.Drawing.Point(100, 415);
             this.comboBox_output_encode.Name = "comboBox_output_encode";
             this.comboBox_output_encode.Size = new System.Drawing.Size(102, 20);
@@ -277,9 +263,7 @@
             // 
             this.comboBox_search_type.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBox_search_type.FormattingEnabled = true;
-            this.comboBox_search_type.Items.AddRange(new object[] {
-            "ID",
-            "专辑"});
+            this.comboBox_search_type.Items.AddRange(new object[] { "ID", "专辑" });
             this.comboBox_search_type.Location = new System.Drawing.Point(11, 43);
             this.comboBox_search_type.Name = "comboBox_search_type";
             this.comboBox_search_type.Size = new System.Drawing.Size(58, 20);
@@ -296,11 +280,7 @@
             // 
             // menuStrip1
             // 
-            this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.homeMenuItem,
-            this.wikiItem,
-            this.issueMenuItem,
-            this.latestVersionMenuItem});
+            this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { this.homeMenuItem, this.wikiItem, this.issueMenuItem, this.latestVersionMenuItem });
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Size = new System.Drawing.Size(480, 25);
@@ -339,10 +319,7 @@
             // 
             this.comboBox_dot.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBox_dot.FormattingEnabled = true;
-            this.comboBox_dot.Items.AddRange(new object[] {
-            "不开启",
-            "截位",
-            "四舍五入"});
+            this.comboBox_dot.Items.AddRange(new object[] { "不开启", "截位", "四舍五入" });
             this.comboBox_dot.Location = new System.Drawing.Point(275, 43);
             this.comboBox_dot.Name = "comboBox_dot";
             this.comboBox_dot.Size = new System.Drawing.Size(94, 20);
@@ -399,7 +376,6 @@
             this.menuStrip1.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
-
         }
 
         #endregion
