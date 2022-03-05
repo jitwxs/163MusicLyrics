@@ -468,6 +468,8 @@ namespace 网易云歌词提取
                     return Encoding.GetEncoding("GBK");
                 case OUTPUT_ENCODING_ENUM.UTF_8_BOM:
                     return new UTF8Encoding(true);
+                case OUTPUT_ENCODING_ENUM.UNICODE:
+                    return Encoding.Unicode;
                 default:
                     // utf-8 and others
                     return new UTF8Encoding(false);

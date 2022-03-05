@@ -42,7 +42,8 @@ namespace 网易云歌词提取
         UTF_8 = 0,
         UTF_8_BOM = 1,
         GB_2312 = 2,
-        GBK = 3
+        GBK = 3,
+        UNICODE = 4
     }
 
     /**

@@ -225,7 +225,7 @@
             this.comboBox_output_encode.AutoCompleteCustomSource.AddRange(new string[] { "UTF-8", "GB2312" });
             this.comboBox_output_encode.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBox_output_encode.FormattingEnabled = true;
-            this.comboBox_output_encode.Items.AddRange(new object[] { "UTF-8", "UTF-8-BOM", "GB2312", "GBK" });
+            this.comboBox_output_encode.Items.AddRange(new object[] { "UTF-8", "UTF-8-BOM", "GB2312", "GBK", "UNICODE" });
             this.comboBox_output_encode.Location = new System.Drawing.Point(100, 415);
             this.comboBox_output_encode.Name = "comboBox_output_encode";
             this.comboBox_output_encode.Size = new System.Drawing.Size(102, 20);
