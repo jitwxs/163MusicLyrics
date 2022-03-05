@@ -50,24 +50,25 @@ namespace 网易云歌词提取
          */
         public static SongVo GetSongVo(Datum datum, Song song, out string errorMsg)
         {
-            var vo = new SongVo();
-
             if (datum == null)
             {
                 errorMsg = ErrorMsg.SONG_NOT_EXIST;
-                return vo;
+                return null;
             }
 
             if (song == null)
             {
                 errorMsg = ErrorMsg.SONG_NOT_EXIST;
-                return vo;
+                return null;
             }
 
-            vo.Links = datum.Url;
-            vo.Name = song.Name;
-            vo.Singer = ContractSinger(song.Ar);
-            vo.Album = song.Al.Name;
+            var vo = new SongVo
+            {
+                Links = datum.Url,
+                Name = song.Name,
+                Singer = ContractSinger(song.Ar),
+                Album = song.Al.Name
+            };
 
             errorMsg = ErrorMsg.SUCCESS;
 
@@ -468,6 +469,8 @@ namespace 网易云歌词提取
                     return Encoding.GetEncoding("GBK");
                 case OUTPUT_ENCODING_ENUM.UTF_8_BOM:
                     return new UTF8Encoding(true);
+                case OUTPUT_ENCODING_ENUM.UNICODE:
+                    return Encoding.Unicode;
                 default:
                     // utf-8 and others
                     return new UTF8Encoding(false);

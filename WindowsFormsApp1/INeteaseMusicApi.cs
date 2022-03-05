@@ -6,9 +6,7 @@ namespace 网易云歌词提取
     {
         Dictionary<long, Datum> GetDatum(long[] songId, long bitrate = 999000);
 
-        DetailResult GetDetail(long songId);
-        
-        Song GetSong(long songId);
+        Dictionary<long, Song> GetSongs(long[] songIds);
 
         AlbumResult GetAlbum(long albumId);
 
