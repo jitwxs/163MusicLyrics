@@ -61,26 +61,6 @@ namespace 网易云歌词提取
         {
             DatumCache.Add(songId, datum);
         }
-        
-        /* --------------------------------------------------------------------------------------------------------- */
-        
-        private static readonly Dictionary<long, DetailResult> DetailCache = new Dictionary<long, DetailResult>();
-
-        public static bool ContainsDetail(long songId)
-        {
-            return DetailCache.ContainsKey(songId);
-        }
-
-        public static DetailResult GetDetail(long songId)
-        {
-            DetailCache.TryGetValue(songId, out var result);
-            return result;
-        }
-
-        public static void PutDetail(long songId, DetailResult detailResult)
-        {
-            DetailCache.Add(songId, detailResult);
-        }
 
         /* --------------------------------------------------------------------------------------------------------- */
         

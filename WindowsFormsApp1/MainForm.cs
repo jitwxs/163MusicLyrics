@@ -86,11 +86,23 @@ namespace 网易云歌词提取
         /**
          * 获取歌曲信息
          */
-        private SongVo RequestSongVo(long songId, out string errorMsg)
+        private Dictionary<long, SongVo> RequestSongVo(long[] songIds, out Dictionary<long, string> errorMsgs)
         {
-            var datum = _api.GetDatum(new[] { songId })[songId];
+            var datumDict = _api.GetDatum(songIds);
+            var songDict = _api.GetSongs(songIds);
 
-            return NetEaseMusicUtils.GetSongVo(datum, _api.GetSong(songId), out errorMsg);
+            errorMsgs = new Dictionary<long, string>();
+            var result = new Dictionary<long, SongVo>();
+
+            foreach (var pair in datumDict)
+            {
+                var songId = pair.Key;
+                
+                result[songId] = NetEaseMusicUtils.GetSongVo(pair.Value, songDict[songId], out var errorMsg);
+                errorMsgs[songId] = errorMsg;
+            }
+
+            return result;
         }
 
         /**
@@ -104,36 +116,46 @@ namespace 网易云歌词提取
         /**
          * 根据歌曲ID查询
          */
-        private void SearchBySongId(IEnumerable<long> songIds, out Dictionary<long, string> errorMsgs)
+        private void SearchBySongId(IEnumerable<long> songIds, out Dictionary<long, string> errorMsgDict)
         {
-            errorMsgs = new Dictionary<long, string>();
+            errorMsgDict = new Dictionary<long, string>();
+
+            var requestId = new List<long>();
 
             foreach (var songId in songIds)
             {
-                // 1、优先从缓存，获取歌曲内容
                 if (NetEaseMusicCache.ContainsSaveVo(songId))
                 {
-                    errorMsgs.Add(songId, ErrorMsg.SUCCESS);
-                    continue;
+                    errorMsgDict.Add(songId, ErrorMsg.SUCCESS);
                 }
-
-                // 2、查询服务器
-                var songVo = RequestSongVo(songId, out var songErrorMsg);
-                if (songErrorMsg != ErrorMsg.SUCCESS)
+                else
                 {
-                    errorMsgs.Add(songId, songErrorMsg);
-                    continue;
+                    requestId.Add(songId);
                 }
+            }
 
-                var lyricVo = RequestLyricVo(songId, _globalSearchInfo, out var lyricErrorMsg);
-                if (lyricErrorMsg != ErrorMsg.SUCCESS)
+            if (requestId.Count == 0)
+            {
+                return;
+            }
+            
+            foreach (var pair in RequestSongVo(requestId.ToArray(), out var songVoErrorMsg))
+            {
+                var songId = pair.Key;
+                
+                var errorMsg = songVoErrorMsg[songId];
+                if (errorMsg == ErrorMsg.SUCCESS)
                 {
-                    errorMsgs.Add(songId, lyricErrorMsg);
-                    continue;
+                    var lyricVo = RequestLyricVo(songId, _globalSearchInfo, out errorMsg);
+                    if (errorMsg == ErrorMsg.SUCCESS)
+                    {
+                        NetEaseMusicCache.PutSaveVo(songId, new SaveVo(songId, pair.Value, lyricVo));
+                        errorMsgDict.Add(songId, ErrorMsg.SUCCESS);
+                        continue;
+                    }
                 }
-
-                NetEaseMusicCache.PutSaveVo(songId, new SaveVo(songId, songVo, lyricVo));
-                errorMsgs.Add(songId, ErrorMsg.SUCCESS);
+                
+                errorMsgDict.Add(songId, errorMsg);
             }
         }
 

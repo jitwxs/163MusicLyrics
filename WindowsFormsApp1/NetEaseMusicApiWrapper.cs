@@ -42,33 +42,27 @@ namespace 网易云歌词提取
             return result;
         }
 
-        public DetailResult GetDetail(long songId)
+        public Dictionary<long, Song> GetSongs(long[] songIds)
         {
-            if (NetEaseMusicCache.ContainsDetail(songId))
+            var result = new Dictionary<long, Song>();
+            var requestIds = new List<long>();
+            
+            foreach (var songId in songIds)
             {
-                return NetEaseMusicCache.GetDetail(songId);
+                if (NetEaseMusicCache.ContainsSong(songId))
+                {
+                    result[songId] = NetEaseMusicCache.GetSong(songId);
+                }
+                else
+                {
+                    requestIds.Add(songId);
+                }
             }
-
-            var result = _netEaseMusicApi.GetDetail(songId);
-            if (result != null)
+            
+            foreach(var pair in _netEaseMusicApi.GetSongs(requestIds.ToArray()))
             {
-                NetEaseMusicCache.PutDetail(songId, result);
-            }
-
-            return result;
-        }
-
-        public Song GetSong(long songId)
-        {
-            if (NetEaseMusicCache.ContainsSong(songId))
-            {
-                return NetEaseMusicCache.GetSong(songId);
-            }
-
-            var result = _netEaseMusicApi.GetSong(songId);
-            if (result != null)
-            {
-                NetEaseMusicCache.PutSong(songId, result);
+                result[pair.Key] = pair.Value;
+                NetEaseMusicCache.PutSong(pair.Key, pair.Value);
             }
 
             return result;
