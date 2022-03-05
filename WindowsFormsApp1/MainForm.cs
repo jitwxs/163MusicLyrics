@@ -50,8 +50,6 @@ namespace 网易云歌词提取
 
         private void ReloadConfig()
         {
-            _globalSaveVoMap.Clear();
-            
             var ids = search_id_text.Text.Trim().Split(',');
             _globalSearchInfo.InputIds = new string[ids.Length];
             for (var i = 0; i < ids.Length; i++)
@@ -262,6 +260,7 @@ namespace 网易云歌词提取
         {
             ReloadConfig();
             CleanTextBox();
+            _globalSaveVoMap.Clear();
 
             InitInputSongIds(out var errorMsg);
             if (errorMsg != ErrorMsg.SUCCESS)
