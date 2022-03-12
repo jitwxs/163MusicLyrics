@@ -33,7 +33,10 @@ namespace 网易云歌词提取
         // 输出文件名类型
         OUTPUT_FILENAME_TYPE_ENUM output_filename_type_enum;
 
-        public const string Version = "v3.5";
+        // 输出文件类型
+        OUTPUT_FORMAT_ENUM output_format_enum;
+
+        public const string Version = "v3.6";
 
         public MainForm()
         {
@@ -44,6 +47,7 @@ namespace 网易云歌词提取
             comboBox_diglossia_lrc.SelectedIndex = 0;
             comboBox_search_type.SelectedIndex = 0;
             comboBox_dot.SelectedIndex = 0;
+            comboBox_output_format.SelectedIndex = 0;
 
             _api = new NetEaseMusicApiWrapper();
         }
@@ -56,13 +60,14 @@ namespace 网易云歌词提取
             {
                 _globalSearchInfo.InputIds[i] = ids[i].Trim();
             }
-            
+
             _globalSearchInfo.SONG_IDS.Clear();
             _globalSearchInfo.SearchType = search_type_enum;
             _globalSearchInfo.OutputFileNameType = output_filename_type_enum;
             _globalSearchInfo.ShowLrcType = show_lrc_type_enum;
             _globalSearchInfo.Encoding = output_encoding_enum;
             _globalSearchInfo.DotType = dot_type_enum;
+            _globalSearchInfo.OutputFileFormat = output_format_enum;
             _globalSearchInfo.LrcMergeSeparator = splitTextBox.Text;
         }
 
@@ -95,9 +100,22 @@ namespace 网易云歌词提取
             foreach (var pair in datumDict)
             {
                 var songId = pair.Key;
-                
-                result[songId] = NetEaseMusicUtils.GetSongVo(pair.Value, songDict[songId], out var errorMsg);
-                errorMsgs[songId] = errorMsg;
+                var datum = pair.Value;
+
+                if (!songDict.TryGetValue(songId, out var song))
+                {
+                    errorMsgs[songId] = ErrorMsg.SONG_NOT_EXIST;
+                    continue;
+                }
+
+                result[songId] = new SongVo
+                {
+                    Links = datum.Url,
+                    Name = song.Name,
+                    Singer = NetEaseMusicUtils.ContractSinger(song.Ar),
+                    Album = song.Al.Name
+                };
+                errorMsgs[songId] = ErrorMsg.SUCCESS;
             }
 
             return result;
@@ -136,18 +154,19 @@ namespace 网易云歌词提取
             {
                 return;
             }
-            
-            foreach (var pair in RequestSongVo(requestId.ToArray(), out var songVoErrorMsg))
+
+            var requestResult = RequestSongVo(requestId.ToArray(), out var songVoErrorMsg);
+            foreach (var errorPair in songVoErrorMsg)
             {
-                var songId = pair.Key;
-                
-                var errorMsg = songVoErrorMsg[songId];
+                var songId = errorPair.Key;
+                var errorMsg = errorPair.Value;
+
                 if (errorMsg == ErrorMsg.SUCCESS)
                 {
                     var lyricVo = RequestLyricVo(songId, _globalSearchInfo, out errorMsg);
                     if (errorMsg == ErrorMsg.SUCCESS)
                     {
-                        NetEaseMusicCache.PutSaveVo(songId, new SaveVo(songId, pair.Value, lyricVo));
+                        NetEaseMusicCache.PutSaveVo(songId, new SaveVo(songId, requestResult[songId], lyricVo));
                         errorMsgDict.Add(songId, ErrorMsg.SUCCESS);
                         continue;
                     }
@@ -244,11 +263,11 @@ namespace 网易云歌词提取
                     _globalSaveVoMap.Add(songId, NetEaseMusicCache.GetSaveVo(songId));
                 }
 
-                log.Append("ID: " + songId + ", Result: " + message + "\r\n");
+                log.Append("ID: " + songId + ", Result: " + message).Append(Environment.NewLine);
             }
 
             log.Append("---Total：" + resultMaps.Count + ", Success：" + _globalSaveVoMap.Count + ", Failure：" +
-                       (resultMaps.Count - _globalSaveVoMap.Count) + "---\r\n");
+                       (resultMaps.Count - _globalSaveVoMap.Count) + "---").Append(Environment.NewLine);
 
             UpdateLrcTextBox(log.ToString());
         }
@@ -307,8 +326,9 @@ namespace 网易云歌词提取
                     if (saveVo != null)
                     {
                         link = saveVo.SongVo.Links ?? "failure";
-                    } 
-                    log.Append($"ID: {songId}, Links: {link}\r\n");
+                    }
+
+                    log.Append($"ID: {songId}, Links: {link}").Append(Environment.NewLine);
                 }
 
                 UpdateLrcTextBox(log.ToString());
@@ -358,11 +378,11 @@ namespace 网易云歌词提取
                 }
 
                 saveDialog.FileName = outputFileName;
-                saveDialog.Filter = "lrc文件(*.lrc)|*.lrc|txt文件(*.txt)|*.txt";
+                saveDialog.Filter = output_format_enum.ToDescription();
                 if (saveDialog.ShowDialog() == DialogResult.OK)
                 {
                     var sw = new StreamWriter(saveDialog.FileName, false, NetEaseMusicUtils.GetEncoding(_globalSearchInfo.Encoding));
-                    sw.Write(textBox_lrc.Text);
+                    sw.Write(NetEaseMusicUtils.GetOutputContent(saveVo.LyricVo, _globalSearchInfo));
                     sw.Flush();
                     sw.Close();
                     MessageBox.Show(ErrorMsg.SAVE_SUCCESS, "提示");
@@ -383,7 +403,7 @@ namespace 网易云歌词提取
             try
             {
                 saveDialog.FileName = "直接选择保存路径即可，无需修改此处内容";
-                saveDialog.Filter = "lrc文件(*.lrc)|*.lrc|txt文件(*.txt)|*.txt";
+                saveDialog.Filter = output_format_enum.ToDescription();
                 if (saveDialog.ShowDialog() == DialogResult.OK)
                 {
                     string localFilePath = saveDialog.FileName;
@@ -394,12 +414,11 @@ namespace 网易云歌词提取
 
                     foreach (var item in _globalSaveVoMap)
                     {
-                        string outputFileName = NetEaseMusicUtils.GetOutputName(item.Value.SongVo, _globalSearchInfo);
+                        var saveVo = item.Value;
+                        string outputFileName = NetEaseMusicUtils.GetOutputName(saveVo.SongVo, _globalSearchInfo);
                         string path = filePath + "/" + NetEaseMusicUtils.GetSafeFilename(outputFileName) + fileSuffix;
-                        StreamWriter sw = new StreamWriter(path, false,
-                            NetEaseMusicUtils.GetEncoding(_globalSearchInfo.Encoding));
-                        sw.Write(NetEaseMusicUtils.GetOutputLyric(item.Value.LyricVo.Lyric, item.Value.LyricVo.TLyric,
-                            _globalSearchInfo));
+                        StreamWriter sw = new StreamWriter(path, false, NetEaseMusicUtils.GetEncoding(_globalSearchInfo.Encoding));
+                        sw.Write(NetEaseMusicUtils.GetOutputContent(saveVo.LyricVo, _globalSearchInfo));
                         sw.Flush();
                         sw.Close();
                     }
@@ -416,8 +435,9 @@ namespace 网易云歌词提取
             var log = new StringBuilder();
             foreach (var songId in _globalSearchInfo.SONG_IDS)
             {
-                log.Append(
-                    $"ID: {songId}, Result: {(_globalSaveVoMap.ContainsKey(songId) ? "success" : "failure")}\r\n");
+                log
+                    .Append($"ID: {songId}, Result: {(_globalSaveVoMap.ContainsKey(songId) ? "success" : "failure")}")
+                    .Append(Environment.NewLine);
             }
 
             UpdateLrcTextBox(log.ToString());
@@ -583,11 +603,10 @@ namespace 网易云歌词提取
                 if (_globalSaveVoMap != null && _globalSaveVoMap.Count == 1)
                 {
                     // only loop one times
-                    foreach (var item in _globalSaveVoMap)
+                    foreach (var saveVo in _globalSaveVoMap.Values)
                     {
-                        string outputLyric = NetEaseMusicUtils.GetOutputLyric(item.Value.LyricVo.Lyric,
-                            item.Value.LyricVo.TLyric, _globalSearchInfo);
-                        textBox_lrc.Text = outputLyric == "" ? ErrorMsg.LRC_NOT_EXIST : outputLyric;
+                        var outputContent = NetEaseMusicUtils.GetOutputContent(saveVo.LyricVo, _globalSearchInfo);
+                        textBox_lrc.Text = string.IsNullOrEmpty(outputContent) ? ErrorMsg.LRC_NOT_EXIST : outputContent;
                     }
                 }
             }
@@ -610,6 +629,12 @@ namespace 网易云歌词提取
             {
                 ((TextBox)sender).SelectAll();
             }
+        }
+
+        private void comboBox_output_format_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            output_format_enum = (OUTPUT_FORMAT_ENUM)comboBox_output_format.SelectedIndex;
+            ReloadConfig();
         }
     }
 }

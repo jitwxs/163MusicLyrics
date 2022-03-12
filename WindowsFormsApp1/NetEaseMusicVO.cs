@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq;
 
 namespace 网易云歌词提取
 {
@@ -44,6 +47,15 @@ namespace 网易云歌词提取
         GB_2312 = 2,
         GBK = 3,
         UNICODE = 4
+    }
+
+    public enum OUTPUT_FORMAT_ENUM
+    {
+        [Description("lrc文件(*.lrc)|*.lrc")]
+        LRC = 0,
+        
+        [Description("srt文件(*.srt)|*.srt")]
+        SRT = 1
     }
 
     /**
@@ -122,5 +134,21 @@ namespace 网易云歌词提取
         public string LrcMergeSeparator { get; set; }
 
         public DOT_TYPE_ENUM DotType { get; set; }
+        
+        public OUTPUT_FORMAT_ENUM OutputFileFormat { get; set; }
+    }
+    
+    public static class EnumHelper
+    {
+        public static string ToDescription(this Enum val)
+        {
+            var type = val.GetType();
+            var memberInfo = type.GetMember(val.ToString());
+            var attributes = memberInfo[0].GetCustomAttributes(typeof(DescriptionAttribute), false);
+            //如果没有定义描述，就把当前枚举值的对应名称返回
+            if (attributes == null || attributes.Length != 1) return val.ToString();
+ 
+            return (attributes.Single() as DescriptionAttribute).Description;
+        }
     }
 }
