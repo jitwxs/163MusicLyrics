@@ -20,3 +20,8 @@
 ## How to use
 
 [163MusicLyrics Wiki](https://github.com/jitwxs/163MusicLyrics/wiki)
+
+
+
+![screenshot](./images/latest_version.png)
+
