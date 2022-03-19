@@ -413,7 +413,7 @@ namespace 网易云歌词提取
             {
                 int index = lrcStr[i].IndexOf("]");
                 int dot = lrcStr[i].IndexOf(".");
-                if (dot == -1)
+                if (index == -1 || dot == -1)
                 {
                     continue;
                 }
