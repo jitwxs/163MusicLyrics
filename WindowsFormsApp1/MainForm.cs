@@ -36,7 +36,7 @@ namespace 网易云歌词提取
         // 输出文件类型
         OUTPUT_FORMAT_ENUM output_format_enum;
 
-        public const string Version = "v3.7";
+        public const string Version = "v3.8";
 
         public MainForm()
         {
