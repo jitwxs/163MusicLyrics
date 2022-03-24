@@ -31,7 +31,7 @@ namespace 网易云歌词提取
         /**
          * 获取歌词信息
          */
-        public static LyricVo GetLyricVo(LyricResult lyricResult, SearchInfo searchInfo, out string errorMsg)
+        public static LyricVo GetLyricVo(LyricResult lyricResult, long dt, SearchInfo searchInfo, out string errorMsg)
         {
             var vo = new LyricVo();
 
@@ -64,6 +64,7 @@ namespace 网易云歌词提取
 
                     vo.Lyric = originLyric;
                     vo.TLyric = originTLyric;
+                    vo.Dt = dt;
                     vo.Output = GetOutputContent(vo, searchInfo);
                 }
 
@@ -72,7 +73,6 @@ namespace 网易云歌词提取
             catch (Exception ew)
             {
                 errorMsg = ew.Message;
-                Console.WriteLine(ew);
             }
 
             return vo;
@@ -87,7 +87,7 @@ namespace 网易云歌词提取
 
             if (searchInfo.OutputFileFormat == OUTPUT_FORMAT_ENUM.SRT)
             {
-                output = ConvertLyricToSrt(output);
+                output = ConvertLyricToSrt(output, lyricVo.Dt);
             }
 
             return output;
@@ -115,26 +115,40 @@ namespace 网易云歌词提取
         /**
          * lrc --> srt
          */
-        private static string ConvertLyricToSrt(string input)
+        private static string ConvertLyricToSrt(string input, long dt)
         {
             var output = new StringBuilder();
 
             var startTime = new TimeSpan();
             var baseTime = startTime.Add(new TimeSpan(0, 0, 0, 0, 0));
             var preTime = baseTime;
-            bool isFirstLine = true;
-            string preStr = "pp";
-            Regex timeReg = new Regex(@"(?<=^\[)(\d|\:|\.)+(?=])");
-            Regex strReg = new Regex(@"(?<=]).+", RegexOptions.RightToLeft);
+            var isFirstLine = true;
+            var preStr = "";
+            var timeReg = new Regex(@"(?<=^\[)(\d|\:|\.)+(?=])");
+            var strReg = new Regex(@"(?<=]).+", RegexOptions.RightToLeft);
 
             var lines = input.Split(Environment.NewLine.ToCharArray());
 
             var index = 1;
-            foreach (var singleLine in lines)
+            
+            void AddSrtLine(TimeSpan curTime)
             {
-                var line = singleLine.Trim();
-                if (line == "") continue;
-                
+                output
+                    .Append(index++)
+                    .Append(Environment.NewLine)
+                    .Append($"{preTime.Hours:d2}:{preTime.Minutes:d2}:{preTime.Seconds:d2},{preTime.Milliseconds:d3}")
+                    .Append(" --> ")
+                    .Append($"{curTime.Hours:d2}:{curTime.Minutes:d2}:{curTime.Seconds:d2},{curTime.Milliseconds:d3}")
+                    .Append(Environment.NewLine)
+                    .Append(preStr)
+                    .Append(Environment.NewLine)
+                    .Append(Environment.NewLine);
+            }
+
+            foreach (var line in lines)
+            {
+                if (string.IsNullOrWhiteSpace(line)) continue;
+
                 var match = timeReg.Match(line);
                 if (match.Success)
                 {
@@ -147,28 +161,20 @@ namespace 网易云歌词提取
                     {
                         if (!preStr.Equals(""))
                         {
-                            var curTime = baseTime.Add(TimeSpan.Parse("00:" + match.Value));           
-                            output
-                                .Append(index++)
-                                .Append(Environment.NewLine)
-                                .Append($"{preTime.Hours:d2}:{preTime.Minutes:d2}:{preTime.Seconds:d2},{preTime.Milliseconds:d3}")
-                                .Append(" --> ")
-                                .Append($"{curTime.Hours:d2}:{curTime.Minutes:d2}:{curTime.Seconds:d2},{curTime.Milliseconds:d3}")
-                                .Append(Environment.NewLine)
-                                .Append(preStr)
-                                .Append(Environment.NewLine)
-                                .Append(Environment.NewLine);
-                                
+                            var curTime = baseTime.Add(TimeSpan.Parse("00:" + match.Value));
+
+                            AddSrtLine(curTime);
+
                             preTime = curTime;
                         }
                     }
 
                     var strMatch = strReg.Match(line);
-                    preStr = strMatch.Success ? strMatch.Value : "";
+                    preStr = strMatch.Success ? strMatch.Value.Trim() : "";
                 }
                 else
                 {
-                    Regex offsetReg = new Regex(@"(?<=^\[offset:)\d+(?=])");
+                    var offsetReg = new Regex(@"(?<=^\[offset:)\d+(?=])");
                     match = offsetReg.Match(line);
                     if (match.Success)
                     {
@@ -177,6 +183,12 @@ namespace 网易云歌词提取
                     }
                 }
             }
+
+            if (!preStr.Equals(""))
+            {
+                AddSrtLine(TimeSpan.FromMilliseconds(dt));
+            }
+
             return output.ToString();
         }
 

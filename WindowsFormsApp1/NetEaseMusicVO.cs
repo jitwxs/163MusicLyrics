@@ -106,6 +106,8 @@ namespace 网易云歌词提取
         public string Album { get; set; }
 
         public string Links { get; set; }
+        
+        public long Dt { get; set; }
     }
 
     public class LyricVo
@@ -113,6 +115,8 @@ namespace 网易云歌词提取
         public string Lyric { get; set; }
 
         public string TLyric { get; set; }
+        
+        public long Dt { get; set; }
 
         public string Output { get; set; }
     }
