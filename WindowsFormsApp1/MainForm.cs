@@ -36,7 +36,7 @@ namespace 网易云歌词提取
         // 输出文件类型
         OUTPUT_FORMAT_ENUM output_format_enum;
 
-        public const string Version = "v3.7";
+        public const string Version = "v3.8";
 
         public MainForm()
         {
@@ -113,20 +113,13 @@ namespace 网易云歌词提取
                     Links = datum.Url,
                     Name = song.Name,
                     Singer = NetEaseMusicUtils.ContractSinger(song.Ar),
-                    Album = song.Al.Name
+                    Album = song.Al.Name,
+                    Dt = song.Dt
                 };
                 errorMsgs[songId] = ErrorMsg.SUCCESS;
             }
 
             return result;
-        }
-
-        /**
-         * 货期歌词信息
-         */
-        private LyricVo RequestLyricVo(long songId, SearchInfo searchInfo, out string errorMsg)
-        {
-            return NetEaseMusicUtils.GetLyricVo(_api.GetLyric(songId), searchInfo, out errorMsg);
         }
 
         /**
@@ -163,10 +156,11 @@ namespace 网易云歌词提取
 
                 if (errorMsg == ErrorMsg.SUCCESS)
                 {
-                    var lyricVo = RequestLyricVo(songId, _globalSearchInfo, out errorMsg);
+                    var songVo = requestResult[songId];
+                    var lyricVo = NetEaseMusicUtils.GetLyricVo(_api.GetLyric(songId), songVo.Dt, _globalSearchInfo, out errorMsg);
                     if (errorMsg == ErrorMsg.SUCCESS)
                     {
-                        NetEaseMusicCache.PutSaveVo(songId, new SaveVo(songId, requestResult[songId], lyricVo));
+                        NetEaseMusicCache.PutSaveVo(songId, new SaveVo(songId, songVo, lyricVo));
                         errorMsgDict.Add(songId, ErrorMsg.SUCCESS);
                         continue;
                     }
