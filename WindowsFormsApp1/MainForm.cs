@@ -180,13 +180,13 @@ namespace 网易云歌词提取
             var inputs = _globalSearchInfo.InputIds;
             if (inputs.Length < 1)
             {
-                errorMsg = ErrorMsg.INPUT_ID_ILLEGAG;
+                errorMsg = ErrorMsg.INPUT_ID_ILLEGAL;
                 return;
             }
 
             foreach (var input in inputs)
             {
-                var id = NetEaseMusicUtils.CheckInputId(input, out errorMsg);
+                var id = NetEaseMusicUtils.CheckInputId(input, _globalSearchInfo.SearchType, out errorMsg);
 
                 if (errorMsg != ErrorMsg.SUCCESS)
                 {
@@ -340,7 +340,7 @@ namespace 网易云歌词提取
                     else
                     {
                         Clipboard.SetDataObject(link);
-                        MessageBox.Show(ErrorMsg.SONG_URL_COPY_SUCESS, "提示");
+                        MessageBox.Show(ErrorMsg.SONG_URL_COPY_SUCCESS, "提示");
                     }
                 }
             }
