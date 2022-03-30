@@ -81,6 +81,11 @@ namespace 网易云歌词提取
             errorMsg = ErrorMsg.SUCCESS;
 
             var albumResult = _api.GetAlbum(albumId);
+            if (albumResult.Code != 200)
+            {
+                errorMsg = ErrorMsg.INPUT_ALBUM_ILLEGAG;
+                return null;
+            }
             var set = albumResult.Songs.Select(song => song.Id);
             songIds.AddRange(set);
 
@@ -197,12 +202,14 @@ namespace 网易云歌词提取
                 if (_globalSearchInfo.SearchType == SEARCH_TYPE_ENUM.ALBUM_ID)
                 {
                     var songIds = RequestSongIdInAlbum(id, out errorMsg);
-                    if (errorMsg == ErrorMsg.SUCCESS)
+                    if (errorMsg != ErrorMsg.SUCCESS)
                     {
-                        foreach (var songId in songIds)
-                        {
-                            _globalSearchInfo.SONG_IDS.Add(songId);
-                        }
+                        MessageBox.Show(errorMsg, "提示");
+                        return;
+                    }
+                    foreach (var songId in songIds)
+                    {
+                        _globalSearchInfo.SONG_IDS.Add(songId);
                     }
                 }
                 else

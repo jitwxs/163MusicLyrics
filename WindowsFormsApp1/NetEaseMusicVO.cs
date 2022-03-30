@@ -68,6 +68,7 @@ namespace 网易云歌词提取
         public static string MUST_SEARCH_BEFORE_SAVE = "您必须先搜索，才能保存内容";
         public static string MUST_SEARCH_BEFORE_COPY_SONG_URL = "您必须先搜索，才能获取直链";
         public static string INPUT_ID_ILLEGAG = "您输入的 ID 号不合法";
+        public static string INPUT_ALBUM_ILLEGAG = "您输入的 专辑编号 不合法";
         public static string SONG_NOT_EXIST = "歌曲信息暂未被收录或查询失败";
         public static string LRC_NOT_EXIST = "歌词信息暂未被收录或查询失败";
         public static string FUNCTION_NOT_SUPPORT = "该功能暂不可用，请等待后续更新";

@@ -166,7 +166,7 @@ namespace 网易云歌词提取
                     }
                     else
                     {
-                        if (!preStr.Equals(string.Empty))
+                        if (preStr != string.Empty)
                         {
                             var curTime = baseTime.Add(TimeSpan.Parse("00:" + match.Value));
 
