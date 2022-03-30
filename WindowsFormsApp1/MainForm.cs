@@ -54,6 +54,9 @@ namespace 网易云歌词提取
             _api = new NetEaseMusicApiWrapper();
         }
 
+        /// <summary>
+        /// 读取搜索框并重新加载配置
+        /// </summary>
         private void ReloadConfig()
         {
             var ids = search_id_text.Text.Trim().Split(',');
@@ -288,6 +291,8 @@ namespace 网易云歌词提取
             InitInputSongIds(out var errorMsg);
             if (errorMsg != ErrorMsg.SUCCESS)
             {
+                _logger.Info($"搜索失败, 搜索框内容: {search_id_text.Text}, 搜索模式: {_globalSearchInfo.SearchType}, " +
+                    $"错误信息: {errorMsg}");
                 MessageBox.Show(errorMsg, "提示");
                 return;
             }
@@ -421,7 +426,7 @@ namespace 网易云歌词提取
                     {
                         var saveVo = item.Value;
                         string outputFileName = NetEaseMusicUtils.GetOutputName(saveVo.SongVo, _globalSearchInfo);
-                        string path = filePath + "/" + NetEaseMusicUtils.GetSafeFilename(outputFileName) + fileSuffix;
+                        string path = filePath + '/' + NetEaseMusicUtils.GetSafeFilename(outputFileName) + fileSuffix;
                         StreamWriter sw = new StreamWriter(path, false, NetEaseMusicUtils.GetEncoding(_globalSearchInfo.Encoding));
                         sw.Write(NetEaseMusicUtils.GetOutputContent(saveVo.LyricVo, _globalSearchInfo));
                         sw.Flush();
@@ -526,7 +531,14 @@ namespace 网易云歌词提取
          */
         private void homeMenuItem_Click(object sender, EventArgs e)
         {
-            System.Diagnostics.Process.Start("https://github.com/jitwxs/163MusicLyrics");
+            try
+            {
+                System.Diagnostics.Process.Start("https://github.com/jitwxs/163MusicLyrics");
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "项目主页打开失败");
+            }
         }
 
         /**
@@ -576,7 +588,14 @@ namespace 网易云歌词提取
          */
         private void issueMenuItem_Click(object sender, EventArgs e)
         {
-            System.Diagnostics.Process.Start("https://github.com/jitwxs/163MusicLyrics/issues");
+            try
+            {
+                System.Diagnostics.Process.Start("https://github.com/jitwxs/163MusicLyrics/issues");
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "问题反馈网址打开失败");
+            }
         }
 
         /**
@@ -584,7 +603,14 @@ namespace 网易云歌词提取
          */
         private void wikiItem_Click(object sender, EventArgs e)
         {
-            System.Diagnostics.Process.Start("https://github.com/jitwxs/163MusicLyrics/wiki");
+            try
+            {
+                System.Diagnostics.Process.Start("https://github.com/jitwxs/163MusicLyrics/wiki");
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "使用手册网址打开失败");
+            }
         }
 
         private void splitTextBox_TextChanged(object sender, EventArgs e)

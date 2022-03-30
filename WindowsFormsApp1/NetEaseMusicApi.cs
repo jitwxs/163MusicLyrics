@@ -79,7 +79,7 @@ namespace 网易云歌词提取
 
         public AlbumResult GetAlbum(long albumId)
         {
-            var url = "https://music.163.com/weapi/v1/album/" + albumId + "?csrf_token=";
+            var url = $"https://music.163.com/weapi/v1/album/{albumId}?csrf_token=";
             
             var data = new Dictionary<string, string>
             {
@@ -217,7 +217,7 @@ namespace 网易云歌词提取
                 var bytes = wc.UploadValues(url, method, reqparm);
                 result = Encoding.UTF8.GetString(bytes);
             }
-            System.Diagnostics.Debug.WriteLine(result);
+            //System.Diagnostics.Debug.WriteLine(result);
             return result;
         }
 
