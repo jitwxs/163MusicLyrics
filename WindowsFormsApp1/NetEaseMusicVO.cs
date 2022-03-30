@@ -107,7 +107,7 @@ namespace 网易云歌词提取
 
         public string Links { get; set; }
         
-        public long Dt { get; set; }
+        public long DateTime { get; set; }
     }
 
     public class LyricVo
@@ -116,7 +116,7 @@ namespace 网易云歌词提取
 
         public string TLyric { get; set; }
         
-        public long Dt { get; set; }
+        public long DateTime { get; set; }
 
         public string Output { get; set; }
     }

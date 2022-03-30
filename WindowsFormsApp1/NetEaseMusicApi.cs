@@ -218,7 +218,7 @@ namespace 网易云歌词提取
                 var bytes = wc.UploadValues(url, method, reqparm);
                 result = Encoding.UTF8.GetString(bytes);
             }
-
+            System.Diagnostics.Debug.WriteLine(result);
             return result;
         }
 

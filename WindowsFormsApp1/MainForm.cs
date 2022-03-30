@@ -81,7 +81,8 @@ namespace 网易云歌词提取
             errorMsg = ErrorMsg.SUCCESS;
 
             var albumResult = _api.GetAlbum(albumId);
-            songIds.AddRange(albumResult.Songs.Select(song => song.Id));
+            var set = albumResult.Songs.Select(song => song.Id);
+            songIds.AddRange(set);
 
             return songIds;
         }
@@ -114,7 +115,7 @@ namespace 网易云歌词提取
                     Name = song.Name,
                     Singer = NetEaseMusicUtils.ContractSinger(song.Ar),
                     Album = song.Al.Name,
-                    Dt = song.Dt
+                    DateTime = song.Dt
                 };
                 errorMsgs[songId] = ErrorMsg.SUCCESS;
             }
@@ -157,7 +158,7 @@ namespace 网易云歌词提取
                 if (errorMsg == ErrorMsg.SUCCESS)
                 {
                     var songVo = requestResult[songId];
-                    var lyricVo = NetEaseMusicUtils.GetLyricVo(_api.GetLyric(songId), songVo.Dt, _globalSearchInfo, out errorMsg);
+                    var lyricVo = NetEaseMusicUtils.GetLyricVo(_api.GetLyric(songId), songVo.DateTime, _globalSearchInfo, out errorMsg);
                     if (errorMsg == ErrorMsg.SUCCESS)
                     {
                         NetEaseMusicCache.PutSaveVo(songId, new SaveVo(songId, songVo, lyricVo));

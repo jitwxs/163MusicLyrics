@@ -28,6 +28,14 @@ namespace 网易云歌词提取
             return result;
         }
 
+        /*
+         * 检查字符串是否为数字
+         */
+        private static bool CheckNum(string s)
+        {
+            return Regex.IsMatch(s, "^\\d+$");
+        }
+
         /**
          * 获取歌词信息
          */
@@ -63,7 +71,7 @@ namespace 网易云歌词提取
 
                 vo.Lyric = originLyric;
                 vo.TLyric = originTLyric;
-                vo.Dt = dt;
+                vo.DateTime = dt;
                 vo.Output = GetOutputContent(vo, searchInfo);                
             }
             catch (Exception ew)
@@ -79,14 +87,16 @@ namespace 网易云歌词提取
          */
         public static string GetOutputContent(LyricVo lyricVo, SearchInfo searchInfo)
         {
-            var output = GetOutputLyric(lyricVo.Lyric, lyricVo.TLyric, searchInfo);
+            if (lyricVo == null)
+                throw new ArgumentNullException(nameof(lyricVo));
 
-            if (searchInfo.OutputFileFormat == OUTPUT_FORMAT_ENUM.SRT)
+            switch (searchInfo?.OutputFileFormat ?? throw new ArgumentNullException(nameof(searchInfo)))
             {
-                output = ConvertLyricToSrt(output, lyricVo.Dt);
+                case OUTPUT_FORMAT_ENUM.LRC: return GetOutputLyric(lyricVo.Lyric, lyricVo.TLyric, searchInfo);
+                case OUTPUT_FORMAT_ENUM.SRT: return ConvertLyricToSrt(
+                    GetOutputLyric(lyricVo.Lyric, lyricVo.TLyric, searchInfo), lyricVo.DateTime);
+                default: throw new ArgumentException(nameof(searchInfo.OutputFileFormat));
             }
-
-            return output;
         }
 
         /**
@@ -194,7 +204,10 @@ namespace 网易云歌词提取
          */
         public static string GetOutputName(SongVo songVo, SearchInfo searchInfo)
         {
-            switch (searchInfo.OutputFileNameType)
+            if (songVo == null)
+                throw new ArgumentNullException(nameof(songVo));
+
+            switch (searchInfo?.OutputFileNameType ?? throw new ArgumentNullException(nameof(searchInfo)))
             {
                 case OUTPUT_FILENAME_TYPE_ENUM.NAME_SINGER:
                     return songVo.Name + " - " + songVo.Singer;
@@ -207,13 +220,6 @@ namespace 网易云歌词提取
             }
         }
 
-        /*
-         * 检查字符串是否为数字
-         */
-        private static bool CheckNum(string s)
-        {
-            return Regex.IsMatch(s, "^\\d+$");
-        }
 
         /**
          * 拼接歌手名
@@ -448,7 +454,8 @@ namespace 网易云歌词提取
         {
             var invalidChars = System.IO.Path.GetInvalidFileNameChars();
             var replaceIndex = arbitraryString.IndexOfAny(invalidChars, 0);
-            if (replaceIndex == -1) return arbitraryString;
+            if (replaceIndex == -1)
+                return arbitraryString;
 
             var r = new StringBuilder();
             var i = 0;
