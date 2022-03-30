@@ -395,6 +395,7 @@ namespace 网易云歌词提取
             catch (Exception ew)
             {
                 MessageBox.Show("保存失败！错误信息：\n" + ew.Message);
+                _logger.Error(ew, "单独保存歌词失败");
             }
         }
 
@@ -432,6 +433,7 @@ namespace 网易云歌词提取
             catch (Exception ew)
             {
                 MessageBox.Show("批量保存失败，错误信息：\n" + ew.Message);
+                _logger.Error(ew, "批量保存失败");
             }
 
             // 输出日志

@@ -187,7 +187,6 @@ namespace 网易云歌词提取
         private string RSAEncode(string text)
         {
             string srtext = new string(text.Reverse().ToArray());
-            ;
             var a = BCHexDec(BitConverter.ToString(Encoding.Default.GetBytes(srtext)).Replace("-", string.Empty));
             var b = BCHexDec(_PUBKEY);
             var c = BCHexDec(_MODULUS);
