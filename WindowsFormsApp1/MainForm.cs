@@ -97,9 +97,13 @@ namespace 网易云歌词提取
             return songIds;
         }
 
-        /**
-         * 获取歌曲信息
-         */
+        /// <summary>
+        /// 获取歌曲信息
+        /// </summary>
+        /// <param name="songIds">歌曲ID</param>
+        /// <param name="errorMsgs">错误信息</param>
+        /// <exception cref="WebException"></exception>
+        /// <returns></returns>
         private Dictionary<long, SongVo> RequestSongVo(long[] songIds, out Dictionary<long, string> errorMsgs)
         {
             var datumDict = _api.GetDatum(songIds);
@@ -133,9 +137,13 @@ namespace 网易云歌词提取
             return result;
         }
 
-        /**
-         * 根据歌曲ID查询
-         */
+
+        /// <summary>
+        /// 根据歌曲ID查询
+        /// </summary>
+        /// <param name="songIds"></param>
+        /// <param name="errorMsgDict"></param>
+        /// <exception cref="WebException"></exception>
         private void SearchBySongId(IEnumerable<long> songIds, out Dictionary<long, string> errorMsgDict)
         {
             errorMsgDict = new Dictionary<long, string>();
@@ -224,17 +232,20 @@ namespace 网易云歌词提取
             }
         }
 
-        /**
-         * 单个歌曲搜索
-         */
-        private void SingleSearch(long songId)
+        /// <summary>
+        /// 单个歌曲搜索
+        /// </summary>
+        /// <param name="songId">歌曲ID</param>
+        /// <param name="errorMsg">错误信息</param>
+        /// <exception cref="WebException"></exception>
+        private void SingleSearch(long songId, out string errorMsg)
         {
             SearchBySongId(new[] { songId }, out var resultMaps);
 
             var message = resultMaps[songId];
+            errorMsg = message;
             if (message != ErrorMsg.SUCCESS)
-            {
-                MessageBox.Show(message, "提示");
+            {                
                 return;
             }
 
@@ -250,9 +261,12 @@ namespace 网易云歌词提取
             UpdateLrcTextBox(string.Empty);
         }
 
-        /**
-         * 批量歌曲搜索
-         */
+
+        /// <summary>
+        /// 批量歌曲搜索
+        /// </summary>
+        /// <param name="ids"></param>
+        /// <exception cref="WebException"></exception>
         private void BatchSearch(IEnumerable<long> ids)
         {
             SearchBySongId(ids, out var resultMaps);
@@ -297,18 +311,35 @@ namespace 网易云歌词提取
                 return;
             }
 
-            var songIds = _globalSearchInfo.SONG_IDS;
-            if (songIds.Count > 1)
+            try
             {
-                BatchSearch(songIds);
-            }
-            else
-            {
-                // just loop once
-                foreach (var songId in songIds)
+                var songIds = _globalSearchInfo.SONG_IDS;
+                if (songIds.Count > 1)
                 {
-                    SingleSearch(songId);
+                    BatchSearch(songIds);
                 }
+                else
+                {
+                    // just loop once
+                    foreach (var songId in songIds)
+                    {
+                        SingleSearch(songId, out errorMsg);
+                        if (errorMsg != ErrorMsg.SUCCESS)
+                        {
+                            MessageBox.Show(errorMsg, "提示");
+                            return;
+                        }
+                    }
+                }
+            }
+            catch (WebException ex)
+            {
+                MessageBox.Show("网络错误", "错误");
+                _logger.Error(ex, "网络错误");                
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex);
             }
         }
 
@@ -390,10 +421,11 @@ namespace 网易云歌词提取
                 saveDialog.Filter = output_format_enum.ToDescription();
                 if (saveDialog.ShowDialog() == DialogResult.OK)
                 {
-                    var sw = new StreamWriter(saveDialog.FileName, false, NetEaseMusicUtils.GetEncoding(_globalSearchInfo.Encoding));
-                    sw.Write(NetEaseMusicUtils.GetOutputContent(saveVo.LyricVo, _globalSearchInfo));
-                    sw.Flush();
-                    sw.Close();
+                    using (var sw = new StreamWriter(saveDialog.FileName, false, NetEaseMusicUtils.GetEncoding(_globalSearchInfo.Encoding)))
+                    {
+                        sw.Write(NetEaseMusicUtils.GetOutputContent(saveVo.LyricVo, _globalSearchInfo));
+                        sw.Flush();
+                    }
                     MessageBox.Show(ErrorMsg.SAVE_SUCCESS, "提示");
                 }
             }

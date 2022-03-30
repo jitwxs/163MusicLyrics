@@ -54,6 +54,12 @@ namespace 网易云歌词提取
             return result;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="songIds"></param>
+        /// <exception cref="WebException"></exception>
+        /// <returns></returns>
         public Dictionary<long, Song> GetSongs(long[] songIds)
         {
             var result = new Dictionary<long, Song>();
@@ -91,6 +97,13 @@ namespace 网易云歌词提取
             return JsonConvert.DeserializeObject<AlbumResult>(raw);
         }
 
+        /// <summary>
+        /// 获得原始歌词结果
+        /// </summary>
+        /// <param name="songId">音乐ID</param>
+        /// <exception cref="WebException"></exception>
+        /// <returns>一个
+        /// <see cref="LyricResult"/></returns>
         public LyricResult GetLyric(long songId)
         {
             const string url = "https://music.163.com/weapi/song/lyric?csrf_token=";
@@ -125,9 +138,12 @@ namespace 网易云歌词提取
             return JsonConvert.DeserializeObject<SongUrls>(raw);
         }
 
-        /**
-         * 批量获取歌曲详情
-         */
+        /// <summary>
+        /// 批量获得歌曲详情
+        /// </summary>
+        /// <param name="songIds">歌曲ID</param>
+        /// <exception cref="WebException"></exception>
+        /// <returns></returns>
         private DetailResult GetDetail(IEnumerable<long> songIds)
         {
             const string url = "https://music.163.com/weapi/v3/song/detail?csrf_token=";
@@ -198,7 +214,14 @@ namespace 网易云歌词提取
                 return key;
         }
 
-        // fake curl
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="url">链接</param>
+        /// <param name="parms">参数</param>
+        /// <param name="method">模式</param>
+        /// <exception cref="WebException"></exception>
+        /// <returns></returns>
         private string CURL(string url, Dictionary<string, string> parms, string method = "POST")
         {
             string result;
