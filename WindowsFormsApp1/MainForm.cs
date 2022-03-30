@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Windows.Forms;
+using NLog;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -13,6 +14,7 @@ namespace 网易云歌词提取
     public partial class MainForm : Form
     {
         private readonly NetEaseMusicApiWrapper _api;
+        private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
         private readonly Dictionary<long, SaveVo> _globalSaveVoMap = new Dictionary<long, SaveVo>();
 
