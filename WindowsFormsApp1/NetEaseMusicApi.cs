@@ -135,7 +135,7 @@ namespace 网易云歌词提取
             var songRequests = new StringBuilder();
             foreach (var songId in songIds)
             {
-                songRequests.Append("{'id':'").Append(songId).Append("'}").Append(",");
+                songRequests.Append("{'id':'").Append(songId).Append("'}").Append(',');
             }
             
             var data = new Dictionary<string, string>

@@ -265,7 +265,7 @@ namespace 网易云歌词提取
                     _globalSaveVoMap.Add(songId, NetEaseMusicCache.GetSaveVo(songId));
                 }
 
-                log.Append("ID: " + songId + ", Result: " + message).Append(Environment.NewLine);
+                log.Append($"ID: {songId}, Result: {message}").Append(Environment.NewLine);
             }
 
             log.Append("---Total：" + resultMaps.Count + ", Success：" + _globalSaveVoMap.Count + ", Failure：" +
@@ -538,7 +538,7 @@ namespace 网易云歌词提取
                 { "User-Agent", NetEaseMusicApi._USERAGENT }
             };
 
-            var jsonStr = HttpUtils.HttpGet("http://api.github.com/repos/jitwxs/163MusicLyrics/releases/latest",
+            var jsonStr = HttpUtils.HttpGet("https://api.github.com/repos/jitwxs/163MusicLyrics/releases/latest",
                 "application/json", headers);
             var obj = (JObject)JsonConvert.DeserializeObject(jsonStr);
             OutputLatestTag(obj["tag_name"]);

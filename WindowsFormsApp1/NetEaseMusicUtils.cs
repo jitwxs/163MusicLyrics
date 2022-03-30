@@ -119,6 +119,76 @@ namespace 网易云歌词提取
         }
 
         /**
+         * 歌词格式化
+         */
+        private static string[] FormatLyric(string originLrc, string translateLrc, SearchInfo searchInfo)
+        {
+            var showLrcType = searchInfo.ShowLrcType;
+
+            // 如果不存在翻译歌词，或者选择返回原歌词
+            var originLrcs = SplitLrc(originLrc);
+            if (string.IsNullOrEmpty(translateLrc) || showLrcType == SHOW_LRC_TYPE_ENUM.ONLY_ORIGIN)
+            {
+                return originLrcs;
+            }
+
+            // 如果选择仅译文
+            var translateLrcs = SplitLrc(translateLrc);
+            if (showLrcType == SHOW_LRC_TYPE_ENUM.ONLY_TRANSLATE)
+            {
+                return translateLrcs;
+            }
+
+            string[] res = null;
+            switch (showLrcType)
+            {
+                case SHOW_LRC_TYPE_ENUM.ORIGIN_PRIOR:
+                    res = SortLrc(originLrcs, translateLrcs, true);
+                    break;
+                case SHOW_LRC_TYPE_ENUM.TRANSLATE_PRIOR:
+                    res = SortLrc(originLrcs, translateLrcs, false);
+                    break;
+                case SHOW_LRC_TYPE_ENUM.MERGE_ORIGIN:
+                    res = MergeLrc(originLrcs, translateLrcs, searchInfo.LrcMergeSeparator, true);
+                    break;
+                case SHOW_LRC_TYPE_ENUM.MERGE_TRANSLATE:
+                    res = MergeLrc(originLrcs, translateLrcs, searchInfo.LrcMergeSeparator, false);
+                    break;
+            }
+            return res;
+        }
+
+        /**
+         * 设置时间戳小数位数
+         */
+        private static void SetTimeStamp2Dot(ref string[] lrcStr, DOT_TYPE_ENUM dotTypeEnum)
+        {
+            for (int i = 0; i < lrcStr.Length; i++)
+            {
+                int index = lrcStr[i].IndexOf("]");
+                int dot = lrcStr[i].IndexOf(".");
+                if (index == -1 || dot == -1)
+                {
+                    continue;
+                }
+
+                string ms = lrcStr[i].Substring(dot + 1, index - dot - 1);
+                if (ms.Length == 3)
+                {
+                    if (dotTypeEnum == DOT_TYPE_ENUM.DOWN)
+                    {
+                        ms = ms.Substring(0, 2);
+                    }
+                    else if (dotTypeEnum == DOT_TYPE_ENUM.HALF_UP)
+                    {
+                        ms = Convert.ToDouble("0." + ms).ToString("0.00").Substring(2);
+                    }
+                }
+                lrcStr[i] = lrcStr[i].Substring(0, dot) + "." + ms + lrcStr[i].Substring(index);
+            }
+        }
+
+        /**
          * lrc --> srt
          */
         private static string ConvertLyricToSrt(string input, long dt)
@@ -220,12 +290,15 @@ namespace 网易云歌词提取
             }
         }
 
-
         /**
          * 拼接歌手名
          */
         public static string ContractSinger(List<Ar> arList)
         {
+            if (arList == null)
+            {
+                throw new ArgumentNullException(nameof(arList));
+            }
             if (!arList.Any())
             {
                 return string.Empty;
@@ -238,47 +311,6 @@ namespace 网易云歌词提取
             }
 
             return sb.Remove(sb.Length - 1, 1).ToString();
-        }
-
-        /**
-         * 歌词格式化
-         */
-        private static string[] FormatLyric(string originLrc, string translateLrc, SearchInfo searchInfo)
-        {
-            var showLrcType = searchInfo.ShowLrcType;
-
-            // 如果不存在翻译歌词，或者选择返回原歌词
-            var originLrcs = SplitLrc(originLrc);
-            if (string.IsNullOrEmpty(translateLrc) || showLrcType == SHOW_LRC_TYPE_ENUM.ONLY_ORIGIN)
-            {
-                return originLrcs;
-            }
-
-            // 如果选择仅译文
-            var translateLrcs = SplitLrc(translateLrc);
-            if (showLrcType == SHOW_LRC_TYPE_ENUM.ONLY_TRANSLATE)
-            {
-                return translateLrcs;
-            }
-
-            string[] res = null;
-            switch (showLrcType)
-            {
-                case SHOW_LRC_TYPE_ENUM.ORIGIN_PRIOR:
-                    res = SortLrc(originLrcs, translateLrcs, true);
-                    break;
-                case SHOW_LRC_TYPE_ENUM.TRANSLATE_PRIOR:
-                    res = SortLrc(originLrcs, translateLrcs, false);
-                    break;
-                case SHOW_LRC_TYPE_ENUM.MERGE_ORIGIN:
-                    res = MergeLrc(originLrcs, translateLrcs, searchInfo.LrcMergeSeparator, true);
-                    break;
-                case SHOW_LRC_TYPE_ENUM.MERGE_TRANSLATE:
-                    res = MergeLrc(originLrcs, translateLrcs, searchInfo.LrcMergeSeparator, false);
-                    break;
-            }
-
-            return res;
         }
 
         /**
@@ -419,39 +451,12 @@ namespace 网易云歌词提取
             }
         }
 
-        /**
-         * 设置时间戳小数位数
-         */
-        private static void SetTimeStamp2Dot(ref string[] lrcStr, DOT_TYPE_ENUM dotTypeEnum)
-        {
-            for (int i = 0; i < lrcStr.Length; i++)
-            {
-                int index = lrcStr[i].IndexOf("]");
-                int dot = lrcStr[i].IndexOf(".");
-                if (index == -1 || dot == -1)
-                {
-                    continue;
-                }
-
-                string ms = lrcStr[i].Substring(dot + 1, index - dot - 1);
-                if (ms.Length == 3)
-                {
-                    if (dotTypeEnum == DOT_TYPE_ENUM.DOWN)
-                    {
-                        ms = ms.Substring(0, 2);
-                    }
-                    else if (dotTypeEnum == DOT_TYPE_ENUM.HALF_UP)
-                    {
-                        ms = Convert.ToDouble("0." + ms).ToString("0.00").Substring(2);
-                    }
-                }
-
-                lrcStr[i] = lrcStr[i].Substring(0, dot) + "." + ms + lrcStr[i].Substring(index);
-            }
-        }
-
         public static string GetSafeFilename(string arbitraryString)
         {
+            if (arbitraryString == null)
+            {
+                throw new ArgumentNullException(nameof(arbitraryString));
+            }
             var invalidChars = System.IO.Path.GetInvalidFileNameChars();
             var replaceIndex = arbitraryString.IndexOfAny(invalidChars, 0);
             if (replaceIndex == -1)
