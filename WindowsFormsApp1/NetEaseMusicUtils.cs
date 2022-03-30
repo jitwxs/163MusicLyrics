@@ -35,40 +35,36 @@ namespace 网易云歌词提取
         {
             var vo = new LyricVo();
 
-            if (searchInfo == null)
-            {
-                errorMsg = ErrorMsg.LRC_NOT_EXIST;
-                return vo;
-            }
-
-            if (lyricResult == null)
+            if (searchInfo == null || lyricResult == null)
             {
                 errorMsg = ErrorMsg.LRC_NOT_EXIST;
                 return vo;
             }
 
             try
-            {
-                if (lyricResult.Code == 200)
+            {                
+                if (lyricResult.Code != 200)
                 {
-                    string originLyric = string.Empty, originTLyric = string.Empty;
-                    if (lyricResult.Lrc != null)
-                    {
-                        originLyric = lyricResult.Lrc.Lyric;
-                    }
-
-                    if (lyricResult.Tlyric != null)
-                    {
-                        originTLyric = lyricResult.Tlyric.Lyric;
-                    }
-
-                    vo.Lyric = originLyric;
-                    vo.TLyric = originTLyric;
-                    vo.Dt = dt;
-                    vo.Output = GetOutputContent(vo, searchInfo);
+                    errorMsg = $"网络错误, 错误码: {lyricResult.Code}";
+                    return vo;
                 }
 
                 errorMsg = ErrorMsg.SUCCESS;
+                string originLyric = string.Empty, originTLyric = string.Empty;
+                if (lyricResult.Lrc != null)
+                {
+                    originLyric = lyricResult.Lrc.Lyric;
+                }
+
+                if (lyricResult.Tlyric != null)
+                {
+                    originTLyric = lyricResult.Tlyric.Lyric;
+                }
+
+                vo.Lyric = originLyric;
+                vo.TLyric = originTLyric;
+                vo.Dt = dt;
+                vo.Output = GetOutputContent(vo, searchInfo);                
             }
             catch (Exception ew)
             {
@@ -147,7 +143,8 @@ namespace 网易云歌词提取
 
             foreach (var line in lines)
             {
-                if (string.IsNullOrWhiteSpace(line)) continue;
+                if (string.IsNullOrWhiteSpace(line)) 
+                    continue;
 
                 var match = timeReg.Match(line);
                 if (match.Success)
@@ -184,7 +181,7 @@ namespace 网易云歌词提取
                 }
             }
 
-            if (!preStr.Equals(string.Empty))
+            if (preStr != string.Empty)
             {
                 AddSrtLine(TimeSpan.FromMilliseconds(dt));
             }
@@ -215,7 +212,7 @@ namespace 网易云歌词提取
          */
         private static bool CheckNum(string s)
         {
-            return Regex.Match(s, "^\\d+$").Success;
+            return Regex.IsMatch(s, "^\\d+$");
         }
 
         /**
@@ -231,7 +228,7 @@ namespace 网易云歌词提取
             var sb = new StringBuilder();
             foreach (var ar in arList)
             {
-                sb.Append(ar.Name).Append(",");
+                sb.Append(ar.Name).Append(',');
             }
 
             return sb.Remove(sb.Length - 1, 1).ToString();
