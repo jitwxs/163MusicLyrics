@@ -51,7 +51,7 @@ namespace 网易云歌词提取
             {
                 if (lyricResult.Code == 200)
                 {
-                    string originLyric = "", originTLyric = "";
+                    string originLyric = string.Empty, originTLyric = string.Empty;
                     if (lyricResult.Lrc != null)
                     {
                         originLyric = lyricResult.Lrc.Lyric;
@@ -123,7 +123,7 @@ namespace 网易云歌词提取
             var baseTime = startTime.Add(new TimeSpan(0, 0, 0, 0, 0));
             var preTime = baseTime;
             var isFirstLine = true;
-            var preStr = "";
+            var preStr = string.Empty;
             var timeReg = new Regex(@"(?<=^\[)(\d|\:|\.)+(?=])");
             var strReg = new Regex(@"(?<=]).+", RegexOptions.RightToLeft);
 
@@ -159,7 +159,7 @@ namespace 网易云歌词提取
                     }
                     else
                     {
-                        if (!preStr.Equals(""))
+                        if (!preStr.Equals(string.Empty))
                         {
                             var curTime = baseTime.Add(TimeSpan.Parse("00:" + match.Value));
 
@@ -170,7 +170,7 @@ namespace 网易云歌词提取
                     }
 
                     var strMatch = strReg.Match(line);
-                    preStr = strMatch.Success ? strMatch.Value.Trim() : "";
+                    preStr = strMatch.Success ? strMatch.Value.Trim() : string.Empty;
                 }
                 else
                 {
@@ -184,7 +184,7 @@ namespace 网易云歌词提取
                 }
             }
 
-            if (!preStr.Equals(""))
+            if (!preStr.Equals(string.Empty))
             {
                 AddSrtLine(TimeSpan.FromMilliseconds(dt));
             }
@@ -206,7 +206,7 @@ namespace 网易云歌词提取
                 case OUTPUT_FILENAME_TYPE_ENUM.NAME:
                     return songVo.Name;
                 default:
-                    return "";
+                    return string.Empty;
             }
         }
 
@@ -225,7 +225,7 @@ namespace 网易云歌词提取
         {
             if (!arList.Any())
             {
-                return "";
+                return string.Empty;
             }
 
             var sb = new StringBuilder();

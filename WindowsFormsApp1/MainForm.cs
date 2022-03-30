@@ -234,7 +234,7 @@ namespace 网易云歌词提取
             textBox_song.Text = result.SongVo.Name;
             textBox_singer.Text = result.SongVo.Singer;
             textBox_album.Text = result.SongVo.Album;
-            UpdateLrcTextBox("");
+            UpdateLrcTextBox(string.Empty);
         }
 
         /**
@@ -492,7 +492,7 @@ namespace 网易云歌词提取
             }
 
             ReloadConfig();
-            UpdateLrcTextBox("");
+            UpdateLrcTextBox(string.Empty);
         }
 
         private void comboBox_search_type_SelectedIndexChanged(object sender, EventArgs e)
@@ -500,14 +500,14 @@ namespace 网易云歌词提取
             search_type_enum = (SEARCH_TYPE_ENUM)comboBox_search_type.SelectedIndex;
 
             ReloadConfig();
-            UpdateLrcTextBox("");
+            UpdateLrcTextBox(string.Empty);
         }
 
         private void comboBox_dot_SelectedIndexChanged(object sender, EventArgs e)
         {
             dot_type_enum = (DOT_TYPE_ENUM)comboBox_dot.SelectedIndex;
             ReloadConfig();
-            UpdateLrcTextBox("");
+            UpdateLrcTextBox(string.Empty);
         }
 
         /**
@@ -579,7 +579,7 @@ namespace 网易云歌词提取
         private void splitTextBox_TextChanged(object sender, EventArgs e)
         {
             ReloadConfig();
-            UpdateLrcTextBox("");
+            UpdateLrcTextBox(string.Empty);
         }
 
         /**
@@ -587,7 +587,7 @@ namespace 网易云歌词提取
          */
         private void UpdateLrcTextBox(string replace)
         {
-            if (replace != "")
+            if (replace != string.Empty)
             {
                 textBox_lrc.Text = replace;
             }
@@ -611,10 +611,10 @@ namespace 网易云歌词提取
          */
         private void CleanTextBox()
         {
-            textBox_lrc.Text = "";
-            textBox_song.Text = "";
-            textBox_singer.Text = "";
-            textBox_album.Text = "";
+            textBox_lrc.Text = string.Empty;
+            textBox_song.Text = string.Empty;
+            textBox_singer.Text = string.Empty;
+            textBox_album.Text = string.Empty;
         }
 
         private void textBox_lrc_KeyDown(object sender, KeyEventArgs e)
