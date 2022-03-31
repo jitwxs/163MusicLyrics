@@ -83,7 +83,7 @@ namespace 网易云歌词提取
             var albumResult = _api.GetAlbum(albumId);
             if (albumResult.Code != 200)
             {
-                errorMsg = ErrorMsg.INPUT_ALBUM_ILLEGAG;
+                errorMsg = ErrorMsg.INPUT_ALBUM_ILLEGAL;
                 return null;
             }
             var set = albumResult.Songs.Select(song => song.Id);
