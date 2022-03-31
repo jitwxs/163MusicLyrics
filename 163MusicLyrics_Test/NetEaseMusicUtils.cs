@@ -33,32 +33,19 @@ namespace _163MusicLyrics_Test
         [Test]
         public void CheckInputIdAndInputIsNuber()
         {
-            Assert.AreEqual(1, CheckInputId("1", out var output_1));
+            Assert.AreEqual(1, CheckInputId("1", SEARCH_TYPE_ENUM.SONG_ID, out var output_1));
             Assert.AreEqual(ErrorMsg.SUCCESS, output_1);
-            Assert.AreEqual(0, NetEaseMusicUtils.CheckInputId(string.Empty, out var output_2));
-            Assert.AreEqual(ErrorMsg.INPUT_ID_ILLEGAG, output_2);
-            Assert.AreEqual(0, NetEaseMusicUtils.CheckInputId(null, out var output_3));
-            Assert.AreEqual(ErrorMsg.INPUT_ID_ILLEGAG, output_3);
+            Assert.AreEqual(-1, NetEaseMusicUtils.CheckInputId(string.Empty, SEARCH_TYPE_ENUM.SONG_ID, out var output_2));
+            Assert.AreEqual(ErrorMsg.INPUT_ID_ILLEGAL, output_2);
+            Assert.AreEqual(-1, NetEaseMusicUtils.CheckInputId(null, SEARCH_TYPE_ENUM.SONG_ID, out var output_3));
+            Assert.AreEqual(ErrorMsg.INPUT_ID_ILLEGAL, output_3);
         }
 
         [Test]
         public void CheckInputIdAndInputNotIsNuber()
         {
-            Assert.AreEqual(0, CheckInputId("abc", out var output_1));
-            Assert.AreEqual(ErrorMsg.INPUT_ID_ILLEGAG, output_1);
-        }
-
-        [Test]
-        public void GetLyricVoThrowException()
-        {
-            var search = new SearchInfo();
-            var lyrics = new LyricResult();
-
-            //等合并后
-            //Assert.Throws<ArgumentNullException>(() => GetLyricVo(null, 0, null, out _));
-            //Assert.Throws<ArgumentNullException>(() => GetLyricVo(null, 0, search, out _));
-            //Assert.Throws<ArgumentNullException>(() => GetLyricVo(lyrics, 0, null, out _));
-            Assert.DoesNotThrow(() => GetLyricVo(lyrics, 0, search, out _));
+            Assert.AreEqual(-1, CheckInputId("abc", SEARCH_TYPE_ENUM.SONG_ID, out var output_1));
+            Assert.AreEqual(ErrorMsg.INPUT_ID_ILLEGAL, output_1);
         }
 
         [Test]

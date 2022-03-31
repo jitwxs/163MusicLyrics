@@ -7,7 +7,6 @@ using System.Text.RegularExpressions;
 namespace 网易云歌词提取
 {
     public static class NetEaseMusicUtils
-
     {
         /**
          * 输入参数校验
@@ -32,7 +31,7 @@ namespace 网易云歌词提取
             }
             
             // ID提取
-            var keyword = "";
+            var keyword = string.Empty;
             switch (searchType)
             {
                 case SEARCH_TYPE_ENUM.SONG_ID:
@@ -118,7 +117,7 @@ namespace 网易云歌词提取
                 vo.Output = GetOutputContent(vo, searchInfo);                
             }
             catch (Exception ew)
-            {
+            {               
                 errorMsg = ew.Message;
             }
 
