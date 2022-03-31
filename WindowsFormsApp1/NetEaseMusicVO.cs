@@ -72,7 +72,7 @@ namespace 网易云歌词提取
         public static string SONG_NOT_EXIST = "歌曲信息暂未被收录或查询失败";
         public static string LRC_NOT_EXIST = "歌词信息暂未被收录或查询失败";
         public static string FUNCTION_NOT_SUPPORT = "该功能暂不可用，请等待后续更新";
-        public static string SONG_URL_COPY_SUCESS = "歌曲直链，已复制到剪切板";
+        public static string SONG_URL_COPY_SUCCESS = "歌曲直链，已复制到剪切板";
         public static string SONG_URL_GET_FAILED = "歌曲直链，获取失败";
         public static string FILE_NAME_IS_EMPTY = "输出文件名不能为空";
         public static string SAVE_SUCCESS = "保存成功";
