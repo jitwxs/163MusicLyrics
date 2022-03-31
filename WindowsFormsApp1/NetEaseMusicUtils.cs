@@ -6,26 +6,68 @@ using System.Text.RegularExpressions;
 
 namespace 网易云歌词提取
 {
-    static class NetEaseMusicUtils
+    internal static class NetEaseMusicUtils
     {
         /**
          * 输入参数校验
+         *
+         * @param input 输入参数
+         * @param searchType 查询类型
          */
-        public static long CheckInputId(string input, out string errorMsg)
+        public static long CheckInputId(string input, SEARCH_TYPE_ENUM searchType, out string errorMsg)
         {
-            long result = 0;
-
-            if (string.IsNullOrEmpty(input) || !CheckNum(input))
+            // 输入参数为空
+            if (string.IsNullOrEmpty(input))
             {
-                errorMsg = ErrorMsg.INPUT_ID_ILLEGAG;
+                errorMsg = ErrorMsg.INPUT_ID_ILLEGAL;
+                return -1;
             }
-            else
+            
+            // 输入是数字，直接返回
+            if (CheckNum(input))
             {
                 errorMsg = ErrorMsg.SUCCESS;
-                result = long.Parse(input);
+                return long.Parse(input);
+            }
+            
+            // ID提取
+            var keyword = "";
+            switch (searchType)
+            {
+                case SEARCH_TYPE_ENUM.SONG_ID:
+                    keyword = "song?id=";
+                    break;
+                case SEARCH_TYPE_ENUM.ALBUM_ID:
+                    keyword = "album?id=";
+                    break;
             }
 
-            return result;
+            var index = input.IndexOf(keyword, StringComparison.Ordinal);
+            if (index != -1)
+            {
+                var sb = new StringBuilder();
+                foreach (var c in input.Substring(index + keyword.Length).ToCharArray())
+                {
+                    if (char.IsNumber(c))
+                    {
+                        sb.Append(c);
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+
+                if (sb.Length != 0)
+                {
+                    errorMsg = ErrorMsg.SUCCESS;
+                    return long.Parse(sb.ToString());
+                }
+            }
+            
+            // 不合法类型
+            errorMsg = ErrorMsg.INPUT_ID_ILLEGAL;
+            return -1;
         }
 
         /*
