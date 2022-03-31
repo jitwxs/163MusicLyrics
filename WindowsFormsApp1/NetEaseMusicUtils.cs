@@ -33,7 +33,7 @@ namespace 网易云歌词提取
             }
             
             // ID提取
-            var keyword = "";
+            var keyword = string.Empty;
             switch (searchType)
             {
                 case SEARCH_TYPE_ENUM.SONG_ID:
