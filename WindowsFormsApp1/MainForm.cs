@@ -91,6 +91,7 @@ namespace 网易云歌词提取
                 errorMsg = ErrorMsg.INPUT_ALBUM_ILLEGAL;
                 return null;
             }
+
             var set = albumResult.Songs.Select(song => song.Id);
             songIds.AddRange(set);
 
@@ -184,7 +185,7 @@ namespace 网易云歌词提取
                         continue;
                     }
                 }
-                
+
                 errorMsgDict.Add(songId, errorMsg);
             }
         }
@@ -220,6 +221,7 @@ namespace 网易云歌词提取
                         MessageBox.Show(errorMsg, "提示");
                         return;
                     }
+
                     foreach (var songId in songIds)
                     {
                         _globalSearchInfo.SONG_IDS.Add(songId);
@@ -245,7 +247,7 @@ namespace 网易云歌词提取
             var message = resultMaps[songId];
             errorMsg = message;
             if (message != ErrorMsg.SUCCESS)
-            {                
+            {
                 return;
             }
 
@@ -306,7 +308,7 @@ namespace 网易云歌词提取
             if (errorMsg != ErrorMsg.SUCCESS)
             {
                 _logger.Info($"搜索失败, 搜索框内容: {search_id_text.Text}, 搜索模式: {_globalSearchInfo.SearchType}, " +
-                    $"错误信息: {errorMsg}");
+                             $"错误信息: {errorMsg}");
                 MessageBox.Show(errorMsg, "提示");
                 return;
             }
@@ -334,8 +336,8 @@ namespace 网易云歌词提取
             }
             catch (WebException ex)
             {
+                _logger.Error(ex, "网络错误");
                 MessageBox.Show("网络错误", "错误");
-                _logger.Error(ex, "网络错误");                
             }
             catch (Exception ex)
             {
@@ -426,13 +428,14 @@ namespace 网易云歌词提取
                         sw.Write(NetEaseMusicUtils.GetOutputContent(saveVo.LyricVo, _globalSearchInfo));
                         sw.Flush();
                     }
+
                     MessageBox.Show(ErrorMsg.SAVE_SUCCESS, "提示");
                 }
             }
             catch (Exception ew)
             {
-                MessageBox.Show("保存失败！错误信息：\n" + ew.Message);
                 _logger.Error(ew, "单独保存歌词失败");
+                MessageBox.Show("保存失败！错误信息：\n" + ew.Message);
             }
         }
 
@@ -464,13 +467,14 @@ namespace 网易云歌词提取
                         sw.Flush();
                         sw.Close();
                     }
+
                     MessageBox.Show(ErrorMsg.SAVE_SUCCESS, "提示");
                 }
             }
             catch (Exception ew)
             {
-                MessageBox.Show("批量保存失败，错误信息：\n" + ew.Message);
                 _logger.Error(ew, "批量保存失败");
+                MessageBox.Show("批量保存失败，错误信息：\n" + ew.Message);
             }
 
             // 输出日志
