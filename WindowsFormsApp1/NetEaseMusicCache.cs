@@ -1,10 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using NLog;
 
 namespace 网易云歌词提取
 {
     public static class NetEaseMusicCache
     {
         private static readonly Dictionary<long, SaveVo> SaveVoCache = new Dictionary<long, SaveVo>();
+        private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
         public static bool ContainsSaveVo(long songId)
         {
@@ -79,6 +82,12 @@ namespace 网易云歌词提取
 
         public static void PutAlbum(long albumId, AlbumResult albumResult)
         {
+            if (albumResult == null)
+            {
+                var ex = new ArgumentNullException(nameof(albumResult));
+                _logger.Error(ex);
+                throw ex;
+            }
             AlbumCache.Add(albumId, albumResult);
         }
         
@@ -99,6 +108,12 @@ namespace 网易云歌词提取
 
         public static void PutLyric(long songId, LyricResult albumResult)
         {
+            if (albumResult == null)
+            {
+                var ex = new ArgumentNullException(nameof(albumResult));
+                _logger.Error(ex);
+                throw ex;
+            }
             LyricCache.Add(songId, albumResult);
         }
     }

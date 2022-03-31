@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Net;
+using System.Collections.Generic;
 
 namespace 网易云歌词提取
 {
@@ -42,6 +43,12 @@ namespace 网易云歌词提取
             return result;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="songIds"></param>
+        /// <exception cref="WebException"></exception>
+        /// <returns></returns>
         public Dictionary<long, Song> GetSongs(long[] songIds)
         {
             var result = new Dictionary<long, Song>();

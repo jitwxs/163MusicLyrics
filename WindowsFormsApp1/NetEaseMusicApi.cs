@@ -54,6 +54,12 @@ namespace 网易云歌词提取
             return result;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="songIds"></param>
+        /// <exception cref="WebException"></exception>
+        /// <returns></returns>
         public Dictionary<long, Song> GetSongs(long[] songIds)
         {
             var result = new Dictionary<long, Song>();
@@ -79,11 +85,11 @@ namespace 网易云歌词提取
 
         public AlbumResult GetAlbum(long albumId)
         {
-            var url = "https://music.163.com/weapi/v1/album/" + albumId + "?csrf_token=";
+            var url = $"https://music.163.com/weapi/v1/album/{albumId}?csrf_token=";
             
             var data = new Dictionary<string, string>
             {
-                { "csrf_token", "" },
+                { "csrf_token", string.Empty },
             };
 
             var raw = CURL(url, Prepare(JsonConvert.SerializeObject(data)));
@@ -91,6 +97,13 @@ namespace 网易云歌词提取
             return JsonConvert.DeserializeObject<AlbumResult>(raw);
         }
 
+        /// <summary>
+        /// 获得原始歌词结果
+        /// </summary>
+        /// <param name="songId">音乐ID</param>
+        /// <exception cref="WebException"></exception>
+        /// <returns>一个
+        /// <see cref="LyricResult"/></returns>
         public LyricResult GetLyric(long songId)
         {
             const string url = "https://music.163.com/weapi/song/lyric?csrf_token=";
@@ -102,7 +115,7 @@ namespace 网易云歌词提取
                 { "lv", "-1" },
                 { "kv", "-1" },
                 { "tv", "-1" },
-                { "csrf_token", "" }
+                { "csrf_token", string.Empty }
             };
 
             var raw = CURL(url, Prepare(JsonConvert.SerializeObject(data)));
@@ -125,9 +138,12 @@ namespace 网易云歌词提取
             return JsonConvert.DeserializeObject<SongUrls>(raw);
         }
 
-        /**
-         * 批量获取歌曲详情
-         */
+        /// <summary>
+        /// 批量获得歌曲详情
+        /// </summary>
+        /// <param name="songIds">歌曲ID</param>
+        /// <exception cref="WebException"></exception>
+        /// <returns></returns>
         private DetailResult GetDetail(IEnumerable<long> songIds)
         {
             const string url = "https://music.163.com/weapi/v3/song/detail?csrf_token=";
@@ -135,7 +151,7 @@ namespace 网易云歌词提取
             var songRequests = new StringBuilder();
             foreach (var songId in songIds)
             {
-                songRequests.Append("{'id':'").Append(songId).Append("'}").Append(",");
+                songRequests.Append("{'id':'").Append(songId).Append("'}").Append(',');
             }
             
             var data = new Dictionary<string, string>
@@ -144,7 +160,7 @@ namespace 网易云歌词提取
                     "c",
                     "[" + songRequests.Remove(songRequests.Length - 1, 1) + "]"
                 },
-                { "csrf_token", "" },
+                { "csrf_token", string.Empty },
             };
             
             var raw = CURL(url, Prepare(JsonConvert.SerializeObject(data)));
@@ -156,7 +172,7 @@ namespace 网易云歌词提取
         {
             public long[] ids;
             public long br;
-            public string csrf_token = "";
+            public string csrf_token = string.Empty;
         }
 
         private string CreateSecretKey(int length)
@@ -187,8 +203,7 @@ namespace 网易云歌词提取
         private string RSAEncode(string text)
         {
             string srtext = new string(text.Reverse().ToArray());
-            ;
-            var a = BCHexDec(BitConverter.ToString(Encoding.Default.GetBytes(srtext)).Replace("-", ""));
+            var a = BCHexDec(BitConverter.ToString(Encoding.Default.GetBytes(srtext)).Replace("-", string.Empty));
             var b = BCHexDec(_PUBKEY);
             var c = BCHexDec(_MODULUS);
             var key = BigInteger.ModPow(a, b, c).ToString("x");
@@ -199,7 +214,14 @@ namespace 网易云歌词提取
                 return key;
         }
 
-        // fake curl
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="url">链接</param>
+        /// <param name="parms">参数</param>
+        /// <param name="method">模式</param>
+        /// <exception cref="WebException"></exception>
+        /// <returns></returns>
         private string CURL(string url, Dictionary<string, string> parms, string method = "POST")
         {
             string result;
@@ -218,7 +240,7 @@ namespace 网易云歌词提取
                 var bytes = wc.UploadValues(url, method, reqparm);
                 result = Encoding.UTF8.GetString(bytes);
             }
-
+            //System.Diagnostics.Debug.WriteLine(result);
             return result;
         }
 

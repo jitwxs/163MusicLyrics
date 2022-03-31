@@ -18,7 +18,7 @@ namespace 网易云歌词提取
         /// <returns></returns>
         public static string HttpPost(string url, string postData = null, string contentType = "application/json", int timeOut = 30, Dictionary<string, string> headers = null)
         {
-            postData = postData ?? "";
+            postData = postData ?? string.Empty;
             using (HttpClient client = new HttpClient())
             {
                 if (headers != null)
@@ -48,7 +48,7 @@ namespace 网易云歌词提取
         /// <returns></returns>
         public static async Task<string> HttpPostAsync(string url, string postData = null, string contentType = "application/json", int timeOut = 30, Dictionary<string, string> headers = null)
         {
-            postData = postData ?? "";
+            postData = postData ?? string.Empty;
             using (HttpClient client = new HttpClient())
             {
                 client.Timeout = new TimeSpan(0, 0, timeOut);
