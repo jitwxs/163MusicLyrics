@@ -83,7 +83,7 @@ namespace 网易云歌词提取
             
             var data = new Dictionary<string, string>
             {
-                { "csrf_token", "" },
+                { "csrf_token", string.Empty },
             };
 
             var raw = CURL(url, Prepare(JsonConvert.SerializeObject(data)));
@@ -102,7 +102,7 @@ namespace 网易云歌词提取
                 { "lv", "-1" },
                 { "kv", "-1" },
                 { "tv", "-1" },
-                { "csrf_token", "" }
+                { "csrf_token", string.Empty }
             };
 
             var raw = CURL(url, Prepare(JsonConvert.SerializeObject(data)));
@@ -135,7 +135,7 @@ namespace 网易云歌词提取
             var songRequests = new StringBuilder();
             foreach (var songId in songIds)
             {
-                songRequests.Append("{'id':'").Append(songId).Append("'}").Append(",");
+                songRequests.Append("{'id':'").Append(songId).Append("'}").Append(',');
             }
             
             var data = new Dictionary<string, string>
@@ -144,7 +144,7 @@ namespace 网易云歌词提取
                     "c",
                     "[" + songRequests.Remove(songRequests.Length - 1, 1) + "]"
                 },
-                { "csrf_token", "" },
+                { "csrf_token", string.Empty },
             };
             
             var raw = CURL(url, Prepare(JsonConvert.SerializeObject(data)));
@@ -156,7 +156,7 @@ namespace 网易云歌词提取
         {
             public long[] ids;
             public long br;
-            public string csrf_token = "";
+            public string csrf_token = string.Empty;
         }
 
         private string CreateSecretKey(int length)
@@ -188,7 +188,7 @@ namespace 网易云歌词提取
         {
             string srtext = new string(text.Reverse().ToArray());
             ;
-            var a = BCHexDec(BitConverter.ToString(Encoding.Default.GetBytes(srtext)).Replace("-", ""));
+            var a = BCHexDec(BitConverter.ToString(Encoding.Default.GetBytes(srtext)).Replace("-", string.Empty));
             var b = BCHexDec(_PUBKEY);
             var c = BCHexDec(_MODULUS);
             var key = BigInteger.ModPow(a, b, c).ToString("x");
@@ -218,7 +218,7 @@ namespace 网易云歌词提取
                 var bytes = wc.UploadValues(url, method, reqparm);
                 result = Encoding.UTF8.GetString(bytes);
             }
-
+            System.Diagnostics.Debug.WriteLine(result);
             return result;
         }
 

@@ -70,6 +70,14 @@ namespace 网易云歌词提取
             return -1;
         }
 
+        /*
+         * 检查字符串是否为数字
+         */
+        private static bool CheckNum(string s)
+        {
+            return Regex.IsMatch(s, "^\\d+$");
+        }
+
         /**
          * 获取歌词信息
          */
@@ -77,40 +85,36 @@ namespace 网易云歌词提取
         {
             var vo = new LyricVo();
 
-            if (searchInfo == null)
-            {
-                errorMsg = ErrorMsg.LRC_NOT_EXIST;
-                return vo;
-            }
-
-            if (lyricResult == null)
+            if (searchInfo == null || lyricResult == null)
             {
                 errorMsg = ErrorMsg.LRC_NOT_EXIST;
                 return vo;
             }
 
             try
-            {
-                if (lyricResult.Code == 200)
+            {                
+                if (lyricResult.Code != 200)
                 {
-                    string originLyric = "", originTLyric = "";
-                    if (lyricResult.Lrc != null)
-                    {
-                        originLyric = lyricResult.Lrc.Lyric;
-                    }
-
-                    if (lyricResult.Tlyric != null)
-                    {
-                        originTLyric = lyricResult.Tlyric.Lyric;
-                    }
-
-                    vo.Lyric = originLyric;
-                    vo.TLyric = originTLyric;
-                    vo.Dt = dt;
-                    vo.Output = GetOutputContent(vo, searchInfo);
+                    errorMsg = $"网络错误, 错误码: {lyricResult.Code}";
+                    return vo;
                 }
 
                 errorMsg = ErrorMsg.SUCCESS;
+                string originLyric = string.Empty, originTLyric = string.Empty;
+                if (lyricResult.Lrc != null)
+                {
+                    originLyric = lyricResult.Lrc.Lyric;
+                }
+
+                if (lyricResult.Tlyric != null)
+                {
+                    originTLyric = lyricResult.Tlyric.Lyric;
+                }
+
+                vo.Lyric = originLyric;
+                vo.TLyric = originTLyric;
+                vo.DateTime = dt;
+                vo.Output = GetOutputContent(vo, searchInfo);                
             }
             catch (Exception ew)
             {
@@ -125,14 +129,16 @@ namespace 网易云歌词提取
          */
         public static string GetOutputContent(LyricVo lyricVo, SearchInfo searchInfo)
         {
-            var output = GetOutputLyric(lyricVo.Lyric, lyricVo.TLyric, searchInfo);
+            if (lyricVo == null)
+                throw new ArgumentNullException(nameof(lyricVo));
 
-            if (searchInfo.OutputFileFormat == OUTPUT_FORMAT_ENUM.SRT)
+            switch (searchInfo?.OutputFileFormat ?? throw new ArgumentNullException(nameof(searchInfo)))
             {
-                output = ConvertLyricToSrt(output, lyricVo.Dt);
+                case OUTPUT_FORMAT_ENUM.LRC: return GetOutputLyric(lyricVo.Lyric, lyricVo.TLyric, searchInfo);
+                case OUTPUT_FORMAT_ENUM.SRT: return ConvertLyricToSrt(
+                    GetOutputLyric(lyricVo.Lyric, lyricVo.TLyric, searchInfo), lyricVo.DateTime);
+                default: throw new ArgumentException(nameof(searchInfo.OutputFileFormat));
             }
-
-            return output;
         }
 
         /**
@@ -152,131 +158,6 @@ namespace 网易云歌词提取
                 result.Append(i).Append(Environment.NewLine);
             }
             return result.ToString();
-        }
-
-        /**
-         * lrc --> srt
-         */
-        private static string ConvertLyricToSrt(string input, long dt)
-        {
-            var output = new StringBuilder();
-
-            var startTime = new TimeSpan();
-            var baseTime = startTime.Add(new TimeSpan(0, 0, 0, 0, 0));
-            var preTime = baseTime;
-            var isFirstLine = true;
-            var preStr = "";
-            var timeReg = new Regex(@"(?<=^\[)(\d|\:|\.)+(?=])");
-            var strReg = new Regex(@"(?<=]).+", RegexOptions.RightToLeft);
-
-            var lines = input.Split(Environment.NewLine.ToCharArray());
-
-            var index = 1;
-            
-            void AddSrtLine(TimeSpan curTime)
-            {
-                output
-                    .Append(index++)
-                    .Append(Environment.NewLine)
-                    .Append($"{preTime.Hours:d2}:{preTime.Minutes:d2}:{preTime.Seconds:d2},{preTime.Milliseconds:d3}")
-                    .Append(" --> ")
-                    .Append($"{curTime.Hours:d2}:{curTime.Minutes:d2}:{curTime.Seconds:d2},{curTime.Milliseconds:d3}")
-                    .Append(Environment.NewLine)
-                    .Append(preStr)
-                    .Append(Environment.NewLine)
-                    .Append(Environment.NewLine);
-            }
-
-            foreach (var line in lines)
-            {
-                if (string.IsNullOrWhiteSpace(line)) continue;
-
-                var match = timeReg.Match(line);
-                if (match.Success)
-                {
-                    if (isFirstLine)
-                    {
-                        preTime = baseTime.Add(TimeSpan.Parse("00:" + match.Value));
-                        isFirstLine = false;
-                    }
-                    else
-                    {
-                        if (!preStr.Equals(""))
-                        {
-                            var curTime = baseTime.Add(TimeSpan.Parse("00:" + match.Value));
-
-                            AddSrtLine(curTime);
-
-                            preTime = curTime;
-                        }
-                    }
-
-                    var strMatch = strReg.Match(line);
-                    preStr = strMatch.Success ? strMatch.Value.Trim() : "";
-                }
-                else
-                {
-                    var offsetReg = new Regex(@"(?<=^\[offset:)\d+(?=])");
-                    match = offsetReg.Match(line);
-                    if (match.Success)
-                    {
-                        var offset = Convert.ToInt32(match.Value);
-                        baseTime = baseTime.Add(new TimeSpan(0, 0, 0, 0, offset));
-                    }
-                }
-            }
-
-            if (!preStr.Equals(""))
-            {
-                AddSrtLine(TimeSpan.FromMilliseconds(dt));
-            }
-
-            return output.ToString();
-        }
-
-        /**
-         * 获取输出文件名
-         */
-        public static string GetOutputName(SongVo songVo, SearchInfo searchInfo)
-        {
-            switch (searchInfo.OutputFileNameType)
-            {
-                case OUTPUT_FILENAME_TYPE_ENUM.NAME_SINGER:
-                    return songVo.Name + " - " + songVo.Singer;
-                case OUTPUT_FILENAME_TYPE_ENUM.SINGER_NAME:
-                    return songVo.Singer + " - " + songVo.Name;
-                case OUTPUT_FILENAME_TYPE_ENUM.NAME:
-                    return songVo.Name;
-                default:
-                    return "";
-            }
-        }
-
-        /*
-         * 检查字符串是否为数字
-         */
-        private static bool CheckNum(string s)
-        {
-            return Regex.Match(s, "^\\d+$").Success;
-        }
-
-        /**
-         * 拼接歌手名
-         */
-        public static string ContractSinger(List<Ar> arList)
-        {
-            if (!arList.Any())
-            {
-                return "";
-            }
-
-            var sb = new StringBuilder();
-            foreach (var ar in arList)
-            {
-                sb.Append(ar.Name).Append(",");
-            }
-
-            return sb.Remove(sb.Length - 1, 1).ToString();
         }
 
         /**
@@ -316,8 +197,162 @@ namespace 网易云歌词提取
                     res = MergeLrc(originLrcs, translateLrcs, searchInfo.LrcMergeSeparator, false);
                     break;
             }
-
             return res;
+        }
+
+        /**
+         * 设置时间戳小数位数
+         */
+        private static void SetTimeStamp2Dot(ref string[] lrcStr, DOT_TYPE_ENUM dotTypeEnum)
+        {
+            for (int i = 0; i < lrcStr.Length; i++)
+            {
+                int index = lrcStr[i].IndexOf("]");
+                int dot = lrcStr[i].IndexOf(".");
+                if (index == -1 || dot == -1)
+                {
+                    continue;
+                }
+
+                string ms = lrcStr[i].Substring(dot + 1, index - dot - 1);
+                if (ms.Length == 3)
+                {
+                    if (dotTypeEnum == DOT_TYPE_ENUM.DOWN)
+                    {
+                        ms = ms.Substring(0, 2);
+                    }
+                    else if (dotTypeEnum == DOT_TYPE_ENUM.HALF_UP)
+                    {
+                        ms = Convert.ToDouble("0." + ms).ToString("0.00").Substring(2);
+                    }
+                }
+                lrcStr[i] = lrcStr[i].Substring(0, dot) + "." + ms + lrcStr[i].Substring(index);
+            }
+        }
+
+        /**
+         * lrc --> srt
+         */
+        private static string ConvertLyricToSrt(string input, long dt)
+        {
+            var output = new StringBuilder();
+
+            var startTime = new TimeSpan();
+            var baseTime = startTime.Add(new TimeSpan(0, 0, 0, 0, 0));
+            var preTime = baseTime;
+            var isFirstLine = true;
+            var preStr = string.Empty;
+            var timeReg = new Regex(@"(?<=^\[)(\d|\:|\.)+(?=])");
+            var strReg = new Regex(@"(?<=]).+", RegexOptions.RightToLeft);
+
+            var lines = input.Split(Environment.NewLine.ToCharArray());
+
+            var index = 1;
+            
+            void AddSrtLine(TimeSpan curTime)
+            {
+                output
+                    .Append(index++)
+                    .Append(Environment.NewLine)
+                    .Append($"{preTime.Hours:d2}:{preTime.Minutes:d2}:{preTime.Seconds:d2},{preTime.Milliseconds:d3}")
+                    .Append(" --> ")
+                    .Append($"{curTime.Hours:d2}:{curTime.Minutes:d2}:{curTime.Seconds:d2},{curTime.Milliseconds:d3}")
+                    .Append(Environment.NewLine)
+                    .Append(preStr)
+                    .Append(Environment.NewLine)
+                    .Append(Environment.NewLine);
+            }
+
+            foreach (var line in lines)
+            {
+                if (string.IsNullOrWhiteSpace(line)) 
+                    continue;
+
+                var match = timeReg.Match(line);
+                if (match.Success)
+                {
+                    if (isFirstLine)
+                    {
+                        preTime = baseTime.Add(TimeSpan.Parse("00:" + match.Value));
+                        isFirstLine = false;
+                    }
+                    else
+                    {
+                        if (preStr != string.Empty)
+                        {
+                            var curTime = baseTime.Add(TimeSpan.Parse("00:" + match.Value));
+
+                            AddSrtLine(curTime);
+
+                            preTime = curTime;
+                        }
+                    }
+
+                    var strMatch = strReg.Match(line);
+                    preStr = strMatch.Success ? strMatch.Value.Trim() : string.Empty;
+                }
+                else
+                {
+                    var offsetReg = new Regex(@"(?<=^\[offset:)\d+(?=])");
+                    match = offsetReg.Match(line);
+                    if (match.Success)
+                    {
+                        var offset = Convert.ToInt32(match.Value);
+                        baseTime = baseTime.Add(new TimeSpan(0, 0, 0, 0, offset));
+                    }
+                }
+            }
+
+            if (preStr != string.Empty)
+            {
+                AddSrtLine(TimeSpan.FromMilliseconds(dt));
+            }
+
+            return output.ToString();
+        }
+
+        /**
+         * 获取输出文件名
+         */
+        public static string GetOutputName(SongVo songVo, SearchInfo searchInfo)
+        {
+            if (songVo == null)
+                throw new ArgumentNullException(nameof(songVo));
+
+            switch (searchInfo?.OutputFileNameType ?? throw new ArgumentNullException(nameof(searchInfo)))
+            {
+                case OUTPUT_FILENAME_TYPE_ENUM.NAME_SINGER:
+                    return songVo.Name + " - " + songVo.Singer;
+                case OUTPUT_FILENAME_TYPE_ENUM.SINGER_NAME:
+                    return songVo.Singer + " - " + songVo.Name;
+                case OUTPUT_FILENAME_TYPE_ENUM.NAME:
+                    return songVo.Name;
+                default:
+                    return string.Empty;
+            }
+        }
+
+        /**
+         * 拼接歌手名
+         */
+        public static string ContractSinger(List<Ar> arList)
+        {
+            if (arList == null)
+            {
+                throw new ArgumentNullException(nameof(arList));
+            }
+            if (!arList.Any())
+            {
+                return string.Empty;
+            }
+
+            var sb = new StringBuilder();
+            foreach (var ar in arList)
+            {
+                sb.Append(ar.Name).Append(',');
+            }
+
+            return sb.Remove(sb.Length - 1, 1).ToString();
         }
 
         /**
@@ -458,42 +493,16 @@ namespace 网易云歌词提取
             }
         }
 
-        /**
-         * 设置时间戳小数位数
-         */
-        private static void SetTimeStamp2Dot(ref string[] lrcStr, DOT_TYPE_ENUM dotTypeEnum)
-        {
-            for (int i = 0; i < lrcStr.Length; i++)
-            {
-                int index = lrcStr[i].IndexOf("]");
-                int dot = lrcStr[i].IndexOf(".");
-                if (index == -1 || dot == -1)
-                {
-                    continue;
-                }
-
-                string ms = lrcStr[i].Substring(dot + 1, index - dot - 1);
-                if (ms.Length == 3)
-                {
-                    if (dotTypeEnum == DOT_TYPE_ENUM.DOWN)
-                    {
-                        ms = ms.Substring(0, 2);
-                    }
-                    else if (dotTypeEnum == DOT_TYPE_ENUM.HALF_UP)
-                    {
-                        ms = Convert.ToDouble("0." + ms).ToString("0.00").Substring(2);
-                    }
-                }
-
-                lrcStr[i] = lrcStr[i].Substring(0, dot) + "." + ms + lrcStr[i].Substring(index);
-            }
-        }
-
         public static string GetSafeFilename(string arbitraryString)
         {
+            if (arbitraryString == null)
+            {
+                throw new ArgumentNullException(nameof(arbitraryString));
+            }
             var invalidChars = System.IO.Path.GetInvalidFileNameChars();
             var replaceIndex = arbitraryString.IndexOfAny(invalidChars, 0);
-            if (replaceIndex == -1) return arbitraryString;
+            if (replaceIndex == -1)
+                return arbitraryString;
 
             var r = new StringBuilder();
             var i = 0;
