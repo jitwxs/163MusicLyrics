@@ -6,7 +6,7 @@ using System.Text.RegularExpressions;
 
 namespace 网易云歌词提取
 {
-    static class NetEaseMusicUtils
+    public static class NetEaseMusicUtils
     {
         /**
          * 输入参数校验
