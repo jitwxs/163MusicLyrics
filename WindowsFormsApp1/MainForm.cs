@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Windows.Forms;
+using NLog;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -13,6 +14,7 @@ namespace 网易云歌词提取
     public partial class MainForm : Form
     {
         private readonly NetEaseMusicApiWrapper _api;
+        private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
         private readonly Dictionary<long, SaveVo> _globalSaveVoMap = new Dictionary<long, SaveVo>();
 
@@ -52,6 +54,9 @@ namespace 网易云歌词提取
             _api = new NetEaseMusicApiWrapper();
         }
 
+        /// <summary>
+        /// 读取搜索框并重新加载配置
+        /// </summary>
         private void ReloadConfig()
         {
             var ids = search_id_text.Text.Trim().Split(',');
@@ -92,9 +97,13 @@ namespace 网易云歌词提取
             return songIds;
         }
 
-        /**
-         * 获取歌曲信息
-         */
+        /// <summary>
+        /// 获取歌曲信息
+        /// </summary>
+        /// <param name="songIds">歌曲ID</param>
+        /// <param name="errorMsgs">错误信息</param>
+        /// <exception cref="WebException"></exception>
+        /// <returns></returns>
         private Dictionary<long, SongVo> RequestSongVo(long[] songIds, out Dictionary<long, string> errorMsgs)
         {
             var datumDict = _api.GetDatum(songIds);
@@ -128,9 +137,13 @@ namespace 网易云歌词提取
             return result;
         }
 
-        /**
-         * 根据歌曲ID查询
-         */
+
+        /// <summary>
+        /// 根据歌曲ID查询
+        /// </summary>
+        /// <param name="songIds"></param>
+        /// <param name="errorMsgDict"></param>
+        /// <exception cref="WebException"></exception>
         private void SearchBySongId(IEnumerable<long> songIds, out Dictionary<long, string> errorMsgDict)
         {
             errorMsgDict = new Dictionary<long, string>();
@@ -219,17 +232,20 @@ namespace 网易云歌词提取
             }
         }
 
-        /**
-         * 单个歌曲搜索
-         */
-        private void SingleSearch(long songId)
+        /// <summary>
+        /// 单个歌曲搜索
+        /// </summary>
+        /// <param name="songId">歌曲ID</param>
+        /// <param name="errorMsg">错误信息</param>
+        /// <exception cref="WebException"></exception>
+        private void SingleSearch(long songId, out string errorMsg)
         {
             SearchBySongId(new[] { songId }, out var resultMaps);
 
             var message = resultMaps[songId];
+            errorMsg = message;
             if (message != ErrorMsg.SUCCESS)
-            {
-                MessageBox.Show(message, "提示");
+            {                
                 return;
             }
 
@@ -245,9 +261,12 @@ namespace 网易云歌词提取
             UpdateLrcTextBox(string.Empty);
         }
 
-        /**
-         * 批量歌曲搜索
-         */
+
+        /// <summary>
+        /// 批量歌曲搜索
+        /// </summary>
+        /// <param name="ids"></param>
+        /// <exception cref="WebException"></exception>
         private void BatchSearch(IEnumerable<long> ids)
         {
             SearchBySongId(ids, out var resultMaps);
@@ -286,22 +305,41 @@ namespace 网易云歌词提取
             InitInputSongIds(out var errorMsg);
             if (errorMsg != ErrorMsg.SUCCESS)
             {
+                _logger.Info($"搜索失败, 搜索框内容: {search_id_text.Text}, 搜索模式: {_globalSearchInfo.SearchType}, " +
+                    $"错误信息: {errorMsg}");
                 MessageBox.Show(errorMsg, "提示");
                 return;
             }
 
-            var songIds = _globalSearchInfo.SONG_IDS;
-            if (songIds.Count > 1)
+            try
             {
-                BatchSearch(songIds);
-            }
-            else
-            {
-                // just loop once
-                foreach (var songId in songIds)
+                var songIds = _globalSearchInfo.SONG_IDS;
+                if (songIds.Count > 1)
                 {
-                    SingleSearch(songId);
+                    BatchSearch(songIds);
                 }
+                else
+                {
+                    // just loop once
+                    foreach (var songId in songIds)
+                    {
+                        SingleSearch(songId, out errorMsg);
+                        if (errorMsg != ErrorMsg.SUCCESS)
+                        {
+                            MessageBox.Show(errorMsg, "提示");
+                            return;
+                        }
+                    }
+                }
+            }
+            catch (WebException ex)
+            {
+                MessageBox.Show("网络错误", "错误");
+                _logger.Error(ex, "网络错误");                
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex);
             }
         }
 
@@ -383,16 +421,18 @@ namespace 网易云歌词提取
                 saveDialog.Filter = output_format_enum.ToDescription();
                 if (saveDialog.ShowDialog() == DialogResult.OK)
                 {
-                    var sw = new StreamWriter(saveDialog.FileName, false, NetEaseMusicUtils.GetEncoding(_globalSearchInfo.Encoding));
-                    sw.Write(NetEaseMusicUtils.GetOutputContent(saveVo.LyricVo, _globalSearchInfo));
-                    sw.Flush();
-                    sw.Close();
+                    using (var sw = new StreamWriter(saveDialog.FileName, false, NetEaseMusicUtils.GetEncoding(_globalSearchInfo.Encoding)))
+                    {
+                        sw.Write(NetEaseMusicUtils.GetOutputContent(saveVo.LyricVo, _globalSearchInfo));
+                        sw.Flush();
+                    }
                     MessageBox.Show(ErrorMsg.SAVE_SUCCESS, "提示");
                 }
             }
             catch (Exception ew)
             {
                 MessageBox.Show("保存失败！错误信息：\n" + ew.Message);
+                _logger.Error(ew, "单独保存歌词失败");
             }
         }
 
@@ -418,7 +458,7 @@ namespace 网易云歌词提取
                     {
                         var saveVo = item.Value;
                         string outputFileName = NetEaseMusicUtils.GetOutputName(saveVo.SongVo, _globalSearchInfo);
-                        string path = filePath + "/" + NetEaseMusicUtils.GetSafeFilename(outputFileName) + fileSuffix;
+                        string path = filePath + '/' + NetEaseMusicUtils.GetSafeFilename(outputFileName) + fileSuffix;
                         StreamWriter sw = new StreamWriter(path, false, NetEaseMusicUtils.GetEncoding(_globalSearchInfo.Encoding));
                         sw.Write(NetEaseMusicUtils.GetOutputContent(saveVo.LyricVo, _globalSearchInfo));
                         sw.Flush();
@@ -430,6 +470,7 @@ namespace 网易云歌词提取
             catch (Exception ew)
             {
                 MessageBox.Show("批量保存失败，错误信息：\n" + ew.Message);
+                _logger.Error(ew, "批量保存失败");
             }
 
             // 输出日志
@@ -522,7 +563,14 @@ namespace 网易云歌词提取
          */
         private void homeMenuItem_Click(object sender, EventArgs e)
         {
-            System.Diagnostics.Process.Start("https://github.com/jitwxs/163MusicLyrics");
+            try
+            {
+                System.Diagnostics.Process.Start("https://github.com/jitwxs/163MusicLyrics");
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "项目主页打开失败");
+            }
         }
 
         /**
@@ -572,7 +620,14 @@ namespace 网易云歌词提取
          */
         private void issueMenuItem_Click(object sender, EventArgs e)
         {
-            System.Diagnostics.Process.Start("https://github.com/jitwxs/163MusicLyrics/issues");
+            try
+            {
+                System.Diagnostics.Process.Start("https://github.com/jitwxs/163MusicLyrics/issues");
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "问题反馈网址打开失败");
+            }
         }
 
         /**
@@ -580,7 +635,14 @@ namespace 网易云歌词提取
          */
         private void wikiItem_Click(object sender, EventArgs e)
         {
-            System.Diagnostics.Process.Start("https://github.com/jitwxs/163MusicLyrics/wiki");
+            try
+            {
+                System.Diagnostics.Process.Start("https://github.com/jitwxs/163MusicLyrics/wiki");
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "使用手册网址打开失败");
+            }
         }
 
         private void splitTextBox_TextChanged(object sender, EventArgs e)

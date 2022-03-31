@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NLog;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,8 +7,9 @@ using System.Text.RegularExpressions;
 
 namespace 网易云歌词提取
 {
-    internal static class NetEaseMusicUtils
+    public static class NetEaseMusicUtils
     {
+        private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
         /**
          * 输入参数校验
          *
@@ -96,6 +98,7 @@ namespace 网易云歌词提取
                 if (lyricResult.Code != 200)
                 {
                     errorMsg = $"网络错误, 错误码: {lyricResult.Code}";
+                    _logger.Error($"获得歌曲信息时失败, 错误码: {lyricResult.Code}");
                     return vo;
                 }
 
@@ -116,9 +119,10 @@ namespace 网易云歌词提取
                 vo.DateTime = dt;
                 vo.Output = GetOutputContent(vo, searchInfo);                
             }
-            catch (Exception ew)
+            catch (Exception ex)
             {
-                errorMsg = ew.Message;
+                _logger.Error(ex, "获取歌词信息失败");
+                errorMsg = ex.Message;
             }
 
             return vo;
@@ -130,9 +134,19 @@ namespace 网易云歌词提取
         public static string GetOutputContent(LyricVo lyricVo, SearchInfo searchInfo)
         {
             if (lyricVo == null)
-                throw new ArgumentNullException(nameof(lyricVo));
+            {
+                var ex = new ArgumentNullException(nameof(lyricVo));
+                _logger.Error(ex);
+                throw ex;
+            }
+            if (searchInfo == null)
+            {
+                var ex = new ArgumentNullException(nameof(searchInfo));
+                _logger.Error(ex);
+                throw ex;
+            }
 
-            switch (searchInfo?.OutputFileFormat ?? throw new ArgumentNullException(nameof(searchInfo)))
+            switch (searchInfo.OutputFileFormat)
             {
                 case OUTPUT_FORMAT_ENUM.LRC: return GetOutputLyric(lyricVo.Lyric, lyricVo.TLyric, searchInfo);
                 case OUTPUT_FORMAT_ENUM.SRT: return ConvertLyricToSrt(
@@ -317,7 +331,11 @@ namespace 网易云歌词提取
         public static string GetOutputName(SongVo songVo, SearchInfo searchInfo)
         {
             if (songVo == null)
-                throw new ArgumentNullException(nameof(songVo));
+            {
+                var ex = new ArgumentNullException(nameof(songVo));
+                _logger.Error(ex);
+                throw ex;
+            }
 
             switch (searchInfo?.OutputFileNameType ?? throw new ArgumentNullException(nameof(searchInfo)))
             {
@@ -339,7 +357,9 @@ namespace 网易云歌词提取
         {
             if (arList == null)
             {
-                throw new ArgumentNullException(nameof(arList));
+                var ex = new ArgumentNullException(nameof(arList));
+                _logger.Error(ex);
+                throw ex;
             }
             if (!arList.Any())
             {
@@ -497,7 +517,9 @@ namespace 网易云歌词提取
         {
             if (arbitraryString == null)
             {
-                throw new ArgumentNullException(nameof(arbitraryString));
+                var ex = new ArgumentNullException(nameof(arbitraryString));
+                _logger.Error(ex);
+                throw ex;
             }
             var invalidChars = System.IO.Path.GetInvalidFileNameChars();
             var replaceIndex = arbitraryString.IndexOfAny(invalidChars, 0);
