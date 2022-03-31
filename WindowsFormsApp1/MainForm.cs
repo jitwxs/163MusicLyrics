@@ -336,8 +336,8 @@ namespace 网易云歌词提取
             }
             catch (WebException ex)
             {
-                MessageBox.Show("网络错误", "错误");
                 _logger.Error(ex, "网络错误");
+                MessageBox.Show("网络错误", "错误");
             }
             catch (Exception ex)
             {
@@ -434,8 +434,8 @@ namespace 网易云歌词提取
             }
             catch (Exception ew)
             {
-                MessageBox.Show("保存失败！错误信息：\n" + ew.Message);
                 _logger.Error(ew, "单独保存歌词失败");
+                MessageBox.Show("保存失败！错误信息：\n" + ew.Message);
             }
         }
 
@@ -473,8 +473,8 @@ namespace 网易云歌词提取
             }
             catch (Exception ew)
             {
-                MessageBox.Show("批量保存失败，错误信息：\n" + ew.Message);
                 _logger.Error(ew, "批量保存失败");
+                MessageBox.Show("批量保存失败，错误信息：\n" + ew.Message);
             }
 
             // 输出日志
