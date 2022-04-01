@@ -26,11 +26,11 @@ namespace 网易云歌词提取
         private const string _COOKIE =
             "os=pc;osver=Microsoft-Windows-10-Professional-build-16299.125-64bit;appver=2.0.3.131777;channel=netease;__remember_me=true";
 
-        private const string _REFERER = "http://music.163.com/";
+        private const string _REFERER = "https://music.163.com/";
 
         // use keygen in c#
-        private string _secretKey;
-        private string _encSecKey;
+        private readonly string _secretKey;
+        private readonly string _encSecKey;
 
         public NetEaseMusicApi()
         {
