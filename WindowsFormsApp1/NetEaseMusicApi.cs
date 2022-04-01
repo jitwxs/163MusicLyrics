@@ -26,11 +26,11 @@ namespace 网易云歌词提取
         private const string _COOKIE =
             "os=pc;osver=Microsoft-Windows-10-Professional-build-16299.125-64bit;appver=2.0.3.131777;channel=netease;__remember_me=true";
 
-        private const string _REFERER = "http://music.163.com/";
+        private const string _REFERER = "https://music.163.com/";
 
         // use keygen in c#
-        private string _secretKey;
-        private string _encSecKey;
+        private readonly string _secretKey;
+        private readonly string _encSecKey;
 
         public NetEaseMusicApi()
         {
@@ -38,6 +38,13 @@ namespace 网易云歌词提取
             _encSecKey = RSAEncode(_secretKey);
         }
 
+       /// <summary>
+       /// 
+       /// </summary>
+       /// <param name="songId"></param>
+       /// <param name="bitrate"></param>
+       /// <exception cref="WebException"></exception>
+       /// <returns></returns>
         public Dictionary<long, Datum> GetDatum(long[] songId, long bitrate = 999000)
         {
             var result = new Dictionary<long, Datum>();
@@ -123,6 +130,13 @@ namespace 网易云歌词提取
             return JsonConvert.DeserializeObject<LyricResult>(raw);
         }
         
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="songId"></param>
+        /// <param name="bitrate"></param>
+        /// <returns></returns>
+        /// <exception cref="WebException"></exception>
         private SongUrls GetSongsUrl(long[] songId, long bitrate = 999000)
         {
             const string url = "https://music.163.com/weapi/song/enhance/player/url?csrf_token=";
