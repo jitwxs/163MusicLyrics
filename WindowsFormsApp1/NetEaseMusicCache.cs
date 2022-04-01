@@ -20,8 +20,20 @@ namespace 网易云歌词提取
             return result;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="songId"></param>
+        /// <param name="saveVo"></param>
+        /// <exception cref="ArgumentNullException"></exception>
         public static void PutSaveVo(long songId, SaveVo saveVo)
         {
+            if (saveVo == null)
+            {
+                var ex = new ArgumentNullException(nameof(saveVo));
+                _logger.Error(ex);
+                throw ex;
+            }
             SaveVoCache.Add(songId, saveVo);
         }
         
@@ -86,6 +98,12 @@ namespace 网易云歌词提取
             return result;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="albumId"></param>
+        /// <param name="albumResult"></param>
+        /// <exception cref="ArgumentNullException"></exception>
         public static void PutAlbum(long albumId, AlbumResult albumResult)
         {
             if (albumResult == null)
@@ -112,6 +130,12 @@ namespace 网易云歌词提取
             return result;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="songId"></param>
+        /// <param name="albumResult"></param>
+        /// <exception cref="ArgumentNullException"></exception>
         public static void PutLyric(long songId, LyricResult albumResult)
         {
             if (albumResult == null)

@@ -3,11 +3,14 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Text;
 using System.Windows.Forms;
 using NLog;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System.Threading.Tasks;
+using 网易云歌词提取.Web;
 
 namespace 网易云歌词提取
 {
@@ -176,13 +179,25 @@ namespace 网易云歌词提取
 
                 if (errorMsg == ErrorMsg.SUCCESS)
                 {
-                    var songVo = requestResult[songId];
-                    var lyricVo = NetEaseMusicUtils.GetLyricVo(_api.GetLyric(songId), songVo.DateTime, _globalSearchInfo, out errorMsg);
-                    if (errorMsg == ErrorMsg.SUCCESS)
+                    try
                     {
-                        NetEaseMusicCache.PutSaveVo(songId, new SaveVo(songId, songVo, lyricVo));
-                        errorMsgDict.Add(songId, ErrorMsg.SUCCESS);
-                        continue;
+                        var songVo = requestResult[songId];
+                        var lyricVo = NetEaseMusicUtils.GetLyricVo(_api.GetLyric(songId), songVo.DateTime,
+                            _globalSearchInfo, out errorMsg);
+                        if (errorMsg == ErrorMsg.SUCCESS)
+                        {
+                            NetEaseMusicCache.PutSaveVo(songId, new SaveVo(songId, songVo, lyricVo));
+                            errorMsgDict.Add(songId, ErrorMsg.SUCCESS);
+                            continue;
+                        }
+                    }
+                    catch (WebException ex)
+                    {
+                        _logger.Error(ex, "网络错误, 网络延迟: {0}", WebTools.GetWebRoundtripTime(50));
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.Error(ex, "请求歌曲ID: {0},错误信息{1}", songId, errorMsg);
                     }
                 }
 
@@ -298,7 +313,7 @@ namespace 网易云歌词提取
         /**
          * 搜索按钮点击事件
          */
-        private void searchBtn_Click(object sender, EventArgs e)
+        private async void searchBtn_Click(object sender, EventArgs e)
         {
             ReloadConfig();
             CleanTextBox();
@@ -307,7 +322,7 @@ namespace 网易云歌词提取
             InitInputSongIds(out var errorMsg);
             if (errorMsg != ErrorMsg.SUCCESS)
             {
-                _logger.Info($"搜索失败, 搜索框内容: {search_id_text.Text}, 搜索模式: {_globalSearchInfo.SearchType}, " +
+                _logger.Info($"搜索失败,搜索框内容: {search_id_text.Text},搜索模式: {_globalSearchInfo.SearchType}, " +
                              $"错误信息: {errorMsg}");
                 MessageBox.Show(errorMsg, "提示");
                 return;
@@ -336,7 +351,7 @@ namespace 网易云歌词提取
             }
             catch (WebException ex)
             {
-                _logger.Error(ex, "网络错误");
+                _logger.Error(ex, "网络错误, 网络延迟: {0}", await WebTools.GetWebRoundtripTimeAsync());
                 MessageBox.Show("网络错误", "错误");
             }
             catch (Exception ex)
@@ -565,7 +580,7 @@ namespace 网易云歌词提取
         /**
          * 项目主页item
          */
-        private void homeMenuItem_Click(object sender, EventArgs e)
+        private async void homeMenuItem_Click(object sender, EventArgs e)
         {
             try
             {
@@ -573,7 +588,8 @@ namespace 网易云歌词提取
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, "项目主页打开失败");
+                _logger.Error(ex, "项目主页打开失败,网络延迟: {0}", await WebTools.GetWebRoundtripTimeAsync());
+                MessageBox.Show("项目主页打开失败", "错误");
             }
         }
 
@@ -590,10 +606,18 @@ namespace 网易云歌词提取
                 { "User-Agent", NetEaseMusicApi._USERAGENT }
             };
 
-            var jsonStr = HttpUtils.HttpGet("https://api.github.com/repos/jitwxs/163MusicLyrics/releases/latest",
+            try
+            {
+                var jsonStr = HttpUtils.HttpGet("https://api.github.com/repos/jitwxs/163MusicLyrics/releases/latest",
                 "application/json", headers);
-            var obj = (JObject)JsonConvert.DeserializeObject(jsonStr);
-            OutputLatestTag(obj["tag_name"]);
+                var obj = (JObject)JsonConvert.DeserializeObject(jsonStr);
+                OutputLatestTag(obj["tag_name"]);
+            }
+            catch (HttpRequestException ex)
+            {
+                _logger.Error(ex);
+                MessageBox.Show("网络错误", "错误");
+            }            
         }
 
         private static void OutputLatestTag(JToken latestTag)
@@ -631,6 +655,7 @@ namespace 网易云歌词提取
             catch (Exception ex)
             {
                 _logger.Error(ex, "问题反馈网址打开失败");
+                MessageBox.Show("问题反馈网址打开失败", "错误");
             }
         }
 
@@ -646,6 +671,7 @@ namespace 网易云歌词提取
             catch (Exception ex)
             {
                 _logger.Error(ex, "使用手册网址打开失败");
+                MessageBox.Show("使用手册网址打开失败", "错误");
             }
         }
 

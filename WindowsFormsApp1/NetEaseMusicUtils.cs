@@ -4,18 +4,21 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using Newtonsoft.Json;
 
 namespace 网易云歌词提取
 {
     public static class NetEaseMusicUtils
     {
         private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
-        /**
-         * 输入参数校验
-         *
-         * @param input 输入参数
-         * @param searchType 查询类型
-         */
+
+        /// <summary>
+        /// 输入参数校验
+        /// </summary>
+        /// <param name="input">输入参数</param>
+        /// <param name="searchType">查询类型</param>
+        /// <param name="errorMsg"></param>
+        /// <returns></returns>
         public static long CheckInputId(string input, SEARCH_TYPE_ENUM searchType, out string errorMsg)
         {
             // 输入参数为空
@@ -80,9 +83,14 @@ namespace 网易云歌词提取
             return Regex.IsMatch(s, "^\\d+$");
         }
 
-        /**
-         * 获取歌词信息
-         */
+        /// <summary>
+        /// 获取歌词信息
+        /// </summary>
+        /// <param name="lyricResult"></param>
+        /// <param name="dt"></param>
+        /// <param name="searchInfo"></param>
+        /// <param name="errorMsg"></param>
+        /// <returns></returns>
         public static LyricVo GetLyricVo(LyricResult lyricResult, long dt, SearchInfo searchInfo, out string errorMsg)
         {
             var vo = new LyricVo();
@@ -98,7 +106,8 @@ namespace 网易云歌词提取
                 if (lyricResult.Code != 200)
                 {
                     errorMsg = $"网络错误, 错误码: {lyricResult.Code}";
-                    _logger.Error($"获得歌曲信息时失败, 错误码: {lyricResult.Code}");
+                    _logger.Error("获得歌曲信息时失败, 错误码: {0}, 对象内容: {1}", lyricResult.Code, 
+                        JsonConvert.SerializeObject(lyricResult));
                     return vo;
                 }
 
@@ -110,20 +119,26 @@ namespace 网易云歌词提取
                 vo.Lyric = originLyric;
                 vo.TLyric = originTLyric;
                 vo.DateTime = dt;
+              
                 vo.Output = GetOutputContent(vo, searchInfo);   
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, "获取歌词信息失败");
+                _logger.Error(ex, "获取歌词信息时发生异常, 对象内容: {0}", JsonConvert.SerializeObject(lyricResult));
                 errorMsg = ex.Message;
             }
 
             return vo;
         }
 
-        /**
-         * 获取输出结果
-         */
+        /// <summary>
+        /// 获取输出结果
+        /// </summary>
+        /// <param name="lyricVo"></param>
+        /// <param name="searchInfo"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException"></exception>
+        /// <exception cref="ArgumentNullException"></exception>
         public static string GetOutputContent(LyricVo lyricVo, SearchInfo searchInfo)
         {
             if (lyricVo == null)
@@ -506,6 +521,12 @@ namespace 网易云歌词提取
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="arbitraryString"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"></exception>
         public static string GetSafeFilename(string arbitraryString)
         {
             if (arbitraryString == null)
