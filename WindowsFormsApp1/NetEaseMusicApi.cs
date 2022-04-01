@@ -90,6 +90,12 @@ namespace 网易云歌词提取
             return result;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="albumId"></param>
+        /// <returns></returns>
+        /// <exception cref="WebException"></exception>
         public AlbumResult GetAlbum(long albumId)
         {
             var url = $"https://music.163.com/weapi/v1/album/{albumId}?csrf_token=";

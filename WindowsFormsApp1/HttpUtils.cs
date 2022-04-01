@@ -46,6 +46,7 @@ namespace 网易云歌词提取
         /// <param name="contentType">application/xml、application/json、application/text、application/x-www-form-urlencoded</param>
         /// <param name="headers">填充消息头</param>        
         /// <returns></returns>
+        /// <exception cref="HttpRequestException"></exception>
         public static async Task<string> HttpPostAsync(string url, string postData = null, string contentType = "application/json", int timeOut = 30, Dictionary<string, string> headers = null)
         {
             postData = postData ?? string.Empty;
@@ -75,6 +76,7 @@ namespace 网易云歌词提取
         /// <param name="headers"></param>
         /// <param name="contentType"></param>
         /// <returns></returns>
+        /// <exception cref="HttpRequestException"></exception>
         public static string HttpGet(string url, string contentType = "application/json", Dictionary<string, string> headers = null)
         {
             using (HttpClient client = new HttpClient())
