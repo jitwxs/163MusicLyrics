@@ -103,21 +103,14 @@ namespace 网易云歌词提取
                 }
 
                 errorMsg = ErrorMsg.SUCCESS;
-                string originLyric = string.Empty, originTLyric = string.Empty;
-                if (lyricResult.Lrc != null)
-                {
-                    originLyric = lyricResult.Lrc.Lyric;
-                }
 
-                if (lyricResult.Tlyric != null)
-                {
-                    originTLyric = lyricResult.Tlyric.Lyric;
-                }
+                string originLyric = lyricResult?.Lrc.Lyric ?? string.Empty;
+                string originTLyric = lyricResult?.Tlyric.Lyric ?? string.Empty;
 
                 vo.Lyric = originLyric;
                 vo.TLyric = originTLyric;
                 vo.DateTime = dt;
-                vo.Output = GetOutputContent(vo, searchInfo);                
+                vo.Output = GetOutputContent(vo, searchInfo);   
             }
             catch (Exception ex)
             {
