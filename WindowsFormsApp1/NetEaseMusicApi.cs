@@ -38,6 +38,13 @@ namespace 网易云歌词提取
             _encSecKey = RSAEncode(_secretKey);
         }
 
+       /// <summary>
+       /// 
+       /// </summary>
+       /// <param name="songId"></param>
+       /// <param name="bitrate"></param>
+       /// <exception cref="WebException"></exception>
+       /// <returns></returns>
         public Dictionary<long, Datum> GetDatum(long[] songId, long bitrate = 999000)
         {
             var result = new Dictionary<long, Datum>();
@@ -123,6 +130,13 @@ namespace 网易云歌词提取
             return JsonConvert.DeserializeObject<LyricResult>(raw);
         }
         
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="songId"></param>
+        /// <param name="bitrate"></param>
+        /// <returns></returns>
+        /// <exception cref="WebException"></exception>
         private SongUrls GetSongsUrl(long[] songId, long bitrate = 999000)
         {
             const string url = "https://music.163.com/weapi/song/enhance/player/url?csrf_token=";
