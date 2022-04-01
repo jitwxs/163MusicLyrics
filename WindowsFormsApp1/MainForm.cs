@@ -599,23 +599,20 @@ namespace 网易云歌词提取
 
         private void OutputLatestTag(GitHubInfo info)
         {
-            var update = new 软件更新(info);
-            update.ShowDialog();
-
             if (info == null)
             {
                 MessageBox.Show(ErrorMsg.GET_LATEST_VERSION_FAILED, "提示");
                 return;
             }
 
-            string bigV = info.ToString().Substring(1, 2), smallV = info.TagName.Substring(3);
+            string bigV = info.TagName.Substring(1, 2), smallV = info.TagName.Substring(3);
             string curBigV = Version.Substring(1, 2), curSmallV = Version.Substring(3);
 
             if (bigV.CompareTo(curBigV) == 1 || (bigV.CompareTo(curBigV) == 0 && smallV.CompareTo(curSmallV) == 1))
             {
-                
-                Clipboard.SetDataObject("https://github.com/jitwxs/163MusicLyrics/releases");
-                MessageBox.Show(string.Format(ErrorMsg.EXIST_LATEST_VERSION, info), "提示");
+                var update = new SoftwareUpdateForm(info);
+                update.ShowDialog();
+                update.Close();
             }
             else
             {

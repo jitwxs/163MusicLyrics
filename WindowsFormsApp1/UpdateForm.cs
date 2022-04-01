@@ -12,12 +12,12 @@ using 网易云歌词提取.JsonBase;
 
 namespace 网易云歌词提取
 {
-    public partial class 软件更新 : Form
+    public partial class SoftwareUpdateForm : Form
     {
         private readonly GitHubInfo _gitHubInfo;
         private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
-        public 软件更新(GitHubInfo info)
+        public SoftwareUpdateForm(GitHubInfo info)
         {
             if (info == null)
             {

@@ -1,6 +1,6 @@
 ﻿namespace 网易云歌词提取
 {
-    partial class 软件更新
+    partial class SoftwareUpdateForm
     {
         /// <summary>
         /// Required designer variable.
