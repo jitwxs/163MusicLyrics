@@ -176,13 +176,29 @@ namespace 网易云歌词提取
 
                 if (errorMsg == ErrorMsg.SUCCESS)
                 {
-                    var songVo = requestResult[songId];
-                    var lyricVo = NetEaseMusicUtils.GetLyricVo(_api.GetLyric(songId), songVo.DateTime, _globalSearchInfo, out errorMsg);
-                    if (errorMsg == ErrorMsg.SUCCESS)
+                    try
                     {
-                        NetEaseMusicCache.PutSaveVo(songId, new SaveVo(songId, songVo, lyricVo));
-                        errorMsgDict.Add(songId, ErrorMsg.SUCCESS);
-                        continue;
+                        var songVo = requestResult[songId];
+                        var lyricVo = NetEaseMusicUtils.GetLyricVo(_api.GetLyric(songId), songVo.DateTime,
+                            _globalSearchInfo, out errorMsg);
+                        if (errorMsg == ErrorMsg.SUCCESS)
+                        {
+                            NetEaseMusicCache.PutSaveVo(songId, new SaveVo(songId, songVo, lyricVo));
+                            errorMsgDict.Add(songId, ErrorMsg.SUCCESS);
+                            continue;
+                        }
+                    }
+                    catch (WebException ex)
+                    {
+                        _logger.Error(ex);                        
+                    }
+                    catch (ArgumentNullException ex) 
+                    {
+                        _logger.Error(ex);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.Error(ex, "请求歌曲ID: {0}，错误信息{1}", songId, errorMsg);
                     }
                 }
 

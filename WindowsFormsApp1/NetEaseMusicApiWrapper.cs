@@ -75,6 +75,12 @@ namespace 网易云歌词提取
             return result;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="albumId"></param>
+        /// <returns></returns>
+        /// <exception cref="WebException"></exception>
         public AlbumResult GetAlbum(long albumId)
         {
             if (NetEaseMusicCache.ContainsAlbum(albumId))
@@ -91,6 +97,12 @@ namespace 网易云歌词提取
             return result;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="songId"></param>
+        /// <returns></returns>
+        /// <exception cref="WebException"></exception>
         public LyricResult GetLyric(long songId)
         {
             if (NetEaseMusicCache.ContainsLyric(songId))
