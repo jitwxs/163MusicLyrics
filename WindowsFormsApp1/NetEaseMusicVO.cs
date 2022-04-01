@@ -63,23 +63,23 @@ namespace 网易云歌词提取
      */
     public static class ErrorMsg
     {
-        public static string SUCCESS = "成功";
-        public static string SEARCH_RESULT_STAGE = "查询成功，结果已暂存";
-        public static string MUST_SEARCH_BEFORE_SAVE = "您必须先搜索，才能保存内容";
-        public static string MUST_SEARCH_BEFORE_COPY_SONG_URL = "您必须先搜索，才能获取直链";
-        public static string INPUT_ID_ILLEGAL = "您输入的 ID 号不合法";
-        public static string INPUT_ALBUM_ILLEGAL = "您输入的 专辑编号 不合法";
-        public static string SONG_NOT_EXIST = "歌曲信息暂未被收录或查询失败";
-        public static string LRC_NOT_EXIST = "歌词信息暂未被收录或查询失败";
-        public static string FUNCTION_NOT_SUPPORT = "该功能暂不可用，请等待后续更新";
-        public static string SONG_URL_COPY_SUCCESS = "歌曲直链，已复制到剪切板";
-        public static string SONG_URL_GET_FAILED = "歌曲直链，获取失败";
-        public static string FILE_NAME_IS_EMPTY = "输出文件名不能为空";
-        public static string SAVE_SUCCESS = "保存成功";
+        public const string SUCCESS = "成功";
+        public const string SEARCH_RESULT_STAGE = "查询成功，结果已暂存";
+        public const string MUST_SEARCH_BEFORE_SAVE = "您必须先搜索，才能保存内容";
+        public const string MUST_SEARCH_BEFORE_COPY_SONG_URL = "您必须先搜索，才能获取直链";
+        public const string INPUT_ID_ILLEGAL = "您输入的 ID 号不合法";
+        public const string INPUT_ALBUM_ILLEGAL = "您输入的 专辑编号 不合法";
+        public const string SONG_NOT_EXIST = "歌曲信息暂未被收录或查询失败";
+        public const string LRC_NOT_EXIST = "歌词信息暂未被收录或查询失败";
+        public const string FUNCTION_NOT_SUPPORT = "该功能暂不可用，请等待后续更新";
+        public const string SONG_URL_COPY_SUCCESS = "歌曲直链，已复制到剪切板";
+        public const string SONG_URL_GET_FAILED = "歌曲直链，获取失败";
+        public const string FILE_NAME_IS_EMPTY = "输出文件名不能为空";
+        public const string SAVE_SUCCESS = "保存成功";
 
-        public static string GET_LATEST_VERSION_FAILED = "获取最新版本失败";
-        public static string THIS_IS_LATEST_VERSION = "当前版本已经是最新版本";
-        public static string EXIST_LATEST_VERSION = "检测到最新版本 {0}，下载地址已复制到剪切板";
+        public const string GET_LATEST_VERSION_FAILED = "获取最新版本失败";
+        public const string THIS_IS_LATEST_VERSION = "当前版本已经是最新版本";
+        public const string EXIST_LATEST_VERSION = "检测到最新版本 {0}，下载地址已复制到剪切板";
     }
 
     public class SaveVo
