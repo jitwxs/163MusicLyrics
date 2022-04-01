@@ -599,7 +599,7 @@ namespace 网易云歌词提取
 
         private void OutputLatestTag(GitHubInfo info)
         {
-            var update = new UpdateForm(info);
+            var update = new 软件更新(info);
             update.ShowDialog();
 
             if (info == null)

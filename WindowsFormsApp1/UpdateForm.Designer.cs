@@ -1,6 +1,6 @@
 ﻿namespace 网易云歌词提取
 {
-    partial class UpdateForm
+    partial class 软件更新
     {
         /// <summary>
         /// Required designer variable.
@@ -34,6 +34,8 @@
             this.label_UpdateDate = new System.Windows.Forms.Label();
             this.label_authorName = new System.Windows.Forms.Label();
             this.label_downloadCount = new System.Windows.Forms.Label();
+            this.buttonDownload = new System.Windows.Forms.Button();
+            this.label_FileSize = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // softwareText
@@ -53,6 +55,7 @@
             this.textBox_UpdateContent.Location = new System.Drawing.Point(215, 154);
             this.textBox_UpdateContent.Multiline = true;
             this.textBox_UpdateContent.Name = "textBox_UpdateContent";
+            this.textBox_UpdateContent.ReadOnly = true;
             this.textBox_UpdateContent.Size = new System.Drawing.Size(465, 368);
             this.textBox_UpdateContent.TabIndex = 1;
             // 
@@ -96,18 +99,41 @@
             this.label_downloadCount.TabIndex = 5;
             this.label_downloadCount.Text = "downloadCount";
             // 
-            // UpdateForm
+            // buttonDownload
+            // 
+            this.buttonDownload.Font = new System.Drawing.Font("宋体", 13F);
+            this.buttonDownload.Location = new System.Drawing.Point(348, 536);
+            this.buttonDownload.Name = "buttonDownload";
+            this.buttonDownload.Size = new System.Drawing.Size(175, 35);
+            this.buttonDownload.TabIndex = 6;
+            this.buttonDownload.Text = "去看看";
+            this.buttonDownload.UseVisualStyleBackColor = true;
+            this.buttonDownload.Click += new System.EventHandler(this.buttonDownload_Click);
+            // 
+            // label_FileSize
+            // 
+            this.label_FileSize.AutoSize = true;
+            this.label_FileSize.Font = new System.Drawing.Font("宋体", 11F);
+            this.label_FileSize.Location = new System.Drawing.Point(229, 113);
+            this.label_FileSize.Name = "label_FileSize";
+            this.label_FileSize.Size = new System.Drawing.Size(85, 19);
+            this.label_FileSize.TabIndex = 7;
+            this.label_FileSize.Text = "文件大小";
+            // 
+            // 软件更新
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(905, 583);
+            this.Controls.Add(this.label_FileSize);
+            this.Controls.Add(this.buttonDownload);
             this.Controls.Add(this.label_downloadCount);
             this.Controls.Add(this.label_authorName);
             this.Controls.Add(this.label_UpdateDate);
             this.Controls.Add(this.textBox_UpdateContent);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.softwareText);
-            this.Name = "UpdateForm";
+            this.Name = "软件更新";
             this.Text = "Update";
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -122,5 +148,7 @@
         private System.Windows.Forms.Label label_UpdateDate;
         private System.Windows.Forms.Label label_authorName;
         private System.Windows.Forms.Label label_downloadCount;
+        private System.Windows.Forms.Button buttonDownload;
+        private System.Windows.Forms.Label label_FileSize;
     }
 }
