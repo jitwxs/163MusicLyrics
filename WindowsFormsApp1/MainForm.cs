@@ -8,6 +8,7 @@ using System.Windows.Forms;
 using NLog;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using 网易云歌词提取.JsonBase;
 
 namespace 网易云歌词提取
 {
@@ -592,31 +593,34 @@ namespace 网易云歌词提取
 
             var jsonStr = HttpUtils.HttpGet("https://api.github.com/repos/jitwxs/163MusicLyrics/releases/latest",
                 "application/json", headers);
-            var obj = (JObject)JsonConvert.DeserializeObject(jsonStr);
-            OutputLatestTag(obj["tag_name"]);
+            var obj = JsonConvert.DeserializeObject<GitHubInfo>(jsonStr);
+            OutputLatestTag(obj);
         }
 
-        private static void OutputLatestTag(JToken latestTag)
+        private void OutputLatestTag(GitHubInfo info)
         {
-            if (latestTag == null)
+            var update = new UpdateForm(info);
+            update.ShowDialog();
+
+            if (info == null)
             {
                 MessageBox.Show(ErrorMsg.GET_LATEST_VERSION_FAILED, "提示");
+                return;
+            }
+
+            string bigV = info.ToString().Substring(1, 2), smallV = info.TagName.Substring(3);
+            string curBigV = Version.Substring(1, 2), curSmallV = Version.Substring(3);
+
+            if (bigV.CompareTo(curBigV) == 1 || (bigV.CompareTo(curBigV) == 0 && smallV.CompareTo(curSmallV) == 1))
+            {
+                
+                Clipboard.SetDataObject("https://github.com/jitwxs/163MusicLyrics/releases");
+                MessageBox.Show(string.Format(ErrorMsg.EXIST_LATEST_VERSION, info), "提示");
             }
             else
             {
-                string bigV = latestTag.ToString().Substring(1, 2), smallV = latestTag.ToString().Substring(3);
-                string curBigV = Version.Substring(1, 2), curSmallV = Version.Substring(3);
-
-                if (bigV.CompareTo(curBigV) == 1 || (bigV.CompareTo(curBigV) == 0 && smallV.CompareTo(curSmallV) == 1))
-                {
-                    Clipboard.SetDataObject("https://github.com/jitwxs/163MusicLyrics/releases");
-                    MessageBox.Show(string.Format(ErrorMsg.EXIST_LATEST_VERSION, latestTag), "提示");
-                }
-                else
-                {
-                    MessageBox.Show(ErrorMsg.THIS_IS_LATEST_VERSION, "提示");
-                }
-            }
+                MessageBox.Show(ErrorMsg.THIS_IS_LATEST_VERSION, "提示");
+            }            
         }
 
         /**
