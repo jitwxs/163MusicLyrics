@@ -95,6 +95,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="INeteaseMusicApi.cs" />
+    <Compile Include="JsonBase\GitHubBase.cs" />
     <Compile Include="NetEaseMusicApi.cs" />
     <Compile Include="NetEaseMusicApiWrapper.cs" />
     <Compile Include="NetEaseMusicBean.cs" />
