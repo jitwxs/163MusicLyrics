@@ -36,7 +36,7 @@ namespace 网易云歌词提取
             }
             
             // ID提取
-            var keyword = "";
+            var keyword = string.Empty;
             switch (searchType)
             {
                 case SEARCH_TYPE_ENUM.SONG_ID:
@@ -112,22 +112,16 @@ namespace 网易云歌词提取
                 }
 
                 errorMsg = ErrorMsg.SUCCESS;
-                string originLyric = string.Empty, originTLyric = string.Empty;
-                if (lyricResult.Lrc != null)
-                {
-                    originLyric = lyricResult.Lrc.Lyric;
-                }
 
-                if (lyricResult.Tlyric != null)
-                {
-                    originTLyric = lyricResult.Tlyric.Lyric;
-                }
+                string originLyric = lyricResult?.Lrc.Lyric ?? string.Empty;
+                string originTLyric = lyricResult?.Tlyric.Lyric ?? string.Empty;
 
                 vo.Lyric = originLyric;
                 vo.TLyric = originTLyric;
                 vo.DateTime = dt;
-                vo.Output = GetOutputContent(vo, searchInfo);                
-            }            
+              
+                vo.Output = GetOutputContent(vo, searchInfo);   
+            }
             catch (Exception ex)
             {
                 _logger.Error(ex, "获取歌词信息时发生异常, 对象内容: {0}", JsonConvert.SerializeObject(lyricResult));
