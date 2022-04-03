@@ -461,7 +461,7 @@ namespace Application.Utils
                     string subStr1 = list[index];
                     string subStr2 = c[i].Substring(str2Index);
 
-                    // Fix: https://github.com/jitwxs/163MusicLyrics/issues/7
+                    // Fix: https://github.com/jitwxs/Application/issues/7
                     if (string.IsNullOrEmpty(subStr1) || string.IsNullOrEmpty(subStr2))
                     {
                         list[index] = subStr1 + subStr2;
@@ -486,7 +486,7 @@ namespace Application.Utils
             int str2Index = translateLrc.IndexOf("]");
             string str2Timestamp = translateLrc.Substring(0, str2Index + 1);
 
-            // Fix: https://github.com/jitwxs/163MusicLyrics/issues/8
+            // Fix: https://github.com/jitwxs/Application/issues/8
             if (string.IsNullOrEmpty(str1Timestamp) || string.IsNullOrEmpty(str2Timestamp))
             {
                 return 1;

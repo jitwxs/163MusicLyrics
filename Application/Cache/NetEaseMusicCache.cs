@@ -55,6 +55,12 @@ namespace Application.Cache
 
         public static void PutSong(long songId, Song song)
         {
+            if (song == null)
+            {
+                var ex = new ArgumentNullException(nameof(song));
+                _logger.Error(ex);
+                throw ex;
+            }
             SongCache.Add(songId, song);
         }
         

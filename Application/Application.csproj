@@ -7,7 +7,7 @@
     <ProjectGuid>{A8897401-6EE2-4C86-A56A-59CCF37A5974}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <RootNamespace>Application</RootNamespace>
-    <AssemblyName>163MusicLyrics</AssemblyName>
+    <AssemblyName>Application</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
