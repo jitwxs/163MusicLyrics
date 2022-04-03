@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using Application.Bean;
 using NLog;
 
-namespace 网易云歌词提取
+namespace Application.Cache
 {
     public static class NetEaseMusicCache
     {
