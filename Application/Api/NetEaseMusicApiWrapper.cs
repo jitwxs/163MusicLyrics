@@ -1,9 +1,11 @@
-﻿using System.Net;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Net;
+using Application.Bean;
+using Application.Cache;
 
-namespace 网易云歌词提取
+namespace Application.Api
 {
-    public class NetEaseMusicApiWrapper : INeteaseMusicApi
+    public class NetEaseMusicApiWrapper : INetEaseMusicApi
     {
         private readonly NetEaseMusicApi _netEaseMusicApi;
 

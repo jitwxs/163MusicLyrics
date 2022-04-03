@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Net.NetworkInformation;
+using System.Threading.Tasks;
 
-namespace 网易云歌词提取.Web
+namespace Application.Utils
 {
-    public static class WebTools
+    public static class NetworkUtils
     {
         public const string TEST_HOST_NAME = "bilibili.com";
         private readonly static Ping _ping = new Ping();

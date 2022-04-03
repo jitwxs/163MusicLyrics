@@ -1,11 +1,11 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
-using Newtonsoft.Json;
+using Application.Bean;
+using Application.Utils;
 using NUnit.Framework;
-using ÍøÒ×ÔÆ¸è´ÊÌáÈ¡;
-using static ÍøÒ×ÔÆ¸è´ÊÌáÈ¡.NetEaseMusicUtils;
+using static Application.Utils.NetEaseMusicUtils;
 
-namespace _163MusicLyrics_Test
+namespace ApplicationTest.Utils
 {
     [TestFixture]
     public class NetEaseMusicUtilsTest
@@ -13,14 +13,14 @@ namespace _163MusicLyrics_Test
         private const string LYRICS_TEST_DATA =
             "{\"Sgc\":false,\"Sfy\":true,\"Qfy\":true,\"Nolyric\":false," +
             "\"Uncollected\":false,\"TransUser\":null," +
-            "\"LyricUser\":{\"Id\":3651114,\"Status\":99,\"Demand\":0,\"Userid\":85756151,\"Nickname\":\"ĞÇ³¾TwinkleStar\",\"Uptime\":0}," +
-            "\"Lrc\":{\"Version\":36,\"Lyric\":\"[00:00.000] ×÷´Ê : èÖÍ©\n[00:01.000] ×÷Çú : Ê¯Ò³\n[00:10.35]Èç¹ûĞÇĞÇ»¹¼ÇµÃ\n[00:14.78]±àÇú£ºÊ¯Ò³\n[00:17.75]µç¼ªËû£ºÊ¯Ò³\n[00:25.81]·¿ÍßÉÏÍ£Áô×Å´ÓºÎ´¦·ÉÀ´µÄº®Ñ»\n[00:32.21]ÁãËéÒ¹ÍíÅãË­¿´ÑÌ»ğÉ²ÄÇ\n[00:37.33]·¿Ç°°ÚÉÏÒ»ÅèÓÀ²»¿İÎ®µÄ»¨\n[00:41.46]¾²Ìı Ï¨ÃğÁËµÆ»ğµÄÈË¼Ò\n[00:46.85]¿´Ò¹¿ÕÖĞĞÇĞÇ¶àÃÀÀöÉÁË¸×ÅµãµãÎ¢¹â\n[00:52.03]µÈË­ÔÙËµÆğÄÇ¼ÇÒäÖĞµÄÄê»ª\n[00:57.38]½Å²½Ì«¹ı³ÁÖØ²Å»áÈÃÈËĞÄÁéÄÇ°ãÍÏí³\n[01:03.06]Èç¹ûĞÇĞÇÄÜ¼ÇµÃµÄ»°\n[01:09.87]ÊÖ±ß·Å×Å¾ÉÊ±ºòµÄÄÇĞ©·º»ÆÊéÔı\n[01:14.64]É­ÁÖÖĞÃÜ²¼Ê¢¿ªÃÀÀö·±»¨\n[01:19.62]¿´ĞÇĞÇÓĞ¶àÃÀÌı×ÅÁ÷Ë®»©À²\n[01:23.74]Çáºß Çà´º³ª¹ıË­µÄÍ¯»°\n[01:29.65]ãÂ¶®µÄÄê»ªÎÒÃÇÒ²Ğí×ÜÊÇÔÚÏë×Å³¤´ó\n[01:34.89]ËæÔø¾­Ò»³¾²»±äµÄ¼ÇÒäÂäÏÂ\n[01:40.24]Ö»ÊÇÏë×·Ñ°ÎôÈÕÖ´×ÅÖÁ½ñµÄĞ¡Ğ¡²½·¥\n[01:45.88]Èç¹ûĞÇĞÇÄÜ¼ÇµÃµÄ»°\n\"}," +
+            "\"LyricUser\":{\"Id\":3651114,\"Status\":99,\"Demand\":0,\"Userid\":85756151,\"Nickname\":\"æ˜Ÿå°˜TwinkleStar\",\"Uptime\":0}," +
+            "\"Lrc\":{\"Version\":36,\"Lyric\":\"[00:00.000] ä½œè¯ : æŸšæ¡\n[00:01.000] ä½œæ›² : çŸ³é¡µ\n[00:10.35]å¦‚æœæ˜Ÿæ˜Ÿè¿˜è®°å¾—\n[00:14.78]ç¼–æ›²ï¼šçŸ³é¡µ\n[00:17.75]ç”µå‰ä»–ï¼šçŸ³é¡µ\n[00:25.81]æˆ¿ç“¦ä¸Šåœç•™ç€ä»ä½•å¤„é£æ¥çš„å¯’é¸¦\n[00:32.21]é›¶ç¢å¤œæ™šé™ªè°çœ‹çƒŸç«åˆ¹é‚£\n[00:37.33]æˆ¿å‰æ‘†ä¸Šä¸€ç›†æ°¸ä¸æ¯èçš„èŠ±\n[00:41.46]é™å¬ ç†„ç­äº†ç¯ç«çš„äººå®¶\n[00:46.85]çœ‹å¤œç©ºä¸­æ˜Ÿæ˜Ÿå¤šç¾ä¸½é—ªçƒç€ç‚¹ç‚¹å¾®å…‰\n[00:52.03]ç­‰è°å†è¯´èµ·é‚£è®°å¿†ä¸­çš„å¹´å\n[00:57.38]è„šæ­¥å¤ªè¿‡æ²‰é‡æ‰ä¼šè®©äººå¿ƒçµé‚£èˆ¬æ‹–æ²“\n[01:03.06]å¦‚æœæ˜Ÿæ˜Ÿèƒ½è®°å¾—çš„è¯\n[01:09.87]æ‰‹è¾¹æ”¾ç€æ—§æ—¶å€™çš„é‚£äº›æ³›é»„ä¹¦æœ­\n[01:14.64]æ£®æ—ä¸­å¯†å¸ƒç››å¼€ç¾ä¸½ç¹èŠ±\n[01:19.62]çœ‹æ˜Ÿæ˜Ÿæœ‰å¤šç¾å¬ç€æµæ°´å“—å•¦\n[01:23.74]è½»å“¼ é’æ˜¥å”±è¿‡è°çš„ç«¥è¯\n[01:29.65]æ‡µæ‡‚çš„å¹´åæˆ‘ä»¬ä¹Ÿè®¸æ€»æ˜¯åœ¨æƒ³ç€é•¿å¤§\n[01:34.89]éšæ›¾ç»ä¸€å°˜ä¸å˜çš„è®°å¿†è½ä¸‹\n[01:40.24]åªæ˜¯æƒ³è¿½å¯»æ˜”æ—¥æ‰§ç€è‡³ä»Šçš„å°å°æ­¥ä¼\n[01:45.88]å¦‚æœæ˜Ÿæ˜Ÿèƒ½è®°å¾—çš„è¯\n\"}," +
             "\"Klyric\":{\"Version\":0,\"lyric\":\"\"},\"Tlyric\":{\"Version\":0,\"Lyric\":\"\"},\"Code\":200}";
 
         private const string DETAILS_TEST_DATA =
-            "{\"Songs\":[{\"Name\":\"Èç¹ûĞÇĞÇÄÜ¼ÇµÃ(Vocaloid)\",\"Id\":447309968,\"Pst\":0,\"T\":0," +
-            "\"Ar\":[{\"Id\":12200045,\"Name\":\"Ê¯Ò³\",\"Tns\":[],\"Alias\":[]}],\"Alia\":[],\"Pop\":75.0,\"St\":0," +
-            "\"Rt\":null,\"Fee\":0,\"V\":103,\"Crbt\":null,\"Cf\":\"\",\"Al\":{\"Id\":35060085,\"Name\":\"Ê¯Ò³µÄV¼ÒÇú\"," +
+            "{\"Songs\":[{\"Name\":\"å¦‚æœæ˜Ÿæ˜Ÿèƒ½è®°å¾—(Vocaloid)\",\"Id\":447309968,\"Pst\":0,\"T\":0," +
+            "\"Ar\":[{\"Id\":12200045,\"Name\":\"çŸ³é¡µ\",\"Tns\":[],\"Alias\":[]}],\"Alia\":[],\"Pop\":75.0,\"St\":0," +
+            "\"Rt\":null,\"Fee\":0,\"V\":103,\"Crbt\":null,\"Cf\":\"\",\"Al\":{\"Id\":35060085,\"Name\":\"çŸ³é¡µçš„Vå®¶æ›²\"," +
             "\"PicUrl\":\"https://p4.music.126.net/CUMANQGhUXEjB-Db1CvSwQ==/109951162824061491.jpg\",\"Tns\":[]," +
             "\"Pic\":109951162824061491},\"Dt\":157506,\"H\":{\"Br\":320000,\"Fid\":0,\"Size\":6302868,\"Vd\":-11799.0}," +
             "\"M\":{\"Br\":192000,\"Fid\":0,\"Size\":3781738,\"Vd\":-9400.0},\"L\":{\"Br\":128000,\"Fid\":0," +
@@ -35,9 +35,9 @@ namespace _163MusicLyrics_Test
         {
             Assert.AreEqual(1, CheckInputId("1", SEARCH_TYPE_ENUM.SONG_ID, out var output_1));
             Assert.AreEqual(ErrorMsg.SUCCESS, output_1);
-            Assert.AreEqual(-1, NetEaseMusicUtils.CheckInputId(string.Empty, SEARCH_TYPE_ENUM.SONG_ID, out var output_2));
+            Assert.AreEqual(-1, CheckInputId(string.Empty, SEARCH_TYPE_ENUM.SONG_ID, out var output_2));
             Assert.AreEqual(ErrorMsg.INPUT_ID_ILLEGAL, output_2);
-            Assert.AreEqual(-1, NetEaseMusicUtils.CheckInputId(null, SEARCH_TYPE_ENUM.SONG_ID, out var output_3));
+            Assert.AreEqual(-1, CheckInputId(null, SEARCH_TYPE_ENUM.SONG_ID, out var output_3));
             Assert.AreEqual(ErrorMsg.INPUT_ID_ILLEGAL, output_3);
         }
 
@@ -63,9 +63,9 @@ namespace _163MusicLyrics_Test
                 Name = "name",
                 Singer = "singer"
             };
-            Assert.AreEqual("name - singer", 
+            Assert.AreEqual("name - singer",
                 GetOutputName(songVo, new SearchInfo() { OutputFileNameType = OUTPUT_FILENAME_TYPE_ENUM.NAME_SINGER }));
-            Assert.AreEqual("singer - name", 
+            Assert.AreEqual("singer - name",
                 GetOutputName(songVo, new SearchInfo() { OutputFileNameType = OUTPUT_FILENAME_TYPE_ENUM.SINGER_NAME }));
             Assert.AreEqual("name",
                 GetOutputName(songVo, new SearchInfo() { OutputFileNameType = OUTPUT_FILENAME_TYPE_ENUM.NAME }));
@@ -74,15 +74,15 @@ namespace _163MusicLyrics_Test
         [Test]
         public void ContractSingerTest()
         {
-            var rawDetails = JsonConvert.DeserializeObject<DetailResult>(DETAILS_TEST_DATA);
+            var rawDetails = DETAILS_TEST_DATA.ToEntity<DetailResult>();
 
             var details = new DetailResult();
             details.Songs = new Song[1];
             details.Songs[0] = new Song() { Ar = new List<Ar>() };
-            details.Songs[0].Ar.Add(new Ar() { Name = "name-1"});
-            details.Songs[0].Ar.Add(new Ar() { Name = "name-2"});
+            details.Songs[0].Ar.Add(new Ar() { Name = "name-1" });
+            details.Songs[0].Ar.Add(new Ar() { Name = "name-2" });
 
-            Assert.AreEqual("Ê¯Ò³", ContractSinger(rawDetails.Songs[0].Ar));
+            Assert.AreEqual("çŸ³é¡µ", ContractSinger(rawDetails.Songs[0].Ar));
             Assert.AreEqual("name-1,name-2", ContractSinger(details.Songs[0].Ar));
             Assert.AreEqual(string.Empty, ContractSinger(new List<Ar>()));
         }

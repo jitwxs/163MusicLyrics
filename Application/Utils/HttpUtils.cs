@@ -4,9 +4,9 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace 网易云歌词提取
+namespace Application.Utils
 {
-    public class HttpUtils
+    public static class HttpUtils
     {
         /// <summary>
         /// 发起POST同步请求

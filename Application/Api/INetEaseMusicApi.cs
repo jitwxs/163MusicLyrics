@@ -1,8 +1,9 @@
 ﻿using System.Collections.Generic;
+using Application.Bean;
 
-namespace 网易云歌词提取
+namespace Application.Api
 {
-    public interface INeteaseMusicApi
+    public interface INetEaseMusicApi
     {
         Dictionary<long, Datum> GetDatum(long[] songId, long bitrate = 999000);
 

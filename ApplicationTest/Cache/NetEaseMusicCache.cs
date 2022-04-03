@@ -1,12 +1,8 @@
 ﻿using System;
 using NUnit.Framework;
-using static 网易云歌词提取.NetEaseMusicCache;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using static Application.Cache.NetEaseMusicCache;
 
-namespace _163MusicLyrics_Test
+namespace ApplicationTest.Cache
 {
     [TestFixture]
     public class NetEaseMusicCache
@@ -18,6 +14,5 @@ namespace _163MusicLyrics_Test
             Assert.Throws<ArgumentNullException>(() => PutAlbum(0, null));
             Assert.Throws<ArgumentNullException>(() => PutSong(0, null));
         }
-
     }
 }
