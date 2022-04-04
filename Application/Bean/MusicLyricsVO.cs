@@ -23,6 +23,13 @@ namespace Application.Bean
         SINGER_NAME = 1, // 歌手 - 歌曲名
         NAME = 2 // 歌曲名
     }
+    
+    // 搜索来源
+    public enum SearchSourceEnum
+    {
+        NET_EASE_MUSIC = 0, // 网易云音乐
+        QQ_MUSIC = 1 // QQ音乐
+    }
 
     // 搜索类型
     public enum SearchTypeEnum
@@ -163,6 +170,11 @@ namespace Application.Bean
     /// </summary>
     public class SearchInfo
     {
+        /// <summary>
+        /// 搜索来源
+        /// </summary>
+        public SearchSourceEnum SearchSource { get; set; }
+        
         /// <summary>
         /// 搜索类型
         /// </summary>

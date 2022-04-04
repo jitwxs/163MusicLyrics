@@ -35,7 +35,6 @@
             this.label_singer = new System.Windows.Forms.Label();
             this.searchBtn = new System.Windows.Forms.Button();
             this.saveBtn = new System.Windows.Forms.Button();
-            this.labe_translate = new System.Windows.Forms.Label();
             this.comboBox_output_name = new System.Windows.Forms.ComboBox();
             this.comboBox_diglossia_lrc = new System.Windows.Forms.ComboBox();
             this.search_id_text = new System.Windows.Forms.TextBox();
@@ -61,6 +60,7 @@
             this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.comboBox_output_format = new System.Windows.Forms.ComboBox();
+            this.comboBox_search_source = new System.Windows.Forms.ComboBox();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -71,7 +71,7 @@
             this.textBox_lrc.Name = "textBox_lrc";
             this.textBox_lrc.ReadOnly = true;
             this.textBox_lrc.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox_lrc.Size = new System.Drawing.Size(457, 203);
+            this.textBox_lrc.Size = new System.Drawing.Size(472, 203);
             this.textBox_lrc.TabIndex = 3;
             this.textBox_lrc.KeyDown += new System.Windows.Forms.KeyEventHandler(this.textBox_lrc_KeyDown);
             // 
@@ -103,7 +103,7 @@
             // 
             // searchBtn
             // 
-            this.searchBtn.Location = new System.Drawing.Point(375, 28);
+            this.searchBtn.Location = new System.Drawing.Point(387, 28);
             this.searchBtn.Name = "searchBtn";
             this.searchBtn.Size = new System.Drawing.Size(93, 46);
             this.searchBtn.TabIndex = 2;
@@ -115,20 +115,11 @@
             // 
             this.saveBtn.Location = new System.Drawing.Point(222, 377);
             this.saveBtn.Name = "saveBtn";
-            this.saveBtn.Size = new System.Drawing.Size(243, 83);
+            this.saveBtn.Size = new System.Drawing.Size(258, 83);
             this.saveBtn.TabIndex = 4;
             this.saveBtn.Text = "保存";
             this.saveBtn.UseVisualStyleBackColor = true;
             this.saveBtn.Click += new System.EventHandler(this.saveBtn_Click);
-            // 
-            // labe_translate
-            // 
-            this.labe_translate.AutoSize = true;
-            this.labe_translate.Location = new System.Drawing.Point(11, 83);
-            this.labe_translate.Name = "labe_translate";
-            this.labe_translate.Size = new System.Drawing.Size(65, 12);
-            this.labe_translate.TabIndex = 12;
-            this.labe_translate.Text = "双语歌词：";
             // 
             // comboBox_output_name
             // 
@@ -146,17 +137,17 @@
             this.comboBox_diglossia_lrc.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBox_diglossia_lrc.FormattingEnabled = true;
             this.comboBox_diglossia_lrc.Items.AddRange(new object[] { "不显示译文", "仅显示译文", "优先原文", "优先译文", "合并显示，优先原文", "合并显示，优先译文" });
-            this.comboBox_diglossia_lrc.Location = new System.Drawing.Point(85, 80);
+            this.comboBox_diglossia_lrc.Location = new System.Drawing.Point(89, 42);
             this.comboBox_diglossia_lrc.Name = "comboBox_diglossia_lrc";
-            this.comboBox_diglossia_lrc.Size = new System.Drawing.Size(134, 20);
+            this.comboBox_diglossia_lrc.Size = new System.Drawing.Size(120, 20);
             this.comboBox_diglossia_lrc.TabIndex = 13;
             this.comboBox_diglossia_lrc.SelectedIndexChanged += new System.EventHandler(this.comboBox_diglossia_lrc_SelectedIndexChanged);
             // 
             // search_id_text
             // 
-            this.search_id_text.Location = new System.Drawing.Point(84, 42);
+            this.search_id_text.Location = new System.Drawing.Point(89, 80);
             this.search_id_text.Name = "search_id_text";
-            this.search_id_text.Size = new System.Drawing.Size(108, 21);
+            this.search_id_text.Size = new System.Drawing.Size(120, 21);
             this.search_id_text.TabIndex = 1;
             // 
             // label_output
@@ -171,11 +162,11 @@
             // label_split
             // 
             this.label_split.AutoSize = true;
-            this.label_split.Location = new System.Drawing.Point(231, 83);
+            this.label_split.Location = new System.Drawing.Point(222, 45);
             this.label_split.Name = "label_split";
             this.label_split.Size = new System.Drawing.Size(77, 12);
             this.label_split.TabIndex = 14;
-            this.label_split.Text = "合并分隔符：";
+            this.label_split.Text = "歌词合并符：";
             // 
             // label1
             // 
@@ -189,10 +180,10 @@
             // splitTextBox
             // 
             this.splitTextBox.BackColor = System.Drawing.SystemColors.Control;
-            this.splitTextBox.Location = new System.Drawing.Point(315, 80);
+            this.splitTextBox.Location = new System.Drawing.Point(299, 42);
             this.splitTextBox.Name = "splitTextBox";
             this.splitTextBox.ReadOnly = true;
-            this.splitTextBox.Size = new System.Drawing.Size(54, 21);
+            this.splitTextBox.Size = new System.Drawing.Size(70, 21);
             this.splitTextBox.TabIndex = 15;
             this.splitTextBox.TextChanged += new System.EventHandler(this.splitTextBox_TextChanged);
             // 
@@ -207,9 +198,9 @@
             // label4
             // 
             this.label4.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.label4.Location = new System.Drawing.Point(13, 113);
+            this.label4.Location = new System.Drawing.Point(13, 115);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(455, 2);
+            this.label4.Size = new System.Drawing.Size(470, 2);
             this.label4.TabIndex = 16;
             this.label4.Text = "label4";
             // 
@@ -236,7 +227,7 @@
             // 
             // textBox_album
             // 
-            this.textBox_album.Location = new System.Drawing.Point(372, 130);
+            this.textBox_album.Location = new System.Drawing.Point(387, 130);
             this.textBox_album.Name = "textBox_album";
             this.textBox_album.ReadOnly = true;
             this.textBox_album.Size = new System.Drawing.Size(93, 21);
@@ -245,7 +236,7 @@
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(325, 133);
+            this.label5.Location = new System.Drawing.Point(328, 133);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(41, 12);
             this.label5.TabIndex = 19;
@@ -253,11 +244,11 @@
             // 
             // songUrlBtn
             // 
-            this.songUrlBtn.Location = new System.Drawing.Point(375, 80);
+            this.songUrlBtn.Location = new System.Drawing.Point(387, 79);
             this.songUrlBtn.Name = "songUrlBtn";
             this.songUrlBtn.Size = new System.Drawing.Size(93, 22);
             this.songUrlBtn.TabIndex = 21;
-            this.songUrlBtn.Text = "歌曲直链";
+            this.songUrlBtn.Text = "歌曲链接";
             this.songUrlBtn.UseVisualStyleBackColor = true;
             this.songUrlBtn.Click += new System.EventHandler(this.songUrlBtn_Click);
             // 
@@ -266,9 +257,9 @@
             this.comboBox_search_type.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBox_search_type.FormattingEnabled = true;
             this.comboBox_search_type.Items.AddRange(new object[] { "ID", "专辑" });
-            this.comboBox_search_type.Location = new System.Drawing.Point(11, 43);
+            this.comboBox_search_type.Location = new System.Drawing.Point(11, 81);
             this.comboBox_search_type.Name = "comboBox_search_type";
-            this.comboBox_search_type.Size = new System.Drawing.Size(58, 20);
+            this.comboBox_search_type.Size = new System.Drawing.Size(62, 20);
             this.comboBox_search_type.TabIndex = 22;
             this.comboBox_search_type.SelectedIndexChanged += new System.EventHandler(this.comboBox_search_type_SelectedIndexChanged);
             // 
@@ -285,7 +276,7 @@
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { this.homeMenuItem, this.wikiItem, this.issueMenuItem, this.latestVersionMenuItem });
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(480, 25);
+            this.menuStrip1.Size = new System.Drawing.Size(492, 25);
             this.menuStrip1.TabIndex = 25;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -322,16 +313,16 @@
             this.comboBox_dot.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBox_dot.FormattingEnabled = true;
             this.comboBox_dot.Items.AddRange(new object[] { "不开启", "截位", "四舍五入" });
-            this.comboBox_dot.Location = new System.Drawing.Point(275, 43);
+            this.comboBox_dot.Location = new System.Drawing.Point(298, 80);
             this.comboBox_dot.Name = "comboBox_dot";
-            this.comboBox_dot.Size = new System.Drawing.Size(94, 20);
+            this.comboBox_dot.Size = new System.Drawing.Size(71, 20);
             this.comboBox_dot.TabIndex = 26;
             this.comboBox_dot.SelectedIndexChanged += new System.EventHandler(this.comboBox_dot_SelectedIndexChanged);
             // 
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(204, 45);
+            this.label2.Location = new System.Drawing.Point(222, 85);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(65, 12);
             this.label2.TabIndex = 27;
@@ -357,12 +348,24 @@
             this.comboBox_output_format.TabIndex = 29;
             this.comboBox_output_format.SelectedIndexChanged += new System.EventHandler(this.comboBox_output_format_SelectedIndexChanged);
             // 
+            // comboBox_search_source
+            // 
+            this.comboBox_search_source.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBox_search_source.FormattingEnabled = true;
+            this.comboBox_search_source.Items.AddRange(new object[] { "网易云", "QQ音乐" });
+            this.comboBox_search_source.Location = new System.Drawing.Point(11, 42);
+            this.comboBox_search_source.Name = "comboBox_search_source";
+            this.comboBox_search_source.Size = new System.Drawing.Size(62, 20);
+            this.comboBox_search_source.TabIndex = 30;
+            this.comboBox_search_source.SelectedIndexChanged += new System.EventHandler(this.comboBox_search_source_SelectedIndexChanged);
+            // 
             // MainForm
             // 
             this.AcceptButton = this.searchBtn;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(480, 475);
+            this.ClientSize = new System.Drawing.Size(492, 475);
+            this.Controls.Add(this.comboBox_search_source);
             this.Controls.Add(this.comboBox_output_format);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.label2);
@@ -388,7 +391,6 @@
             this.Controls.Add(this.textBox_lrc);
             this.Controls.Add(this.comboBox_diglossia_lrc);
             this.Controls.Add(this.saveBtn);
-            this.Controls.Add(this.labe_translate);
             this.Controls.Add(this.comboBox_output_name);
             this.Controls.Add(this.menuStrip1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
@@ -412,7 +414,6 @@
         private System.Windows.Forms.Label label_singer;
         private System.Windows.Forms.Button searchBtn;
         private System.Windows.Forms.Button saveBtn;
-        private System.Windows.Forms.Label labe_translate;
         private System.Windows.Forms.ComboBox comboBox_output_name;
         private System.Windows.Forms.ComboBox comboBox_diglossia_lrc;
         private System.Windows.Forms.TextBox search_id_text;
@@ -428,6 +429,7 @@
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Button songUrlBtn;
         private System.Windows.Forms.ComboBox comboBox_search_type;
+        private System.Windows.Forms.ComboBox comboBox_search_source;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.ToolStripMenuItem homeMenuItem;

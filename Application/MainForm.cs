@@ -29,6 +29,9 @@ namespace Application
         // 输出文件编码
         private OutputEncodingEnum _outputEncodingEnum;
 
+        // 搜索来源
+        private SearchSourceEnum _searchSourceEnum;
+        
         // 搜索类型
         private SearchTypeEnum _searchTypeEnum;
 
@@ -55,6 +58,7 @@ namespace Application
             comboBox_output_name.SelectedIndex = 0;
             comboBox_output_encode.SelectedIndex = 0;
             comboBox_diglossia_lrc.SelectedIndex = 0;
+            comboBox_search_source.SelectedIndex = 0;
             comboBox_search_type.SelectedIndex = 0;
             comboBox_dot.SelectedIndex = 0;
             comboBox_output_format.SelectedIndex = 0;
@@ -73,6 +77,7 @@ namespace Application
             }
 
             _globalSearchInfo.SongIds.Clear();
+            _globalSearchInfo.SearchSource = _searchSourceEnum;
             _globalSearchInfo.SearchType = _searchTypeEnum;
             _globalSearchInfo.OutputFileNameType = _outputFilenameTypeEnum;
             _globalSearchInfo.ShowLrcType = _showLrcTypeEnum;
@@ -499,6 +504,14 @@ namespace Application
                 splitTextBox.ReadOnly = true;
                 splitTextBox.BackColor = Color.FromArgb(240, 240, 240);
             }
+
+            ReloadConfig();
+            UpdateLrcTextBox(string.Empty);
+        }
+        
+        private void comboBox_search_source_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            _searchSourceEnum = (SearchSourceEnum)comboBox_search_source.SelectedIndex;
 
             ReloadConfig();
             UpdateLrcTextBox(string.Empty);
