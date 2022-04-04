@@ -9,7 +9,7 @@ namespace Application.Utils
     /// <summary>
     /// 歌词处理基类
     /// </summary>
-    public abstract class BaseLyricUtils
+    public abstract class LyricUtils
     {
         /// <summary>
         /// 填充歌词信息属性

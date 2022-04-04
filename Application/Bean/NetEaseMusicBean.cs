@@ -10,7 +10,7 @@ namespace Application.Bean
     
     public class Datum
     {
-        public long Id { get; set; }
+        public string Id { get; set; }
         public string Url { get; set; }
         public long Br { get; set; }
         public long Size { get; set; }
@@ -102,7 +102,7 @@ namespace Application.Bean
     public class Song
     {
         public string Name { get; set; }
-        public long Id { get; set; }
+        public string Id { get; set; }
         public long Pst { get; set; }
         public long T { get; set; }
         public List<Ar> Ar { get; set; }

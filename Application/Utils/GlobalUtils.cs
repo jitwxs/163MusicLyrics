@@ -4,11 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using Application.Bean;
+using Application.Exception;
 using NLog;
 
 namespace Application.Utils
 {
-    public static class NetEaseMusicUtils
+    public static class GlobalUtils
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
@@ -17,39 +18,31 @@ namespace Application.Utils
         /// </summary>
         /// <param name="input">输入参数</param>
         /// <param name="searchType">查询类型</param>
-        /// <param name="errorMsg"></param>
         /// <returns></returns>
-        public static long CheckInputId(string input, SearchTypeEnum searchType, out string errorMsg)
+        public static string CheckInputId(string input, SearchSourceEnum searchSource, SearchTypeEnum searchType)
         {
             // 输入参数为空
             if (string.IsNullOrEmpty(input))
             {
-                errorMsg = ErrorMsg.INPUT_ID_ILLEGAL;
-                return -1;
-            }
-            
-            // 输入是数字，直接返回
-            if (CheckNum(input))
-            {
-                errorMsg = ErrorMsg.SUCCESS;
-                return long.Parse(input);
-            }
-            
-            // ID提取
-            var keyword = string.Empty;
-            switch (searchType)
-            {
-                case SearchTypeEnum.SONG_ID:
-                    keyword = "song?id=";
-                    break;
-                case SearchTypeEnum.ALBUM_ID:
-                    keyword = "album?id=";
-                    break;
+                throw new MusicLyricException(ErrorMsg.INPUT_ID_ILLEGAL);
             }
 
-            var index = input.IndexOf(keyword, StringComparison.Ordinal);
-            if (index != -1)
+            if (searchSource == SearchSourceEnum.NET_EASE_MUSIC)
             {
+                // 输入是数字，直接返回
+                if (CheckNum(input))
+                {
+                    return input;
+                }
+                
+                // ID 提取
+                var keyword = searchType == SearchTypeEnum.SONG_ID ? "song?id=" : "album?id=";
+                var index = input.IndexOf(keyword, StringComparison.Ordinal);
+                if (index == -1)
+                {
+                    throw new MusicLyricException(ErrorMsg.INPUT_ID_ILLEGAL);
+                }
+                
                 var sb = new StringBuilder();
                 foreach (var c in input.Substring(index + keyword.Length).ToCharArray())
                 {
@@ -63,16 +56,20 @@ namespace Application.Utils
                     }
                 }
 
-                if (sb.Length != 0)
+                if (sb.Length == 0 || !CheckNum(sb.ToString())) 
                 {
-                    errorMsg = ErrorMsg.SUCCESS;
-                    return long.Parse(sb.ToString());
+                    throw new MusicLyricException(ErrorMsg.INPUT_ID_ILLEGAL);
                 }
+
+                return sb.ToString();
             }
-            
-            // 不合法类型
-            errorMsg = ErrorMsg.INPUT_ID_ILLEGAL;
-            return -1;
+
+            if (searchSource == SearchSourceEnum.QQ_MUSIC)
+            {
+                return input;
+            }
+
+            throw new MusicLyricException(ErrorMsg.INPUT_ID_ILLEGAL);
         }
 
         /**

@@ -11,7 +11,7 @@ using Newtonsoft.Json;
 
 namespace Application.Api
 {
-    public class NetEaseMusicApi : INetEaseMusicApi
+    public class NetEaseMusicNativeApi : BaseNativeApi
     {
         // General
         private const string _MODULUS =
@@ -21,22 +21,19 @@ namespace Application.Api
         private const string _PUBKEY = "010001";
         private const string _VI = "0102030405060708";
 
-        public static string _USERAGENT =
-            "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Safari/537.36";
-
-        private const string _COOKIE =
-            "os=pc;osver=Microsoft-Windows-10-Professional-build-16299.125-64bit;appver=2.0.3.131777;channel=netease;__remember_me=true";
-
-        private const string _REFERER = "https://music.163.com/";
-
         // use keygen in c#
         private readonly string _secretKey;
         private readonly string _encSecKey;
 
-        public NetEaseMusicApi()
+        public NetEaseMusicNativeApi()
         {
             _secretKey = CreateSecretKey(16);
             _encSecKey = RSAEncode(_secretKey);
+        }
+        
+        protected override string HttpRefer()
+        {
+            return "https://music.163.com/";
         }
 
        /// <summary>
@@ -46,9 +43,9 @@ namespace Application.Api
        /// <param name="bitrate"></param>
        /// <exception cref="WebException"></exception>
        /// <returns></returns>
-        public Dictionary<long, Datum> GetDatum(long[] songId, long bitrate = 999000)
+        public Dictionary<string, Datum> GetDatum(string[] songId, long bitrate = 999000)
         {
-            var result = new Dictionary<long, Datum>();
+            var result = new Dictionary<string, Datum>();
             
             var urls = GetSongsUrl(songId, bitrate);
             if (urls.Code == 200)
@@ -68,9 +65,9 @@ namespace Application.Api
         /// <param name="songIds"></param>
         /// <exception cref="WebException"></exception>
         /// <returns></returns>
-        public Dictionary<long, Song> GetSongs(long[] songIds)
+        public Dictionary<string, Song> GetSongs(string[] songIds)
         {
-            var result = new Dictionary<long, Song>();
+            var result = new Dictionary<string, Song>();
 
             if (songIds == null || songIds.Length < 1)
             {
@@ -97,7 +94,7 @@ namespace Application.Api
         /// <param name="albumId"></param>
         /// <returns></returns>
         /// <exception cref="WebException"></exception>
-        public AlbumResult GetAlbum(long albumId)
+        public AlbumResult GetAlbum(string albumId)
         {
             var url = $"https://music.163.com/weapi/v1/album/{albumId}?csrf_token=";
             
@@ -106,7 +103,7 @@ namespace Application.Api
                 { "csrf_token", string.Empty },
             };
 
-            var raw = CURL(url, Prepare(JsonConvert.SerializeObject(data)));
+            var raw = SendHttp(url, Prepare(JsonConvert.SerializeObject(data)));
             
             return JsonConvert.DeserializeObject<AlbumResult>(raw);
         }
@@ -118,7 +115,7 @@ namespace Application.Api
         /// <exception cref="WebException"></exception>
         /// <returns>一个
         /// <see cref="LyricResult"/></returns>
-        public LyricResult GetLyric(long songId)
+        public LyricResult GetLyric(string songId)
         {
             const string url = "https://music.163.com/weapi/song/lyric?csrf_token=";
             
@@ -132,7 +129,7 @@ namespace Application.Api
                 { "csrf_token", string.Empty }
             };
 
-            var raw = CURL(url, Prepare(JsonConvert.SerializeObject(data)));
+            var raw = SendHttp(url, Prepare(JsonConvert.SerializeObject(data)));
             
             return JsonConvert.DeserializeObject<LyricResult>(raw);
         }
@@ -144,7 +141,7 @@ namespace Application.Api
         /// <param name="bitrate"></param>
         /// <returns></returns>
         /// <exception cref="WebException"></exception>
-        private SongUrls GetSongsUrl(long[] songId, long bitrate = 999000)
+        private SongUrls GetSongsUrl(string[] songId, long bitrate = 999000)
         {
             const string url = "https://music.163.com/weapi/song/enhance/player/url?csrf_token=";
 
@@ -154,7 +151,7 @@ namespace Application.Api
                 br = bitrate
             };
 
-            var raw = CURL(url, Prepare(JsonConvert.SerializeObject(data)));
+            var raw = SendHttp(url, Prepare(JsonConvert.SerializeObject(data)));
 
             return JsonConvert.DeserializeObject<SongUrls>(raw);
         }
@@ -165,7 +162,7 @@ namespace Application.Api
         /// <param name="songIds">歌曲ID</param>
         /// <exception cref="WebException"></exception>
         /// <returns></returns>
-        private DetailResult GetDetail(IEnumerable<long> songIds)
+        private DetailResult GetDetail(IEnumerable<string> songIds)
         {
             const string url = "https://music.163.com/weapi/v3/song/detail?csrf_token=";
 
@@ -184,14 +181,14 @@ namespace Application.Api
                 { "csrf_token", string.Empty },
             };
             
-            var raw = CURL(url, Prepare(JsonConvert.SerializeObject(data)));
+            var raw = SendHttp(url, Prepare(JsonConvert.SerializeObject(data)));
 
             return JsonConvert.DeserializeObject<DetailResult>(raw);
         }
 
         private class GetSongUrlJson
         {
-            public long[] ids;
+            public string[] ids;
             public long br;
             public string csrf_token = string.Empty;
         }
@@ -233,36 +230,6 @@ namespace Application.Api
                 return key.Substring(key.Length - 256, 256);
             else
                 return key;
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="url">链接</param>
-        /// <param name="parms">参数</param>
-        /// <param name="method">模式</param>
-        /// <exception cref="WebException"></exception>
-        /// <returns></returns>
-        private string CURL(string url, Dictionary<string, string> parms, string method = "POST")
-        {
-            string result;
-            using (var wc = new WebClient())
-            {
-                wc.Headers.Add(HttpRequestHeader.ContentType, "application/x-www-form-urlencoded");
-                wc.Headers.Add(HttpRequestHeader.Referer, _REFERER);
-                wc.Headers.Add(HttpRequestHeader.UserAgent, _USERAGENT);
-                wc.Headers.Add(HttpRequestHeader.Cookie, _COOKIE);
-                var reqparm = new System.Collections.Specialized.NameValueCollection();
-                foreach (var keyPair in parms)
-                {
-                    reqparm.Add(keyPair.Key, keyPair.Value);
-                }
-
-                var bytes = wc.UploadValues(url, method, reqparm);
-                result = Encoding.UTF8.GetString(bytes);
-            }
-            //System.Diagnostics.Debug.WriteLine(result);
-            return result;
         }
 
         private BigInteger BCHexDec(string hex)

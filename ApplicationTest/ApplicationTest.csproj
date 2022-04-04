@@ -25,14 +25,20 @@
         <WarningLevel>4</WarningLevel>
     </PropertyGroup>
     <ItemGroup>
+        <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed">
+          <HintPath>..\packages\Newtonsoft.Json.13.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+        </Reference>
         <Reference Include="System" />
     </ItemGroup>
     <ItemGroup>
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
         <PackageReference Include="NUnit" Version="2.6.4" />
         <PackageReference Include="Xamarin.UITest" Version="2.2.4" />
     </ItemGroup>
     <ItemGroup>
-      <Compile Include="Cache\NetEaseMusicCache.cs" />
+      <Compile Include="Api\NetEaseMusicApiV2.cs" />
+      <Compile Include="Api\QQMusicNativeApi.cs" />
+      <Compile Include="Utils\GlobalUtils.cs" />
       <Compile Include="Utils\NetEaseMusicUtils.cs" />
     </ItemGroup>
     <ItemGroup>
@@ -40,6 +46,9 @@
         <Project>{a8897401-6ee2-4c86-a56a-59ccf37a5974}</Project>
         <Name>Application</Name>
       </ProjectReference>
+    </ItemGroup>
+    <ItemGroup>
+      <Folder Include="Cache" />
     </ItemGroup>
     <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -94,14 +94,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Api\BaseNativeApi.cs" />
     <Compile Include="Api\IMusicApiV2.cs" />
-    <Compile Include="Api\INetEaseMusicApi.cs" />
-    <Compile Include="Api\NetEaseMusicApi.cs" />
+    <Compile Include="Api\MusicApiV2Cacheable.cs" />
+    <Compile Include="Api\NetEaseMusicNativeApi.cs" />
     <Compile Include="Api\NetEaseMusicApiV2.cs" />
-    <Compile Include="Api\NetEaseMusicApiWrapper.cs" />
+    <Compile Include="Api\QQMusicApiV2.cs" />
+    <Compile Include="Api\QQMusicNativeApi.cs" />
     <Compile Include="Bean\NetEaseMusicBean.cs" />
     <Compile Include="Bean\MusicLyricsVO.cs" />
-    <Compile Include="Cache\NetEaseMusicCache.cs" />
+    <Compile Include="Bean\QQMusicBean.cs" />
+    <Compile Include="Cache\GlobalCache.cs" />
     <Compile Include="Exception\MusicLyricException.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
@@ -111,7 +114,7 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Utils\BaseLyricUtils.cs" />
+    <Compile Include="Utils\LyricUtils.cs" />
     <Compile Include="Utils\HttpUtils.cs" />
     <Compile Include="Utils\JsonUtils.cs" />
     <Compile Include="Utils\GlobalUtils.cs" />

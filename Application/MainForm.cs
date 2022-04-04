@@ -22,7 +22,7 @@ namespace Application
     {
         private readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
-        private readonly Dictionary<long, SaveVo> _globalSaveVoMap = new Dictionary<long, SaveVo>();
+        private readonly Dictionary<string, SaveVo> _globalSaveVoMap = new Dictionary<string, SaveVo>();
 
         private readonly SearchInfo _globalSearchInfo = new SearchInfo();
 
@@ -86,22 +86,29 @@ namespace Application
             _globalSearchInfo.OutputFileFormat = _outputFormatEnum;
             _globalSearchInfo.LrcMergeSeparator = splitTextBox.Text;
 
-            _api = new NetEaseMusicApiV2();
+            if (_searchSourceEnum == SearchSourceEnum.QQ_MUSIC)
+            {
+                _api = new QQMusicApiV2();
+            }
+            else
+            {
+                _api = new NetEaseMusicApiV2();
+            }
         }
 
         /// <summary>
         /// 根据歌曲ID查询
         /// </summary>
-        private void SearchBySongId(IEnumerable<long> songIds, out Dictionary<long, string> errorMsgDict)
+        private void SearchBySongId(IEnumerable<string> songIds, out Dictionary<string, string> errorMsgDict)
         {
-            errorMsgDict = new Dictionary<long, string>();
+            errorMsgDict = new Dictionary<string, string>();
 
             // 1、优先加载缓存
-            var requestId = new List<long>();
+            var requestId = new List<string>();
 
             foreach (var songId in songIds)
             {
-                if (NetEaseMusicCache.ContainsSaveVo(songId))
+                if (GlobalCache.ContainsSaveVo(songId))
                 {
                     errorMsgDict.Add(songId, ErrorMsg.SUCCESS);
                 }
@@ -134,9 +141,9 @@ namespace Application
                     var songVo = songResp[songId];
                     var lyricVo = _api.GetLyricVo(songId);
                         
-                    BaseLyricUtils.FillingLyricVo(lyricVo, songVo, _globalSearchInfo);
+                    LyricUtils.FillingLyricVo(lyricVo, songVo, _globalSearchInfo);
                         
-                    NetEaseMusicCache.PutSaveVo(songId, new SaveVo(songId, songVo, lyricVo));
+                    GlobalCache.PutSaveVo(songId, new SaveVo(songId, songVo, lyricVo));
                 }
                 catch (WebException ex)
                 {
@@ -156,23 +163,17 @@ namespace Application
         /// <summary>
         /// 初始化输入的歌曲 ID 列表
         /// </summary>
-        /// <returns></returns>
-        private string InitInputSongIds()
+        private void InitInputSongIds()
         {
             var inputs = _globalSearchInfo.InputIds;
             if (inputs.Length < 1)
             {
-                return ErrorMsg.INPUT_ID_ILLEGAL;
+                throw new MusicLyricException(ErrorMsg.INPUT_ID_ILLEGAL);
             }
 
             foreach (var input in inputs)
             {
-                var id = NetEaseMusicUtils.CheckInputId(input, _globalSearchInfo.SearchType, out var singleCheckResult);
-                if (singleCheckResult != ErrorMsg.SUCCESS)
-                {
-                    return singleCheckResult;
-                }
-
+                var id = GlobalUtils.CheckInputId(input, _globalSearchInfo.SearchSource, _globalSearchInfo.SearchType);
                 switch (_globalSearchInfo.SearchType)
                 {
                     case SearchTypeEnum.ALBUM_ID:
@@ -189,8 +190,6 @@ namespace Application
                         throw new MusicLyricException(ErrorMsg.SYSTEM_ERROR);
                 }
             }
-
-            return ErrorMsg.SUCCESS;
         }
 
         /// <summary>
@@ -199,7 +198,7 @@ namespace Application
         /// <param name="songId">歌曲ID</param>
         /// <param name="errorMsg">错误信息</param>
         /// <exception cref="WebException"></exception>
-        private void SingleSearch(long songId, out string errorMsg)
+        private void SingleSearch(string songId, out string errorMsg)
         {
             SearchBySongId(new[] { songId }, out var resultMaps);
 
@@ -210,7 +209,7 @@ namespace Application
                 return;
             }
 
-            var result = NetEaseMusicCache.GetSaveVo(songId);
+            var result = GlobalCache.GetSaveVo(songId);
 
             // 3、加入结果集
             _globalSaveVoMap.Add(songId, result);
@@ -228,7 +227,7 @@ namespace Application
         /// </summary>
         /// <param name="ids"></param>
         /// <exception cref="WebException"></exception>
-        private void BatchSearch(IEnumerable<long> ids)
+        private void BatchSearch(IEnumerable<string> ids)
         {
             SearchBySongId(ids, out var resultMaps);
 
@@ -242,7 +241,7 @@ namespace Application
 
                 if (message == ErrorMsg.SUCCESS)
                 {
-                    _globalSaveVoMap.Add(songId, NetEaseMusicCache.GetSaveVo(songId));
+                    _globalSaveVoMap.Add(songId, GlobalCache.GetSaveVo(songId));
                 }
 
                 log.Append($"ID: {songId}, Result: {message}").Append(Environment.NewLine);
@@ -263,17 +262,10 @@ namespace Application
             CleanTextBox();
             _globalSaveVoMap.Clear();
 
-            var initResp = InitInputSongIds();
-            if (initResp != ErrorMsg.SUCCESS)
-            {
-                _logger.Error("searchBtn_Click failed, param: {SearchParam}, type: {SearchType}, message: {ErrorMsg}",
-                    search_id_text.Text, _globalSearchInfo.SearchType, initResp);
-                MessageBox.Show(initResp, "提示");
-                return;
-            }
-
             try
             {
+                InitInputSongIds();
+
                 var songIds = _globalSearchInfo.SongIds;
                 if (songIds.Count > 1)
                 {
@@ -295,8 +287,14 @@ namespace Application
             }
             catch (WebException ex)
             {
-                _logger.Error(ex, "网络错误, 网络延迟: {Delay}", await NetworkUtils.GetWebRoundtripTimeAsync());
+                _logger.Error(ex, "Search Network error, delay: {Delay}", await NetworkUtils.GetWebRoundtripTimeAsync());
                 MessageBox.Show(ErrorMsg.NETWORK_ERROR, "错误");
+            }
+            catch (MusicLyricException ex)
+            {
+                _logger.Error("Search Business failed, param: {SearchParam}, type: {SearchType}, message: {ErrorMsg}",
+                    search_id_text.Text, _globalSearchInfo.SearchType, ex.Message);
+                MessageBox.Show(ex.Message, "提示");
             }
             catch (System.Exception ex)
             {
@@ -357,7 +355,7 @@ namespace Application
         /**
          * 单个保存
          */
-        private void SingleSave(long songId)
+        private void SingleSave(string songId)
         {
             var saveDialog = new SaveFileDialog();
             try
@@ -368,7 +366,7 @@ namespace Application
                     return;
                 }
 
-                var outputFileName = NetEaseMusicUtils.GetOutputName(saveVo.SongVo, _globalSearchInfo);
+                var outputFileName = GlobalUtils.GetOutputName(saveVo.SongVo, _globalSearchInfo);
                 if (outputFileName == null)
                 {
                     MessageBox.Show(ErrorMsg.FILE_NAME_IS_EMPTY, "提示");
@@ -376,7 +374,7 @@ namespace Application
                 }
                 else
                 {
-                    outputFileName = NetEaseMusicUtils.GetSafeFilename(outputFileName);
+                    outputFileName = GlobalUtils.GetSafeFilename(outputFileName);
                 }
 
                 saveDialog.FileName = outputFileName;
@@ -384,9 +382,9 @@ namespace Application
                 if (saveDialog.ShowDialog() == DialogResult.OK)
                 {
                     using (var sw = new StreamWriter(saveDialog.FileName, false,
-                               NetEaseMusicUtils.GetEncoding(_globalSearchInfo.Encoding)))
+                               GlobalUtils.GetEncoding(_globalSearchInfo.Encoding)))
                     {
-                        sw.Write(BaseLyricUtils.GetOutputContent(saveVo.LyricVo, _globalSearchInfo));
+                        sw.Write(LyricUtils.GetOutputContent(saveVo.LyricVo, _globalSearchInfo));
                         sw.Flush();
                     }
 
@@ -421,11 +419,11 @@ namespace Application
                     foreach (var item in _globalSaveVoMap)
                     {
                         var saveVo = item.Value;
-                        string outputFileName = NetEaseMusicUtils.GetOutputName(saveVo.SongVo, _globalSearchInfo);
-                        string path = filePath + '/' + NetEaseMusicUtils.GetSafeFilename(outputFileName) + fileSuffix;
+                        string outputFileName = GlobalUtils.GetOutputName(saveVo.SongVo, _globalSearchInfo);
+                        string path = filePath + '/' + GlobalUtils.GetSafeFilename(outputFileName) + fileSuffix;
                         StreamWriter sw = new StreamWriter(path, false,
-                            NetEaseMusicUtils.GetEncoding(_globalSearchInfo.Encoding));
-                        sw.Write(BaseLyricUtils.GetOutputContent(saveVo.LyricVo, _globalSearchInfo));
+                            GlobalUtils.GetEncoding(_globalSearchInfo.Encoding));
+                        sw.Write(LyricUtils.GetOutputContent(saveVo.LyricVo, _globalSearchInfo));
                         sw.Flush();
                         sw.Close();
                     }
@@ -558,7 +556,7 @@ namespace Application
             var headers = new Dictionary<string, string>
             {
                 { "Accept", "application/vnd.github.v3+json" },
-                { "User-Agent", NetEaseMusicApi._USERAGENT }
+                { "User-Agent", BaseNativeApi.Useragent }
             };
 
             try
@@ -653,7 +651,7 @@ namespace Application
                     // only loop one times
                     foreach (var saveVo in _globalSaveVoMap.Values)
                     {
-                        var outputContent = BaseLyricUtils.GetOutputContent(saveVo.LyricVo, _globalSearchInfo);
+                        var outputContent = LyricUtils.GetOutputContent(saveVo.LyricVo, _globalSearchInfo);
                         textBox_lrc.Text = string.IsNullOrEmpty(outputContent) ? ErrorMsg.LRC_NOT_EXIST : outputContent;
                     }
                 }

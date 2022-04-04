@@ -72,8 +72,8 @@ namespace Application.Bean
         public const string SEARCH_RESULT_STAGE = "查询成功，结果已暂存";
         public const string MUST_SEARCH_BEFORE_SAVE = "您必须先搜索，才能保存内容";
         public const string MUST_SEARCH_BEFORE_COPY_SONG_URL = "您必须先搜索，才能获取直链";
-        public const string INPUT_ID_ILLEGAL = "您输入的 ID 号不合法";
-        public const string INPUT_ALBUM_ILLEGAL = "您输入的 专辑编号 不合法";
+        public const string INPUT_ID_ILLEGAL = "您输入的ID不合法";
+        public const string ALBUM_NOT_EXIST = "专辑信息暂未被收录或查询失败";
         public const string SONG_NOT_EXIST = "歌曲信息暂未被收录或查询失败";
         public const string LRC_NOT_EXIST = "歌词信息暂未被收录或查询失败";
         public const string FUNCTION_NOT_SUPPORT = "该功能暂不可用，请等待后续更新";
@@ -94,14 +94,14 @@ namespace Application.Bean
     /// </summary>
     public class SaveVo
     {
-        public SaveVo(long songId, SongVo songVo, LyricVo lyricVo)
+        public SaveVo(string songId, SongVo songVo, LyricVo lyricVo)
         {
             SongId = songId;
             SongVo = songVo;
             LyricVo = lyricVo;
         }
 
-        public long SongId { get; }
+        public string SongId { get; }
 
         public SongVo SongVo { get; }
 
@@ -198,7 +198,7 @@ namespace Application.Bean
         /// <summary>
         /// 实际处理的歌曲 ID 列表
         /// </summary>
-        public readonly HashSet<long> SongIds = new HashSet<long>();
+        public readonly HashSet<string> SongIds = new HashSet<string>();
 
         /// <summary>
         /// 输出文件编码

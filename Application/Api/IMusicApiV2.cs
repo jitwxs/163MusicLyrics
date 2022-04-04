@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Application.Bean;
 
 namespace Application.Api
@@ -10,7 +11,7 @@ namespace Application.Api
         /// </summary>
         /// <param name="albumId">专辑ID</param>
         /// <returns>歌曲ID列表</returns>
-        IEnumerable<long> GetSongIdsFromAlbum(long albumId);
+        IEnumerable<string> GetSongIdsFromAlbum(string albumId);
 
         /// <summary>
         /// 获取歌曲信息
@@ -18,13 +19,13 @@ namespace Application.Api
         /// <param name="songIds">歌曲ID列表</param>
         /// <param name="errorMsgDict">错误信息</param>
         /// <returns></returns>
-        Dictionary<long, SongVo> GetSongVo(long[] songIds, out Dictionary<long, string> errorMsgDict);
+        Dictionary<string, SongVo> GetSongVo(string[] songIds, out Dictionary<string, string> errorMsgDict);
         
         /// <summary>
         /// 获取歌词信息
         /// </summary>
         /// <param name="songId">歌曲ID</param>
         /// <returns></returns>
-        LyricVo GetLyricVo(long songId);
+        LyricVo GetLyricVo(string songId);
     }
 }
