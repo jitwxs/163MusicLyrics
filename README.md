@@ -3,7 +3,7 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Email](https://img.shields.io/badge/Email-jitwxs%40foxmail.com-brightgreen)](#)
 
-### 如何使用 How To Use
+### How To Use
 
 [👉163MusicLyrics Wiki](https://github.com/jitwxs/163MusicLyrics/wiki)
 
@@ -14,7 +14,7 @@
 - [x] 支持提取（部分）歌曲试听链接 Support extraction (part) song audition link
 - [x] 支持多种保存命名规则、文件编码、输出格式 Support multiple saving naming rules, file encoding, output format
 
-### 下载 Downloads
+### Downloads
 
 进入 [GitHub Release](https://github.com/jitwxs/163MusicLyrics/releases) 页下载最新版本即可，您可点击 [ChangeLog](https://github.com/jitwxs/163MusicLyrics/wiki/ChangeLog) 查看不同版本的变更。
 
@@ -22,7 +22,7 @@ Enter [Github Release](https://github.com/jitwxs/163musiclyrics/releses) page to
 
 ![screenshot](./images/latest_version.png)
 
-### 贡献 Contribution
+### Contribution
 
 您可访问 [163MusicLyrics Projects](https://github.com/users/jitwxs/projects/1) 了解项目当前阶段的工作计划，如您愿意在其中贡献力量，您可以：
 
