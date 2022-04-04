@@ -80,6 +80,9 @@ namespace Application.Bean
         public const string EXIST_LATEST_VERSION = "检测到最新版本 {0}，下载地址已复制到剪切板";
     }
 
+    /// <summary>
+    /// 封装单首歌曲的持久化信息
+    /// </summary>
     public class SaveVo
     {
         public SaveVo(long songId, SongVo songVo, LyricVo lyricVo)
@@ -89,55 +92,112 @@ namespace Application.Bean
             LyricVo = lyricVo;
         }
 
-        public long SongId { get; set; }
+        public long SongId { get; }
 
-        public SongVo SongVo { get; set; }
+        public SongVo SongVo { get; }
 
-        public LyricVo LyricVo { get; set; }
+        public LyricVo LyricVo { get; }
     }
 
+    /// <summary>
+    /// 歌曲信息
+    /// </summary>
     public class SongVo
     {
+        /// <summary>
+        /// 歌曲名
+        /// </summary>
         public string Name { get; set; }
 
+        /// <summary>
+        /// 歌手名
+        /// </summary>
         public string Singer { get; set; }
 
+        /// <summary>
+        /// 所属专辑名
+        /// </summary>
         public string Album { get; set; }
 
+        /// <summary>
+        /// 歌曲直链 Url
+        /// </summary>
         public string Links { get; set; }
 
+        /// <summary>
+        /// 歌曲时长 ms
+        /// </summary>
         public long DateTime { get; set; }
     }
 
+    /// <summary>
+    /// 歌词信息
+    /// </summary>
     public class LyricVo
     {
+        /// <summary>
+        /// 歌词内容
+        /// </summary>
         public string Lyric { get; set; }
 
+        /// <summary>
+        /// 译文歌词内容
+        /// </summary>
         public string TLyric { get; set; }
 
-        public long DateTime { get; set; }
+        [Obsolete] public long DateTime { get; set; }
 
         public string Output { get; set; }
     }
 
+    /// <summary>
+    /// 搜索信息
+    /// </summary>
     public class SearchInfo
     {
+        /// <summary>
+        /// 搜索类型
+        /// </summary>
         public SearchTypeEnum SearchType { get; set; }
 
+        /// <summary>
+        /// 输出文件名类型
+        /// </summary>
         public OutputFilenameTypeEnum OutputFileNameType { get; set; }
 
+        /// <summary>
+        /// 歌词展示格式
+        /// </summary>
         public ShowLrcTypeEnum ShowLrcType { get; set; }
 
+        /// <summary>
+        /// 输入 ID 列表
+        /// </summary>
         public string[] InputIds { get; set; }
 
-        public readonly HashSet<long> SONG_IDS = new HashSet<long>();
+        /// <summary>
+        /// 实际处理的歌曲 ID 列表
+        /// </summary>
+        public readonly HashSet<long> SongIds = new HashSet<long>();
 
+        /// <summary>
+        /// 输出文件编码
+        /// </summary>
         public OutputEncodingEnum Encoding { get; set; }
 
+        /// <summary>
+        /// 指定歌词合并的分隔符
+        /// </summary>
         public string LrcMergeSeparator { get; set; }
 
+        /// <summary>
+        /// 小数位处理策略
+        /// </summary>
         public DotTypeEnum DotType { get; set; }
 
+        /// <summary>
+        /// 输出文件格式
+        /// </summary>
         public OutputFormatEnum OutputFileFormat { get; set; }
     }
 

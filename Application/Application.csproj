@@ -98,7 +98,7 @@
     <Compile Include="Api\NetEaseMusicApi.cs" />
     <Compile Include="Api\NetEaseMusicApiWrapper.cs" />
     <Compile Include="Bean\NetEaseMusicBean.cs" />
-    <Compile Include="Bean\NetEaseMusicVO.cs" />
+    <Compile Include="Bean\MusicLyricsVO.cs" />
     <Compile Include="Cache\NetEaseMusicCache.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>

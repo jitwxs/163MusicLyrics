@@ -71,7 +71,7 @@ namespace Application
                 _globalSearchInfo.InputIds[i] = ids[i].Trim();
             }
 
-            _globalSearchInfo.SONG_IDS.Clear();
+            _globalSearchInfo.SongIds.Clear();
             _globalSearchInfo.SearchType = search_type_enum;
             _globalSearchInfo.OutputFileNameType = output_filename_type_enum;
             _globalSearchInfo.ShowLrcType = show_lrc_type_enum;
@@ -241,12 +241,12 @@ namespace Application
 
                     foreach (var songId in songIds)
                     {
-                        _globalSearchInfo.SONG_IDS.Add(songId);
+                        _globalSearchInfo.SongIds.Add(songId);
                     }
                 }
                 else
                 {
-                    _globalSearchInfo.SONG_IDS.Add(id);
+                    _globalSearchInfo.SongIds.Add(id);
                 }
             }
         }
@@ -332,7 +332,7 @@ namespace Application
 
             try
             {
-                var songIds = _globalSearchInfo.SONG_IDS;
+                var songIds = _globalSearchInfo.SongIds;
                 if (songIds.Count > 1)
                 {
                     BatchSearch(songIds);
@@ -377,7 +377,7 @@ namespace Application
             if (_globalSaveVoMap.Count > 1)
             {
                 // 输出日志
-                foreach (var songId in _globalSearchInfo.SONG_IDS)
+                foreach (var songId in _globalSearchInfo.SongIds)
                 {
                     _globalSaveVoMap.TryGetValue(songId, out var saveVo);
 
@@ -496,7 +496,7 @@ namespace Application
 
             // 输出日志
             var log = new StringBuilder();
-            foreach (var songId in _globalSearchInfo.SONG_IDS)
+            foreach (var songId in _globalSearchInfo.SongIds)
             {
                 log
                     .Append($"ID: {songId}, Result: {(_globalSaveVoMap.ContainsKey(songId) ? "success" : "failure")}")
