@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26730.16
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Application", "Application\Application.csproj", "{A8897401-6EE2-4C86-A56A-59CCF37A5974}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MusicLyricApp", "MusicLyricApp\MusicLyricApp.csproj", "{A8897401-6EE2-4C86-A56A-59CCF37A5974}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApplicationTest", "ApplicationTest\ApplicationTest.csproj", "{9D302133-2ABB-4099-8573-2007EBE28A22}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MusicLyricAppTest", "MusicLyricAppTest\MusicLyricAppTest.csproj", "{9D302133-2ABB-4099-8573-2007EBE28A22}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
