@@ -72,11 +72,17 @@ namespace MusicLyricApp.Api
 
             if (resp.Code == 200)
             {
-                return new LyricVo
+                var lyricVo = new LyricVo();
+                if (resp.Lrc != null)
                 {
-                    Lyric = resp.Lrc.Lyric ?? string.Empty,
-                    TranslateLyric = resp.Tlyric.Lyric ?? string.Empty
-                };
+                    lyricVo.Lyric = resp.Lrc.Lyric;
+                }
+                if (resp.Tlyric != null)
+                {
+                    lyricVo.TranslateLyric = resp.Tlyric.Lyric;
+                }
+
+                return lyricVo;
             }
 
             _logger.Error("NetEaseMusicApiV2 GetLyricVo failed, resp: {Resp}", resp.ToJson());
