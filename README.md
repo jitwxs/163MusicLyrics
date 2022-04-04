@@ -45,7 +45,9 @@
 如果本项目为您带来方便，欢迎 Star 来让更多人发现和使用它。本项目为个人维护项目，如果您愿意请作者喝一瓶可乐的话，欢迎打赏。
 
 >如您选择打赏，记得备注您的昵称，我将为您登记到本页面中。
-<div>
-    <img src="./images/alipay_donate.jpg" height="300" style="float:left;margin-right:20px;margin-left: 310px">
-    <img src="./images/wechat_donate.jpg" height="300" style="float:left">
+
+<div align="center">
+    <img src="./images/alipay_donate.jpg" height="200" style="float:left;margin-right:20px;margin-left: 310px">
+    <img src="./images/wechat_donate.jpg" height="200" style="float:left">
+</div> 
 
