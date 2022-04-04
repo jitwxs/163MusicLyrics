@@ -79,8 +79,7 @@ namespace MusicLyricApp.Bean
         public const string FUNCTION_NOT_SUPPORT = "该功能暂不可用，请等待后续更新";
         public const string SONG_URL_COPY_SUCCESS = "歌曲直链，已复制到剪切板";
         public const string SONG_URL_GET_FAILED = "歌曲直链，获取失败";
-        public const string FILE_NAME_IS_EMPTY = "输出文件名不能为空";
-        public const string SAVE_SUCCESS = "保存成功";
+        public const string SAVE_COMPLETE = "保存完毕，成功 {0} 跳过 {1}";
 
         public const string GET_LATEST_VERSION_FAILED = "获取最新版本失败";
         public const string THIS_IS_LATEST_VERSION = "当前版本已经是最新版本";
@@ -163,6 +162,11 @@ namespace MusicLyricApp.Bean
         /// 实际输出的歌词
         /// </summary>
         public string Output { get; set; }
+
+        public bool IsEmpty()
+        {
+            return string.IsNullOrEmpty(Lyric) && string.IsNullOrEmpty(TranslateLyric);
+        }
     }
 
     /// <summary>

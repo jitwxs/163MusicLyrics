@@ -39,7 +39,6 @@
       <Compile Include="Api\NetEaseMusicApiV2.cs" />
       <Compile Include="Api\QQMusicNativeApi.cs" />
       <Compile Include="Utils\GlobalUtils.cs" />
-      <Compile Include="Utils\NetEaseMusicUtils.cs" />
     </ItemGroup>
     <ItemGroup>
       <ProjectReference Include="..\MusicLyricApp\MusicLyricApp.csproj">

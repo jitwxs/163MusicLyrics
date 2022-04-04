@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using MusicLyricApp.Bean;
@@ -17,6 +15,7 @@ namespace MusicLyricApp.Utils
         /// 输入参数校验
         /// </summary>
         /// <param name="input">输入参数</param>
+        /// <param name="searchSource">搜索类型</param>
         /// <param name="searchType">查询类型</param>
         /// <returns></returns>
         public static string CheckInputId(string input, SearchSourceEnum searchSource, SearchTypeEnum searchType)
@@ -118,51 +117,25 @@ namespace MusicLyricApp.Utils
                 throw ex;
             }
 
-            switch (searchInfo?.OutputFileNameType ?? throw new ArgumentNullException(nameof(searchInfo)))
+            string outputName;
+            switch (searchInfo.OutputFileNameType)
             {
                 case OutputFilenameTypeEnum.NAME_SINGER:
-                    return songVo.Name + " - " + songVo.Singer;
+                    outputName = songVo.Name + " - " + songVo.Singer;
+                    break;
                 case OutputFilenameTypeEnum.SINGER_NAME:
-                    return songVo.Singer + " - " + songVo.Name;
+                    outputName = songVo.Singer + " - " + songVo.Name;
+                    break;
                 case OutputFilenameTypeEnum.NAME:
-                    return songVo.Name;
+                    outputName = songVo.Name;
+                    break;
                 default:
-                    return string.Empty;
+                    throw new MusicLyricException(ErrorMsg.SYSTEM_ERROR);
             }
+            return GetSafeFilename(outputName);
         }
 
-        /**
-         * 拼接歌手名
-         */
-        public static string ContractSinger(List<Ar> arList)
-        {
-            if (arList == null)
-            {
-                var ex = new ArgumentNullException(nameof(arList));
-                Logger.Error(ex);
-                throw ex;
-            }
-            if (!arList.Any())
-            {
-                return string.Empty;
-            }
-
-            var sb = new StringBuilder();
-            foreach (var ar in arList)
-            {
-                sb.Append(ar.Name).Append(',');
-            }
-
-            return sb.Remove(sb.Length - 1, 1).ToString();
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="arbitraryString"></param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentNullException"></exception>
-        public static string GetSafeFilename(string arbitraryString)
+        private static string GetSafeFilename(string arbitraryString)
         {
             if (arbitraryString == null)
             {
