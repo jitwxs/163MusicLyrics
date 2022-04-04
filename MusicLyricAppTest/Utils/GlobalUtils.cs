@@ -40,6 +40,8 @@ namespace ApplicationTest.Utils
             
             Assert.AreEqual("002owtOq052wu9", CheckInputId("https://y.qq.com/n/ryqq/songDetail/002owtOq052wu9", SearchSourceEnum.QQ_MUSIC, SearchTypeEnum.SONG_ID));
             Assert.AreEqual("000k0h474UtgAL", CheckInputId("https://y.qq.com/n/ryqq/albumDetail/000k0h474UtgAL", SearchSourceEnum.QQ_MUSIC, SearchTypeEnum.ALBUM_ID));
+            
+            Assert.Throws(typeof(MusicLyricException), () => CheckInputId("https://y.qq.com/n/ryqq/singer/004cyCLc1ByKPx", SearchSourceEnum.QQ_MUSIC, SearchTypeEnum.SONG_ID));
         }
     }
 }

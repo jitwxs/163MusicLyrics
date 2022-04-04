@@ -66,28 +66,33 @@ namespace MusicLyricApp.Utils
 
             if (searchSource == SearchSourceEnum.QQ_MUSIC)
             {
-                // ID 提取
-                var keyword = searchType == SearchTypeEnum.SONG_ID ? "songDetail/" : "albumDetail/";
-                var index = input.IndexOf(keyword, StringComparison.Ordinal);
-                if (index != -1)
+                if (input.Contains("/"))
                 {
-                    var sb = new StringBuilder();
-                    foreach (var c in input.Substring(index + keyword.Length).ToCharArray())
+                    // ID 提取
+                    var keyword = searchType == SearchTypeEnum.SONG_ID ? "songDetail/" : "albumDetail/";
+                    var index = input.IndexOf(keyword, StringComparison.Ordinal);
+                    if (index != -1)
                     {
-                        if (c == '/')
+                        var sb = new StringBuilder();
+                        foreach (var c in input.Substring(index + keyword.Length).ToCharArray())
                         {
-                            break;
+                            if (c == '/')
+                            {
+                                break;
+                            }
+                            sb.Append(c);
                         }
-                        sb.Append(c);
-                    }
 
-                    if (sb.Length > 0)
-                    {
-                        return sb.ToString();
+                        if (sb.Length > 0)
+                        {
+                            return sb.ToString();
+                        }
                     }
                 }
-                
-                return input;
+                else
+                {
+                    return input;
+                }
             }
 
             throw new MusicLyricException(ErrorMsg.INPUT_ID_ILLEGAL);
