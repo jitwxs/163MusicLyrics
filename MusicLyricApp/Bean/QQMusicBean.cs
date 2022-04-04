@@ -130,7 +130,7 @@ namespace MusicLyricApp.Bean
 
             public int Type { get; set; }
 
-            public int Uin { get; set; }
+            public long Uin { get; set; }
         }
     }
 }
