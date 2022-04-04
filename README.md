@@ -27,3 +27,11 @@
 ### Stargazers over time 
 
 [![Stargazers over time](https://starchart.cc/jitwxs/163MusicLyrics.svg)](https://starchart.cc/jitwxs/163MusicLyrics) 
+
+### Reference
+
+本项目部分功能借鉴以下项目：
+
+- https://github.com/Binaryify/NeteaseCloudMusicApi
+- https://github.com/Rain120/qq-music-api
+- https://github.com/ElliottSilence/LyricCapture
