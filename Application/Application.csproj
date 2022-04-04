@@ -94,12 +94,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Api\IMusicApiV2.cs" />
     <Compile Include="Api\INetEaseMusicApi.cs" />
     <Compile Include="Api\NetEaseMusicApi.cs" />
+    <Compile Include="Api\NetEaseMusicApiV2.cs" />
     <Compile Include="Api\NetEaseMusicApiWrapper.cs" />
     <Compile Include="Bean\NetEaseMusicBean.cs" />
     <Compile Include="Bean\MusicLyricsVO.cs" />
     <Compile Include="Cache\NetEaseMusicCache.cs" />
+    <Compile Include="Exception\MusicLyricException.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -108,10 +111,12 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Utils\BaseLyricUtils.cs" />
     <Compile Include="Utils\HttpUtils.cs" />
     <Compile Include="Utils\JsonUtils.cs" />
-    <Compile Include="Utils\NetEaseMusicUtils.cs" />
+    <Compile Include="Utils\GlobalUtils.cs" />
     <Compile Include="Utils\NetworkUtils.cs" />
+    <Compile Include="Utils\SrtUtils.cs" />
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
     </EmbeddedResource>

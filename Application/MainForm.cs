@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Drawing;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
@@ -9,6 +10,7 @@ using System.Windows.Forms;
 using Application.Api;
 using Application.Bean;
 using Application.Cache;
+using Application.Exception;
 using Application.Utils;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -18,32 +20,33 @@ namespace Application
 {
     public partial class MainForm : Form
     {
-        private readonly NetEaseMusicApiWrapper _api;
-        private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+        private readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
         private readonly Dictionary<long, SaveVo> _globalSaveVoMap = new Dictionary<long, SaveVo>();
 
         private readonly SearchInfo _globalSearchInfo = new SearchInfo();
 
         // 输出文件编码
-        OutputEncodingEnum output_encoding_enum;
+        private OutputEncodingEnum _outputEncodingEnum;
 
         // 搜索类型
-        SearchTypeEnum search_type_enum;
+        private SearchTypeEnum _searchTypeEnum;
 
         // 强制两位类型
-        DotTypeEnum dot_type_enum;
+        private DotTypeEnum _dotTypeEnum;
 
         // 展示歌词类型
-        ShowLrcTypeEnum show_lrc_type_enum;
+        private ShowLrcTypeEnum _showLrcTypeEnum;
 
         // 输出文件名类型
-        OutputFilenameTypeEnum output_filename_type_enum;
+        private OutputFilenameTypeEnum _outputFilenameTypeEnum;
 
         // 输出文件类型
-        OutputFormatEnum output_format_enum;
+        private OutputFormatEnum _outputFormatEnum;
 
         public const string Version = "v3.9";
+
+        private IMusicApiV2 _api;
 
         public MainForm()
         {
@@ -55,8 +58,6 @@ namespace Application
             comboBox_search_type.SelectedIndex = 0;
             comboBox_dot.SelectedIndex = 0;
             comboBox_output_format.SelectedIndex = 0;
-
-            _api = new NetEaseMusicApiWrapper();
         }
 
         /// <summary>
@@ -72,88 +73,25 @@ namespace Application
             }
 
             _globalSearchInfo.SongIds.Clear();
-            _globalSearchInfo.SearchType = search_type_enum;
-            _globalSearchInfo.OutputFileNameType = output_filename_type_enum;
-            _globalSearchInfo.ShowLrcType = show_lrc_type_enum;
-            _globalSearchInfo.Encoding = output_encoding_enum;
-            _globalSearchInfo.DotType = dot_type_enum;
-            _globalSearchInfo.OutputFileFormat = output_format_enum;
+            _globalSearchInfo.SearchType = _searchTypeEnum;
+            _globalSearchInfo.OutputFileNameType = _outputFilenameTypeEnum;
+            _globalSearchInfo.ShowLrcType = _showLrcTypeEnum;
+            _globalSearchInfo.Encoding = _outputEncodingEnum;
+            _globalSearchInfo.DotType = _dotTypeEnum;
+            _globalSearchInfo.OutputFileFormat = _outputFormatEnum;
             _globalSearchInfo.LrcMergeSeparator = splitTextBox.Text;
+
+            _api = new NetEaseMusicApiV2();
         }
-
-        /**
-         * 从专辑ID中获取歌曲ID列表
-         */
-        private List<long> RequestSongIdInAlbum(long albumId, out string errorMsg)
-        {
-            var songIds = new List<long>();
-
-            errorMsg = ErrorMsg.SUCCESS;
-
-            var albumResult = _api.GetAlbum(albumId);
-            if (albumResult.Code != 200)
-            {
-                errorMsg = ErrorMsg.INPUT_ALBUM_ILLEGAL;
-                return null;
-            }
-
-            var set = albumResult.Songs.Select(song => song.Id);
-            songIds.AddRange(set);
-
-            return songIds;
-        }
-
-        /// <summary>
-        /// 获取歌曲信息
-        /// </summary>
-        /// <param name="songIds">歌曲ID</param>
-        /// <param name="errorMsgs">错误信息</param>
-        /// <exception cref="WebException"></exception>
-        /// <returns></returns>
-        private Dictionary<long, SongVo> RequestSongVo(long[] songIds, out Dictionary<long, string> errorMsgs)
-        {
-            var datumDict = _api.GetDatum(songIds);
-            var songDict = _api.GetSongs(songIds);
-
-            errorMsgs = new Dictionary<long, string>();
-            var result = new Dictionary<long, SongVo>();
-
-            foreach (var pair in datumDict)
-            {
-                var songId = pair.Key;
-                var datum = pair.Value;
-
-                if (!songDict.TryGetValue(songId, out var song))
-                {
-                    errorMsgs[songId] = ErrorMsg.SONG_NOT_EXIST;
-                    continue;
-                }
-
-                result[songId] = new SongVo
-                {
-                    Links = datum.Url,
-                    Name = song.Name,
-                    Singer = NetEaseMusicUtils.ContractSinger(song.Ar),
-                    Album = song.Al.Name,
-                    DateTime = song.Dt
-                };
-                errorMsgs[songId] = ErrorMsg.SUCCESS;
-            }
-
-            return result;
-        }
-
 
         /// <summary>
         /// 根据歌曲ID查询
         /// </summary>
-        /// <param name="songIds"></param>
-        /// <param name="errorMsgDict"></param>
-        /// <exception cref="WebException"></exception>
         private void SearchBySongId(IEnumerable<long> songIds, out Dictionary<long, string> errorMsgDict)
         {
             errorMsgDict = new Dictionary<long, string>();
 
+            // 1、优先加载缓存
             var requestId = new List<long>();
 
             foreach (var songId in songIds)
@@ -173,82 +111,81 @@ namespace Application
                 return;
             }
 
-            var requestResult = RequestSongVo(requestId.ToArray(), out var songVoErrorMsg);
+            // 2、API 请求
+            var songResp = _api.GetSongVo(requestId.ToArray(), out var songVoErrorMsg);
             foreach (var errorPair in songVoErrorMsg)
             {
                 var songId = errorPair.Key;
                 var errorMsg = errorPair.Value;
 
-                if (errorMsg == ErrorMsg.SUCCESS)
+                if (errorMsg != ErrorMsg.SUCCESS)
                 {
-                    try
-                    {
-                        var songVo = requestResult[songId];
-                        var lyricVo = NetEaseMusicUtils.GetLyricVo(_api.GetLyric(songId), songVo.DateTime,
-                            _globalSearchInfo, out errorMsg);
-                        if (errorMsg == ErrorMsg.SUCCESS)
-                        {
-                            NetEaseMusicCache.PutSaveVo(songId, new SaveVo(songId, songVo, lyricVo));
-                            errorMsgDict.Add(songId, ErrorMsg.SUCCESS);
-                            continue;
-                        }
-                    }
-                    catch (WebException ex)
-                    {
-                        _logger.Error(ex, "网络错误, 网络延迟: {0}", NetworkUtils.GetWebRoundtripTime(50));
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.Error(ex, "请求歌曲ID: {0},错误信息{1}", songId, errorMsg);
-                    }
+                    errorMsgDict.Add(songId, errorMsg);
+                    continue;
+                }
+                
+                try
+                {
+                    var songVo = songResp[songId];
+                    var lyricVo = _api.GetLyricVo(songId);
+                        
+                    BaseLyricUtils.FillingLyricVo(lyricVo, songVo, _globalSearchInfo);
+                        
+                    NetEaseMusicCache.PutSaveVo(songId, new SaveVo(songId, songVo, lyricVo));
+                }
+                catch (WebException ex)
+                {
+                    _logger.Error(ex, "SearchBySongId network error, delay: {Delay}", NetworkUtils.GetWebRoundtripTime(50));
+                    errorMsg = ErrorMsg.NETWORK_ERROR;
+                }
+                catch (System.Exception ex)
+                {
+                    _logger.Error(ex, "SearchBySongId error, songId: {SongId}, message: {ErrorMsg}", songId, errorMsg);
+                    errorMsg = ex.Message;
                 }
 
                 errorMsgDict.Add(songId, errorMsg);
             }
         }
 
-        /**
-         * 获取要输入的歌曲 ID 列表
-         */
-        private void InitInputSongIds(out string errorMsg)
+        /// <summary>
+        /// 初始化输入的歌曲 ID 列表
+        /// </summary>
+        /// <returns></returns>
+        private string InitInputSongIds()
         {
-            errorMsg = ErrorMsg.SUCCESS;
-
             var inputs = _globalSearchInfo.InputIds;
             if (inputs.Length < 1)
             {
-                errorMsg = ErrorMsg.INPUT_ID_ILLEGAL;
-                return;
+                return ErrorMsg.INPUT_ID_ILLEGAL;
             }
 
             foreach (var input in inputs)
             {
-                var id = NetEaseMusicUtils.CheckInputId(input, _globalSearchInfo.SearchType, out errorMsg);
-
-                if (errorMsg != ErrorMsg.SUCCESS)
+                var id = NetEaseMusicUtils.CheckInputId(input, _globalSearchInfo.SearchType, out var singleCheckResult);
+                if (singleCheckResult != ErrorMsg.SUCCESS)
                 {
-                    return;
+                    return singleCheckResult;
                 }
 
-                if (_globalSearchInfo.SearchType == SearchTypeEnum.ALBUM_ID)
+                switch (_globalSearchInfo.SearchType)
                 {
-                    var songIds = RequestSongIdInAlbum(id, out errorMsg);
-                    if (errorMsg != ErrorMsg.SUCCESS)
-                    {
-                        MessageBox.Show(errorMsg, "提示");
-                        return;
-                    }
+                    case SearchTypeEnum.ALBUM_ID:
+                        foreach (var songId in _api.GetSongIdsFromAlbum(id))
+                        {
+                            _globalSearchInfo.SongIds.Add(songId);
+                        }
 
-                    foreach (var songId in songIds)
-                    {
-                        _globalSearchInfo.SongIds.Add(songId);
-                    }
-                }
-                else
-                {
-                    _globalSearchInfo.SongIds.Add(id);
+                        break;
+                    case SearchTypeEnum.SONG_ID:
+                        _globalSearchInfo.SongIds.Add(id);
+                        break;
+                    default:
+                        throw new MusicLyricException(ErrorMsg.SYSTEM_ERROR);
                 }
             }
+
+            return ErrorMsg.SUCCESS;
         }
 
         /// <summary>
@@ -321,12 +258,12 @@ namespace Application
             CleanTextBox();
             _globalSaveVoMap.Clear();
 
-            InitInputSongIds(out var errorMsg);
-            if (errorMsg != ErrorMsg.SUCCESS)
+            var initResp = InitInputSongIds();
+            if (initResp != ErrorMsg.SUCCESS)
             {
-                _logger.Info($"搜索失败,搜索框内容: {search_id_text.Text},搜索模式: {_globalSearchInfo.SearchType}, " +
-                             $"错误信息: {errorMsg}");
-                MessageBox.Show(errorMsg, "提示");
+                _logger.Error("searchBtn_Click failed, param: {SearchParam}, type: {SearchType}, message: {ErrorMsg}",
+                    search_id_text.Text, _globalSearchInfo.SearchType, initResp);
+                MessageBox.Show(initResp, "提示");
                 return;
             }
 
@@ -342,7 +279,7 @@ namespace Application
                     // just loop once
                     foreach (var songId in songIds)
                     {
-                        SingleSearch(songId, out errorMsg);
+                        SingleSearch(songId, out var errorMsg);
                         if (errorMsg != ErrorMsg.SUCCESS)
                         {
                             MessageBox.Show(errorMsg, "提示");
@@ -353,12 +290,13 @@ namespace Application
             }
             catch (WebException ex)
             {
-                _logger.Error(ex, "网络错误, 网络延迟: {0}", await NetworkUtils.GetWebRoundtripTimeAsync());
-                MessageBox.Show("网络错误", "错误");
+                _logger.Error(ex, "网络错误, 网络延迟: {Delay}", await NetworkUtils.GetWebRoundtripTimeAsync());
+                MessageBox.Show(ErrorMsg.NETWORK_ERROR, "错误");
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 _logger.Error(ex);
+                MessageBox.Show(ErrorMsg.SYSTEM_ERROR, "错误");
             }
         }
 
@@ -437,19 +375,20 @@ namespace Application
                 }
 
                 saveDialog.FileName = outputFileName;
-                saveDialog.Filter = output_format_enum.ToDescription();
+                saveDialog.Filter = _outputFormatEnum.ToDescription();
                 if (saveDialog.ShowDialog() == DialogResult.OK)
                 {
-                    using (var sw = new StreamWriter(saveDialog.FileName, false, NetEaseMusicUtils.GetEncoding(_globalSearchInfo.Encoding)))
+                    using (var sw = new StreamWriter(saveDialog.FileName, false,
+                               NetEaseMusicUtils.GetEncoding(_globalSearchInfo.Encoding)))
                     {
-                        sw.Write(NetEaseMusicUtils.GetOutputContent(saveVo.LyricVo, _globalSearchInfo));
+                        sw.Write(BaseLyricUtils.GetOutputContent(saveVo.LyricVo, _globalSearchInfo));
                         sw.Flush();
                     }
 
                     MessageBox.Show(ErrorMsg.SAVE_SUCCESS, "提示");
                 }
             }
-            catch (Exception ew)
+            catch (System.Exception ew)
             {
                 _logger.Error(ew, "单独保存歌词失败");
                 MessageBox.Show("保存失败！错误信息：\n" + ew.Message);
@@ -465,7 +404,7 @@ namespace Application
             try
             {
                 saveDialog.FileName = "直接选择保存路径即可，无需修改此处内容";
-                saveDialog.Filter = output_format_enum.ToDescription();
+                saveDialog.Filter = _outputFormatEnum.ToDescription();
                 if (saveDialog.ShowDialog() == DialogResult.OK)
                 {
                     string localFilePath = saveDialog.FileName;
@@ -479,8 +418,9 @@ namespace Application
                         var saveVo = item.Value;
                         string outputFileName = NetEaseMusicUtils.GetOutputName(saveVo.SongVo, _globalSearchInfo);
                         string path = filePath + '/' + NetEaseMusicUtils.GetSafeFilename(outputFileName) + fileSuffix;
-                        StreamWriter sw = new StreamWriter(path, false, NetEaseMusicUtils.GetEncoding(_globalSearchInfo.Encoding));
-                        sw.Write(NetEaseMusicUtils.GetOutputContent(saveVo.LyricVo, _globalSearchInfo));
+                        StreamWriter sw = new StreamWriter(path, false,
+                            NetEaseMusicUtils.GetEncoding(_globalSearchInfo.Encoding));
+                        sw.Write(BaseLyricUtils.GetOutputContent(saveVo.LyricVo, _globalSearchInfo));
                         sw.Flush();
                         sw.Close();
                     }
@@ -488,7 +428,7 @@ namespace Application
                     MessageBox.Show(ErrorMsg.SAVE_SUCCESS, "提示");
                 }
             }
-            catch (Exception ew)
+            catch (System.Exception ew)
             {
                 _logger.Error(ew, "批量保存失败");
                 MessageBox.Show("批量保存失败，错误信息：\n" + ew.Message);
@@ -533,31 +473,31 @@ namespace Application
 
         private void comboBox_output_name_SelectedIndexChanged(object sender, EventArgs e)
         {
-            output_filename_type_enum = (OutputFilenameTypeEnum)comboBox_output_name.SelectedIndex;
+            _outputFilenameTypeEnum = (OutputFilenameTypeEnum)comboBox_output_name.SelectedIndex;
             ReloadConfig();
         }
 
         private void comboBox_output_encode_SelectedIndexChanged(object sender, EventArgs e)
         {
-            output_encoding_enum = (OutputEncodingEnum)comboBox_output_encode.SelectedIndex;
+            _outputEncodingEnum = (OutputEncodingEnum)comboBox_output_encode.SelectedIndex;
             ReloadConfig();
         }
 
         private void comboBox_diglossia_lrc_SelectedIndexChanged(object sender, EventArgs e)
         {
-            show_lrc_type_enum = (ShowLrcTypeEnum)comboBox_diglossia_lrc.SelectedIndex;
+            _showLrcTypeEnum = (ShowLrcTypeEnum)comboBox_diglossia_lrc.SelectedIndex;
 
-            if (show_lrc_type_enum == ShowLrcTypeEnum.MERGE_ORIGIN ||
-                show_lrc_type_enum == ShowLrcTypeEnum.MERGE_TRANSLATE)
+            if (_showLrcTypeEnum == ShowLrcTypeEnum.MERGE_ORIGIN ||
+                _showLrcTypeEnum == ShowLrcTypeEnum.MERGE_TRANSLATE)
             {
                 splitTextBox.ReadOnly = false;
-                splitTextBox.BackColor = System.Drawing.Color.White;
+                splitTextBox.BackColor = Color.White;
             }
             else
             {
                 splitTextBox.Text = null;
                 splitTextBox.ReadOnly = true;
-                splitTextBox.BackColor = System.Drawing.Color.FromArgb(240, 240, 240);
+                splitTextBox.BackColor = Color.FromArgb(240, 240, 240);
             }
 
             ReloadConfig();
@@ -566,7 +506,7 @@ namespace Application
 
         private void comboBox_search_type_SelectedIndexChanged(object sender, EventArgs e)
         {
-            search_type_enum = (SearchTypeEnum)comboBox_search_type.SelectedIndex;
+            _searchTypeEnum = (SearchTypeEnum)comboBox_search_type.SelectedIndex;
 
             ReloadConfig();
             UpdateLrcTextBox(string.Empty);
@@ -574,7 +514,7 @@ namespace Application
 
         private void comboBox_dot_SelectedIndexChanged(object sender, EventArgs e)
         {
-            dot_type_enum = (DotTypeEnum)comboBox_dot.SelectedIndex;
+            _dotTypeEnum = (DotTypeEnum)comboBox_dot.SelectedIndex;
             ReloadConfig();
             UpdateLrcTextBox(string.Empty);
         }
@@ -586,9 +526,9 @@ namespace Application
         {
             try
             {
-                System.Diagnostics.Process.Start("https://github.com/jitwxs/163MusicLyrics");
+                Process.Start("https://github.com/jitwxs/163MusicLyrics");
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 _logger.Error(ex, "项目主页打开失败,网络延迟: {0}", await NetworkUtils.GetWebRoundtripTimeAsync());
                 MessageBox.Show("项目主页打开失败", "错误");
@@ -611,7 +551,7 @@ namespace Application
             try
             {
                 var jsonStr = HttpUtils.HttpGet("https://api.github.com/repos/jitwxs/163MusicLyrics/releases/latest",
-                "application/json", headers);
+                    "application/json", headers);
                 var obj = (JObject)JsonConvert.DeserializeObject(jsonStr);
                 OutputLatestTag(obj["tag_name"]);
             }
@@ -619,7 +559,7 @@ namespace Application
             {
                 _logger.Error(ex);
                 MessageBox.Show("网络错误", "错误");
-            }            
+            }
         }
 
         private static void OutputLatestTag(JToken latestTag)
@@ -652,9 +592,9 @@ namespace Application
         {
             try
             {
-                System.Diagnostics.Process.Start("https://github.com/jitwxs/163MusicLyrics/issues");
+                Process.Start("https://github.com/jitwxs/163MusicLyrics/issues");
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 _logger.Error(ex, "问题反馈网址打开失败");
                 MessageBox.Show("问题反馈网址打开失败", "错误");
@@ -668,9 +608,9 @@ namespace Application
         {
             try
             {
-                System.Diagnostics.Process.Start("https://github.com/jitwxs/163MusicLyrics/wiki");
+                Process.Start("https://github.com/jitwxs/163MusicLyrics/wiki");
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 _logger.Error(ex, "使用手册网址打开失败");
                 MessageBox.Show("使用手册网址打开失败", "错误");
@@ -700,7 +640,7 @@ namespace Application
                     // only loop one times
                     foreach (var saveVo in _globalSaveVoMap.Values)
                     {
-                        var outputContent = NetEaseMusicUtils.GetOutputContent(saveVo.LyricVo, _globalSearchInfo);
+                        var outputContent = BaseLyricUtils.GetOutputContent(saveVo.LyricVo, _globalSearchInfo);
                         textBox_lrc.Text = string.IsNullOrEmpty(outputContent) ? ErrorMsg.LRC_NOT_EXIST : outputContent;
                     }
                 }
@@ -728,7 +668,7 @@ namespace Application
 
         private void comboBox_output_format_SelectedIndexChanged(object sender, EventArgs e)
         {
-            output_format_enum = (OutputFormatEnum)comboBox_output_format.SelectedIndex;
+            _outputFormatEnum = (OutputFormatEnum)comboBox_output_format.SelectedIndex;
             ReloadConfig();
         }
     }

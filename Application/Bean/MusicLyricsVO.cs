@@ -78,6 +78,8 @@ namespace Application.Bean
         public const string GET_LATEST_VERSION_FAILED = "获取最新版本失败";
         public const string THIS_IS_LATEST_VERSION = "当前版本已经是最新版本";
         public const string EXIST_LATEST_VERSION = "检测到最新版本 {0}，下载地址已复制到剪切板";
+        public const string SYSTEM_ERROR = "系统错误";
+        public const string NETWORK_ERROR = "网络错误，请检查网络链接";
     }
 
     /// <summary>
@@ -127,7 +129,7 @@ namespace Application.Bean
         /// <summary>
         /// 歌曲时长 ms
         /// </summary>
-        public long DateTime { get; set; }
+        public long Duration { get; set; }
     }
 
     /// <summary>
@@ -143,10 +145,16 @@ namespace Application.Bean
         /// <summary>
         /// 译文歌词内容
         /// </summary>
-        public string TLyric { get; set; }
+        public string TranslateLyric { get; set; }
 
-        [Obsolete] public long DateTime { get; set; }
+        /// <summary>
+        /// 歌曲时长 ms
+        /// </summary>
+        public long Duration { get; set; }
 
+        /// <summary>
+        /// 实际输出的歌词
+        /// </summary>
         public string Output { get; set; }
     }
 

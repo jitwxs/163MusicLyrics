@@ -25,7 +25,7 @@ namespace Application.Utils
                 else
                     return -1;
             }
-            catch (Exception)
+            catch (System.Exception)
             {
                 return -1;
             }
@@ -45,7 +45,7 @@ namespace Application.Utils
                 else
                     return -1;
             }
-            catch (Exception)
+            catch (System.Exception)
             {
                 return -1;
             }
