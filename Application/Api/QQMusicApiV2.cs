@@ -45,9 +45,11 @@ namespace Application.Api
 
                 var song = resp.Data[0];
 
+               var links = _api.GetSongLink(songId);
+
                 result[songId] = new SongVo
                 {
-                    Links = null, // TODO 歌曲直链获取功能
+                    Links = links,
                     Name = song.Name,
                     Singer = ContractSinger(song.Singer),
                     Album = song.Album.Name,

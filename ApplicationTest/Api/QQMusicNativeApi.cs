@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿using System;
+using NUnit.Framework;
 
 namespace ApplicationTest.Api
 {
@@ -23,6 +24,13 @@ namespace ApplicationTest.Api
         public void GetAlbum()
         {
             _api.GetAlbum("000IdMCY2pTAiz");
+        }
+        
+        [Test]
+        public void GetSongLink()
+        {
+            var link = _api.GetSongLink("0028gDJg3aMcO1");
+            Console.WriteLine(link);
         }
     }
 }
