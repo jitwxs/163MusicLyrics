@@ -6,7 +6,7 @@ using System.Linq;
 namespace Application.Bean
 {
     // 双语歌词类型
-    public enum SHOW_LRC_TYPE_ENUM
+    public enum ShowLrcTypeEnum
     {
         ONLY_ORIGIN = 0, // 仅显示原文
         ONLY_TRANSLATE = 1, // 仅显示译文
@@ -17,7 +17,7 @@ namespace Application.Bean
     }
 
     // 输出文件名类型
-    public enum OUTPUT_FILENAME_TYPE_ENUM
+    public enum OutputFilenameTypeEnum
     {
         NAME_SINGER = 0, // 歌曲名 - 歌手
         SINGER_NAME = 1, // 歌手 - 歌曲名
@@ -25,14 +25,14 @@ namespace Application.Bean
     }
 
     // 搜索类型
-    public enum SEARCH_TYPE_ENUM
+    public enum SearchTypeEnum
     {
         SONG_ID = 0, // 歌曲ID
         ALBUM_ID = 1 // 专辑ID
     }
 
     // 强制两位类型
-    public enum DOT_TYPE_ENUM
+    public enum DotTypeEnum
     {
         DISABLE = 0, // 不启用
         DOWN = 1, // 截位
@@ -40,7 +40,7 @@ namespace Application.Bean
     }
 
     // 输出文件格式
-    public enum OUTPUT_ENCODING_ENUM
+    public enum OutputEncodingEnum
     {
         UTF_8 = 0,
         UTF_8_BOM = 1,
@@ -49,13 +49,11 @@ namespace Application.Bean
         UNICODE = 4
     }
 
-    public enum OUTPUT_FORMAT_ENUM
+    public enum OutputFormatEnum
     {
-        [Description("lrc文件(*.lrc)|*.lrc")]
-        LRC = 0,
-        
-        [Description("srt文件(*.srt)|*.srt")]
-        SRT = 1
+        [Description("lrc文件(*.lrc)|*.lrc")] LRC = 0,
+
+        [Description("srt文件(*.srt)|*.srt")] SRT = 1
     }
 
     /**
@@ -107,7 +105,7 @@ namespace Application.Bean
         public string Album { get; set; }
 
         public string Links { get; set; }
-        
+
         public long DateTime { get; set; }
     }
 
@@ -116,7 +114,7 @@ namespace Application.Bean
         public string Lyric { get; set; }
 
         public string TLyric { get; set; }
-        
+
         public long DateTime { get; set; }
 
         public string Output { get; set; }
@@ -124,25 +122,25 @@ namespace Application.Bean
 
     public class SearchInfo
     {
-        public SEARCH_TYPE_ENUM SearchType { get; set; }
+        public SearchTypeEnum SearchType { get; set; }
 
-        public OUTPUT_FILENAME_TYPE_ENUM OutputFileNameType { get; set; }
+        public OutputFilenameTypeEnum OutputFileNameType { get; set; }
 
-        public SHOW_LRC_TYPE_ENUM ShowLrcType { get; set; }
+        public ShowLrcTypeEnum ShowLrcType { get; set; }
 
         public string[] InputIds { get; set; }
 
         public readonly HashSet<long> SONG_IDS = new HashSet<long>();
 
-        public OUTPUT_ENCODING_ENUM Encoding { get; set; }
+        public OutputEncodingEnum Encoding { get; set; }
 
         public string LrcMergeSeparator { get; set; }
 
-        public DOT_TYPE_ENUM DotType { get; set; }
-        
-        public OUTPUT_FORMAT_ENUM OutputFileFormat { get; set; }
+        public DotTypeEnum DotType { get; set; }
+
+        public OutputFormatEnum OutputFileFormat { get; set; }
     }
-    
+
     public static class EnumHelper
     {
         public static string ToDescription(this Enum val)
@@ -152,8 +150,8 @@ namespace Application.Bean
             var attributes = memberInfo[0].GetCustomAttributes(typeof(DescriptionAttribute), false);
             //如果没有定义描述，就把当前枚举值的对应名称返回
             if (attributes == null || attributes.Length != 1) return val.ToString();
- 
-            return (attributes.Single() as DescriptionAttribute).Description;
+
+            return (attributes.Single() as DescriptionAttribute)?.Description;
         }
     }
 }

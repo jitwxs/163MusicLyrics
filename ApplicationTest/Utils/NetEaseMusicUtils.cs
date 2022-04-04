@@ -33,18 +33,18 @@ namespace ApplicationTest.Utils
         [Test]
         public void CheckInputIdAndInputIsNuber()
         {
-            Assert.AreEqual(1, CheckInputId("1", SEARCH_TYPE_ENUM.SONG_ID, out var output_1));
+            Assert.AreEqual(1, CheckInputId("1", SearchTypeEnum.SONG_ID, out var output_1));
             Assert.AreEqual(ErrorMsg.SUCCESS, output_1);
-            Assert.AreEqual(-1, CheckInputId(string.Empty, SEARCH_TYPE_ENUM.SONG_ID, out var output_2));
+            Assert.AreEqual(-1, CheckInputId(string.Empty, SearchTypeEnum.SONG_ID, out var output_2));
             Assert.AreEqual(ErrorMsg.INPUT_ID_ILLEGAL, output_2);
-            Assert.AreEqual(-1, CheckInputId(null, SEARCH_TYPE_ENUM.SONG_ID, out var output_3));
+            Assert.AreEqual(-1, CheckInputId(null, SearchTypeEnum.SONG_ID, out var output_3));
             Assert.AreEqual(ErrorMsg.INPUT_ID_ILLEGAL, output_3);
         }
 
         [Test]
         public void CheckInputIdAndInputNotIsNuber()
         {
-            Assert.AreEqual(-1, CheckInputId("abc", SEARCH_TYPE_ENUM.SONG_ID, out var output_1));
+            Assert.AreEqual(-1, CheckInputId("abc", SearchTypeEnum.SONG_ID, out var output_1));
             Assert.AreEqual(ErrorMsg.INPUT_ID_ILLEGAL, output_1);
         }
 
@@ -64,11 +64,11 @@ namespace ApplicationTest.Utils
                 Singer = "singer"
             };
             Assert.AreEqual("name - singer",
-                GetOutputName(songVo, new SearchInfo() { OutputFileNameType = OUTPUT_FILENAME_TYPE_ENUM.NAME_SINGER }));
+                GetOutputName(songVo, new SearchInfo() { OutputFileNameType = OutputFilenameTypeEnum.NAME_SINGER }));
             Assert.AreEqual("singer - name",
-                GetOutputName(songVo, new SearchInfo() { OutputFileNameType = OUTPUT_FILENAME_TYPE_ENUM.SINGER_NAME }));
+                GetOutputName(songVo, new SearchInfo() { OutputFileNameType = OutputFilenameTypeEnum.SINGER_NAME }));
             Assert.AreEqual("name",
-                GetOutputName(songVo, new SearchInfo() { OutputFileNameType = OUTPUT_FILENAME_TYPE_ENUM.NAME }));
+                GetOutputName(songVo, new SearchInfo() { OutputFileNameType = OutputFilenameTypeEnum.NAME }));
         }
 
         [Test]

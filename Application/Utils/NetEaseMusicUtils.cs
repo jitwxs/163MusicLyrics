@@ -20,7 +20,7 @@ namespace Application.Utils
         /// <param name="searchType">查询类型</param>
         /// <param name="errorMsg"></param>
         /// <returns></returns>
-        public static long CheckInputId(string input, SEARCH_TYPE_ENUM searchType, out string errorMsg)
+        public static long CheckInputId(string input, SearchTypeEnum searchType, out string errorMsg)
         {
             // 输入参数为空
             if (string.IsNullOrEmpty(input))
@@ -40,10 +40,10 @@ namespace Application.Utils
             var keyword = string.Empty;
             switch (searchType)
             {
-                case SEARCH_TYPE_ENUM.SONG_ID:
+                case SearchTypeEnum.SONG_ID:
                     keyword = "song?id=";
                     break;
-                case SEARCH_TYPE_ENUM.ALBUM_ID:
+                case SearchTypeEnum.ALBUM_ID:
                     keyword = "album?id=";
                     break;
             }
@@ -157,8 +157,8 @@ namespace Application.Utils
 
             switch (searchInfo.OutputFileFormat)
             {
-                case OUTPUT_FORMAT_ENUM.LRC: return GetOutputLyric(lyricVo.Lyric, lyricVo.TLyric, searchInfo);
-                case OUTPUT_FORMAT_ENUM.SRT: return ConvertLyricToSrt(
+                case OutputFormatEnum.LRC: return GetOutputLyric(lyricVo.Lyric, lyricVo.TLyric, searchInfo);
+                case OutputFormatEnum.SRT: return ConvertLyricToSrt(
                     GetOutputLyric(lyricVo.Lyric, lyricVo.TLyric, searchInfo), lyricVo.DateTime);
                 default: throw new ArgumentException(nameof(searchInfo.OutputFileFormat));
             }
@@ -192,14 +192,14 @@ namespace Application.Utils
 
             // 如果不存在翻译歌词，或者选择返回原歌词
             var originLrcs = SplitLrc(originLrc);
-            if (string.IsNullOrEmpty(translateLrc) || showLrcType == SHOW_LRC_TYPE_ENUM.ONLY_ORIGIN)
+            if (string.IsNullOrEmpty(translateLrc) || showLrcType == ShowLrcTypeEnum.ONLY_ORIGIN)
             {
                 return originLrcs;
             }
 
             // 如果选择仅译文
             var translateLrcs = SplitLrc(translateLrc);
-            if (showLrcType == SHOW_LRC_TYPE_ENUM.ONLY_TRANSLATE)
+            if (showLrcType == ShowLrcTypeEnum.ONLY_TRANSLATE)
             {
                 return translateLrcs;
             }
@@ -207,16 +207,16 @@ namespace Application.Utils
             string[] res = null;
             switch (showLrcType)
             {
-                case SHOW_LRC_TYPE_ENUM.ORIGIN_PRIOR:
+                case ShowLrcTypeEnum.ORIGIN_PRIOR:
                     res = SortLrc(originLrcs, translateLrcs, true);
                     break;
-                case SHOW_LRC_TYPE_ENUM.TRANSLATE_PRIOR:
+                case ShowLrcTypeEnum.TRANSLATE_PRIOR:
                     res = SortLrc(originLrcs, translateLrcs, false);
                     break;
-                case SHOW_LRC_TYPE_ENUM.MERGE_ORIGIN:
+                case ShowLrcTypeEnum.MERGE_ORIGIN:
                     res = MergeLrc(originLrcs, translateLrcs, searchInfo.LrcMergeSeparator, true);
                     break;
-                case SHOW_LRC_TYPE_ENUM.MERGE_TRANSLATE:
+                case ShowLrcTypeEnum.MERGE_TRANSLATE:
                     res = MergeLrc(originLrcs, translateLrcs, searchInfo.LrcMergeSeparator, false);
                     break;
             }
@@ -226,7 +226,7 @@ namespace Application.Utils
         /**
          * 设置时间戳小数位数
          */
-        private static void SetTimeStamp2Dot(ref string[] lrcStr, DOT_TYPE_ENUM dotTypeEnum)
+        private static void SetTimeStamp2Dot(ref string[] lrcStr, DotTypeEnum dotTypeEnum)
         {
             for (int i = 0; i < lrcStr.Length; i++)
             {
@@ -240,11 +240,11 @@ namespace Application.Utils
                 string ms = lrcStr[i].Substring(dot + 1, index - dot - 1);
                 if (ms.Length == 3)
                 {
-                    if (dotTypeEnum == DOT_TYPE_ENUM.DOWN)
+                    if (dotTypeEnum == DotTypeEnum.DOWN)
                     {
                         ms = ms.Substring(0, 2);
                     }
-                    else if (dotTypeEnum == DOT_TYPE_ENUM.HALF_UP)
+                    else if (dotTypeEnum == DotTypeEnum.HALF_UP)
                     {
                         ms = Convert.ToDouble("0." + ms).ToString("0.00").Substring(2);
                     }
@@ -348,11 +348,11 @@ namespace Application.Utils
 
             switch (searchInfo?.OutputFileNameType ?? throw new ArgumentNullException(nameof(searchInfo)))
             {
-                case OUTPUT_FILENAME_TYPE_ENUM.NAME_SINGER:
+                case OutputFilenameTypeEnum.NAME_SINGER:
                     return songVo.Name + " - " + songVo.Singer;
-                case OUTPUT_FILENAME_TYPE_ENUM.SINGER_NAME:
+                case OutputFilenameTypeEnum.SINGER_NAME:
                     return songVo.Singer + " - " + songVo.Name;
-                case OUTPUT_FILENAME_TYPE_ENUM.NAME:
+                case OutputFilenameTypeEnum.NAME:
                     return songVo.Name;
                 default:
                     return string.Empty;
@@ -596,17 +596,17 @@ namespace Application.Utils
             return r.ToString();
         }
 
-        public static Encoding GetEncoding(OUTPUT_ENCODING_ENUM encodingEnum)
+        public static Encoding GetEncoding(OutputEncodingEnum encodingEnum)
         {
             switch (encodingEnum)
             {
-                case OUTPUT_ENCODING_ENUM.GB_2312:
+                case OutputEncodingEnum.GB_2312:
                     return Encoding.GetEncoding("GB2312");
-                case OUTPUT_ENCODING_ENUM.GBK:
+                case OutputEncodingEnum.GBK:
                     return Encoding.GetEncoding("GBK");
-                case OUTPUT_ENCODING_ENUM.UTF_8_BOM:
+                case OutputEncodingEnum.UTF_8_BOM:
                     return new UTF8Encoding(true);
-                case OUTPUT_ENCODING_ENUM.UNICODE:
+                case OutputEncodingEnum.UNICODE:
                     return Encoding.Unicode;
                 default:
                     // utf-8 and others

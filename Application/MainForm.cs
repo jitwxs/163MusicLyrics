@@ -26,22 +26,22 @@ namespace Application
         private readonly SearchInfo _globalSearchInfo = new SearchInfo();
 
         // 输出文件编码
-        OUTPUT_ENCODING_ENUM output_encoding_enum;
+        OutputEncodingEnum output_encoding_enum;
 
         // 搜索类型
-        SEARCH_TYPE_ENUM search_type_enum;
+        SearchTypeEnum search_type_enum;
 
         // 强制两位类型
-        DOT_TYPE_ENUM dot_type_enum;
+        DotTypeEnum dot_type_enum;
 
         // 展示歌词类型
-        SHOW_LRC_TYPE_ENUM show_lrc_type_enum;
+        ShowLrcTypeEnum show_lrc_type_enum;
 
         // 输出文件名类型
-        OUTPUT_FILENAME_TYPE_ENUM output_filename_type_enum;
+        OutputFilenameTypeEnum output_filename_type_enum;
 
         // 输出文件类型
-        OUTPUT_FORMAT_ENUM output_format_enum;
+        OutputFormatEnum output_format_enum;
 
         public const string Version = "v3.9";
 
@@ -230,7 +230,7 @@ namespace Application
                     return;
                 }
 
-                if (_globalSearchInfo.SearchType == SEARCH_TYPE_ENUM.ALBUM_ID)
+                if (_globalSearchInfo.SearchType == SearchTypeEnum.ALBUM_ID)
                 {
                     var songIds = RequestSongIdInAlbum(id, out errorMsg);
                     if (errorMsg != ErrorMsg.SUCCESS)
@@ -533,22 +533,22 @@ namespace Application
 
         private void comboBox_output_name_SelectedIndexChanged(object sender, EventArgs e)
         {
-            output_filename_type_enum = (OUTPUT_FILENAME_TYPE_ENUM)comboBox_output_name.SelectedIndex;
+            output_filename_type_enum = (OutputFilenameTypeEnum)comboBox_output_name.SelectedIndex;
             ReloadConfig();
         }
 
         private void comboBox_output_encode_SelectedIndexChanged(object sender, EventArgs e)
         {
-            output_encoding_enum = (OUTPUT_ENCODING_ENUM)comboBox_output_encode.SelectedIndex;
+            output_encoding_enum = (OutputEncodingEnum)comboBox_output_encode.SelectedIndex;
             ReloadConfig();
         }
 
         private void comboBox_diglossia_lrc_SelectedIndexChanged(object sender, EventArgs e)
         {
-            show_lrc_type_enum = (SHOW_LRC_TYPE_ENUM)comboBox_diglossia_lrc.SelectedIndex;
+            show_lrc_type_enum = (ShowLrcTypeEnum)comboBox_diglossia_lrc.SelectedIndex;
 
-            if (show_lrc_type_enum == SHOW_LRC_TYPE_ENUM.MERGE_ORIGIN ||
-                show_lrc_type_enum == SHOW_LRC_TYPE_ENUM.MERGE_TRANSLATE)
+            if (show_lrc_type_enum == ShowLrcTypeEnum.MERGE_ORIGIN ||
+                show_lrc_type_enum == ShowLrcTypeEnum.MERGE_TRANSLATE)
             {
                 splitTextBox.ReadOnly = false;
                 splitTextBox.BackColor = System.Drawing.Color.White;
@@ -566,7 +566,7 @@ namespace Application
 
         private void comboBox_search_type_SelectedIndexChanged(object sender, EventArgs e)
         {
-            search_type_enum = (SEARCH_TYPE_ENUM)comboBox_search_type.SelectedIndex;
+            search_type_enum = (SearchTypeEnum)comboBox_search_type.SelectedIndex;
 
             ReloadConfig();
             UpdateLrcTextBox(string.Empty);
@@ -574,7 +574,7 @@ namespace Application
 
         private void comboBox_dot_SelectedIndexChanged(object sender, EventArgs e)
         {
-            dot_type_enum = (DOT_TYPE_ENUM)comboBox_dot.SelectedIndex;
+            dot_type_enum = (DotTypeEnum)comboBox_dot.SelectedIndex;
             ReloadConfig();
             UpdateLrcTextBox(string.Empty);
         }
@@ -728,7 +728,7 @@ namespace Application
 
         private void comboBox_output_format_SelectedIndexChanged(object sender, EventArgs e)
         {
-            output_format_enum = (OUTPUT_FORMAT_ENUM)comboBox_output_format.SelectedIndex;
+            output_format_enum = (OutputFormatEnum)comboBox_output_format.SelectedIndex;
             ReloadConfig();
         }
     }
