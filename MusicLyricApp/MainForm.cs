@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
@@ -357,27 +358,24 @@ namespace Application
          */
         private void SingleSave(string songId)
         {
+            // 没有搜索结果
+            if (!_globalSaveVoMap.TryGetValue(songId, out var saveVo))
+            {
+                MessageBox.Show(ErrorMsg.MUST_SEARCH_BEFORE_SAVE, "提示");
+                return;
+            }
+
+            // 没有歌词内容
+            if (saveVo.LyricVo.IsEmpty())
+            {
+                MessageBox.Show(ErrorMsg.LRC_NOT_EXIST, "提示");
+                return;
+            }
+            
             var saveDialog = new SaveFileDialog();
             try
             {
-                if (!_globalSaveVoMap.TryGetValue(songId, out var saveVo))
-                {
-                    MessageBox.Show(ErrorMsg.MUST_SEARCH_BEFORE_SAVE, "提示");
-                    return;
-                }
-
-                var outputFileName = GlobalUtils.GetOutputName(saveVo.SongVo, _globalSearchInfo);
-                if (outputFileName == null)
-                {
-                    MessageBox.Show(ErrorMsg.FILE_NAME_IS_EMPTY, "提示");
-                    return;
-                }
-                else
-                {
-                    outputFileName = GlobalUtils.GetSafeFilename(outputFileName);
-                }
-
-                saveDialog.FileName = outputFileName;
+                saveDialog.FileName = GlobalUtils.GetOutputName(saveVo.SongVo, _globalSearchInfo);
                 saveDialog.Filter = _outputFormatEnum.ToDescription();
                 if (saveDialog.ShowDialog() == DialogResult.OK)
                 {
@@ -388,10 +386,10 @@ namespace Application
                         sw.Flush();
                     }
 
-                    MessageBox.Show(ErrorMsg.SAVE_SUCCESS, "提示");
+                    MessageBox.Show(string.Format(ErrorMsg.SAVE_COMPLETE, 1, 1), "提示");
                 }
             }
-            catch (System.Exception ew)
+            catch (Exception ew)
             {
                 _logger.Error(ew, "单独保存歌词失败");
                 MessageBox.Show("保存失败！错误信息：\n" + ew.Message);
@@ -404,48 +402,58 @@ namespace Application
         private void BatchSave()
         {
             var saveDialog = new SaveFileDialog();
+            var skipCount = 0;
+            var success = new HashSet<string>();
+            
             try
             {
                 saveDialog.FileName = "直接选择保存路径即可，无需修改此处内容";
                 saveDialog.Filter = _outputFormatEnum.ToDescription();
                 if (saveDialog.ShowDialog() == DialogResult.OK)
                 {
-                    string localFilePath = saveDialog.FileName;
+                    var localFilePath = saveDialog.FileName;
                     // 获取文件后缀
-                    string fileSuffix = localFilePath.Substring(localFilePath.LastIndexOf("."));
+                    var fileSuffix = localFilePath.Substring(localFilePath.LastIndexOf("."));
                     //获取文件路径，不带文件名 
-                    string filePath = localFilePath.Substring(0, localFilePath.LastIndexOf("\\"));
+                    var filePath = localFilePath.Substring(0, localFilePath.LastIndexOf("\\"));
 
+                    
                     foreach (var item in _globalSaveVoMap)
                     {
                         var saveVo = item.Value;
-                        string outputFileName = GlobalUtils.GetOutputName(saveVo.SongVo, _globalSearchInfo);
-                        string path = filePath + '/' + GlobalUtils.GetSafeFilename(outputFileName) + fileSuffix;
-                        StreamWriter sw = new StreamWriter(path, false,
-                            GlobalUtils.GetEncoding(_globalSearchInfo.Encoding));
-                        sw.Write(LyricUtils.GetOutputContent(saveVo.LyricVo, _globalSearchInfo));
-                        sw.Flush();
-                        sw.Close();
-                    }
+                        var lyricVo = saveVo.LyricVo;
+                        if (lyricVo.IsEmpty())
+                        {
+                            skipCount++;
+                            continue;
+                        }
 
-                    MessageBox.Show(ErrorMsg.SAVE_SUCCESS, "提示");
+                        var path = filePath + '/' + GlobalUtils.GetOutputName(saveVo.SongVo, _globalSearchInfo) + fileSuffix;
+                        using( var sw = new StreamWriter(path, false, GlobalUtils.GetEncoding(_globalSearchInfo.Encoding)))
+                        {
+                            sw.Write(LyricUtils.GetOutputContent(lyricVo, _globalSearchInfo));
+                            sw.Flush();
+                            success.Add(item.Key);
+                        }
+                    }
                 }
             }
-            catch (System.Exception ew)
+            catch (Exception ew)
             {
                 _logger.Error(ew, "批量保存失败");
                 MessageBox.Show("批量保存失败，错误信息：\n" + ew.Message);
             }
+            
+            MessageBox.Show(string.Format(ErrorMsg.SAVE_COMPLETE, success.Count, skipCount), "提示");
 
             // 输出日志
             var log = new StringBuilder();
             foreach (var songId in _globalSearchInfo.SongIds)
             {
                 log
-                    .Append($"ID: {songId}, Result: {(_globalSaveVoMap.ContainsKey(songId) ? "success" : "failure")}")
+                    .Append($"ID: {songId}, Result: {(success.Contains(songId) ? "success" : "failure")}")
                     .Append(Environment.NewLine);
             }
-
             UpdateLrcTextBox(log.ToString());
         }
 
@@ -649,10 +657,9 @@ namespace Application
                 if (_globalSaveVoMap != null && _globalSaveVoMap.Count == 1)
                 {
                     // only loop one times
-                    foreach (var saveVo in _globalSaveVoMap.Values)
+                    foreach (var lyricVo in _globalSaveVoMap.Values.Select(saveVo => saveVo.LyricVo))
                     {
-                        var outputContent = LyricUtils.GetOutputContent(saveVo.LyricVo, _globalSearchInfo);
-                        textBox_lrc.Text = string.IsNullOrEmpty(outputContent) ? ErrorMsg.LRC_NOT_EXIST : outputContent;
+                        textBox_lrc.Text = lyricVo.IsEmpty() ? ErrorMsg.LRC_NOT_EXIST : LyricUtils.GetOutputContent(lyricVo, _globalSearchInfo);
                     }
                 }
             }
