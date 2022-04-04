@@ -20,3 +20,7 @@ assignees: jitwxs
 ~1. xxx
 2. xxx
 3. xxx~
+
+**错误日志（可选） Error Log(Optional)**
+
+~可上传程序 `Logs` 目录下的日志文件，帮助定位问题~
