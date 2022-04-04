@@ -47,7 +47,7 @@ namespace Application
         // 输出文件类型
         private OutputFormatEnum _outputFormatEnum;
 
-        public const string Version = "v3.9";
+        public const string Version = "v4.0";
 
         private IMusicApiV2 _api;
 
