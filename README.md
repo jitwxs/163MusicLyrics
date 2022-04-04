@@ -1,5 +1,7 @@
 [![Release](https://img.shields.io/github/v/release/jitwxs/163MusicLyrics.svg)](https://github.com/jitwxs/163MusicLyrics/releases)
+![Star](https://badgen.net/github/stars/jitwxs/163MusicLyrics)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![Email](https://img.shields.io/badge/Email-jitwxs%40foxmail.com-brightgreen)](#)
 
 ### How To Use
 
@@ -20,9 +22,11 @@
 
 ### Contribution
 
-- 将您的想法或发现的 BUG 填写在 issuse 中，我将不定期的进行处理。
+您可访问 [163MusicLyrics Projects](https://github.com/users/jitwxs/projects/1) 了解项目当前阶段的工作计划，如您愿意在其中贡献力量，您可以：
 
-- Fork 项目，并提交 Pull Request。
+- 将您的想法或发现的 BUG 填写在 [issuses](https://github.com/jitwxs/163MusicLyrics/issues) 中，我将不定期的进行处理
+
+- Fork 项目，并提交您的 Pull Request
 
 ### Stargazers over time 
 
@@ -35,3 +39,13 @@
 - https://github.com/Binaryify/NeteaseCloudMusicApi
 - https://github.com/Rain120/qq-music-api
 - https://github.com/ElliottSilence/LyricCapture
+
+### Donate
+
+如果本项目为您带来方便，欢迎 Star 来让更多人发现和使用它。本项目为个人维护项目，如果您愿意请作者喝一瓶可乐的话，欢迎打赏。
+
+>如您选择打赏，记得备注您的昵称，我将为您登记到本页面中。
+<div>
+    <img src="./images/alipay_donate.jpg" height="300" style="float:left;margin-right:20px;margin-left: 310px">
+    <img src="./images/wechat_donate.jpg" height="300" style="float:left">
+
