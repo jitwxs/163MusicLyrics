@@ -256,7 +256,7 @@
             // 
             this.comboBox_search_type.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBox_search_type.FormattingEnabled = true;
-            this.comboBox_search_type.Items.AddRange(new object[] { "ID", "专辑" });
+            this.comboBox_search_type.Items.AddRange(new object[] { "单曲", "专辑" });
             this.comboBox_search_type.Location = new System.Drawing.Point(11, 81);
             this.comboBox_search_type.Name = "comboBox_search_type";
             this.comboBox_search_type.Size = new System.Drawing.Size(62, 20);
