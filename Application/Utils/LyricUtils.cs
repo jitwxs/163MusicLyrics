@@ -113,8 +113,7 @@ namespace Application.Utils
          */
         private static string[] SplitLrc(string lrc)
         {
-            string[] ss = lrc.Split('\n').Where(s => !string.IsNullOrWhiteSpace(s)).ToArray();
-            return ss;
+            return lrc.Replace("\r\n", "\n").Split('\n').Where(s => !string.IsNullOrWhiteSpace(s)).ToArray();
         }
 
         /**
