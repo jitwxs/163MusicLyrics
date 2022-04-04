@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Application.Bean;
@@ -18,8 +17,14 @@ namespace Application.Api
 
         protected override IEnumerable<string> GetSongIdsFromAlbum0(string albumId)
         {
-            // TODO 专辑功能待实现            
-            return Array.Empty<string>();
+            var resp = _api.GetAlbum(albumId);
+
+            if (resp.Code == 0)
+            {
+                return resp.Data.List.Select(albumSong => albumSong.Songmid);
+            }
+
+            throw new MusicLyricException(ErrorMsg.ALBUM_NOT_EXIST);
         }
 
         protected override Dictionary<string, SongVo> GetSongVo0(string[] songIds, out Dictionary<string, string> errorMsgDict)

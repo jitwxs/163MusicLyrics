@@ -14,6 +14,18 @@ namespace Application.Api
             return "https://c.y.qq.com/";
         }
 
+        public QQMusicBean.AlbumResult GetAlbum(string albumMid)
+        {
+            var data = new Dictionary<string, string>
+            {
+                { "albummid", albumMid }
+            };
+
+            var resp = SendHttp("https://c.y.qq.com/v8/fcg-bin/fcg_v8_album_info_cp.fcg", data);
+            
+            return resp.ToEntity<QQMusicBean.AlbumResult>();
+        }
+        
         public QQMusicBean.SongResult GetSong(string songMid)
         {
             const string callBack = "getOneSongInfoCallback";
