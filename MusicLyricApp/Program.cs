@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Windows.Forms;
 
-namespace Application
+namespace MusicLyricApp
 {
     static class Program
     {
