@@ -7,6 +7,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
+using System.Threading;
 using System.Windows.Forms;
 using MusicLyricApp.Api;
 using MusicLyricApp.Bean;
@@ -83,6 +84,12 @@ namespace MusicLyricApp
             Dot_TextBox.SelectedIndex = (int) paramConfig.DotType;
             OutputFormat_CombBox.SelectedIndex = (int) paramConfig.OutputFileFormat;
             LrcMergeSeparator_TextBox.Text = paramConfig.LrcMergeSeparator;
+            
+            // 3、自动检查更新
+            if (_settingBean.Config.AutoCheckUpdate)
+            {
+                ThreadPool.QueueUserWorkItem(p => CheckLatestVersion(false));
+            }
         }
 
         /// <summary>
@@ -722,6 +729,27 @@ namespace MusicLyricApp
             }
             else if (input == CheckVersion_MItem)
             {
+                ThreadPool.QueueUserWorkItem(p => CheckLatestVersion(true));
+            }
+        }
+
+        private bool _inCheckVersion;
+
+        private bool _showMessageIfNotExistLatestVersion;
+
+        private void CheckLatestVersion(bool showMessageIfNotExistLatestVersion)
+        {
+            _showMessageIfNotExistLatestVersion = showMessageIfNotExistLatestVersion;
+            
+            if (_inCheckVersion)
+            {
+                return;
+            }
+
+            _inCheckVersion = true;
+
+            try
+            {
                 // support https
                 ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
                 var headers = new Dictionary<string, string>
@@ -730,29 +758,19 @@ namespace MusicLyricApp
                     { "User-Agent", BaseNativeApi.Useragent }
                 };
 
-                try
+                var jsonStr = HttpUtils.HttpGetAsync(
+                    "https://api.github.com/repos/jitwxs/163MusicLyrics/releases/latest",
+                    "application/json", headers).Result;
+
+                var jObject = (JObject)JsonConvert.DeserializeObject(jsonStr);
+                var latestTag = jObject["tag_name"];
+
+                if (latestTag == null)
                 {
-                    var jsonStr = HttpUtils.HttpGet("https://api.github.com/repos/jitwxs/163MusicLyrics/releases/latest",
-                        "application/json", headers);
-                    var obj = (JObject)JsonConvert.DeserializeObject(jsonStr);
-                    OutputLatestTag(obj["tag_name"]);
+                    MessageBox.Show(ErrorMsg.GET_LATEST_VERSION_FAILED, "提示");
+                    return;
                 }
-                catch (HttpRequestException ex)
-                {
-                    _logger.Error(ex);
-                    MessageBox.Show("网络错误", "错误");
-                }
-            }
-        }
-        
-        private static void OutputLatestTag(JToken latestTag)
-        {
-            if (latestTag == null)
-            {
-                MessageBox.Show(ErrorMsg.GET_LATEST_VERSION_FAILED, "提示");
-            }
-            else
-            {
+
                 string bigV = latestTag.ToString().Substring(1, 2), smallV = latestTag.ToString().Substring(3);
                 string curBigV = Constants.Version.Substring(1, 2), curSmallV = Constants.Version.Substring(3);
 
@@ -760,11 +778,22 @@ namespace MusicLyricApp
                 {
                     Clipboard.SetDataObject("https://github.com/jitwxs/163MusicLyrics/releases");
                     MessageBox.Show(string.Format(ErrorMsg.EXIST_LATEST_VERSION, latestTag), "提示");
+                    return;
                 }
-                else
+
+                if (_showMessageIfNotExistLatestVersion)
                 {
                     MessageBox.Show(ErrorMsg.THIS_IS_LATEST_VERSION, "提示");
                 }
+            }
+            catch (HttpRequestException ex)
+            {
+                _logger.Error(ex);
+                MessageBox.Show(ErrorMsg.NETWORK_ERROR, "提示");
+            }
+            finally
+            {
+                _inCheckVersion = false;
             }
         }
     }
