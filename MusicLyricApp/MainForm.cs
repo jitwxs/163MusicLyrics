@@ -75,14 +75,14 @@ namespace MusicLyricApp
             
             // 2、配置应用
             var paramConfig = _settingBean.Config.RememberParam ? _settingBean.Param : new PersistParamBean();
-            comboBox_output_name.SelectedIndex = (int) paramConfig.OutputFileNameType;
-            comboBox_output_encode.SelectedIndex = (int) paramConfig.Encoding;
-            comboBox_diglossia_lrc.SelectedIndex = (int) paramConfig.ShowLrcType;
-            comboBox_search_source.SelectedIndex = (int) paramConfig.SearchSource;
-            comboBox_search_type.SelectedIndex = (int) paramConfig.SearchType;
-            comboBox_dot.SelectedIndex = (int) paramConfig.DotType;
-            comboBox_output_format.SelectedIndex = (int) paramConfig.OutputFileFormat;
-            splitTextBox.Text = paramConfig.LrcMergeSeparator;
+            OutputName_ComboBox.SelectedIndex = (int) paramConfig.OutputFileNameType;
+            OutputEncoding_ComboBox.SelectedIndex = (int) paramConfig.Encoding;
+            LrcType_ComboBox.SelectedIndex = (int) paramConfig.ShowLrcType;
+            SearchSource_ComboBox.SelectedIndex = (int) paramConfig.SearchSource;
+            SearchType_ComboBox.SelectedIndex = (int) paramConfig.SearchType;
+            Dot_TextBox.SelectedIndex = (int) paramConfig.DotType;
+            OutputFormat_CombBox.SelectedIndex = (int) paramConfig.OutputFileFormat;
+            LrcMergeSeparator_TextBox.Text = paramConfig.LrcMergeSeparator;
         }
 
         /// <summary>
@@ -90,7 +90,7 @@ namespace MusicLyricApp
         /// </summary>
         private void ReloadConfig()
         {
-            var ids = search_id_text.Text.Trim().Split(',');
+            var ids = Search_Text.Text.Trim().Split(',');
             _globalSearchInfo.InputIds = new string[ids.Length];
             for (var i = 0; i < ids.Length; i++)
             {
@@ -105,7 +105,7 @@ namespace MusicLyricApp
             _globalSearchInfo.Encoding = _outputEncodingEnum;
             _globalSearchInfo.DotType = _dotTypeEnum;
             _globalSearchInfo.OutputFileFormat = _outputFormatEnum;
-            _globalSearchInfo.LrcMergeSeparator = splitTextBox.Text;
+            _globalSearchInfo.LrcMergeSeparator = LrcMergeSeparator_TextBox.Text;
 
             if (_searchSourceEnum == SearchSourceEnum.QQ_MUSIC)
             {
@@ -236,12 +236,11 @@ namespace MusicLyricApp
             _globalSaveVoMap.Add(songId, result);
 
             // 4、前端设置
-            textBox_song.Text = result.SongVo.Name;
-            textBox_singer.Text = result.SongVo.Singer;
-            textBox_album.Text = result.SongVo.Album;
+            SongName_TextBox.Text = result.SongVo.Name;
+            Singer_TextBox.Text = result.SongVo.Singer;
+            Album_TextBox.Text = result.SongVo.Album;
             UpdateLrcTextBox(string.Empty);
         }
-
 
         /// <summary>
         /// 批量歌曲搜索
@@ -274,10 +273,10 @@ namespace MusicLyricApp
             UpdateLrcTextBox(log.ToString());
         }
 
-        /**
-         * 搜索按钮点击事件
-         */
-        private async void searchBtn_Click(object sender, EventArgs e)
+        /// <summary>
+        /// 搜索按钮，点击事件
+        /// </summary>
+        private async void Search_Btn_Click(object sender, EventArgs e)
         {
             ReloadConfig();
             CleanTextBox();
@@ -314,7 +313,7 @@ namespace MusicLyricApp
             catch (MusicLyricException ex)
             {
                 _logger.Error("Search Business failed, param: {SearchParam}, type: {SearchType}, message: {ErrorMsg}",
-                    search_id_text.Text, _globalSearchInfo.SearchType, ex.Message);
+                    Search_Text.Text, _globalSearchInfo.SearchType, ex.Message);
                 MessageBox.Show(ex.Message, "提示");
             }
             catch (System.Exception ex)
@@ -324,10 +323,10 @@ namespace MusicLyricApp
             }
         }
 
-        /**
-         * 获取直链点击事件
-         */
-        private void songUrlBtn_Click(object sender, EventArgs e)
+        /// <summary>
+        /// 获取直链按钮，点击事件
+        /// </summary>
+        private void SongLink_Btn_Click(object sender, EventArgs e)
         {
             if (_globalSaveVoMap == null || _globalSaveVoMap.Count == 0)
             {
@@ -480,7 +479,7 @@ namespace MusicLyricApp
         /**
          * 保存按钮点击事件
          */
-        private void saveBtn_Click(object sender, EventArgs e)
+        private void Save_Btn_Click(object sender, EventArgs e)
         {
             if (_globalSaveVoMap == null || _globalSaveVoMap.Count == 0)
             {
@@ -502,105 +501,250 @@ namespace MusicLyricApp
             }
         }
 
-        private void comboBox_output_name_SelectedIndexChanged(object sender, EventArgs e)
+        /**
+         * 更新前端歌词
+         */
+        private void UpdateLrcTextBox(string replace)
         {
-            _outputFilenameTypeEnum = (OutputFilenameTypeEnum)comboBox_output_name.SelectedIndex;
-            ReloadConfig();
+            if (replace != string.Empty)
+            {
+                Console_TextBox.Text = replace;
+            }
+            else
+            {
+                // 根据最新配置，更新输出歌词
+                if (_globalSaveVoMap != null && _globalSaveVoMap.Count == 1)
+                {
+                    // only loop one times
+                    foreach (var lyricVo in _globalSaveVoMap.Values.Select(saveVo => saveVo.LyricVo))
+                    {
+                        Console_TextBox.Text = lyricVo.IsEmpty() ? ErrorMsg.LRC_NOT_EXIST : LyricUtils.GetOutputContent(lyricVo, _globalSearchInfo);
+                    }
+                }
+            }
         }
 
-        private void comboBox_output_encode_SelectedIndexChanged(object sender, EventArgs e)
+        /**
+         * 清空前端内容
+         */
+        private void CleanTextBox()
         {
-            _outputEncodingEnum = (OutputEncodingEnum)comboBox_output_encode.SelectedIndex;
-            ReloadConfig();
+            Console_TextBox.Text = string.Empty;
+            SongName_TextBox.Text = string.Empty;
+            Singer_TextBox.Text = string.Empty;
+            Album_TextBox.Text = string.Empty;
         }
 
-        private void comboBox_diglossia_lrc_SelectedIndexChanged(object sender, EventArgs e)
+        private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-            _showLrcTypeEnum = (ShowLrcTypeEnum)comboBox_diglossia_lrc.SelectedIndex;
+            // 记住最终的参数配置
+            if (_settingBean.Config.RememberParam)
+            {
+                _settingBean.Param.Update(_globalSearchInfo);
+            }
+            
+            // 配置持久化
+            File.WriteAllText(Constants.SettingPath, _settingBean.ToJson(), Encoding.UTF8);
+        }
+
+        private void MainForm_MouseEnter(object sender, EventArgs e)
+        {
+            if (_settingBean.Config.AutoReadClipboard)
+            {
+                Search_Text.Text = Clipboard.GetText();
+            }
+        }
+
+        /// <summary>
+        /// 搜索来源下拉框，属性变更事件
+        /// </summary>
+        private void SearchSource_ComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            _searchSourceEnum = (SearchSourceEnum)SearchSource_ComboBox.SelectedIndex;
+
+            ReloadConfig();
+            UpdateLrcTextBox(string.Empty);
+        }
+
+        /// <summary>
+        /// 搜索类型下拉框，属性变更事件
+        /// </summary>
+        private void SearchType_ComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            _searchTypeEnum = (SearchTypeEnum)SearchType_ComboBox.SelectedIndex;
+
+            ReloadConfig();
+            UpdateLrcTextBox(string.Empty);
+        }
+
+        /// <summary>
+        /// LRC歌词类型，属性变更事件
+        /// </summary>
+        private void LrcType_ComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            _showLrcTypeEnum = (ShowLrcTypeEnum)LrcType_ComboBox.SelectedIndex;
 
             if (_showLrcTypeEnum == ShowLrcTypeEnum.MERGE_ORIGIN ||
                 _showLrcTypeEnum == ShowLrcTypeEnum.MERGE_TRANSLATE)
             {
-                splitTextBox.ReadOnly = false;
-                splitTextBox.BackColor = Color.White;
+                LrcMergeSeparator_TextBox.ReadOnly = false;
+                LrcMergeSeparator_TextBox.BackColor = Color.White;
             }
             else
             {
-                splitTextBox.Text = null;
-                splitTextBox.ReadOnly = true;
-                splitTextBox.BackColor = Color.FromArgb(240, 240, 240);
+                LrcMergeSeparator_TextBox.Text = null;
+                LrcMergeSeparator_TextBox.ReadOnly = true;
+                LrcMergeSeparator_TextBox.BackColor = Color.FromArgb(240, 240, 240);
             }
 
             ReloadConfig();
             UpdateLrcTextBox(string.Empty);
+        }
+
+        /// <summary>
+        /// LRC歌词合并符，内容变更事件
+        /// </summary>
+        private void LrcMergeSeparator_TextBox_TextChanged(object sender, EventArgs e)
+        {
+            ReloadConfig();
+            UpdateLrcTextBox(string.Empty);
+        }
+
+        /// <summary>
+        /// 小数位配置，变更事件
+        /// </summary>
+        private void Dot_TextBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            _dotTypeEnum = (DotTypeEnum)Dot_TextBox.SelectedIndex;
+            ReloadConfig();
+            UpdateLrcTextBox(string.Empty);
+        }
+
+        /// <summary>
+        /// 控制台，键盘事件
+        /// </summary>
+        private void Console_TextBox_KeyDown(object sender, KeyEventArgs e)
+        {
+            // 全选操作
+            if (e.Control && e.KeyCode == Keys.A)
+            {
+                ((TextBox)sender).SelectAll();
+            }
+        }
+
+        /// <summary>
+        /// 配置下拉框，属性变更事件
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Config_ComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (!(sender is ComboBox input))
+            {
+                throw new MusicLyricException(ErrorMsg.SYSTEM_ERROR);
+            }
+            
+            if (input == OutputEncoding_ComboBox)
+            {
+                _outputEncodingEnum = (OutputEncodingEnum)input.SelectedIndex;
+            } 
+            else if (input == OutputFormat_CombBox)
+            {
+                _outputFormatEnum = (OutputFormatEnum)input.SelectedIndex;
+            }
+            else if (input == OutputName_ComboBox)
+            {
+                _outputFilenameTypeEnum = (OutputFilenameTypeEnum)input.SelectedIndex;
+            }
+            
+            ReloadConfig();
+        }
+
+        /// <summary>
+        /// 上方菜单元素，点击事件
+        /// </summary>
+        private async void Top_MItem_Click(object sender, EventArgs e)
+        {
+            if (!(sender is ToolStripMenuItem input))
+            {
+                throw new MusicLyricException(ErrorMsg.SYSTEM_ERROR);
+            }
+            
+            if (input == Home_MItem)
+            {
+                try
+                {
+                    Process.Start("https://github.com/jitwxs/163MusicLyrics");
+                }
+                catch (System.Exception ex)
+                {
+                    _logger.Error(ex, "项目主页打开失败,网络延迟: {0}", await NetworkUtils.GetWebRoundtripTimeAsync());
+                    MessageBox.Show("项目主页打开失败", "错误");
+                }
+            } 
+            else if (input == Wiki_MItem)
+            {
+                try
+                {
+                    Process.Start("https://github.com/jitwxs/163MusicLyrics/wiki");
+                }
+                catch (System.Exception ex)
+                {
+                    _logger.Error(ex, "使用手册网址打开失败");
+                    MessageBox.Show("使用手册网址打开失败", "错误");
+                }
+            }
+            else if (input == Setting_MItem)
+            {
+                if (_settingForm == null || _settingForm.IsDisposed)
+                {
+                    _settingForm = new SettingForm(_settingBean.Config);
+                    _settingForm.Location = new Point(Left + Constants.SettingFormOffset, Top + Constants.SettingFormOffset);
+                    _settingForm.StartPosition = FormStartPosition.Manual;
+                    _settingForm.Show();
+                }
+                else
+                {
+                    _settingForm.Activate();
+                }
+            }
+            else if (input == Issue_MItem)
+            {
+                try
+                {
+                    Process.Start("https://github.com/jitwxs/163MusicLyrics/issues");
+                }
+                catch (System.Exception ex)
+                {
+                    _logger.Error(ex, "问题反馈网址打开失败");
+                    MessageBox.Show("问题反馈网址打开失败", "错误");
+                }
+            }
+            else if (input == CheckVersion_MItem)
+            {
+                // support https
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+                var headers = new Dictionary<string, string>
+                {
+                    { "Accept", "application/vnd.github.v3+json" },
+                    { "User-Agent", BaseNativeApi.Useragent }
+                };
+
+                try
+                {
+                    var jsonStr = HttpUtils.HttpGet("https://api.github.com/repos/jitwxs/163MusicLyrics/releases/latest",
+                        "application/json", headers);
+                    var obj = (JObject)JsonConvert.DeserializeObject(jsonStr);
+                    OutputLatestTag(obj["tag_name"]);
+                }
+                catch (HttpRequestException ex)
+                {
+                    _logger.Error(ex);
+                    MessageBox.Show("网络错误", "错误");
+                }
+            }
         }
         
-        private void comboBox_search_source_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            _searchSourceEnum = (SearchSourceEnum)comboBox_search_source.SelectedIndex;
-
-            ReloadConfig();
-            UpdateLrcTextBox(string.Empty);
-        }
-
-        private void comboBox_search_type_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            _searchTypeEnum = (SearchTypeEnum)comboBox_search_type.SelectedIndex;
-
-            ReloadConfig();
-            UpdateLrcTextBox(string.Empty);
-        }
-
-        private void comboBox_dot_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            _dotTypeEnum = (DotTypeEnum)comboBox_dot.SelectedIndex;
-            ReloadConfig();
-            UpdateLrcTextBox(string.Empty);
-        }
-
-        /**
-         * 项目主页item
-         */
-        private async void homeMenuItem_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                Process.Start("https://github.com/jitwxs/163MusicLyrics");
-            }
-            catch (System.Exception ex)
-            {
-                _logger.Error(ex, "项目主页打开失败,网络延迟: {0}", await NetworkUtils.GetWebRoundtripTimeAsync());
-                MessageBox.Show("项目主页打开失败", "错误");
-            }
-        }
-
-        /**
-         * 最新版本item
-         */
-        private void latestVersionMenuItem_Click(object sender, EventArgs e)
-        {
-            // support https
-            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-            var headers = new Dictionary<string, string>
-            {
-                { "Accept", "application/vnd.github.v3+json" },
-                { "User-Agent", BaseNativeApi.Useragent }
-            };
-
-            try
-            {
-                var jsonStr = HttpUtils.HttpGet("https://api.github.com/repos/jitwxs/163MusicLyrics/releases/latest",
-                    "application/json", headers);
-                var obj = (JObject)JsonConvert.DeserializeObject(jsonStr);
-                OutputLatestTag(obj["tag_name"]);
-            }
-            catch (HttpRequestException ex)
-            {
-                _logger.Error(ex);
-                MessageBox.Show("网络错误", "错误");
-            }
-        }
-
         private static void OutputLatestTag(JToken latestTag)
         {
             if (latestTag == null)
@@ -621,127 +765,6 @@ namespace MusicLyricApp
                 {
                     MessageBox.Show(ErrorMsg.THIS_IS_LATEST_VERSION, "提示");
                 }
-            }
-        }
-
-        /**
-         * 问题反馈item
-         */
-        private void issueMenuItem_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                Process.Start("https://github.com/jitwxs/163MusicLyrics/issues");
-            }
-            catch (System.Exception ex)
-            {
-                _logger.Error(ex, "问题反馈网址打开失败");
-                MessageBox.Show("问题反馈网址打开失败", "错误");
-            }
-        }
-
-        /**
-         * 使用手册
-         */
-        private void wikiItem_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                Process.Start("https://github.com/jitwxs/163MusicLyrics/wiki");
-            }
-            catch (System.Exception ex)
-            {
-                _logger.Error(ex, "使用手册网址打开失败");
-                MessageBox.Show("使用手册网址打开失败", "错误");
-            }
-        }
-
-        private void splitTextBox_TextChanged(object sender, EventArgs e)
-        {
-            ReloadConfig();
-            UpdateLrcTextBox(string.Empty);
-        }
-
-        /**
-         * 更新前端歌词
-         */
-        private void UpdateLrcTextBox(string replace)
-        {
-            if (replace != string.Empty)
-            {
-                textBox_lrc.Text = replace;
-            }
-            else
-            {
-                // 根据最新配置，更新输出歌词
-                if (_globalSaveVoMap != null && _globalSaveVoMap.Count == 1)
-                {
-                    // only loop one times
-                    foreach (var lyricVo in _globalSaveVoMap.Values.Select(saveVo => saveVo.LyricVo))
-                    {
-                        textBox_lrc.Text = lyricVo.IsEmpty() ? ErrorMsg.LRC_NOT_EXIST : LyricUtils.GetOutputContent(lyricVo, _globalSearchInfo);
-                    }
-                }
-            }
-        }
-
-        /**
-         * 清空前端内容
-         */
-        private void CleanTextBox()
-        {
-            textBox_lrc.Text = string.Empty;
-            textBox_song.Text = string.Empty;
-            textBox_singer.Text = string.Empty;
-            textBox_album.Text = string.Empty;
-        }
-
-        private void textBox_lrc_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.Control && e.KeyCode == Keys.A)
-            {
-                ((TextBox)sender).SelectAll();
-            }
-        }
-
-        private void comboBox_output_format_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            _outputFormatEnum = (OutputFormatEnum)comboBox_output_format.SelectedIndex;
-            ReloadConfig();
-        }
-
-        private void SettingMenuItem_Click(object sender, EventArgs e)
-        {
-            if (_settingForm == null || _settingForm.IsDisposed)
-            {
-                _settingForm = new SettingForm(_settingBean.Config);
-                _settingForm.Location = new Point(Left + Constants.SettingFormOffset, Top + Constants.SettingFormOffset);
-                _settingForm.StartPosition = FormStartPosition.Manual;
-                _settingForm.Show();
-            }
-            else
-            {
-                _settingForm.Activate();
-            }
-        }
-
-        private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            // 记住最终的参数配置
-            if (_settingBean.Config.RememberParam)
-            {
-                _settingBean.Param.Update(_globalSearchInfo);
-            }
-            
-            // 配置持久化
-            File.WriteAllText(Constants.SettingPath, _settingBean.ToJson(), Encoding.UTF8);
-        }
-
-        private void MainForm_MouseEnter(object sender, EventArgs e)
-        {
-            if ((_settingBean.Config.AutoReadClipboard))
-            {
-                search_id_text.Text = Clipboard.GetText();
             }
         }
     }
