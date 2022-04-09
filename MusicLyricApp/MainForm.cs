@@ -736,5 +736,13 @@ namespace MusicLyricApp
             // 配置持久化
             File.WriteAllText(Constants.SettingPath, _settingBean.ToJson(), Encoding.UTF8);
         }
+
+        private void MainForm_MouseEnter(object sender, EventArgs e)
+        {
+            if ((_settingBean.Config.AutoReadClipboard))
+            {
+                search_id_text.Text = Clipboard.GetText();
+            }
+        }
     }
 }
