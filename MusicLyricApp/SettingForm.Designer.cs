@@ -32,58 +32,58 @@ namespace MusicLyricApp
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SettingForm));
-            this.btn_save = new System.Windows.Forms.Button();
-            this.checkBox_reme_param = new System.Windows.Forms.CheckBox();
-            this.checkBox_auto_read_clipboard = new System.Windows.Forms.CheckBox();
-            this.checkBox_auto_check_update = new System.Windows.Forms.CheckBox();
+            this.Save_Btn = new System.Windows.Forms.Button();
+            this.RememberParam_ComboBox = new System.Windows.Forms.CheckBox();
+            this.AutoReadClipboard_CheckBox = new System.Windows.Forms.CheckBox();
+            this.AutoCheckUpdate_CheckBox = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
-            // btn_save
+            // Save_Btn
             // 
-            this.btn_save.Location = new System.Drawing.Point(173, 114);
-            this.btn_save.Name = "btn_save";
-            this.btn_save.Size = new System.Drawing.Size(102, 44);
-            this.btn_save.TabIndex = 0;
-            this.btn_save.Text = "保存";
-            this.btn_save.UseVisualStyleBackColor = true;
-            this.btn_save.Click += new System.EventHandler(this.btn_save_Click);
+            this.Save_Btn.Location = new System.Drawing.Point(173, 114);
+            this.Save_Btn.Name = "Save_Btn";
+            this.Save_Btn.Size = new System.Drawing.Size(102, 44);
+            this.Save_Btn.TabIndex = 0;
+            this.Save_Btn.Text = "保存";
+            this.Save_Btn.UseVisualStyleBackColor = true;
+            this.Save_Btn.Click += new System.EventHandler(this.Save_Btn_Click);
             // 
-            // checkBox_reme_param
+            // RememberParam_ComboBox
             // 
-            this.checkBox_reme_param.Location = new System.Drawing.Point(27, 25);
-            this.checkBox_reme_param.Name = "checkBox_reme_param";
-            this.checkBox_reme_param.Size = new System.Drawing.Size(78, 24);
-            this.checkBox_reme_param.TabIndex = 1;
-            this.checkBox_reme_param.Text = "参数记忆";
-            this.checkBox_reme_param.UseVisualStyleBackColor = true;
+            this.RememberParam_ComboBox.Location = new System.Drawing.Point(27, 25);
+            this.RememberParam_ComboBox.Name = "RememberParam_ComboBox";
+            this.RememberParam_ComboBox.Size = new System.Drawing.Size(78, 24);
+            this.RememberParam_ComboBox.TabIndex = 1;
+            this.RememberParam_ComboBox.Text = "参数记忆";
+            this.RememberParam_ComboBox.UseVisualStyleBackColor = true;
             // 
-            // checkBox_auto_read_clipboard
+            // AutoReadClipboard_CheckBox
             // 
-            this.checkBox_auto_read_clipboard.Location = new System.Drawing.Point(27, 77);
-            this.checkBox_auto_read_clipboard.Name = "checkBox_auto_read_clipboard";
-            this.checkBox_auto_read_clipboard.Size = new System.Drawing.Size(112, 26);
-            this.checkBox_auto_read_clipboard.TabIndex = 2;
-            this.checkBox_auto_read_clipboard.Text = "自动读取剪贴板";
-            this.checkBox_auto_read_clipboard.UseVisualStyleBackColor = true;
+            this.AutoReadClipboard_CheckBox.Location = new System.Drawing.Point(27, 77);
+            this.AutoReadClipboard_CheckBox.Name = "AutoReadClipboard_CheckBox";
+            this.AutoReadClipboard_CheckBox.Size = new System.Drawing.Size(112, 26);
+            this.AutoReadClipboard_CheckBox.TabIndex = 2;
+            this.AutoReadClipboard_CheckBox.Text = "自动读取剪贴板";
+            this.AutoReadClipboard_CheckBox.UseVisualStyleBackColor = true;
             // 
-            // checkBox_auto_check_update
+            // AutoCheckUpdate_CheckBox
             // 
-            this.checkBox_auto_check_update.Location = new System.Drawing.Point(27, 126);
-            this.checkBox_auto_check_update.Name = "checkBox_auto_check_update";
-            this.checkBox_auto_check_update.Size = new System.Drawing.Size(97, 32);
-            this.checkBox_auto_check_update.TabIndex = 3;
-            this.checkBox_auto_check_update.Text = "自动检查更新";
-            this.checkBox_auto_check_update.UseVisualStyleBackColor = true;
+            this.AutoCheckUpdate_CheckBox.Location = new System.Drawing.Point(27, 126);
+            this.AutoCheckUpdate_CheckBox.Name = "AutoCheckUpdate_CheckBox";
+            this.AutoCheckUpdate_CheckBox.Size = new System.Drawing.Size(97, 32);
+            this.AutoCheckUpdate_CheckBox.TabIndex = 3;
+            this.AutoCheckUpdate_CheckBox.Text = "自动检查更新";
+            this.AutoCheckUpdate_CheckBox.UseVisualStyleBackColor = true;
             // 
             // SettingForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(307, 170);
-            this.Controls.Add(this.checkBox_auto_check_update);
-            this.Controls.Add(this.checkBox_auto_read_clipboard);
-            this.Controls.Add(this.checkBox_reme_param);
-            this.Controls.Add(this.btn_save);
+            this.Controls.Add(this.AutoCheckUpdate_CheckBox);
+            this.Controls.Add(this.AutoReadClipboard_CheckBox);
+            this.Controls.Add(this.RememberParam_ComboBox);
+            this.Controls.Add(this.Save_Btn);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
@@ -92,13 +92,13 @@ namespace MusicLyricApp
             this.ResumeLayout(false);
         }
 
-        private System.Windows.Forms.CheckBox checkBox_auto_check_update;
+        private System.Windows.Forms.CheckBox AutoCheckUpdate_CheckBox;
 
-        private System.Windows.Forms.CheckBox checkBox_auto_read_clipboard;
+        private System.Windows.Forms.CheckBox AutoReadClipboard_CheckBox;
 
-        private System.Windows.Forms.CheckBox checkBox_reme_param;
+        private System.Windows.Forms.CheckBox RememberParam_ComboBox;
 
-        private System.Windows.Forms.Button btn_save;
+        private System.Windows.Forms.Button Save_Btn;
 
         #endregion
     }

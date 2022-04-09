@@ -14,16 +14,16 @@ namespace MusicLyricApp
 
             _configBean = configBean;
 
-            checkBox_reme_param.Checked = _configBean.RememberParam;
-            checkBox_auto_read_clipboard.Checked = _configBean.AutoReadClipboard;
-            checkBox_auto_check_update.Checked = _configBean.AutoCheckUpdate;
+            RememberParam_ComboBox.Checked = _configBean.RememberParam;
+            AutoReadClipboard_CheckBox.Checked = _configBean.AutoReadClipboard;
+            AutoCheckUpdate_CheckBox.Checked = _configBean.AutoCheckUpdate;
         }
 
-        private void btn_save_Click(object sender, EventArgs e)
+        private void Save_Btn_Click(object sender, EventArgs e)
         {
-            _configBean.RememberParam = checkBox_reme_param.Checked;
-            _configBean.AutoReadClipboard = checkBox_auto_read_clipboard.Checked;
-            _configBean.AutoCheckUpdate = checkBox_auto_check_update.Checked;
+            _configBean.RememberParam = RememberParam_ComboBox.Checked;
+            _configBean.AutoReadClipboard = AutoReadClipboard_CheckBox.Checked;
+            _configBean.AutoCheckUpdate = AutoCheckUpdate_CheckBox.Checked;
             
             Close();
         }
