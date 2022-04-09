@@ -1,4 +1,6 @@
-﻿namespace Application
+﻿using MusicLyricApp.Utils;
+
+namespace MusicLyricApp
 {
     partial class MainForm
     {
@@ -56,6 +58,7 @@
             this.wikiItem = new System.Windows.Forms.ToolStripMenuItem();
             this.issueMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.latestVersionMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.SettingMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.comboBox_dot = new System.Windows.Forms.ComboBox();
             this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
@@ -273,7 +276,7 @@
             // 
             // menuStrip1
             // 
-            this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { this.homeMenuItem, this.wikiItem, this.issueMenuItem, this.latestVersionMenuItem });
+            this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { this.homeMenuItem, this.wikiItem, this.issueMenuItem, this.latestVersionMenuItem, this.SettingMenuItem });
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Size = new System.Drawing.Size(492, 25);
@@ -307,6 +310,13 @@
             this.latestVersionMenuItem.Size = new System.Drawing.Size(68, 21);
             this.latestVersionMenuItem.Text = "检查更新";
             this.latestVersionMenuItem.Click += new System.EventHandler(this.latestVersionMenuItem_Click);
+            // 
+            // SettingMenuItem
+            // 
+            this.SettingMenuItem.Name = "SettingMenuItem";
+            this.SettingMenuItem.Size = new System.Drawing.Size(68, 21);
+            this.SettingMenuItem.Text = "更多设置";
+            this.SettingMenuItem.Click += new System.EventHandler(this.SettingMenuItem_Click);
             // 
             // comboBox_dot
             // 
@@ -396,13 +406,17 @@
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.menuStrip1;
+            this.MaximizeBox = false;
             this.Name = "MainForm";
-            this.Text = "云音乐歌词提取 " + MainForm.Version;
+            this.Text = "云音乐歌词提取 " + Constants.Version;
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
         }
+
+        private System.Windows.Forms.ToolStripMenuItem SettingMenuItem;
 
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.ComboBox comboBox_output_format;

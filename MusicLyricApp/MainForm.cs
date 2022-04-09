@@ -17,7 +17,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using NLog;
 
-namespace Application
+namespace MusicLyricApp
 {
     public partial class MainForm : Form
     {
@@ -48,21 +48,41 @@ namespace Application
         // 输出文件类型
         private OutputFormatEnum _outputFormatEnum;
 
-        public const string Version = "v4.1";
-
         private IMusicApiV2 _api;
+
+        private SettingForm _settingForm;
+
+        private SettingBean _settingBean;
 
         public MainForm()
         {
             InitializeComponent();
+            InitialConfig();
+        }
 
-            comboBox_output_name.SelectedIndex = 0;
-            comboBox_output_encode.SelectedIndex = 0;
-            comboBox_diglossia_lrc.SelectedIndex = 0;
-            comboBox_search_source.SelectedIndex = 0;
-            comboBox_search_type.SelectedIndex = 0;
-            comboBox_dot.SelectedIndex = 0;
-            comboBox_output_format.SelectedIndex = 0;
+        private void InitialConfig()
+        {
+            // 1、加载配置
+            if (File.Exists(Constants.SettingPath))
+            {
+                var text = File.ReadAllText(Constants.SettingPath);
+                _settingBean = text.ToEntity<SettingBean>();
+            }
+            else
+            {
+                _settingBean = new SettingBean();
+            }
+            
+            // 2、配置应用
+            var paramConfig = _settingBean.Config.RememberParam ? _settingBean.Param : new PersistParamBean();
+            comboBox_output_name.SelectedIndex = (int) paramConfig.OutputFileNameType;
+            comboBox_output_encode.SelectedIndex = (int) paramConfig.Encoding;
+            comboBox_diglossia_lrc.SelectedIndex = (int) paramConfig.ShowLrcType;
+            comboBox_search_source.SelectedIndex = (int) paramConfig.SearchSource;
+            comboBox_search_type.SelectedIndex = (int) paramConfig.SearchType;
+            comboBox_dot.SelectedIndex = (int) paramConfig.DotType;
+            comboBox_output_format.SelectedIndex = (int) paramConfig.OutputFileFormat;
+            splitTextBox.Text = paramConfig.LrcMergeSeparator;
         }
 
         /// <summary>
@@ -389,7 +409,7 @@ namespace Application
                     MessageBox.Show(string.Format(ErrorMsg.SAVE_COMPLETE, 1, 1), "提示");
                 }
             }
-            catch (Exception ew)
+            catch (System.Exception ew)
             {
                 _logger.Error(ew, "单独保存歌词失败");
                 MessageBox.Show("保存失败！错误信息：\n" + ew.Message);
@@ -438,7 +458,7 @@ namespace Application
                     }
                 }
             }
-            catch (Exception ew)
+            catch (System.Exception ew)
             {
                 _logger.Error(ew, "批量保存失败");
                 MessageBox.Show("批量保存失败，错误信息：\n" + ew.Message);
@@ -590,7 +610,7 @@ namespace Application
             else
             {
                 string bigV = latestTag.ToString().Substring(1, 2), smallV = latestTag.ToString().Substring(3);
-                string curBigV = Version.Substring(1, 2), curSmallV = Version.Substring(3);
+                string curBigV = Constants.Version.Substring(1, 2), curSmallV = Constants.Version.Substring(3);
 
                 if (bigV.CompareTo(curBigV) == 1 || (bigV.CompareTo(curBigV) == 0 && smallV.CompareTo(curSmallV) == 1))
                 {
@@ -688,6 +708,33 @@ namespace Application
         {
             _outputFormatEnum = (OutputFormatEnum)comboBox_output_format.SelectedIndex;
             ReloadConfig();
+        }
+
+        private void SettingMenuItem_Click(object sender, EventArgs e)
+        {
+            if (_settingForm == null || _settingForm.IsDisposed)
+            {
+                _settingForm = new SettingForm(_settingBean.Config);
+                _settingForm.Location = new Point(Left + Constants.SettingFormOffset, Top + Constants.SettingFormOffset);
+                _settingForm.StartPosition = FormStartPosition.Manual;
+                _settingForm.Show();
+            }
+            else
+            {
+                _settingForm.Activate();
+            }
+        }
+
+        private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            // 记住最终的参数配置
+            if (_settingBean.Config.RememberParam)
+            {
+                _settingBean.Param.Update(_globalSearchInfo);
+            }
+            
+            // 配置持久化
+            File.WriteAllText(Constants.SettingPath, _settingBean.ToJson(), Encoding.UTF8);
         }
     }
 }
