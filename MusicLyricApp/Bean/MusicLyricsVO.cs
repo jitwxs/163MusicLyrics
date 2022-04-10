@@ -83,9 +83,9 @@ namespace MusicLyricApp.Bean
 
         public const string GET_LATEST_VERSION_FAILED = "获取最新版本失败";
         public const string THIS_IS_LATEST_VERSION = "当前版本已经是最新版本";
-        public const string EXIST_LATEST_VERSION = "检测到最新版本 {0}，下载地址已复制到剪切板";
         public const string SYSTEM_ERROR = "系统错误";
         public const string NETWORK_ERROR = "网络错误，请检查网络链接";
+        public const string API_RATE_LIMIT = "请求过于频繁，请稍后再试";
     }
 
     /// <summary>
