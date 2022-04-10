@@ -59,6 +59,13 @@ namespace MusicLyricApp
 
         public MainForm()
         {
+            // 禁止多开
+            var instance = new Mutex(true, "MutexName", out var isNotRunning);
+            if (!isNotRunning)
+            {
+                Environment.Exit(1);
+            }
+            
             InitializeComponent();
             InitialConfig();
         }
