@@ -6,7 +6,7 @@ namespace MusicLyricApp.Bean
     {
         public const string Version = "v4.1";
         
-        public static readonly string SettingPath = Environment.CurrentDirectory + "\\setting.json";
+        public static readonly string SettingPath = Environment.CurrentDirectory + "\\MusicLyricAppSetting.json";
 
         public const int SettingFormOffset = 20;
     }

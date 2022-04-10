@@ -803,7 +803,7 @@ namespace MusicLyricApp
                     MessageBox.Show(ErrorMsg.THIS_IS_LATEST_VERSION, "提示");
                 }
             }
-            catch (HttpRequestException ex)
+            catch (System.Exception ex)
             {
                 _logger.Error(ex);
                 MessageBox.Show(ErrorMsg.NETWORK_ERROR, "提示");
