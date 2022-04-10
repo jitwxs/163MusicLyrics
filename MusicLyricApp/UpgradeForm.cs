@@ -27,7 +27,7 @@ namespace MusicLyricApp
             _gitHubInfo = info;
 
             UpgradeTag_Label.Text = info.TagName;
-            UpgradeSpan1_Label.Text = $"更新日期：{info.PublishedAt.DateTime}" + SEPARATOR + $"下载次数：{info.Assets[0].DownloadCount}";
+            UpgradeSpan1_Label.Text = $"更新日期：{info.PublishedAt.DateTime.AddHours(8)}" + SEPARATOR + $"下载次数：{info.Assets[0].DownloadCount}";
             UpgradeSpan2_Label.Text = $"作者：{info.Author.Login}"  + SEPARATOR + $"文件大小：{GetKb(info.Assets[0].Size):F1} KB";
             UpgradeLog_Browser.DocumentText = Markdown.ToHtml(info.Body);
         }
