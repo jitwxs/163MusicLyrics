@@ -1,4 +1,5 @@
-﻿using MusicLyricApp.Utils;
+﻿using MusicLyricApp.Bean;
+using MusicLyricApp.Utils;
 
 namespace MusicLyricApp
 {

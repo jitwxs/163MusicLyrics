@@ -69,6 +69,11 @@
     <ApplicationIcon>Favicon2.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Markdig, Version=0.28.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\packages\Markdig.0.28.1\lib\net452\Markdig.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="mscorlib" />
     <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.13.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
@@ -76,10 +81,26 @@
       <HintPath>..\packages\NLog.4.7.15\lib\net45\NLog.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Buffers, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51">
+      <HintPath>..\packages\System.Buffers.4.5.1\lib\net461\System.Buffers.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.IO.Compression" />
+    <Reference Include="System.Memory, Version=4.0.1.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51">
+      <HintPath>..\packages\System.Memory.4.5.4\lib\net461\System.Memory.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System.Numerics" />
+    <Reference Include="System.Numerics.Vectors, Version=4.1.4.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+      <HintPath>..\packages\System.Numerics.Vectors.4.5.0\lib\net46\System.Numerics.Vectors.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=4.0.4.1, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+      <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.4.5.3\lib\net461\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.ServiceModel" />
     <Reference Include="System.Transactions" />
@@ -101,10 +122,12 @@
     <Compile Include="Api\NetEaseMusicApiV2.cs" />
     <Compile Include="Api\QQMusicApiV2.cs" />
     <Compile Include="Api\QQMusicNativeApi.cs" />
+    <Compile Include="Bean\Constants.cs" />
+    <Compile Include="Bean\GitHubBase.cs" />
     <Compile Include="Bean\NetEaseMusicBean.cs" />
     <Compile Include="Bean\MusicLyricsVO.cs" />
     <Compile Include="Bean\QQMusicBean.cs" />
-    <Compile Include="Bean\SettingBean.cs" />
+    <Compile Include="Bean\SettingBase.cs" />
     <Compile Include="Cache\GlobalCache.cs" />
     <Compile Include="Exception\MusicLyricException.cs" />
     <Compile Include="MainForm.cs">
@@ -121,7 +144,12 @@
     <Compile Include="SettingForm.Designer.cs">
       <DependentUpon>SettingForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Utils\Constants.cs" />
+    <Compile Include="UpgradeForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UpgradeForm.Designer.cs">
+      <DependentUpon>UpgradeForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Utils\LyricUtils.cs" />
     <Compile Include="Utils\HttpUtils.cs" />
     <Compile Include="Utils\JsonUtils.cs" />
@@ -143,6 +171,9 @@
     </Compile>
     <EmbeddedResource Include="SettingForm.resx">
       <DependentUpon>SettingForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UpgradeForm.resx">
+      <DependentUpon>UpgradeForm.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="GetLrc_TemporaryKey.pfx" />
     <None Include="NLog.config">

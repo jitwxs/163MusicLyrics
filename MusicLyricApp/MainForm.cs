@@ -55,6 +55,8 @@ namespace MusicLyricApp
 
         private SettingBean _settingBean;
 
+        private UpgradeForm _upgradeForm;
+
         public MainForm()
         {
             InitializeComponent();
@@ -752,36 +754,51 @@ namespace MusicLyricApp
             {
                 // support https
                 ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-                var headers = new Dictionary<string, string>
-                {
-                    { "Accept", "application/vnd.github.v3+json" },
-                    { "User-Agent", BaseNativeApi.Useragent }
-                };
 
                 var jsonStr = HttpUtils.HttpGetAsync(
-                    "https://api.github.com/repos/jitwxs/163MusicLyrics/releases/latest",
-                    "application/json", headers).Result;
+                    "https://api.github.com/repos/jitwxs/163MusicLyrics/releases/latest", 
+                    "application/json", 
+                    new Dictionary<string, string>
+                    {
+                        { "Accept", "application/vnd.github.v3+json" },
+                        { "User-Agent", BaseNativeApi.Useragent }
+                    }).Result;
 
-                var jObject = (JObject)JsonConvert.DeserializeObject(jsonStr);
-                var latestTag = jObject["tag_name"];
-
-                if (latestTag == null)
+                var info = JsonConvert.DeserializeObject<GitHubInfo>(jsonStr);
+                if (info == null)
                 {
                     MessageBox.Show(ErrorMsg.GET_LATEST_VERSION_FAILED, "提示");
                     return;
                 }
 
-                string bigV = latestTag.ToString().Substring(1, 2), smallV = latestTag.ToString().Substring(3);
+                if (info.Message != null && info.Message.Contains("API rate limit"))
+                {
+                    MessageBox.Show(ErrorMsg.API_RATE_LIMIT, "提示");
+                    return;
+                }
+
+                string bigV = info.TagName.Substring(1, 2), smallV = info.TagName.Substring(3);
                 string curBigV = Constants.Version.Substring(1, 2), curSmallV = Constants.Version.Substring(3);
 
                 if (bigV.CompareTo(curBigV) == 1 || (bigV.CompareTo(curBigV) == 0 && smallV.CompareTo(curSmallV) == 1))
                 {
-                    Clipboard.SetDataObject("https://github.com/jitwxs/163MusicLyrics/releases");
-                    MessageBox.Show(string.Format(ErrorMsg.EXIST_LATEST_VERSION, latestTag), "提示");
-                    return;
+                    void Action()
+                    {
+                        if (_upgradeForm == null || _upgradeForm.IsDisposed)
+                        {
+                            _upgradeForm = new UpgradeForm(info);
+                            _upgradeForm.Location = new Point(Left + Constants.SettingFormOffset, Top + Constants.SettingFormOffset);
+                            _upgradeForm.StartPosition = FormStartPosition.Manual;
+                            _upgradeForm.Show();
+                        }
+                        else
+                        {
+                            _upgradeForm.Activate();
+                        }
+                    }
+                    Invoke((Action)Action);
                 }
-
-                if (_showMessageIfNotExistLatestVersion)
+                else if (_showMessageIfNotExistLatestVersion)
                 {
                     MessageBox.Show(ErrorMsg.THIS_IS_LATEST_VERSION, "提示");
                 }

@@ -31,6 +31,7 @@
         <Reference Include="System" />
     </ItemGroup>
     <ItemGroup>
+        <PackageReference Include="Markdig" Version="0.28.1" />
         <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
         <PackageReference Include="NUnit" Version="2.6.4" />
         <PackageReference Include="Xamarin.UITest" Version="2.2.4" />

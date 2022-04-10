@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MusicLyricApp.Utils
+namespace MusicLyricApp.Bean
 {
     public static class Constants
     {
