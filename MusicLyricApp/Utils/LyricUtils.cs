@@ -62,35 +62,36 @@ namespace MusicLyricApp.Utils
         private static string[] FormatLyric(string originLrc, string translateLrc, SearchInfo searchInfo)
         {
             var showLrcType = searchInfo.ShowLrcType;
+            var searchSource = searchInfo.SearchSource;
 
             // 如果不存在翻译歌词，或者选择返回原歌词
-            var originLrcs = SplitLrc(originLrc);
+            var originLyrics = SplitLrc(originLrc, searchSource);
             if (string.IsNullOrEmpty(translateLrc) || showLrcType == ShowLrcTypeEnum.ONLY_ORIGIN)
             {
-                return originLrcs;
+                return originLyrics;
             }
 
             // 如果选择仅译文
-            var translateLrcs = SplitLrc(translateLrc);
+            var translateLyrics = SplitLrc(translateLrc, searchSource);
             if (showLrcType == ShowLrcTypeEnum.ONLY_TRANSLATE)
             {
-                return translateLrcs;
+                return translateLyrics;
             }
 
             string[] res = null;
             switch (showLrcType)
             {
                 case ShowLrcTypeEnum.ORIGIN_PRIOR:
-                    res = SortLrc(originLrcs, translateLrcs, true);
+                    res = SortLrc(originLyrics, translateLyrics, true);
                     break;
                 case ShowLrcTypeEnum.TRANSLATE_PRIOR:
-                    res = SortLrc(originLrcs, translateLrcs, false);
+                    res = SortLrc(originLyrics, translateLyrics, false);
                     break;
                 case ShowLrcTypeEnum.MERGE_ORIGIN:
-                    res = MergeLrc(originLrcs, translateLrcs, searchInfo.LrcMergeSeparator, true);
+                    res = MergeLrc(originLyrics, translateLyrics, searchInfo.LrcMergeSeparator, true);
                     break;
                 case ShowLrcTypeEnum.MERGE_TRANSLATE:
-                    res = MergeLrc(originLrcs, translateLrcs, searchInfo.LrcMergeSeparator, false);
+                    res = MergeLrc(originLyrics, translateLyrics, searchInfo.LrcMergeSeparator, false);
                     break;
             }
             return res;
@@ -99,42 +100,68 @@ namespace MusicLyricApp.Utils
         /**
          * 将歌词切割为数组
          */
-        private static string[] SplitLrc(string lrc)
+        private static string[] SplitLrc(string lrc, SearchSourceEnum searchSource)
         {
-            return lrc.Replace("\r\n", "\n").Split('\n').Where(s => !string.IsNullOrWhiteSpace(s)).ToArray();
+            // 换行符统一
+            var temp = lrc 
+                .Replace("\r\n", "\n")
+                .Replace("\r", "")
+                .Split('\n');
+
+            var resultList = new List<string>();
+            
+            foreach (var line in temp)
+            {
+                // 跳过空行
+                if (string.IsNullOrWhiteSpace(line))
+                {
+                    continue;
+                }
+                
+                // QQ 音乐歌词正式开始标识符
+                if (searchSource == SearchSourceEnum.QQ_MUSIC && "[offset:0]".Equals(line))
+                {
+                    resultList.Clear();
+                    continue;
+                }
+                
+                resultList.Add(line);
+            }
+            
+            return resultList.ToArray();
         }
 
         /**
          * 双语歌词排序
          */
-        private static string[] SortLrc(string[] originLrcs, string[] translateLrcs, bool hasOriginLrcPrior)
+        private static string[] SortLrc(string[] originLyrics, string[] translateLyrics, bool hasOriginLrcPrior)
         {
-            int lena = originLrcs.Length;
-            int lenb = translateLrcs.Length;
-            string[] c = new string[lena + lenb];
+            int lenA = originLyrics.Length, lenB = translateLyrics.Length;
+            var c = new string[lenA + lenB];
+            
             //分别代表数组a ,b , c 的索引
             int i = 0, j = 0, k = 0;
 
-            while (i < lena && j < lenb)
+            while (i < lenA && j < lenB)
             {
-                if (Compare(originLrcs[i], translateLrcs[j], hasOriginLrcPrior) == 1)
+                if (Compare(originLyrics[i], translateLyrics[j], hasOriginLrcPrior) == 1)
                 {
-                    c[k++] = translateLrcs[j++];
+                    c[k++] = translateLyrics[j++];
                 }
-                else if (Compare(originLrcs[i], translateLrcs[j], hasOriginLrcPrior) == -1)
+                else if (Compare(originLyrics[i], translateLyrics[j], hasOriginLrcPrior) == -1)
                 {
-                    c[k++] = originLrcs[i++];
+                    c[k++] = originLyrics[i++];
                 }
                 else
                 {
-                    c[k++] = hasOriginLrcPrior ? originLrcs[i++] : translateLrcs[j++];
+                    c[k++] = hasOriginLrcPrior ? originLyrics[i++] : translateLyrics[j++];
                 }
             }
 
-            while (i < lena)
-                c[k++] = originLrcs[i++];
-            while (j < lenb)
-                c[k++] = translateLrcs[j++];
+            while (i < lenA)
+                c[k++] = originLyrics[i++];
+            while (j < lenB)
+                c[k++] = translateLyrics[j++];
             return c;
         }
 
