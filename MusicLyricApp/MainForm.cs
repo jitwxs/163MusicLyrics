@@ -177,8 +177,8 @@ namespace MusicLyricApp
                 {
                     var songVo = songResp[songId];
                     var lyricVo = _api.GetLyricVo(songId);
-                        
-                    LyricUtils.FillingLyricVo(lyricVo, songVo, _globalSearchInfo);
+                    
+                    lyricVo.Duration = songVo.Duration;
                         
                     GlobalCache.PutSaveVo(songId, new SaveVo(songId, songVo, lyricVo));
                 }

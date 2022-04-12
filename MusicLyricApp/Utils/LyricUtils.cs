@@ -12,18 +12,6 @@ namespace MusicLyricApp.Utils
     public abstract class LyricUtils
     {
         /// <summary>
-        /// 填充歌词信息属性
-        /// </summary>
-        /// <param name="lyricVo"></param>
-        /// <param name="songVo"></param>
-        /// <param name="searchInfo"></param>
-        public static void FillingLyricVo(LyricVo lyricVo, SongVo songVo, SearchInfo searchInfo)
-        {
-            lyricVo.Duration = songVo.Duration;
-            lyricVo.Output = GetOutputContent(lyricVo, searchInfo);
-        }
-        
-        /// <summary>
         /// 获取输出结果
         /// </summary>
         /// <param name="lyricVo"></param>

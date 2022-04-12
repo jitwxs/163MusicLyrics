@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Web;
 
 namespace MusicLyricApp.Bean
 {
@@ -146,22 +147,27 @@ namespace MusicLyricApp.Bean
         /// <summary>
         /// 歌词内容
         /// </summary>
-        public string Lyric { get; set; }
+        public string Lyric;
 
         /// <summary>
         /// 译文歌词内容
         /// </summary>
-        public string TranslateLyric { get; set; }
+        public string TranslateLyric;
 
         /// <summary>
         /// 歌曲时长 ms
         /// </summary>
         public long Duration { get; set; }
 
-        /// <summary>
-        /// 实际输出的歌词
-        /// </summary>
-        public string Output { get; set; }
+        public void SetLyric(string content)
+        {
+            Lyric = HttpUtility.HtmlDecode(content);
+        }
+
+        public void SetTranslateLyric(string content)
+        {
+            TranslateLyric = HttpUtility.HtmlDecode(content);
+        }
 
         public bool IsEmpty()
         {
