@@ -53,8 +53,8 @@ namespace MusicLyricApp
             {
                 MessageBox.Show(ErrorMsg.ROMAJI_DEPENDENCY_LOSS, "提示");
                 ShowRomaji_CheckBox.Checked = false;
-                RomajiMode_ComboBox.Enabled = false;
-                RomajiSystem_ComboBox.Enabled = false;
+
+                isEnable = false;
             }
             
             RomajiMode_ComboBox.Enabled = isEnable;
