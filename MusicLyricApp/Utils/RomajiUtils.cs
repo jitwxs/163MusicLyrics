@@ -1,4 +1,5 @@
-﻿using System;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Kawazu;
 using MusicLyricApp.Bean;
@@ -8,43 +9,32 @@ namespace MusicLyricApp.Utils
 {
     public static class RomajiUtils
     {
-        public static async Task<string[]> ToRomaji(string[] input, RomajiConfigBean romajiConfig)
+        public static async Task<List<LyricLineVo>> ToRomaji(List<LyricLineVo> inputList, List<LyricLineVo> faultList,
+            RomajiConfigBean romajiConfig)
         {
-            if (input == null || input.Length == 0)
+            if (inputList.Any(vo => Utilities.HasKana(vo.Content)))
             {
-                return Array.Empty<string>();
+                var converter = new KawazuConverter();
+                var mode = ConvertModeEnum(romajiConfig.ModeEnum);
+                var system = ConvertSystemEnum(romajiConfig.SystemEnum);
+
+                var resultList = new List<LyricLineVo>();
+
+                foreach (var vo in inputList)
+                {
+                    var content = await converter.Convert(vo.Content, To.Romaji, mode, system, "(", ")");
+                    resultList.Add(new LyricLineVo
+                    {
+                        Content = content,
+                        Timestamp = vo.Timestamp,
+                        TimeOffset = vo.TimeOffset
+                    });
+                }
+
+                return resultList;
             }
 
-            var result = new string[input.Length];
-            
-            var converter = new KawazuConverter();
-            var mode = ConvertModeEnum(romajiConfig.ModeEnum);
-            var system = ConvertSystemEnum(romajiConfig.SystemEnum);
-            
-            for (var i = 0; i < input.Length; i++)
-            {
-                if (Utilities.HasJapanese(input[i]))
-                {
-                    var startIndex = input[i].IndexOf("]") + 1;
-                    if (startIndex == -1)
-                    {
-                        result[i] = await converter.Convert(input[i], To.Romaji, mode, system, "(", ")");
-                    }
-                    else
-                    {
-                        var head = input[i].Substring(0, startIndex);
-                        var body = await converter.Convert(input[i].Substring(startIndex), To.Romaji, mode, system, "(", ")");
-                        
-                        result[i] = head + body;
-                    }
-                }
-                else
-                {
-                    result[i] = input[i];
-                }
-            }
-
-            return result;
+            return faultList;
         }
 
         private static Mode ConvertModeEnum(RomajiModeEnum modeEnum)
@@ -63,7 +53,7 @@ namespace MusicLyricApp.Utils
                     throw new MusicLyricException(ErrorMsg.FUNCTION_NOT_SUPPORT);
             }
         }
-        
+
         private static RomajiSystem ConvertSystemEnum(RomajiSystemEnum systemEnum)
         {
             switch (systemEnum)

@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Web;
+using MusicLyricApp.Exception;
+using MusicLyricApp.Utils;
 
 namespace MusicLyricApp.Bean
 {
@@ -189,6 +191,78 @@ namespace MusicLyricApp.Bean
         public bool IsEmpty()
         {
             return string.IsNullOrEmpty(Lyric) && string.IsNullOrEmpty(TranslateLyric);
+        }
+    }
+    
+    /// <summary>
+    /// 当行歌词信息
+    /// </summary>
+    public class LyricLineVo : IComparable
+    {
+        /// <summary>
+        /// 时间戳字符串
+        /// </summary>
+        public string Timestamp { get; set; }
+
+        /**
+         * 时间偏移量
+         */
+        public long TimeOffset { get; set; }
+        
+        /// <summary>
+        /// 歌词正文
+        /// </summary>
+        public string Content { get; set; }
+
+        public LyricLineVo(string lyricLine)
+        {
+            var index = lyricLine.IndexOf("]");
+            if (index == -1)
+            {
+                Timestamp = "";
+                TimeOffset = -1;
+                Content = lyricLine;
+            }
+            else
+            {
+                Timestamp = lyricLine.Substring(0, index + 1);
+                Content = lyricLine.Substring(index + 1);
+                TimeOffset = GlobalUtils.TimestampStrToLong(Timestamp);
+            }
+        }
+
+        public LyricLineVo()
+        {
+        }
+
+        public int CompareTo(object input)
+        {
+            if (!(input is LyricLineVo obj))
+            {
+                throw new MusicLyricException(ErrorMsg.SYSTEM_ERROR);
+            }
+            
+            if (TimeOffset == -1 && obj.TimeOffset == -1)
+            {
+                return 0;
+            }
+            
+            if (TimeOffset == -1)
+            {
+                return -1;
+            }
+
+            if (obj.TimeOffset == -1)
+            {
+                return 1;
+            }
+
+            return (int) (TimeOffset - obj.TimeOffset);
+        }
+
+        public override string ToString()
+        {
+            return Timestamp + Content;
         }
     }
 

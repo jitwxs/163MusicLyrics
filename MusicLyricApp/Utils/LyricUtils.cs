@@ -38,18 +38,14 @@ namespace MusicLyricApp.Utils
         /// <returns></returns>
         private static async Task<string> GenerateOutput(string originLyric, string originTLyric, SearchInfo searchInfo)
         {
-            // 歌词合并
             var formatLyrics = await FormatLyric(originLyric, originTLyric, searchInfo);
-
-            // 两位小数
-            SetTimeStamp2Dot(ref formatLyrics, searchInfo.SettingBean.Param.DotType);
 
             var result = new StringBuilder();
             foreach (var i in formatLyrics)
             {
                 result.Append(i).Append(Environment.NewLine);
             }
-            
+
             return result.ToString();
         }
 
@@ -60,46 +56,45 @@ namespace MusicLyricApp.Utils
         /// <param name="translateLrc">原始的译文内容</param>
         /// <param name="searchInfo">处理参数</param>
         /// <returns></returns>
-        private static async Task<string[]> FormatLyric(string originLrc, string translateLrc, SearchInfo searchInfo)
+        private static async Task<List<LyricLineVo>> FormatLyric(string originLrc, string translateLrc, SearchInfo searchInfo)
         {
             var showLrcType = searchInfo.SettingBean.Param.ShowLrcType;
             var searchSource = searchInfo.SettingBean.Param.SearchSource;
+            var dotType = searchInfo.SettingBean.Param.DotType;
 
-            var originLyrics = SplitLrc(originLrc, searchSource);
-            if (originLrc.Length == 0)
-            {
-                return Array.Empty<string>();
-            }
+            var originLyrics = SplitLrc(originLrc, searchSource, dotType);
 
-            // 如果不存在翻译歌词，或者选择返回原歌词
-            if (string.IsNullOrEmpty(translateLrc) || showLrcType == ShowLrcTypeEnum.ONLY_ORIGIN)
+            /*
+             * 1、原文歌词不存在
+             * 2、不存在翻译歌词
+             * 3、选择仅原歌词
+             */
+            if (originLyrics.Count == 0 || string.IsNullOrEmpty(translateLrc) ||
+                showLrcType == ShowLrcTypeEnum.ONLY_ORIGIN)
             {
                 return originLyrics;
             }
-            
+
             // 译文处理，启用罗马音进行转换，否则使用原始的译文
-            string[] translateLyrics;
-            if (searchInfo.SettingBean.Config.RomajiConfig.Enable)
+            var romajiConfig = searchInfo.SettingBean.Config.RomajiConfig;
+            
+            var translateLyrics = SplitLrc(translateLrc, searchSource, dotType);
+
+            if (romajiConfig.Enable)
             {
-                translateLyrics = await RomajiUtils.ToRomaji(originLyrics, searchInfo.SettingBean.Config.RomajiConfig);
-            }
-            else
-            {
-                translateLyrics = SplitLrc(translateLrc, searchSource);
+                translateLyrics = await RomajiUtils.ToRomaji(originLyrics, translateLyrics, romajiConfig);
             }
 
-            if (translateLyrics.Length == 0)
-            {
-                return Array.Empty<string>();
-            }
-
-            // 如果选择仅译文
-            if (showLrcType == ShowLrcTypeEnum.ONLY_TRANSLATE)
+            /*
+             * 1、译文歌词不存在
+             * 2、选择仅译文歌词
+             */
+            if (translateLyrics.Count == 0 || showLrcType == ShowLrcTypeEnum.ONLY_TRANSLATE)
             {
                 return translateLyrics;
             }
 
-            string[] res = null;
+            List<LyricLineVo> res = null;
             switch (showLrcType)
             {
                 case ShowLrcTypeEnum.ORIGIN_PRIOR:
@@ -117,20 +112,20 @@ namespace MusicLyricApp.Utils
             }
             return res;
         }
-        
+
         /**
-         * 将歌词切割为数组
+         * 切割歌词
          */
-        private static string[] SplitLrc(string lrc, SearchSourceEnum searchSource)
+        private static List<LyricLineVo> SplitLrc(string lrc, SearchSourceEnum searchSource, DotTypeEnum dotType)
         {
             // 换行符统一
-            var temp = lrc 
+            var temp = lrc
                 .Replace("\r\n", "\n")
                 .Replace("\r", "")
                 .Split('\n');
 
-            var resultList = new List<string>();
-            
+            var resultList = new List<LyricLineVo>();
+
             foreach (var line in temp)
             {
                 // 跳过空行
@@ -138,176 +133,131 @@ namespace MusicLyricApp.Utils
                 {
                     continue;
                 }
-                
+
                 // QQ 音乐歌词正式开始标识符
                 if (searchSource == SearchSourceEnum.QQ_MUSIC && "[offset:0]".Equals(line))
                 {
                     resultList.Clear();
                     continue;
                 }
-                
-                resultList.Add(line);
+
+                var lyricLineVo = new LyricLineVo(line);
+
+                SetTimeStamp2Dot(lyricLineVo, dotType);
+
+                // 跳过无效行
+                if (string.IsNullOrWhiteSpace(lyricLineVo.Content))
+                {
+                    continue;
+                }
+
+                resultList.Add(lyricLineVo);
             }
-            
-            return resultList.ToArray();
+
+            return resultList;
         }
 
         /**
          * 双语歌词排序
          */
-        private static string[] SortLrc(string[] originLyrics, string[] translateLyrics, bool hasOriginLrcPrior)
+        private static List<LyricLineVo> SortLrc(List<LyricLineVo> originLyrics, List<LyricLineVo> translateLyrics, bool hasOriginLrcPrior)
         {
-            int lenA = originLyrics.Length, lenB = translateLyrics.Length;
-            var c = new string[lenA + lenB];
-            
-            //分别代表数组a ,b , c 的索引
-            int i = 0, j = 0, k = 0;
+            int lenA = originLyrics.Count, lenB = translateLyrics.Count;
+            var c = new List<LyricLineVo>();
+
+            int i = 0, j = 0;
 
             while (i < lenA && j < lenB)
             {
-                if (Compare(originLyrics[i], translateLyrics[j], hasOriginLrcPrior) == 1)
+                var compare = Compare(originLyrics[i], translateLyrics[j], hasOriginLrcPrior);
+                
+                if (compare > 0)
                 {
-                    c[k++] = translateLyrics[j++];
+                    c.Add(translateLyrics[j++]);
                 }
-                else if (Compare(originLyrics[i], translateLyrics[j], hasOriginLrcPrior) == -1)
+                else if (compare < 0)
                 {
-                    c[k++] = originLyrics[i++];
+                    c.Add(originLyrics[i++]);
                 }
                 else
                 {
-                    c[k++] = hasOriginLrcPrior ? originLyrics[i++] : translateLyrics[j++];
+                    c.Add(hasOriginLrcPrior ? originLyrics[i++] : translateLyrics[j++]);
                 }
             }
 
             while (i < lenA)
-                c[k++] = originLyrics[i++];
+                c.Add(originLyrics[i++]);
             while (j < lenB)
-                c[k++] = translateLyrics[j++];
+                c.Add(translateLyrics[j++]);
             return c;
         }
 
         /**
          * 双语歌词合并
          */
-        private static string[] MergeLrc(string[] originLrcs, string[] translateLrcs, string splitStr, bool hasOriginLrcPrior)
+        private static List<LyricLineVo> MergeLrc(List<LyricLineVo> originLrcs, List<LyricLineVo> translateLrcs, string splitStr, bool hasOriginLrcPrior)
         {
-            string[] c = SortLrc(originLrcs, translateLrcs, hasOriginLrcPrior);
-            List<string> list = new List<string>
+            var c = SortLrc(originLrcs, translateLrcs, hasOriginLrcPrior);
+            
+            var list = new List<LyricLineVo>
             {
                 c[0]
             };
 
-            for (int i = 1; i < c.Length; i++)
+            for (var i = 1; i < c.Count - 1; i++)
             {
-                int str1Index = c[i - 1].IndexOf("]") + 1;
-                int str2Index = c[i].IndexOf("]") + 1;
-                string str1Timestamp = c[i - 1].Substring(0, str1Index);
-                string str2Timestamp = c[i].Substring(0, str2Index);
-                if (str1Timestamp != str2Timestamp)
+                if (c[i].TimeOffset != c[i + 1].TimeOffset)
                 {
                     list.Add(c[i]);
                 }
                 else
                 {
-                    int index = list.Count - 1;
-                    string subStr1 = list[index];
-                    string subStr2 = c[i].Substring(str2Index);
+                    var index = list.Count - 1;
 
-                    // Fix: https://github.com/jitwxs/Application/issues/7
-                    if (string.IsNullOrEmpty(subStr1) || string.IsNullOrEmpty(subStr2))
-                    {
-                        list[index] = subStr1 + subStr2;
-                    }
-                    else
-                    {
-                        list[index] = subStr1 + splitStr + subStr2;
-                    }
+                    list[index].Content = list[index].Content + splitStr + c[i].Content;
                 }
             }
 
-            return list.ToArray();
+            return list;
         }
 
         /**
          * 歌词排序函数
          */
-        private static int Compare(string originLrc, string translateLrc, bool hasOriginLrcPrior)
+        private static int Compare(LyricLineVo originLrc, LyricLineVo translateLrc, bool hasOriginLrcPrior)
         {
-            int str1Index = originLrc.IndexOf("]");
-            string str1Timestamp = originLrc.Substring(0, str1Index + 1);
-            int str2Index = translateLrc.IndexOf("]");
-            string str2Timestamp = translateLrc.Substring(0, str2Index + 1);
+            var compareTo = originLrc.CompareTo(translateLrc);
 
-            // Fix: https://github.com/jitwxs/Application/issues/8
-            if (string.IsNullOrEmpty(str1Timestamp) || string.IsNullOrEmpty(str2Timestamp))
-            {
-                return 1;
-            }
-
-            if (str1Timestamp != str2Timestamp)
-            {
-                str1Timestamp = str1Timestamp.Substring(1, str1Timestamp.Length - 2);
-                str2Timestamp = str2Timestamp.Substring(1, str2Timestamp.Length - 2);
-                string[] t1s = str1Timestamp.Split(':');
-                string[] t2s = str2Timestamp.Split(':');
-                for (int i = 0; i < t1s.Length; i++)
-                {
-                    if (double.TryParse(t1s[i], out double t1))
-                    {
-                        if (double.TryParse(t2s[i], out double t2))
-                        {
-                            if (t1 > t2)
-                                return 1;
-                            else if (t1 < t2)
-                                return -1;
-                        }
-                        else
-                        {
-                            return 1;
-                        }
-                    }
-                    else
-                    {
-                        return -1;
-                    }
-                }
-
-                return 0;
-            }
-            else
+            if (compareTo == 0)
             {
                 return hasOriginLrcPrior ? -1 : 1;
             }
+
+            return compareTo;
         }
-        
+
         /**
          * 设置时间戳小数位数
          */
-        private static void SetTimeStamp2Dot(ref string[] lrcStr, DotTypeEnum dotTypeEnum)
+        private static void SetTimeStamp2Dot(LyricLineVo vo, DotTypeEnum dotTypeEnum)
         {
-            for (int i = 0; i < lrcStr.Length; i++)
+            if (dotTypeEnum == DotTypeEnum.DISABLE)
             {
-                int index = lrcStr[i].IndexOf("]");
-                int dot = lrcStr[i].IndexOf(".");
-                if (index == -1 || dot == -1)
-                {
-                    continue;
-                }
-
-                string ms = lrcStr[i].Substring(dot + 1, index - dot - 1);
-                if (ms.Length == 3)
-                {
-                    if (dotTypeEnum == DotTypeEnum.DOWN)
-                    {
-                        ms = ms.Substring(0, 2);
-                    }
-                    else if (dotTypeEnum == DotTypeEnum.HALF_UP)
-                    {
-                        ms = Convert.ToDouble("0." + ms).ToString("0.00").Substring(2);
-                    }
-                }
-                lrcStr[i] = lrcStr[i].Substring(0, dot) + "." + ms + lrcStr[i].Substring(index);
+                return;
             }
+            
+            var round = vo.TimeOffset % 1000 / 100;
+            if (round > 0 && dotTypeEnum == DotTypeEnum.HALF_UP)
+            {
+                round = round >= 5 ? 1 : 0;
+            }
+
+            if (round == 1)
+            {
+                vo.TimeOffset = (vo.TimeOffset / 10 + round) * 10;
+            }
+
+            vo.Timestamp = GlobalUtils.TimestampLongToStr(vo.TimeOffset, "00");
         }
     }
 }

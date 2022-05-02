@@ -66,5 +66,40 @@ namespace MusicLyricAppTest.Utils
             Assert.AreEqual("singer - name", GetOutputName(songVo, OutputFilenameTypeEnum.SINGER_NAME));
             Assert.AreEqual("name", GetOutputName(songVo, OutputFilenameTypeEnum.NAME));
         }
+
+        [Test]
+        public void TestTimestampToLong()
+        {
+            // 不合法
+            Assert.AreEqual(-1, TimestampStrToLong(""));
+            Assert.AreEqual(-1, TimestampStrToLong("[12131"));
+            Assert.AreEqual(-1, TimestampStrToLong("-1]"));
+            
+            // 合法
+            Assert.AreEqual(62 * 1000 + 3, TimestampStrToLong("[1:2.3]"));
+            Assert.AreEqual((12 * 60 + 59) * 1000 + 311, TimestampStrToLong("[12:59.311]"));
+            
+            // [00:39.17]
+            Assert.AreEqual(39 * 1000 + 17, TimestampStrToLong("[00:39.17]"));
+        }
+
+        [Test]
+        public void TestTimestampLongToStr()
+        {
+            // 非法
+            Assert.Throws<MusicLyricException>(() => TimestampLongToStr(-1, "00"));
+            
+            Assert.AreEqual("[00:00.000]", TimestampLongToStr(0, "000"));
+            
+            Assert.AreEqual("[00:00.00]", TimestampLongToStr(0, "00"));
+            
+            Assert.AreEqual("[01:02.003]", TimestampLongToStr(62 * 1000 + 3, "000"));
+            
+            Assert.AreEqual("[01:02.03]", TimestampLongToStr(62 * 1000 + 3, "00"));
+            
+            Assert.AreEqual("[12:59.311]", TimestampLongToStr((12 * 60 + 59) * 1000 + 311, "000"));
+            
+            Assert.AreEqual("[12:59.0311]", TimestampLongToStr((12 * 60 + 59) * 1000 + 311, "0000"));
+        }
     }
 }
