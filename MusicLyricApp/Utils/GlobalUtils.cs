@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using MusicLyricApp.Bean;
@@ -272,6 +274,24 @@ namespace MusicLyricApp.Utils
             var result = defaultValue;
 
             int.TryParse(str, out result);
+
+            return result;
+        }
+        
+        public static List<T> GetEnumList<T>() where T : Enum
+        {
+            return Enum.GetValues(typeof(T)).OfType<T>().ToList();
+        }
+
+        public static string[] GetEnumDescArray<T>() where T : Enum
+        {
+            var list = GetEnumList<T>();
+            var result = new string[list.Count];
+            
+            for (var i = 0; i < list.Count; i++)
+            {
+                result[i] = list[i].ToDescription();
+            }
 
             return result;
         }

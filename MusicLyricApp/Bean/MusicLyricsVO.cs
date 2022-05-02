@@ -11,52 +11,54 @@ namespace MusicLyricApp.Bean
     // 双语歌词类型
     public enum ShowLrcTypeEnum
     {
-        ONLY_ORIGIN = 0, // 仅显示原文
-        ONLY_TRANSLATE = 1, // 仅显示译文
-        ORIGIN_PRIOR = 2, // 优先原文
-        TRANSLATE_PRIOR = 3, // 优先译文
-        MERGE_ORIGIN = 4, // 合并显示，优先原文
-        MERGE_TRANSLATE = 5, // 合并显示，优先译文
+        [Description("仅显示原文")] ONLY_ORIGIN = 0,
+        [Description("仅显示译文")] ONLY_TRANSLATE = 1,
+        [Description("优先原文（交错）")] ORIGIN_PRIOR_STAGGER = 2,
+        [Description("优先译文（交错）")] TRANSLATE_PRIOR_STAGGER = 3,
+        [Description("优先原文（独立）")] ORIGIN_PRIOR_ISOLATED = 4,
+        [Description("优先译文（独立）")] TRANSLATE_PRIOR_ISOLATED = 5,
+        [Description("优先原文（合并）")] ORIGIN_PRIOR_MERGE = 6,
+        [Description("优先译文（合并）")] TRANSLATE_PRIOR_MERGE = 7,
     }
 
     // 输出文件名类型
     public enum OutputFilenameTypeEnum
     {
-        NAME_SINGER = 0, // 歌曲名 - 歌手
-        SINGER_NAME = 1, // 歌手 - 歌曲名
-        NAME = 2 // 歌曲名
+        [Description("歌曲名 - 歌手")] NAME_SINGER = 0,
+        [Description("歌手 - 歌曲名")] SINGER_NAME = 1,
+        [Description("歌曲名")] NAME = 2
     }
     
     // 搜索来源
     public enum SearchSourceEnum
     {
-        NET_EASE_MUSIC = 0, // 网易云音乐
-        QQ_MUSIC = 1 // QQ音乐
+        [Description("网易云音乐")] NET_EASE_MUSIC = 0,
+        [Description("QQ音乐")] QQ_MUSIC = 1
     }
 
     // 搜索类型
     public enum SearchTypeEnum
     {
-        SONG_ID = 0, // 歌曲ID
-        ALBUM_ID = 1 // 专辑ID
+        [Description("单曲")] SONG_ID = 0,
+        [Description("专辑")] ALBUM_ID = 1
     }
 
     // 强制两位类型
     public enum DotTypeEnum
     {
-        DISABLE = 0, // 不启用
-        DOWN = 1, // 截位
-        HALF_UP = 2 // 四舍五入
+        [Description("不启用")] DISABLE = 0,
+        [Description("截位")] DOWN = 1,
+        [Description("四舍五入")] HALF_UP = 2
     }
 
     // 输出文件格式
     public enum OutputEncodingEnum
     {
-        UTF_8 = 0,
-        UTF_8_BOM = 1,
-        GB_2312 = 2,
-        GBK = 3,
-        UNICODE = 4
+        [Description("UTF-8")] UTF_8 = 0,
+        [Description("UTF-8-BOM")] UTF_8_BOM = 1,
+        [Description("GB-2312")] GB_2312 = 2,
+        [Description("GBK")] GBK = 3,
+        [Description("UNICODE")] UNICODE = 4
     }
 
     public enum OutputFormatEnum

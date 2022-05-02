@@ -97,16 +97,24 @@ namespace MusicLyricApp.Utils
             List<LyricLineVo> res = null;
             switch (showLrcType)
             {
-                case ShowLrcTypeEnum.ORIGIN_PRIOR:
+                case ShowLrcTypeEnum.ORIGIN_PRIOR_ISOLATED:
+                    res = originLyrics;
+                    res.AddRange(translateLyrics);
+                    break;
+                case ShowLrcTypeEnum.TRANSLATE_PRIOR_ISOLATED:
+                    res = translateLyrics;
+                    res.AddRange(originLyrics);
+                    break;
+                case ShowLrcTypeEnum.ORIGIN_PRIOR_STAGGER:
                     res = SortLrc(originLyrics, translateLyrics, true);
                     break;
-                case ShowLrcTypeEnum.TRANSLATE_PRIOR:
+                case ShowLrcTypeEnum.TRANSLATE_PRIOR_STAGGER:
                     res = SortLrc(originLyrics, translateLyrics, false);
                     break;
-                case ShowLrcTypeEnum.MERGE_ORIGIN:
+                case ShowLrcTypeEnum.ORIGIN_PRIOR_MERGE:
                     res = MergeLrc(originLyrics, translateLyrics, searchInfo.SettingBean.Param.LrcMergeSeparator, true);
                     break;
-                case ShowLrcTypeEnum.MERGE_TRANSLATE:
+                case ShowLrcTypeEnum.TRANSLATE_PRIOR_MERGE:
                     res = MergeLrc(originLyrics, translateLyrics, searchInfo.SettingBean.Param.LrcMergeSeparator, false);
                     break;
             }

@@ -1,4 +1,6 @@
 ﻿using System.ComponentModel;
+using MusicLyricApp.Bean;
+using MusicLyricApp.Utils;
 
 namespace MusicLyricApp
 {
@@ -105,7 +107,7 @@ namespace MusicLyricApp
             // 
             this.RomajiMode_ComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.RomajiMode_ComboBox.FormattingEnabled = true;
-            this.RomajiMode_ComboBox.Items.AddRange(new object[] { "标准模式", "空格分组", "送假名", "注音假名" });
+            this.RomajiMode_ComboBox.Items.AddRange(GlobalUtils.GetEnumDescArray<RomajiModeEnum>());
             this.RomajiMode_ComboBox.Location = new System.Drawing.Point(232, 61);
             this.RomajiMode_ComboBox.Name = "RomajiMode_ComboBox";
             this.RomajiMode_ComboBox.Size = new System.Drawing.Size(82, 20);
@@ -131,7 +133,7 @@ namespace MusicLyricApp
             // 
             this.RomajiSystem_ComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.RomajiSystem_ComboBox.FormattingEnabled = true;
-            this.RomajiSystem_ComboBox.Items.AddRange(new object[] { "日本式", "护照式", "平文式" });
+            this.RomajiSystem_ComboBox.Items.AddRange(GlobalUtils.GetEnumDescArray<RomajiSystemEnum>());
             this.RomajiSystem_ComboBox.Location = new System.Drawing.Point(232, 107);
             this.RomajiSystem_ComboBox.Name = "RomajiSystem_ComboBox";
             this.RomajiSystem_ComboBox.Size = new System.Drawing.Size(82, 20);
