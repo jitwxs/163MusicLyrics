@@ -64,6 +64,23 @@ namespace MusicLyricApp.Bean
         [Description("srt文件(*.srt)|*.srt")] SRT = 1
     }
 
+    // 罗马音转换模式
+    public enum RomajiModeEnum
+    {
+        [Description("标准模式")] NORMAL = 0,
+        [Description("空格分组")] SPACED = 1,
+        [Description("送假名")] OKURIGANA = 2,
+        [Description("注音假名")] FURIGANA = 3,
+    }
+    
+    // 罗马音字体系
+    public enum RomajiSystemEnum
+    {
+        [Description("日本式")] NIPPON = 0,
+        [Description("护照式")] PASSPORT = 1,
+        [Description("平文式")] HEPBURN = 2,
+    }
+
     /**
      * 错误码
      */
@@ -181,26 +198,6 @@ namespace MusicLyricApp.Bean
     public class SearchInfo
     {
         /// <summary>
-        /// 搜索来源
-        /// </summary>
-        public SearchSourceEnum SearchSource { get; set; }
-        
-        /// <summary>
-        /// 搜索类型
-        /// </summary>
-        public SearchTypeEnum SearchType { get; set; }
-
-        /// <summary>
-        /// 输出文件名类型
-        /// </summary>
-        public OutputFilenameTypeEnum OutputFileNameType { get; set; }
-
-        /// <summary>
-        /// 歌词展示格式
-        /// </summary>
-        public ShowLrcTypeEnum ShowLrcType { get; set; }
-
-        /// <summary>
         /// 输入 ID 列表
         /// </summary>
         public string[] InputIds { get; set; }
@@ -210,25 +207,9 @@ namespace MusicLyricApp.Bean
         /// </summary>
         public readonly HashSet<string> SongIds = new HashSet<string>();
 
-        /// <summary>
-        /// 输出文件编码
-        /// </summary>
-        public OutputEncodingEnum Encoding { get; set; }
+        public SettingBean SettingBeanBackup { get; set; }
 
-        /// <summary>
-        /// 指定歌词合并的分隔符
-        /// </summary>
-        public string LrcMergeSeparator { get; set; }
-
-        /// <summary>
-        /// 小数位处理策略
-        /// </summary>
-        public DotTypeEnum DotType { get; set; }
-
-        /// <summary>
-        /// 输出文件格式
-        /// </summary>
-        public OutputFormatEnum OutputFileFormat { get; set; }
+        public SettingBean SettingBean { get; set; }
     }
 
     public static class EnumHelper

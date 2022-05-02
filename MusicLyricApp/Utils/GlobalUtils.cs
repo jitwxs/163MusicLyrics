@@ -108,7 +108,7 @@ namespace MusicLyricApp.Utils
         /**
          * 获取输出文件名
          */
-        public static string GetOutputName(SongVo songVo, SearchInfo searchInfo)
+        public static string GetOutputName(SongVo songVo, OutputFilenameTypeEnum typeEnum)
         {
             if (songVo == null)
             {
@@ -118,7 +118,7 @@ namespace MusicLyricApp.Utils
             }
 
             string outputName;
-            switch (searchInfo.OutputFileNameType)
+            switch (typeEnum)
             {
                 case OutputFilenameTypeEnum.NAME_SINGER:
                     outputName = songVo.Name + " - " + songVo.Singer;

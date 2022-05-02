@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 
 namespace MusicLyricApp.Utils
 {
-    public class SrtUtils
+    public static class SrtUtils
     {
         /// <summary>
         /// 将 Lrc 格式，转换为 Srt 格式

@@ -6,16 +6,48 @@ namespace MusicLyricApp.Bean
     {
         public readonly ConfigBean Config = new ConfigBean();
 
-        public readonly PersistParamBean Param = new PersistParamBean();
+        public PersistParamBean Param = new PersistParamBean();
     }
 
     public class ConfigBean
     {
+        /// <summary>
+        /// 参数记忆
+        /// </summary>
         public bool RememberParam = false;
 
+        /// <summary>
+        /// 自读读取剪切板
+        /// </summary>
         public bool AutoReadClipboard = false;
 
+        /// <summary>
+        /// 自动检查更新
+        /// </summary>
         public bool AutoCheckUpdate = true;
+
+        /// <summary>
+        /// 罗马音相关配置
+        /// </summary>
+        public RomajiConfigBean RomajiConfig = new RomajiConfigBean();
+    }
+
+    public class RomajiConfigBean
+    {
+        /// <summary>
+        /// 译文显示罗马音
+        /// </summary>
+        public bool Enable = false;
+
+        /// <summary>
+        /// 罗马音转换模式
+        /// </summary>
+        public RomajiModeEnum ModeEnum = RomajiModeEnum.SPACED;
+
+        /// <summary>
+        /// 罗马音字体系
+        /// </summary>
+        public RomajiSystemEnum SystemEnum = RomajiSystemEnum.HEPBURN;
     }
 
     public class PersistParamBean
@@ -59,19 +91,5 @@ namespace MusicLyricApp.Bean
         /// 输出文件编码
         /// </summary>
         public OutputEncodingEnum Encoding = OutputEncodingEnum.UTF_8;
-
-        public void Update(SearchInfo searchInfo)
-        {
-            SearchSource = searchInfo.SearchSource;
-            SearchType = searchInfo.SearchType;
-
-            ShowLrcType = searchInfo.ShowLrcType;
-            LrcMergeSeparator = searchInfo.LrcMergeSeparator;
-            DotType = searchInfo.DotType;
-
-            OutputFileNameType = searchInfo.OutputFileNameType;
-            OutputFileFormat = searchInfo.OutputFileFormat;
-            Encoding = searchInfo.Encoding;
-        }
     }
 }

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using MusicLyricApp.Bean;
 
 namespace MusicLyricApp.Utils
@@ -17,11 +17,11 @@ namespace MusicLyricApp.Utils
         /// <param name="lyricVo"></param>
         /// <param name="searchInfo"></param>
         /// <returns></returns>
-        public static string GetOutputContent(LyricVo lyricVo, SearchInfo searchInfo)
+        public static async Task<string> GetOutputContent(LyricVo lyricVo, SearchInfo searchInfo)
         {
-            var output = GenerateOutput(lyricVo.Lyric, lyricVo.TranslateLyric, searchInfo);
+            var output = await GenerateOutput(lyricVo.Lyric, lyricVo.TranslateLyric, searchInfo);
 
-            if (searchInfo.OutputFileFormat == OutputFormatEnum.SRT)
+            if (searchInfo.SettingBean.Param.OutputFileFormat == OutputFormatEnum.SRT)
             {
                 output = SrtUtils.LrcToSrt(output, lyricVo.Duration);
             }
@@ -36,19 +36,20 @@ namespace MusicLyricApp.Utils
         /// <param name="originTLyric">原始的译文内容</param>
         /// <param name="searchInfo">处理参数</param>
         /// <returns></returns>
-        private static string GenerateOutput(string originLyric, string originTLyric, SearchInfo searchInfo)
+        private static async Task<string> GenerateOutput(string originLyric, string originTLyric, SearchInfo searchInfo)
         {
             // 歌词合并
-            var formatLyrics = FormatLyric(originLyric, originTLyric, searchInfo);
+            var formatLyrics = await FormatLyric(originLyric, originTLyric, searchInfo);
 
             // 两位小数
-            SetTimeStamp2Dot(ref formatLyrics, searchInfo.DotType);
+            SetTimeStamp2Dot(ref formatLyrics, searchInfo.SettingBean.Param.DotType);
 
             var result = new StringBuilder();
             foreach (var i in formatLyrics)
             {
                 result.Append(i).Append(Environment.NewLine);
             }
+            
             return result.ToString();
         }
 
@@ -59,20 +60,40 @@ namespace MusicLyricApp.Utils
         /// <param name="translateLrc">原始的译文内容</param>
         /// <param name="searchInfo">处理参数</param>
         /// <returns></returns>
-        private static string[] FormatLyric(string originLrc, string translateLrc, SearchInfo searchInfo)
+        private static async Task<string[]> FormatLyric(string originLrc, string translateLrc, SearchInfo searchInfo)
         {
-            var showLrcType = searchInfo.ShowLrcType;
-            var searchSource = searchInfo.SearchSource;
+            var showLrcType = searchInfo.SettingBean.Param.ShowLrcType;
+            var searchSource = searchInfo.SettingBean.Param.SearchSource;
+
+            var originLyrics = SplitLrc(originLrc, searchSource);
+            if (originLrc.Length == 0)
+            {
+                return Array.Empty<string>();
+            }
 
             // 如果不存在翻译歌词，或者选择返回原歌词
-            var originLyrics = SplitLrc(originLrc, searchSource);
             if (string.IsNullOrEmpty(translateLrc) || showLrcType == ShowLrcTypeEnum.ONLY_ORIGIN)
             {
                 return originLyrics;
             }
+            
+            // 译文处理，启用罗马音进行转换，否则使用原始的译文
+            string[] translateLyrics;
+            if (searchInfo.SettingBean.Config.RomajiConfig.Enable)
+            {
+                translateLyrics = await RomajiUtils.ToRomaji(originLyrics, searchInfo.SettingBean.Config.RomajiConfig);
+            }
+            else
+            {
+                translateLyrics = SplitLrc(translateLrc, searchSource);
+            }
+
+            if (translateLyrics.Length == 0)
+            {
+                return Array.Empty<string>();
+            }
 
             // 如果选择仅译文
-            var translateLyrics = SplitLrc(translateLrc, searchSource);
             if (showLrcType == ShowLrcTypeEnum.ONLY_TRANSLATE)
             {
                 return translateLyrics;
@@ -88,10 +109,10 @@ namespace MusicLyricApp.Utils
                     res = SortLrc(originLyrics, translateLyrics, false);
                     break;
                 case ShowLrcTypeEnum.MERGE_ORIGIN:
-                    res = MergeLrc(originLyrics, translateLyrics, searchInfo.LrcMergeSeparator, true);
+                    res = MergeLrc(originLyrics, translateLyrics, searchInfo.SettingBean.Param.LrcMergeSeparator, true);
                     break;
                 case ShowLrcTypeEnum.MERGE_TRANSLATE:
-                    res = MergeLrc(originLyrics, translateLyrics, searchInfo.LrcMergeSeparator, false);
+                    res = MergeLrc(originLyrics, translateLyrics, searchInfo.SettingBean.Param.LrcMergeSeparator, false);
                     break;
             }
             return res;

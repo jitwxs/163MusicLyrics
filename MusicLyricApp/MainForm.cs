@@ -5,7 +5,6 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
 using System.Reflection;
 using System.Text;
 using System.Threading;
@@ -16,7 +15,6 @@ using MusicLyricApp.Cache;
 using MusicLyricApp.Exception;
 using MusicLyricApp.Utils;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using NLog;
 
 namespace MusicLyricApp
@@ -29,32 +27,9 @@ namespace MusicLyricApp
 
         private readonly SearchInfo _globalSearchInfo = new SearchInfo();
 
-        // 输出文件编码
-        private OutputEncodingEnum _outputEncodingEnum;
-
-        // 搜索来源
-        private SearchSourceEnum _searchSourceEnum;
-        
-        // 搜索类型
-        private SearchTypeEnum _searchTypeEnum;
-
-        // 强制两位类型
-        private DotTypeEnum _dotTypeEnum;
-
-        // 展示歌词类型
-        private ShowLrcTypeEnum _showLrcTypeEnum;
-
-        // 输出文件名类型
-        private OutputFilenameTypeEnum _outputFilenameTypeEnum;
-
-        // 输出文件类型
-        private OutputFormatEnum _outputFormatEnum;
-
         private IMusicApiV2 _api;
 
         private SettingForm _settingForm;
-
-        private SettingBean _settingBean;
 
         private UpgradeForm _upgradeForm;
 
@@ -76,18 +51,23 @@ namespace MusicLyricApp
         private void InitialConfig()
         {
             // 1、加载配置
+            SettingBean settingBean;
             if (File.Exists(Constants.SettingPath))
             {
                 var text = File.ReadAllText(Constants.SettingPath);
-                _settingBean = text.ToEntity<SettingBean>();
+                settingBean = text.ToEntity<SettingBean>();
             }
             else
             {
-                _settingBean = new SettingBean();
+                settingBean = new SettingBean();
             }
+
+            _globalSearchInfo.SettingBean = settingBean;
+            _globalSearchInfo.SettingBeanBackup = settingBean.ToJson().ToEntity<SettingBean>();
             
             // 2、配置应用
-            var paramConfig = _settingBean.Config.RememberParam ? _settingBean.Param : new PersistParamBean();
+            var paramConfig = settingBean.Config.RememberParam ? settingBean.Param : new PersistParamBean();
+            
             OutputName_ComboBox.SelectedIndex = (int) paramConfig.OutputFileNameType;
             OutputEncoding_ComboBox.SelectedIndex = (int) paramConfig.Encoding;
             LrcType_ComboBox.SelectedIndex = (int) paramConfig.ShowLrcType;
@@ -98,13 +78,13 @@ namespace MusicLyricApp
             LrcMergeSeparator_TextBox.Text = paramConfig.LrcMergeSeparator;
             
             // 3、自动检查更新
-            if (_settingBean.Config.AutoCheckUpdate)
+            if (settingBean.Config.AutoCheckUpdate)
             {
                 ThreadPool.QueueUserWorkItem(p => CheckLatestVersion(false));
             }
         }
 
-        private void TrySetHighDPIFont(String fontName)
+        private void TrySetHighDPIFont(string fontName)
         {
             //缩放比例大于100%才更改字体
             if (DeviceDpi <= 96) return;
@@ -114,7 +94,10 @@ namespace MusicLyricApp
             {
                 font = new Font(fontName, 9F, FontStyle.Regular, GraphicsUnit.Point);
             }
-            catch (System.Exception) { }
+            catch (System.Exception)
+            {
+                // ignored
+            }
 
             if (font == null || !fontName.Equals(font.Name)) return;
 
@@ -131,7 +114,10 @@ namespace MusicLyricApp
                         Object obj = fieldInfo.GetValue(this);
                         propertyInfo.SetValue(obj, font);
                     }
-                    catch (System.Exception) { }
+                    catch (System.Exception)
+                    {
+                        // ignored
+                    }
                 }
             }
         }
@@ -149,16 +135,12 @@ namespace MusicLyricApp
             }
 
             _globalSearchInfo.SongIds.Clear();
-            _globalSearchInfo.SearchSource = _searchSourceEnum;
-            _globalSearchInfo.SearchType = _searchTypeEnum;
-            _globalSearchInfo.OutputFileNameType = _outputFilenameTypeEnum;
-            _globalSearchInfo.ShowLrcType = _showLrcTypeEnum;
-            _globalSearchInfo.Encoding = _outputEncodingEnum;
-            _globalSearchInfo.DotType = _dotTypeEnum;
-            _globalSearchInfo.OutputFileFormat = _outputFormatEnum;
-            _globalSearchInfo.LrcMergeSeparator = LrcMergeSeparator_TextBox.Text;
+            
+            var param = _globalSearchInfo.SettingBean.Param;
 
-            if (_searchSourceEnum == SearchSourceEnum.QQ_MUSIC)
+            param.LrcMergeSeparator = LrcMergeSeparator_TextBox.Text;
+
+            if (param.SearchSource == SearchSourceEnum.QQ_MUSIC)
             {
                 _api = new QQMusicApiV2();
             }
@@ -245,8 +227,11 @@ namespace MusicLyricApp
 
             foreach (var input in inputs)
             {
-                var id = GlobalUtils.CheckInputId(input, _globalSearchInfo.SearchSource, _globalSearchInfo.SearchType);
-                switch (_globalSearchInfo.SearchType)
+                var searchSource = _globalSearchInfo.SettingBean.Param.SearchSource;
+                var searchType = _globalSearchInfo.SettingBean.Param.SearchType;
+                
+                var id = GlobalUtils.CheckInputId(input, searchSource, searchType);
+                switch (searchType)
                 {
                     case SearchTypeEnum.ALBUM_ID:
                         foreach (var songId in _api.GetSongIdsFromAlbum(id))
@@ -364,7 +349,7 @@ namespace MusicLyricApp
             catch (MusicLyricException ex)
             {
                 _logger.Error("Search Business failed, param: {SearchParam}, type: {SearchType}, message: {ErrorMsg}",
-                    Search_Text.Text, _globalSearchInfo.SearchType, ex.Message);
+                    Search_Text.Text, _globalSearchInfo.SettingBean.Param.SearchType, ex.Message);
                 MessageBox.Show(ex.Message, "提示");
             }
             catch (System.Exception ex)
@@ -445,12 +430,12 @@ namespace MusicLyricApp
             var saveDialog = new SaveFileDialog();
             try
             {
-                saveDialog.FileName = GlobalUtils.GetOutputName(saveVo.SongVo, _globalSearchInfo);
-                saveDialog.Filter = _outputFormatEnum.ToDescription();
+                saveDialog.FileName = GlobalUtils.GetOutputName(saveVo.SongVo, _globalSearchInfo.SettingBean.Param.OutputFileNameType);
+                saveDialog.Filter = _globalSearchInfo.SettingBean.Param.OutputFileFormat.ToDescription();
                 if (saveDialog.ShowDialog() == DialogResult.OK)
                 {
                     using (var sw = new StreamWriter(saveDialog.FileName, false,
-                               GlobalUtils.GetEncoding(_globalSearchInfo.Encoding)))
+                               GlobalUtils.GetEncoding(_globalSearchInfo.SettingBean.Param.Encoding)))
                     {
                         sw.Write(LyricUtils.GetOutputContent(saveVo.LyricVo, _globalSearchInfo));
                         sw.Flush();
@@ -478,7 +463,7 @@ namespace MusicLyricApp
             try
             {
                 saveDialog.FileName = "直接选择保存路径即可，无需修改此处内容";
-                saveDialog.Filter = _outputFormatEnum.ToDescription();
+                saveDialog.Filter = _globalSearchInfo.SettingBean.Param.OutputFileFormat.ToDescription();
                 if (saveDialog.ShowDialog() == DialogResult.OK)
                 {
                     var localFilePath = saveDialog.FileName;
@@ -498,8 +483,8 @@ namespace MusicLyricApp
                             continue;
                         }
 
-                        var path = filePath + '/' + GlobalUtils.GetOutputName(saveVo.SongVo, _globalSearchInfo) + fileSuffix;
-                        using( var sw = new StreamWriter(path, false, GlobalUtils.GetEncoding(_globalSearchInfo.Encoding)))
+                        var path = filePath + '/' + GlobalUtils.GetOutputName(saveVo.SongVo, _globalSearchInfo.SettingBean.Param.OutputFileNameType) + fileSuffix;
+                        using( var sw = new StreamWriter(path, false, GlobalUtils.GetEncoding(_globalSearchInfo.SettingBean.Param.Encoding)))
                         {
                             sw.Write(LyricUtils.GetOutputContent(lyricVo, _globalSearchInfo));
                             sw.Flush();
@@ -555,7 +540,7 @@ namespace MusicLyricApp
         /**
          * 更新前端歌词
          */
-        private void UpdateLrcTextBox(string replace)
+        private async void UpdateLrcTextBox(string replace)
         {
             if (replace != string.Empty)
             {
@@ -569,7 +554,14 @@ namespace MusicLyricApp
                     // only loop one times
                     foreach (var lyricVo in _globalSaveVoMap.Values.Select(saveVo => saveVo.LyricVo))
                     {
-                        Console_TextBox.Text = lyricVo.IsEmpty() ? ErrorMsg.LRC_NOT_EXIST : LyricUtils.GetOutputContent(lyricVo, _globalSearchInfo);
+                        if (lyricVo.IsEmpty())
+                        {
+                            Console_TextBox.Text = ErrorMsg.LRC_NOT_EXIST;
+                        }
+                        else
+                        {
+                            Console_TextBox.Text = await LyricUtils.GetOutputContent(lyricVo, _globalSearchInfo);
+                        }
                     }
                 }
             }
@@ -588,19 +580,19 @@ namespace MusicLyricApp
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-            // 记住最终的参数配置
-            if (_settingBean.Config.RememberParam)
+            // 如果参数不记住，需要回滚
+            if (!_globalSearchInfo.SettingBean.Config.RememberParam)
             {
-                _settingBean.Param.Update(_globalSearchInfo);
+                _globalSearchInfo.SettingBean.Param = _globalSearchInfo.SettingBeanBackup.Param;
             }
             
             // 配置持久化
-            File.WriteAllText(Constants.SettingPath, _settingBean.ToJson(), Encoding.UTF8);
+            File.WriteAllText(Constants.SettingPath, _globalSearchInfo.SettingBean.ToJson(), Encoding.UTF8);
         }
 
         private void MainForm_MouseEnter(object sender, EventArgs e)
         {
-            if (_settingBean.Config.AutoReadClipboard)
+            if (_globalSearchInfo.SettingBean.Config.AutoReadClipboard)
             {
                 Search_Text.Text = Clipboard.GetText();
             }
@@ -611,7 +603,7 @@ namespace MusicLyricApp
         /// </summary>
         private void SearchSource_ComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            _searchSourceEnum = (SearchSourceEnum)SearchSource_ComboBox.SelectedIndex;
+            _globalSearchInfo.SettingBean.Param.SearchSource = (SearchSourceEnum)SearchSource_ComboBox.SelectedIndex;
 
             ReloadConfig();
             UpdateLrcTextBox(string.Empty);
@@ -622,7 +614,7 @@ namespace MusicLyricApp
         /// </summary>
         private void SearchType_ComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            _searchTypeEnum = (SearchTypeEnum)SearchType_ComboBox.SelectedIndex;
+            _globalSearchInfo.SettingBean.Param.SearchType = (SearchTypeEnum)SearchType_ComboBox.SelectedIndex;
 
             ReloadConfig();
             UpdateLrcTextBox(string.Empty);
@@ -633,19 +625,18 @@ namespace MusicLyricApp
         /// </summary>
         private void LrcType_ComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            _showLrcTypeEnum = (ShowLrcTypeEnum)LrcType_ComboBox.SelectedIndex;
-
-            if (_showLrcTypeEnum == ShowLrcTypeEnum.MERGE_ORIGIN ||
-                _showLrcTypeEnum == ShowLrcTypeEnum.MERGE_TRANSLATE)
+            switch (_globalSearchInfo.SettingBean.Param.ShowLrcType = (ShowLrcTypeEnum)LrcType_ComboBox.SelectedIndex)
             {
-                LrcMergeSeparator_TextBox.ReadOnly = false;
-                LrcMergeSeparator_TextBox.BackColor = Color.White;
-            }
-            else
-            {
-                LrcMergeSeparator_TextBox.Text = null;
-                LrcMergeSeparator_TextBox.ReadOnly = true;
-                LrcMergeSeparator_TextBox.BackColor = Color.FromArgb(240, 240, 240);
+                case ShowLrcTypeEnum.MERGE_ORIGIN:
+                case ShowLrcTypeEnum.MERGE_TRANSLATE: 
+                    LrcMergeSeparator_TextBox.ReadOnly = false;
+                    LrcMergeSeparator_TextBox.BackColor = Color.White;
+                    break;
+                default: 
+                    LrcMergeSeparator_TextBox.Text = null;
+                    LrcMergeSeparator_TextBox.ReadOnly = true;
+                    LrcMergeSeparator_TextBox.BackColor = Color.FromArgb(240, 240, 240);
+                    break;
             }
 
             ReloadConfig();
@@ -666,7 +657,7 @@ namespace MusicLyricApp
         /// </summary>
         private void Dot_TextBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            _dotTypeEnum = (DotTypeEnum)Dot_TextBox.SelectedIndex;
+            _globalSearchInfo.SettingBean.Param.DotType = (DotTypeEnum)Dot_TextBox.SelectedIndex;
             ReloadConfig();
             UpdateLrcTextBox(string.Empty);
         }
@@ -697,15 +688,15 @@ namespace MusicLyricApp
             
             if (input == OutputEncoding_ComboBox)
             {
-                _outputEncodingEnum = (OutputEncodingEnum)input.SelectedIndex;
+                _globalSearchInfo.SettingBean.Param.Encoding = (OutputEncodingEnum)input.SelectedIndex;
             } 
             else if (input == OutputFormat_CombBox)
             {
-                _outputFormatEnum = (OutputFormatEnum)input.SelectedIndex;
+                _globalSearchInfo.SettingBean.Param.OutputFileFormat = (OutputFormatEnum)input.SelectedIndex;
             }
             else if (input == OutputName_ComboBox)
             {
-                _outputFilenameTypeEnum = (OutputFilenameTypeEnum)input.SelectedIndex;
+                _globalSearchInfo.SettingBean.Param.OutputFileNameType = (OutputFilenameTypeEnum)input.SelectedIndex;
             }
             
             ReloadConfig();
@@ -749,7 +740,7 @@ namespace MusicLyricApp
             {
                 if (_settingForm == null || _settingForm.IsDisposed)
                 {
-                    _settingForm = new SettingForm(_settingBean.Config);
+                    _settingForm = new SettingForm(_globalSearchInfo.SettingBean.Config);
                     _settingForm.Location = new Point(Left + Constants.SettingFormOffset, Top + Constants.SettingFormOffset);
                     _settingForm.StartPosition = FormStartPosition.Manual;
                     _settingForm.Show();
