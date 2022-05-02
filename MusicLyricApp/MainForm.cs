@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Windows.Forms;
@@ -68,6 +69,8 @@ namespace MusicLyricApp
             
             InitializeComponent();
             InitialConfig();
+
+            TrySetHighDPIFont("Segoe UI");
         }
 
         private void InitialConfig()
@@ -98,6 +101,38 @@ namespace MusicLyricApp
             if (_settingBean.Config.AutoCheckUpdate)
             {
                 ThreadPool.QueueUserWorkItem(p => CheckLatestVersion(false));
+            }
+        }
+
+        private void TrySetHighDPIFont(String fontName)
+        {
+            //缩放比例大于100%才更改字体
+            if (DeviceDpi <= 96) return;
+
+            Font font = null;
+            try
+            {
+                font = new Font(fontName, 9F, FontStyle.Regular, GraphicsUnit.Point);
+            }
+            catch (System.Exception) { }
+
+            if (font == null || !fontName.Equals(font.Name)) return;
+
+            Type type = this.GetType();
+            FieldInfo[] fieldInfos = type.GetFields(BindingFlags.NonPublic | BindingFlags.Instance);
+            foreach (FieldInfo fieldInfo in fieldInfos)
+            {
+                Type fieldType = fieldInfo.FieldType;
+                if ("System.Windows.Forms".Equals(fieldType.Namespace))
+                {
+                    try
+                    {
+                        PropertyInfo propertyInfo = fieldType.GetProperty("Font");
+                        Object obj = fieldInfo.GetValue(this);
+                        propertyInfo.SetValue(obj, font);
+                    }
+                    catch (System.Exception) { }
+                }
             }
         }
 
