@@ -13,6 +13,7 @@
 - [x] 支持多种歌词原文和译文的组织方式 Support multiple original lyrics and translation lyrics organization
 - [x] 支持提取（部分）歌曲试听链接 Support extraction (part) song audition link
 - [x] 支持多种保存命名规则、文件编码、输出格式 Support multiple saving naming rules, file encoding, output format
+- [x] 日文歌曲支持罗马音 Support romaji in japanese songs
 
 ### Downloads
 
