@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using MusicLyricApp.Bean;
@@ -105,10 +107,56 @@ namespace MusicLyricApp.Utils
             return Regex.IsMatch(s, "^\\d+$");
         }
 
+        public static long TimestampStrToLong(string timestamp)
+        {
+            // 不支持的格式
+            if (string.IsNullOrWhiteSpace(timestamp) || timestamp[0] != '[' || timestamp[timestamp.Length - 1] != ']')
+            {
+                return -1;
+            }
+
+            timestamp = timestamp.Substring(1, timestamp.Length - 2);
+
+            var split = timestamp.Split(':');
+
+            var min = toInt(split[0], 0);
+
+            split = split[1].Split('.');
+
+            var second = toInt(split[0], 0);
+
+            var ms = 0;
+
+            if (split.Length > 1)
+            {
+                ms = toInt(split[1], 0);
+            }
+
+            return (min * 60 + second) * 1000 + ms;
+        }
+
+        public static string TimestampLongToStr(long timestamp, string msScale)
+        {
+            if (timestamp < 0)
+            {
+                throw new MusicLyricException(ErrorMsg.SYSTEM_ERROR);
+            }
+            
+            var ms = timestamp % 1000;
+
+            timestamp /= 1000;
+
+            var seconds = timestamp % 60;
+
+            var min = timestamp / 60;
+
+            return "[" + min.ToString("00") + ":" + seconds.ToString("00") + "." + ms.ToString(msScale) + "]";
+        }
+        
         /**
          * 获取输出文件名
          */
-        public static string GetOutputName(SongVo songVo, SearchInfo searchInfo)
+        public static string GetOutputName(SongVo songVo, OutputFilenameTypeEnum typeEnum)
         {
             if (songVo == null)
             {
@@ -118,7 +166,7 @@ namespace MusicLyricApp.Utils
             }
 
             string outputName;
-            switch (searchInfo.OutputFileNameType)
+            switch (typeEnum)
             {
                 case OutputFilenameTypeEnum.NAME_SINGER:
                     outputName = songVo.Name + " - " + songVo.Singer;
@@ -219,6 +267,33 @@ namespace MusicLyricApp.Utils
                     // utf-8 and others
                     return new UTF8Encoding(false);
             }
+        }
+
+        public static int toInt(string str, int defaultValue)
+        {
+            var result = defaultValue;
+
+            int.TryParse(str, out result);
+
+            return result;
+        }
+        
+        public static List<T> GetEnumList<T>() where T : Enum
+        {
+            return Enum.GetValues(typeof(T)).OfType<T>().ToList();
+        }
+
+        public static string[] GetEnumDescArray<T>() where T : Enum
+        {
+            var list = GetEnumList<T>();
+            var result = new string[list.Count];
+            
+            for (var i = 0; i < list.Count; i++)
+            {
+                result[i] = list[i].ToDescription();
+            }
+
+            return result;
         }
     }
 }

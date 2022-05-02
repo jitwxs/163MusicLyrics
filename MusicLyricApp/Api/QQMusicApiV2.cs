@@ -65,16 +65,17 @@ namespace MusicLyricApp.Api
         {
             var resp = _api.GetLyric(songId);
 
-            if (resp.Code == 0)
+            if (resp.Code != 0)
             {
-                return new LyricVo
-                {
-                    Lyric = resp.lyric ?? string.Empty,
-                    TranslateLyric = resp.trans ?? string.Empty
-                };
+                throw new MusicLyricException(ErrorMsg.LRC_NOT_EXIST);
             }
-
-            throw new MusicLyricException(ErrorMsg.LRC_NOT_EXIST);
+            
+            var lyricVo = new LyricVo();
+            
+            lyricVo.SetLyric(resp.lyric);
+            lyricVo.SetTranslateLyric(resp.trans);
+           
+            return lyricVo;
         }
         
         /// <summary>

@@ -126,7 +126,7 @@ namespace MusicLyricApp
             // 
             this.OutputName_ComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.OutputName_ComboBox.FormattingEnabled = true;
-            this.OutputName_ComboBox.Items.AddRange(new object[] { "歌曲名 - 歌手", "歌手 - 歌曲名", "歌曲名" });
+            this.OutputName_ComboBox.Items.AddRange(GlobalUtils.GetEnumDescArray<OutputFilenameTypeEnum>());
             this.OutputName_ComboBox.Location = new System.Drawing.Point(101, 374);
             this.OutputName_ComboBox.Name = "OutputName_ComboBox";
             this.OutputName_ComboBox.Size = new System.Drawing.Size(101, 20);
@@ -137,7 +137,7 @@ namespace MusicLyricApp
             // 
             this.LrcType_ComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.LrcType_ComboBox.FormattingEnabled = true;
-            this.LrcType_ComboBox.Items.AddRange(new object[] { "不显示译文", "仅显示译文", "优先原文", "优先译文", "合并显示，优先原文", "合并显示，优先译文" });
+            this.LrcType_ComboBox.Items.AddRange(GlobalUtils.GetEnumDescArray<ShowLrcTypeEnum>());
             this.LrcType_ComboBox.Location = new System.Drawing.Point(89, 42);
             this.LrcType_ComboBox.Name = "LrcType_ComboBox";
             this.LrcType_ComboBox.Size = new System.Drawing.Size(120, 20);
@@ -198,10 +198,9 @@ namespace MusicLyricApp
             // 
             // OutputEncoding_ComboBox
             // 
-            this.OutputEncoding_ComboBox.AutoCompleteCustomSource.AddRange(new string[] { "UTF-8", "GB2312" });
             this.OutputEncoding_ComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.OutputEncoding_ComboBox.FormattingEnabled = true;
-            this.OutputEncoding_ComboBox.Items.AddRange(new object[] { "UTF-8", "UTF-8-BOM", "GB2312", "GBK", "UNICODE" });
+            this.OutputEncoding_ComboBox.Items.AddRange(GlobalUtils.GetEnumDescArray<OutputEncodingEnum>());
             this.OutputEncoding_ComboBox.Location = new System.Drawing.Point(100, 440);
             this.OutputEncoding_ComboBox.Name = "OutputEncoding_ComboBox";
             this.OutputEncoding_ComboBox.Size = new System.Drawing.Size(102, 20);
@@ -239,7 +238,7 @@ namespace MusicLyricApp
             // 
             this.SearchType_ComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.SearchType_ComboBox.FormattingEnabled = true;
-            this.SearchType_ComboBox.Items.AddRange(new object[] { "单曲", "专辑" });
+            this.SearchType_ComboBox.Items.AddRange(GlobalUtils.GetEnumDescArray<SearchTypeEnum>());
             this.SearchType_ComboBox.Location = new System.Drawing.Point(11, 81);
             this.SearchType_ComboBox.Name = "SearchType_ComboBox";
             this.SearchType_ComboBox.Size = new System.Drawing.Size(62, 20);
@@ -294,7 +293,7 @@ namespace MusicLyricApp
             // 
             this.Dot_TextBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.Dot_TextBox.FormattingEnabled = true;
-            this.Dot_TextBox.Items.AddRange(new object[] { "不开启", "截位", "四舍五入" });
+            this.Dot_TextBox.Items.AddRange(GlobalUtils.GetEnumDescArray<DotTypeEnum>());
             this.Dot_TextBox.Location = new System.Drawing.Point(298, 80);
             this.Dot_TextBox.Name = "Dot_TextBox";
             this.Dot_TextBox.Size = new System.Drawing.Size(71, 20);
@@ -334,7 +333,7 @@ namespace MusicLyricApp
             // 
             this.SearchSource_ComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.SearchSource_ComboBox.FormattingEnabled = true;
-            this.SearchSource_ComboBox.Items.AddRange(new object[] { "网易云", "QQ音乐" });
+            this.SearchSource_ComboBox.Items.AddRange(GlobalUtils.GetEnumDescArray<SearchSourceEnum>());
             this.SearchSource_ComboBox.Location = new System.Drawing.Point(11, 42);
             this.SearchSource_ComboBox.Name = "SearchSource_ComboBox";
             this.SearchSource_ComboBox.Size = new System.Drawing.Size(62, 20);

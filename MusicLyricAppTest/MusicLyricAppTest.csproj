@@ -31,10 +31,7 @@
         <Reference Include="System" />
     </ItemGroup>
     <ItemGroup>
-        <PackageReference Include="Costura.Fody" Version="5.8.0-alpha0098">
-          <PrivateAssets>all</PrivateAssets>
-          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-        </PackageReference>
+        <PackageReference Include="Kawazu" Version="1.1.4" />
         <PackageReference Include="Markdig" Version="0.28.1" />
         <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
         <PackageReference Include="NLog.Config" Version="4.7.15" />
@@ -45,6 +42,7 @@
       <Compile Include="Api\NetEaseMusicApiV2.cs" />
       <Compile Include="Api\QQMusicNativeApi.cs" />
       <Compile Include="Utils\GlobalUtils.cs" />
+      <Compile Include="Utils\SrtUtils.cs" />
     </ItemGroup>
     <ItemGroup>
       <ProjectReference Include="..\MusicLyricApp\MusicLyricApp.csproj">

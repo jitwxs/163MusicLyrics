@@ -75,11 +75,11 @@ namespace MusicLyricApp.Api
                 var lyricVo = new LyricVo();
                 if (resp.Lrc != null)
                 {
-                    lyricVo.Lyric = resp.Lrc.Lyric;
+                    lyricVo.SetLyric(resp.Lrc.Lyric);
                 }
                 if (resp.Tlyric != null)
                 {
-                    lyricVo.TranslateLyric = resp.Tlyric.Lyric;
+                    lyricVo.SetTranslateLyric(resp.Tlyric.Lyric);
                 }
 
                 return lyricVo;

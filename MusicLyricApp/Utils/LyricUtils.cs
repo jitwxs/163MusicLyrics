@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using MusicLyricApp.Bean;
 
 namespace MusicLyricApp.Utils
@@ -12,28 +12,16 @@ namespace MusicLyricApp.Utils
     public abstract class LyricUtils
     {
         /// <summary>
-        /// 填充歌词信息属性
-        /// </summary>
-        /// <param name="lyricVo"></param>
-        /// <param name="songVo"></param>
-        /// <param name="searchInfo"></param>
-        public static void FillingLyricVo(LyricVo lyricVo, SongVo songVo, SearchInfo searchInfo)
-        {
-            lyricVo.Duration = songVo.Duration;
-            lyricVo.Output = GetOutputContent(lyricVo, searchInfo);
-        }
-        
-        /// <summary>
         /// 获取输出结果
         /// </summary>
         /// <param name="lyricVo"></param>
         /// <param name="searchInfo"></param>
         /// <returns></returns>
-        public static string GetOutputContent(LyricVo lyricVo, SearchInfo searchInfo)
+        public static async Task<string> GetOutputContent(LyricVo lyricVo, SearchInfo searchInfo)
         {
-            var output = GenerateOutput(lyricVo.Lyric, lyricVo.TranslateLyric, searchInfo);
+            var output = await GenerateOutput(lyricVo.Lyric, lyricVo.TranslateLyric, searchInfo);
 
-            if (searchInfo.OutputFileFormat == OutputFormatEnum.SRT)
+            if (searchInfo.SettingBean.Param.OutputFileFormat == OutputFormatEnum.SRT)
             {
                 output = SrtUtils.LrcToSrt(output, lyricVo.Duration);
             }
@@ -48,19 +36,16 @@ namespace MusicLyricApp.Utils
         /// <param name="originTLyric">原始的译文内容</param>
         /// <param name="searchInfo">处理参数</param>
         /// <returns></returns>
-        private static string GenerateOutput(string originLyric, string originTLyric, SearchInfo searchInfo)
+        private static async Task<string> GenerateOutput(string originLyric, string originTLyric, SearchInfo searchInfo)
         {
-            // 歌词合并
-            var formatLyrics = FormatLyric(originLyric, originTLyric, searchInfo);
-
-            // 两位小数
-            SetTimeStamp2Dot(ref formatLyrics, searchInfo.DotType);
+            var formatLyrics = await FormatLyric(originLyric, originTLyric, searchInfo);
 
             var result = new StringBuilder();
             foreach (var i in formatLyrics)
             {
                 result.Append(i).Append(Environment.NewLine);
             }
+
             return result.ToString();
         }
 
@@ -71,207 +56,216 @@ namespace MusicLyricApp.Utils
         /// <param name="translateLrc">原始的译文内容</param>
         /// <param name="searchInfo">处理参数</param>
         /// <returns></returns>
-        private static string[] FormatLyric(string originLrc, string translateLrc, SearchInfo searchInfo)
+        private static async Task<List<LyricLineVo>> FormatLyric(string originLrc, string translateLrc, SearchInfo searchInfo)
         {
-            var showLrcType = searchInfo.ShowLrcType;
+            var showLrcType = searchInfo.SettingBean.Param.ShowLrcType;
+            var searchSource = searchInfo.SettingBean.Param.SearchSource;
+            var dotType = searchInfo.SettingBean.Param.DotType;
 
-            // 如果不存在翻译歌词，或者选择返回原歌词
-            var originLrcs = SplitLrc(originLrc);
-            if (string.IsNullOrEmpty(translateLrc) || showLrcType == ShowLrcTypeEnum.ONLY_ORIGIN)
+            var originLyrics = SplitLrc(originLrc, searchSource, dotType);
+
+            /*
+             * 1、原文歌词不存在
+             * 2、不存在翻译歌词
+             * 3、选择仅原歌词
+             */
+            if (originLyrics.Count == 0 || string.IsNullOrEmpty(translateLrc) ||
+                showLrcType == ShowLrcTypeEnum.ONLY_ORIGIN)
             {
-                return originLrcs;
+                return originLyrics;
             }
 
-            // 如果选择仅译文
-            var translateLrcs = SplitLrc(translateLrc);
-            if (showLrcType == ShowLrcTypeEnum.ONLY_TRANSLATE)
+            // 译文处理，启用罗马音进行转换，否则使用原始的译文
+            var romajiConfig = searchInfo.SettingBean.Config.RomajiConfig;
+            
+            var translateLyrics = SplitLrc(translateLrc, searchSource, dotType);
+
+            if (romajiConfig.Enable)
             {
-                return translateLrcs;
+                translateLyrics = await RomajiUtils.ToRomaji(originLyrics, translateLyrics, romajiConfig);
             }
 
-            string[] res = null;
+            /*
+             * 1、译文歌词不存在
+             * 2、选择仅译文歌词
+             */
+            if (translateLyrics.Count == 0 || showLrcType == ShowLrcTypeEnum.ONLY_TRANSLATE)
+            {
+                return translateLyrics;
+            }
+
+            List<LyricLineVo> res = null;
             switch (showLrcType)
             {
-                case ShowLrcTypeEnum.ORIGIN_PRIOR:
-                    res = SortLrc(originLrcs, translateLrcs, true);
+                case ShowLrcTypeEnum.ORIGIN_PRIOR_ISOLATED:
+                    res = originLyrics;
+                    res.AddRange(translateLyrics);
                     break;
-                case ShowLrcTypeEnum.TRANSLATE_PRIOR:
-                    res = SortLrc(originLrcs, translateLrcs, false);
+                case ShowLrcTypeEnum.TRANSLATE_PRIOR_ISOLATED:
+                    res = translateLyrics;
+                    res.AddRange(originLyrics);
                     break;
-                case ShowLrcTypeEnum.MERGE_ORIGIN:
-                    res = MergeLrc(originLrcs, translateLrcs, searchInfo.LrcMergeSeparator, true);
+                case ShowLrcTypeEnum.ORIGIN_PRIOR_STAGGER:
+                    res = SortLrc(originLyrics, translateLyrics, true);
                     break;
-                case ShowLrcTypeEnum.MERGE_TRANSLATE:
-                    res = MergeLrc(originLrcs, translateLrcs, searchInfo.LrcMergeSeparator, false);
+                case ShowLrcTypeEnum.TRANSLATE_PRIOR_STAGGER:
+                    res = SortLrc(originLyrics, translateLyrics, false);
+                    break;
+                case ShowLrcTypeEnum.ORIGIN_PRIOR_MERGE:
+                    res = MergeLrc(originLyrics, translateLyrics, searchInfo.SettingBean.Param.LrcMergeSeparator, true);
+                    break;
+                case ShowLrcTypeEnum.TRANSLATE_PRIOR_MERGE:
+                    res = MergeLrc(originLyrics, translateLyrics, searchInfo.SettingBean.Param.LrcMergeSeparator, false);
                     break;
             }
             return res;
         }
-        
+
         /**
-         * 将歌词切割为数组
+         * 切割歌词
          */
-        private static string[] SplitLrc(string lrc)
+        private static List<LyricLineVo> SplitLrc(string lrc, SearchSourceEnum searchSource, DotTypeEnum dotType)
         {
-            return lrc.Replace("\r\n", "\n").Split('\n').Where(s => !string.IsNullOrWhiteSpace(s)).ToArray();
+            // 换行符统一
+            var temp = lrc
+                .Replace("\r\n", "\n")
+                .Replace("\r", "")
+                .Split('\n');
+
+            var resultList = new List<LyricLineVo>();
+
+            foreach (var line in temp)
+            {
+                // 跳过空行
+                if (string.IsNullOrWhiteSpace(line))
+                {
+                    continue;
+                }
+
+                // QQ 音乐歌词正式开始标识符
+                if (searchSource == SearchSourceEnum.QQ_MUSIC && "[offset:0]".Equals(line))
+                {
+                    resultList.Clear();
+                    continue;
+                }
+
+                var lyricLineVo = new LyricLineVo(line);
+
+                SetTimeStamp2Dot(lyricLineVo, dotType);
+
+                // 跳过无效行
+                if (string.IsNullOrWhiteSpace(lyricLineVo.Content))
+                {
+                    continue;
+                }
+
+                resultList.Add(lyricLineVo);
+            }
+
+            return resultList;
         }
 
         /**
          * 双语歌词排序
          */
-        private static string[] SortLrc(string[] originLrcs, string[] translateLrcs, bool hasOriginLrcPrior)
+        private static List<LyricLineVo> SortLrc(List<LyricLineVo> originLyrics, List<LyricLineVo> translateLyrics, bool hasOriginLrcPrior)
         {
-            int lena = originLrcs.Length;
-            int lenb = translateLrcs.Length;
-            string[] c = new string[lena + lenb];
-            //分别代表数组a ,b , c 的索引
-            int i = 0, j = 0, k = 0;
+            int lenA = originLyrics.Count, lenB = translateLyrics.Count;
+            var c = new List<LyricLineVo>();
 
-            while (i < lena && j < lenb)
+            int i = 0, j = 0;
+
+            while (i < lenA && j < lenB)
             {
-                if (Compare(originLrcs[i], translateLrcs[j], hasOriginLrcPrior) == 1)
+                var compare = Compare(originLyrics[i], translateLyrics[j], hasOriginLrcPrior);
+                
+                if (compare > 0)
                 {
-                    c[k++] = translateLrcs[j++];
+                    c.Add(translateLyrics[j++]);
                 }
-                else if (Compare(originLrcs[i], translateLrcs[j], hasOriginLrcPrior) == -1)
+                else if (compare < 0)
                 {
-                    c[k++] = originLrcs[i++];
+                    c.Add(originLyrics[i++]);
                 }
                 else
                 {
-                    c[k++] = hasOriginLrcPrior ? originLrcs[i++] : translateLrcs[j++];
+                    c.Add(hasOriginLrcPrior ? originLyrics[i++] : translateLyrics[j++]);
                 }
             }
 
-            while (i < lena)
-                c[k++] = originLrcs[i++];
-            while (j < lenb)
-                c[k++] = translateLrcs[j++];
+            while (i < lenA)
+                c.Add(originLyrics[i++]);
+            while (j < lenB)
+                c.Add(translateLyrics[j++]);
             return c;
         }
 
         /**
          * 双语歌词合并
          */
-        private static string[] MergeLrc(string[] originLrcs, string[] translateLrcs, string splitStr, bool hasOriginLrcPrior)
+        private static List<LyricLineVo> MergeLrc(List<LyricLineVo> originLrcs, List<LyricLineVo> translateLrcs, string splitStr, bool hasOriginLrcPrior)
         {
-            string[] c = SortLrc(originLrcs, translateLrcs, hasOriginLrcPrior);
-            List<string> list = new List<string>
+            var c = SortLrc(originLrcs, translateLrcs, hasOriginLrcPrior);
+            
+            var list = new List<LyricLineVo>
             {
                 c[0]
             };
 
-            for (int i = 1; i < c.Length; i++)
+            for (var i = 1; i < c.Count - 1; i++)
             {
-                int str1Index = c[i - 1].IndexOf("]") + 1;
-                int str2Index = c[i].IndexOf("]") + 1;
-                string str1Timestamp = c[i - 1].Substring(0, str1Index);
-                string str2Timestamp = c[i].Substring(0, str2Index);
-                if (str1Timestamp != str2Timestamp)
+                if (c[i].TimeOffset != c[i + 1].TimeOffset)
                 {
                     list.Add(c[i]);
                 }
                 else
                 {
-                    int index = list.Count - 1;
-                    string subStr1 = list[index];
-                    string subStr2 = c[i].Substring(str2Index);
+                    var index = list.Count - 1;
 
-                    // Fix: https://github.com/jitwxs/Application/issues/7
-                    if (string.IsNullOrEmpty(subStr1) || string.IsNullOrEmpty(subStr2))
-                    {
-                        list[index] = subStr1 + subStr2;
-                    }
-                    else
-                    {
-                        list[index] = subStr1 + splitStr + subStr2;
-                    }
+                    list[index].Content = list[index].Content + splitStr + c[i].Content;
                 }
             }
 
-            return list.ToArray();
+            return list;
         }
 
         /**
          * 歌词排序函数
          */
-        private static int Compare(string originLrc, string translateLrc, bool hasOriginLrcPrior)
+        private static int Compare(LyricLineVo originLrc, LyricLineVo translateLrc, bool hasOriginLrcPrior)
         {
-            int str1Index = originLrc.IndexOf("]");
-            string str1Timestamp = originLrc.Substring(0, str1Index + 1);
-            int str2Index = translateLrc.IndexOf("]");
-            string str2Timestamp = translateLrc.Substring(0, str2Index + 1);
+            var compareTo = originLrc.CompareTo(translateLrc);
 
-            // Fix: https://github.com/jitwxs/Application/issues/8
-            if (string.IsNullOrEmpty(str1Timestamp) || string.IsNullOrEmpty(str2Timestamp))
-            {
-                return 1;
-            }
-
-            if (str1Timestamp != str2Timestamp)
-            {
-                str1Timestamp = str1Timestamp.Substring(1, str1Timestamp.Length - 2);
-                str2Timestamp = str2Timestamp.Substring(1, str2Timestamp.Length - 2);
-                string[] t1s = str1Timestamp.Split(':');
-                string[] t2s = str2Timestamp.Split(':');
-                for (int i = 0; i < t1s.Length; i++)
-                {
-                    if (double.TryParse(t1s[i], out double t1))
-                    {
-                        if (double.TryParse(t2s[i], out double t2))
-                        {
-                            if (t1 > t2)
-                                return 1;
-                            else if (t1 < t2)
-                                return -1;
-                        }
-                        else
-                        {
-                            return 1;
-                        }
-                    }
-                    else
-                    {
-                        return -1;
-                    }
-                }
-
-                return 0;
-            }
-            else
+            if (compareTo == 0)
             {
                 return hasOriginLrcPrior ? -1 : 1;
             }
+
+            return compareTo;
         }
-        
+
         /**
          * 设置时间戳小数位数
          */
-        private static void SetTimeStamp2Dot(ref string[] lrcStr, DotTypeEnum dotTypeEnum)
+        private static void SetTimeStamp2Dot(LyricLineVo vo, DotTypeEnum dotTypeEnum)
         {
-            for (int i = 0; i < lrcStr.Length; i++)
+            if (dotTypeEnum == DotTypeEnum.DISABLE)
             {
-                int index = lrcStr[i].IndexOf("]");
-                int dot = lrcStr[i].IndexOf(".");
-                if (index == -1 || dot == -1)
-                {
-                    continue;
-                }
-
-                string ms = lrcStr[i].Substring(dot + 1, index - dot - 1);
-                if (ms.Length == 3)
-                {
-                    if (dotTypeEnum == DotTypeEnum.DOWN)
-                    {
-                        ms = ms.Substring(0, 2);
-                    }
-                    else if (dotTypeEnum == DotTypeEnum.HALF_UP)
-                    {
-                        ms = Convert.ToDouble("0." + ms).ToString("0.00").Substring(2);
-                    }
-                }
-                lrcStr[i] = lrcStr[i].Substring(0, dot) + "." + ms + lrcStr[i].Substring(index);
+                return;
             }
+            
+            var round = vo.TimeOffset % 1000 / 100;
+            if (round > 0 && dotTypeEnum == DotTypeEnum.HALF_UP)
+            {
+                round = round >= 5 ? 1 : 0;
+            }
+
+            if (round == 1)
+            {
+                vo.TimeOffset = (vo.TimeOffset / 10 + round) * 10;
+            }
+
+            vo.Timestamp = GlobalUtils.TimestampLongToStr(vo.TimeOffset, "00");
         }
     }
 }
