@@ -411,7 +411,7 @@ namespace MusicLyricApp
         /**
          * 单个保存
          */
-        private void SingleSave(string songId)
+        private async void SingleSave(string songId)
         {
             // 没有搜索结果
             if (!_globalSaveVoMap.TryGetValue(songId, out var saveVo))
@@ -437,11 +437,11 @@ namespace MusicLyricApp
                     using (var sw = new StreamWriter(saveDialog.FileName, false,
                                GlobalUtils.GetEncoding(_globalSearchInfo.SettingBean.Param.Encoding)))
                     {
-                        sw.Write(LyricUtils.GetOutputContent(saveVo.LyricVo, _globalSearchInfo));
-                        sw.Flush();
+                        await sw.WriteAsync(await LyricUtils.GetOutputContent(saveVo.LyricVo, _globalSearchInfo));
+                        await sw.FlushAsync();
                     }
 
-                    MessageBox.Show(string.Format(ErrorMsg.SAVE_COMPLETE, 1, 1), "提示");
+                    MessageBox.Show(string.Format(ErrorMsg.SAVE_COMPLETE, 1, 0), "提示");
                 }
             }
             catch (System.Exception ew)
@@ -454,7 +454,7 @@ namespace MusicLyricApp
         /**
          * 批量保存
          */
-        private void BatchSave()
+        private async void BatchSave()
         {
             var saveDialog = new SaveFileDialog();
             var skipCount = 0;
@@ -484,10 +484,10 @@ namespace MusicLyricApp
                         }
 
                         var path = filePath + '/' + GlobalUtils.GetOutputName(saveVo.SongVo, _globalSearchInfo.SettingBean.Param.OutputFileNameType) + fileSuffix;
-                        using( var sw = new StreamWriter(path, false, GlobalUtils.GetEncoding(_globalSearchInfo.SettingBean.Param.Encoding)))
+                        using(var sw = new StreamWriter(path, false, GlobalUtils.GetEncoding(_globalSearchInfo.SettingBean.Param.Encoding)))
                         {
-                            sw.Write(LyricUtils.GetOutputContent(lyricVo, _globalSearchInfo));
-                            sw.Flush();
+                            await sw.WriteAsync(await LyricUtils.GetOutputContent(lyricVo, _globalSearchInfo));
+                            await sw.FlushAsync();
                             success.Add(item.Key);
                         }
                     }
