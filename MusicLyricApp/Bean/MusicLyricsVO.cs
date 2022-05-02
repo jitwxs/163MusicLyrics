@@ -32,7 +32,7 @@ namespace MusicLyricApp.Bean
     // 搜索来源
     public enum SearchSourceEnum
     {
-        [Description("网易云音乐")] NET_EASE_MUSIC = 0,
+        [Description("网易云")] NET_EASE_MUSIC = 0,
         [Description("QQ音乐")] QQ_MUSIC = 1
     }
 
