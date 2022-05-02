@@ -1,4 +1,6 @@
 ﻿using System;
+using System.IO;
+using System.Linq;
 using System.Windows.Forms;
 using MusicLyricApp.Bean;
 
@@ -46,6 +48,14 @@ namespace MusicLyricApp
 
         private void ShowRomajiChangeListener(bool isEnable)
         {
+            // 检查依赖
+            if (isEnable && Constants.IpaDicDependency.Any(e => !File.Exists(e)))
+            {
+                MessageBox.Show(ErrorMsg.ROMAJI_DEPENDENCY_LOSS, "提示");
+                ShowRomaji_CheckBox.Checked = false;
+                ShowRomajiChangeListener(ShowRomaji_CheckBox.Checked);
+            }
+            
             RomajiMode_ComboBox.Enabled = isEnable;
             RomajiSystem_ComboBox.Enabled = isEnable;
         }
