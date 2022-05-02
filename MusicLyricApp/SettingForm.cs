@@ -51,7 +51,7 @@ namespace MusicLyricApp
             // 检查依赖
             if (isEnable && Constants.IpaDicDependency.Any(e => !File.Exists(e)))
             {
-                MessageBox.Show(ErrorMsg.ROMAJI_DEPENDENCY_LOSS, "提示");
+                MessageBox.Show(string.Format(ErrorMsg.DEPENDENCY_LOSS, "IpaDic"), "提示");
                 ShowRomaji_CheckBox.Checked = false;
 
                 isEnable = false;

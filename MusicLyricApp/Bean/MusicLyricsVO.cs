@@ -101,7 +101,7 @@ namespace MusicLyricApp.Bean
         public const string FUNCTION_NOT_SUPPORT = "该功能暂不可用，请等待后续更新";
         public const string SONG_URL_COPY_SUCCESS = "歌曲直链，已复制到剪切板";
         public const string SONG_URL_GET_FAILED = "歌曲直链，获取失败";
-        public const string ROMAJI_DEPENDENCY_LOSS = "罗马音相关依赖缺失，请重新下载";
+        public const string DEPENDENCY_LOSS = "缺少必须依赖，请前往项目主页下载 {0} 插件";
         public const string SAVE_COMPLETE = "保存完毕，成功 {0} 跳过 {1}";
 
         public const string GET_LATEST_VERSION_FAILED = "获取最新版本失败";
