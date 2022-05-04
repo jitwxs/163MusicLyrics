@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Text;
 using System.Web;
 using MusicLyricApp.Exception;
 using MusicLyricApp.Utils;
@@ -196,51 +197,62 @@ namespace MusicLyricApp.Bean
             return string.IsNullOrEmpty(Lyric) && string.IsNullOrEmpty(TranslateLyric);
         }
     }
-    
-    /// <summary>
-    /// 当行歌词信息
-    /// </summary>
-    public class LyricLineVo : IComparable
+
+    public class LyricTimestamp : IComparable
     {
-        /// <summary>
-        /// 时间戳字符串
-        /// </summary>
-        public string Timestamp { get; set; }
+        public int Minute { get; private set; }
 
-        /**
-         * 时间偏移量
-         */
-        public long TimeOffset { get; set; }
+        public string MinuteS { get; private set; }
         
-        /// <summary>
-        /// 歌词正文
-        /// </summary>
-        public string Content { get; set; }
+        public int Second { get; private set; }
 
-        public LyricLineVo(string lyricLine)
+        public string SecondS { get; private set; }
+        
+        public int Millisecond { get; private set; }
+
+        public string MillisecondS { get; private set; }
+        
+        public int TimeOffset { get;}
+        
+        public LyricTimestamp(string timestamp = "")
         {
-            var index = lyricLine.IndexOf("]");
-            if (index == -1)
+            if (string.IsNullOrWhiteSpace(timestamp) || timestamp[0] != '[' || timestamp[timestamp.Length - 1] != ']')
             {
-                Timestamp = "";
-                TimeOffset = -1;
-                Content = lyricLine;
+                // 不支持的格式
             }
             else
             {
-                Timestamp = lyricLine.Substring(0, index + 1);
-                Content = lyricLine.Substring(index + 1);
-                TimeOffset = GlobalUtils.TimestampStrToLong(Timestamp);
-            }
-        }
+                timestamp = timestamp.Substring(1, timestamp.Length - 2);
 
-        public LyricLineVo()
+                var split = timestamp.Split(':');
+
+                Minute = GlobalUtils.toInt(split[0], 0);
+            
+                split = split[1].Split('.');
+
+                Second = GlobalUtils.toInt(split[0], 0);
+
+                if (split.Length > 1)
+                {
+                    Millisecond = GlobalUtils.toInt(split[1], 0);
+                }
+            }
+            
+            UpdateMinute(Minute);
+            UpdateSecond(Second);
+            UpdateMillisecond(Millisecond);
+
+            TimeOffset = (Minute * 60 + Second) * 1000 + Millisecond;
+        }
+        
+        public override string ToString()
         {
+            return "[" + MinuteS + ":" + SecondS + "." + MillisecondS + "]";
         }
 
         public int CompareTo(object input)
         {
-            if (!(input is LyricLineVo obj))
+            if (!(input is LyricTimestamp obj))
             {
                 throw new MusicLyricException(ErrorMsg.SYSTEM_ERROR);
             }
@@ -260,7 +272,65 @@ namespace MusicLyricApp.Bean
                 return 1;
             }
 
-            return (int) (TimeOffset - obj.TimeOffset);
+            return TimeOffset - obj.TimeOffset;
+        }
+        
+        private void UpdateMinute(int value)
+        {
+            Minute = value;
+            MinuteS = value.ToString("00");
+        }
+        
+        private void UpdateSecond(int value)
+        {
+            Second = value;
+            SecondS = value.ToString("00");
+        }
+
+        public void UpdateMillisecond(int value, int scale = 3)
+        {
+            var format = new StringBuilder().Insert(0, "0", scale).ToString(); 
+            
+            Millisecond = value;
+            MillisecondS = Millisecond.ToString(format);
+        }
+    }
+    
+    /// <summary>
+    /// 当行歌词信息
+    /// </summary>
+    public class LyricLineVo : IComparable
+    {
+        public LyricTimestamp Timestamp { get; set; }
+        
+        /// <summary>
+        /// 歌词正文
+        /// </summary>
+        public string Content { get; set; }
+
+        public LyricLineVo(string lyricLine = "")
+        {
+            var index = lyricLine.IndexOf("]");
+            if (index == -1)
+            {
+                Timestamp = new LyricTimestamp("");
+                Content = lyricLine;
+            }
+            else
+            {
+                Timestamp = new LyricTimestamp(lyricLine.Substring(0, index + 1));
+                Content = lyricLine.Substring(index + 1);
+            }
+        }
+
+        public int CompareTo(object input)
+        {
+            if (!(input is LyricLineVo obj))
+            {
+                throw new MusicLyricException(ErrorMsg.SYSTEM_ERROR);
+            }
+
+            return Timestamp.CompareTo(obj.Timestamp);
         }
 
         /// <summary>

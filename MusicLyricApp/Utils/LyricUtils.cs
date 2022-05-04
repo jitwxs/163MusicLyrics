@@ -151,7 +151,7 @@ namespace MusicLyricApp.Utils
                     continue;
                 }
 
-                SetTimeStamp2Dot(lyricLineVo, dotType);
+                SetMillisecondScale(lyricLineVo, dotType, 2);
 
                 resultList.Add(lyricLineVo);
             }
@@ -208,15 +208,15 @@ namespace MusicLyricApp.Utils
 
             for (var i = 1; i < c.Count; i++)
             {
-                if (c[i - 1].TimeOffset != c[i].TimeOffset)
-                {
-                    list.Add(c[i]);
-                }
-                else
+                if (c[i - 1].Timestamp.TimeOffset == c[i].Timestamp.TimeOffset)
                 {
                     var index = list.Count - 1;
 
                     list[index].Content = list[index].Content + splitStr + c[i].Content;
+                }
+                else
+                {
+                    list.Add(c[i]);
                 }
             }
 
@@ -239,27 +239,39 @@ namespace MusicLyricApp.Utils
         }
 
         /**
-         * 设置时间戳小数位数
+         * 设置毫秒位数
          */
-        private static void SetTimeStamp2Dot(LyricLineVo vo, DotTypeEnum dotTypeEnum)
+        public static void SetMillisecondScale(LyricLineVo vo, DotTypeEnum dotTypeEnum, int scale)
         {
             if (dotTypeEnum == DotTypeEnum.DISABLE)
             {
                 return;
             }
+
+            var timestamp = vo.Timestamp;
+
+            if (timestamp.MillisecondS.Length <= scale)
+            {
+                return;
+            }
+
+            var millisecond = timestamp.Millisecond;
             
-            var round = vo.TimeOffset % 1000 / 100;
-            if (round > 0 && dotTypeEnum == DotTypeEnum.HALF_UP)
+            if (millisecond > 100)
             {
-                round = round >= 5 ? 1 : 0;
+                var round = 0;
+                if (dotTypeEnum == DotTypeEnum.HALF_UP)
+                {
+                    if (millisecond % 10 >= 5)
+                    {
+                        round = 1;
+                    }
+                }
+
+                millisecond = millisecond / 10 + round;
             }
 
-            if (round == 1)
-            {
-                vo.TimeOffset = (vo.TimeOffset / 10 + round) * 10;
-            }
-
-            vo.Timestamp = GlobalUtils.TimestampLongToStr(vo.TimeOffset, "00");
+            timestamp.UpdateMillisecond(millisecond, scale);
         }
     }
 }

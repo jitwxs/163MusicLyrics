@@ -26,8 +26,7 @@ namespace MusicLyricApp.Utils
                     resultList.Add(new LyricLineVo
                     {
                         Content = content,
-                        Timestamp = vo.Timestamp,
-                        TimeOffset = vo.TimeOffset
+                        Timestamp = vo.Timestamp
                     });
                 }
 
