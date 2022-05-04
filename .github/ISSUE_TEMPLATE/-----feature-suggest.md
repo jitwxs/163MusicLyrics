@@ -3,7 +3,7 @@ name: 功能建议 Feature Suggest
 about: Suggest an idea for this project
 title: ''
 labels: enhancement
-assignees: jitwxs
+assignees: ''
 
 ---
 
