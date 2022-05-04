@@ -136,12 +136,6 @@ namespace MusicLyricApp.Utils
 
             foreach (var line in temp)
             {
-                // 跳过空行
-                if (string.IsNullOrWhiteSpace(line))
-                {
-                    continue;
-                }
-
                 // QQ 音乐歌词正式开始标识符
                 if (searchSource == SearchSourceEnum.QQ_MUSIC && "[offset:0]".Equals(line))
                 {
@@ -150,14 +144,14 @@ namespace MusicLyricApp.Utils
                 }
 
                 var lyricLineVo = new LyricLineVo(line);
-
-                SetTimeStamp2Dot(lyricLineVo, dotType);
-
-                // 跳过无效行
-                if (string.IsNullOrWhiteSpace(lyricLineVo.Content))
+                
+                // 跳过无效内容
+                if (lyricLineVo.IsIllegalContent())
                 {
                     continue;
                 }
+
+                SetTimeStamp2Dot(lyricLineVo, dotType);
 
                 resultList.Add(lyricLineVo);
             }
@@ -212,9 +206,9 @@ namespace MusicLyricApp.Utils
                 c[0]
             };
 
-            for (var i = 1; i < c.Count - 1; i++)
+            for (var i = 1; i < c.Count; i++)
             {
-                if (c[i].TimeOffset != c[i + 1].TimeOffset)
+                if (c[i - 1].TimeOffset != c[i].TimeOffset)
                 {
                     list.Add(c[i]);
                 }
@@ -238,7 +232,7 @@ namespace MusicLyricApp.Utils
 
             if (compareTo == 0)
             {
-                return hasOriginLrcPrior ? -1 : 1;
+                return hasOriginLrcPrior ? 1 : -1;
             }
 
             return compareTo;

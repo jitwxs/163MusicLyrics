@@ -26,17 +26,15 @@ namespace MusicLyricApp.Bean
         {
             public long Code { get; set; }
 
-            public string lyric { get; set; }
+            public string Lyric { get; set; }
 
-            public string trans { get; set; }
+            public string Trans { get; set; }
 
             public LyricResult Decode()
             {
-                var decode = Encoding.UTF8.GetString(Convert.FromBase64String(lyric));
-                lyric = Regex.Replace(decode, "\n", "\r\n");
+                Lyric = Encoding.UTF8.GetString(Convert.FromBase64String(Lyric));
 
-                decode = Encoding.UTF8.GetString(Convert.FromBase64String(trans));
-                trans = Regex.Replace(decode, "\n", "\r\n");
+                Trans = Encoding.UTF8.GetString(Convert.FromBase64String(Trans));
 
                 return this;
             }

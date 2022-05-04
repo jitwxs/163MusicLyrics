@@ -263,6 +263,24 @@ namespace MusicLyricApp.Bean
             return (int) (TimeOffset - obj.TimeOffset);
         }
 
+        /// <summary>
+        /// 是否是无效的内容
+        /// </summary>
+        public bool IsIllegalContent()
+        {
+            if (string.IsNullOrWhiteSpace(Content))
+            {
+                return true;
+            }
+
+            if ("//".Equals(Content))
+            {
+                return true;
+            }
+
+            return false;
+        }
+        
         public override string ToString()
         {
             return Timestamp + Content;

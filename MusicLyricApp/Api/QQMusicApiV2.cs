@@ -72,8 +72,8 @@ namespace MusicLyricApp.Api
             
             var lyricVo = new LyricVo();
             
-            lyricVo.SetLyric(resp.lyric);
-            lyricVo.SetTranslateLyric(resp.trans);
+            lyricVo.SetLyric(resp.Lyric);
+            lyricVo.SetTranslateLyric(resp.Trans);
            
             return lyricVo;
         }
