@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Linq;
 using System.Threading.Tasks;
 using MusicLyricApp.Bean;
 
@@ -19,34 +19,16 @@ namespace MusicLyricApp.Utils
         /// <returns></returns>
         public static async Task<string> GetOutputContent(LyricVo lyricVo, SearchInfo searchInfo)
         {
-            var output = await GenerateOutput(lyricVo.Lyric, lyricVo.TranslateLyric, searchInfo);
+            var voList = await FormatLyric(lyricVo.Lyric, lyricVo.TranslateLyric, searchInfo);
 
             if (searchInfo.SettingBean.Param.OutputFileFormat == OutputFormatEnum.SRT)
             {
-                output = SrtUtils.LrcToSrt(output, lyricVo.Duration);
+                return SrtUtils.LrcToSrt(voList, lyricVo.Duration);
             }
-
-            return output;
-        }
-
-        /// <summary>
-        /// 生成输出结果
-        /// </summary>
-        /// <param name="originLyric">原始的歌词内容</param>
-        /// <param name="originTLyric">原始的译文内容</param>
-        /// <param name="searchInfo">处理参数</param>
-        /// <returns></returns>
-        private static async Task<string> GenerateOutput(string originLyric, string originTLyric, SearchInfo searchInfo)
-        {
-            var formatLyrics = await FormatLyric(originLyric, originTLyric, searchInfo);
-
-            var result = new StringBuilder();
-            foreach (var i in formatLyrics)
+            else
             {
-                result.Append(i).Append(Environment.NewLine);
+                return string.Join(Environment.NewLine,  from o in voList select o.ToString());
             }
-
-            return result.ToString();
         }
 
         /// <summary>
@@ -232,7 +214,7 @@ namespace MusicLyricApp.Utils
 
             if (compareTo == 0)
             {
-                return hasOriginLrcPrior ? 1 : -1;
+                return hasOriginLrcPrior ? -1 : 1;
             }
 
             return compareTo;

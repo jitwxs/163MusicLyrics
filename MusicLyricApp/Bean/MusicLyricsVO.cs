@@ -200,21 +200,38 @@ namespace MusicLyricApp.Bean
 
     public class LyricTimestamp : IComparable
     {
-        public int Minute { get; private set; }
+        public long Minute { get; private set; }
 
         public string MinuteS { get; private set; }
         
-        public int Second { get; private set; }
+        public long Second { get; private set; }
 
         public string SecondS { get; private set; }
         
-        public int Millisecond { get; private set; }
+        public long Millisecond { get; private set; }
 
         public string MillisecondS { get; private set; }
         
-        public int TimeOffset { get;}
+        public long TimeOffset { get;}
+
+        public LyricTimestamp(long millisecond)
+        {
+            TimeOffset = millisecond;
+            
+            Millisecond = millisecond % 1000;
+
+            millisecond /= 1000;
+
+            Second = millisecond % 60;
+
+            Minute = millisecond / 60;
+            
+            UpdateMinute(Minute);
+            UpdateSecond(Second);
+            UpdateMillisecond(Millisecond);
+        }
         
-        public LyricTimestamp(string timestamp = "")
+        public LyricTimestamp(string timestamp)
         {
             if (string.IsNullOrWhiteSpace(timestamp) || timestamp[0] != '[' || timestamp[timestamp.Length - 1] != ']')
             {
@@ -245,9 +262,16 @@ namespace MusicLyricApp.Bean
             TimeOffset = (Minute * 60 + Second) * 1000 + Millisecond;
         }
         
-        public override string ToString()
+        public string ToString(OutputFormatEnum outputFormat)
         {
-            return "[" + MinuteS + ":" + SecondS + "." + MillisecondS + "]";
+            if (outputFormat == OutputFormatEnum.LRC)
+            {
+                return "[" + MinuteS + ":" + SecondS + "." + MillisecondS + "]";
+            }
+            else
+            {
+                return "00:" + MinuteS + ":" + SecondS + "," + MillisecondS;
+            }
         }
 
         public int CompareTo(object input)
@@ -257,7 +281,7 @@ namespace MusicLyricApp.Bean
                 throw new MusicLyricException(ErrorMsg.SYSTEM_ERROR);
             }
             
-            if (TimeOffset == -1 && obj.TimeOffset == -1)
+            if (TimeOffset == obj.TimeOffset)
             {
                 return 0;
             }
@@ -272,22 +296,29 @@ namespace MusicLyricApp.Bean
                 return 1;
             }
 
-            return TimeOffset - obj.TimeOffset;
+            if (TimeOffset > obj.TimeOffset)
+            {
+                return 1;
+            }
+            else
+            {
+                return -1;
+            }
         }
         
-        private void UpdateMinute(int value)
+        private void UpdateMinute(long value)
         {
             Minute = value;
             MinuteS = value.ToString("00");
         }
         
-        private void UpdateSecond(int value)
+        private void UpdateSecond(long value)
         {
             Second = value;
             SecondS = value.ToString("00");
         }
 
-        public void UpdateMillisecond(int value, int scale = 3)
+        public void UpdateMillisecond(long value, int scale = 3)
         {
             var format = new StringBuilder().Insert(0, "0", scale).ToString(); 
             
@@ -353,7 +384,7 @@ namespace MusicLyricApp.Bean
         
         public override string ToString()
         {
-            return Timestamp + Content;
+            return Timestamp.ToString(OutputFormatEnum.LRC) + Content;
         }
     }
 
