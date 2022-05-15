@@ -12,7 +12,7 @@ namespace MusicLyricAppTest.Bean
             // 空数据 && 不合法
             foreach (var scenario in new[]
                      {
-                         new LyricTimestamp(), 
+                         new LyricTimestamp(""), 
                          new LyricTimestamp("[12131"),
                          new LyricTimestamp("-1]")
                      })
