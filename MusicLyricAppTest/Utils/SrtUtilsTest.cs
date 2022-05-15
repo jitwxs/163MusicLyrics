@@ -7,7 +7,7 @@ using NUnit.Framework;
 namespace MusicLyricAppTest.Utils
 {
     [TestFixture]
-    public class SrtUtils
+    public class SrtUtilsTest
     {
         [Test]
         public void TestJapaneseLanguageJudge()

@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Linq;
 using System.Threading.Tasks;
 using MusicLyricApp.Bean;
 
@@ -19,34 +19,16 @@ namespace MusicLyricApp.Utils
         /// <returns></returns>
         public static async Task<string> GetOutputContent(LyricVo lyricVo, SearchInfo searchInfo)
         {
-            var output = await GenerateOutput(lyricVo.Lyric, lyricVo.TranslateLyric, searchInfo);
+            var voList = await FormatLyric(lyricVo.Lyric, lyricVo.TranslateLyric, searchInfo);
 
             if (searchInfo.SettingBean.Param.OutputFileFormat == OutputFormatEnum.SRT)
             {
-                output = SrtUtils.LrcToSrt(output, lyricVo.Duration);
+                return SrtUtils.LrcToSrt(voList, lyricVo.Duration);
             }
-
-            return output;
-        }
-
-        /// <summary>
-        /// 生成输出结果
-        /// </summary>
-        /// <param name="originLyric">原始的歌词内容</param>
-        /// <param name="originTLyric">原始的译文内容</param>
-        /// <param name="searchInfo">处理参数</param>
-        /// <returns></returns>
-        private static async Task<string> GenerateOutput(string originLyric, string originTLyric, SearchInfo searchInfo)
-        {
-            var formatLyrics = await FormatLyric(originLyric, originTLyric, searchInfo);
-
-            var result = new StringBuilder();
-            foreach (var i in formatLyrics)
+            else
             {
-                result.Append(i).Append(Environment.NewLine);
+                return string.Join(Environment.NewLine,  from o in voList select o.ToString());
             }
-
-            return result.ToString();
         }
 
         /// <summary>
@@ -136,12 +118,6 @@ namespace MusicLyricApp.Utils
 
             foreach (var line in temp)
             {
-                // 跳过空行
-                if (string.IsNullOrWhiteSpace(line))
-                {
-                    continue;
-                }
-
                 // QQ 音乐歌词正式开始标识符
                 if (searchSource == SearchSourceEnum.QQ_MUSIC && "[offset:0]".Equals(line))
                 {
@@ -150,14 +126,14 @@ namespace MusicLyricApp.Utils
                 }
 
                 var lyricLineVo = new LyricLineVo(line);
-
-                SetTimeStamp2Dot(lyricLineVo, dotType);
-
-                // 跳过无效行
-                if (string.IsNullOrWhiteSpace(lyricLineVo.Content))
+                
+                // 跳过无效内容
+                if (lyricLineVo.IsIllegalContent())
                 {
                     continue;
                 }
+
+                SetMillisecondScale(lyricLineVo, dotType, 2);
 
                 resultList.Add(lyricLineVo);
             }
@@ -212,17 +188,17 @@ namespace MusicLyricApp.Utils
                 c[0]
             };
 
-            for (var i = 1; i < c.Count - 1; i++)
+            for (var i = 1; i < c.Count; i++)
             {
-                if (c[i].TimeOffset != c[i + 1].TimeOffset)
-                {
-                    list.Add(c[i]);
-                }
-                else
+                if (c[i - 1].Timestamp.TimeOffset == c[i].Timestamp.TimeOffset)
                 {
                     var index = list.Count - 1;
 
                     list[index].Content = list[index].Content + splitStr + c[i].Content;
+                }
+                else
+                {
+                    list.Add(c[i]);
                 }
             }
 
@@ -245,27 +221,39 @@ namespace MusicLyricApp.Utils
         }
 
         /**
-         * 设置时间戳小数位数
+         * 设置毫秒位数
          */
-        private static void SetTimeStamp2Dot(LyricLineVo vo, DotTypeEnum dotTypeEnum)
+        public static void SetMillisecondScale(LyricLineVo vo, DotTypeEnum dotTypeEnum, int scale)
         {
             if (dotTypeEnum == DotTypeEnum.DISABLE)
             {
                 return;
             }
+
+            var timestamp = vo.Timestamp;
+
+            if (timestamp.MillisecondS.Length <= scale)
+            {
+                return;
+            }
+
+            var millisecond = timestamp.Millisecond;
             
-            var round = vo.TimeOffset % 1000 / 100;
-            if (round > 0 && dotTypeEnum == DotTypeEnum.HALF_UP)
+            if (millisecond > 100)
             {
-                round = round >= 5 ? 1 : 0;
+                var round = 0;
+                if (dotTypeEnum == DotTypeEnum.HALF_UP)
+                {
+                    if (millisecond % 10 >= 5)
+                    {
+                        round = 1;
+                    }
+                }
+
+                millisecond = millisecond / 10 + round;
             }
 
-            if (round == 1)
-            {
-                vo.TimeOffset = (vo.TimeOffset / 10 + round) * 10;
-            }
-
-            vo.Timestamp = GlobalUtils.TimestampLongToStr(vo.TimeOffset, "00");
+            timestamp.UpdateMillisecond(millisecond, scale);
         }
     }
 }
