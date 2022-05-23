@@ -90,7 +90,7 @@ namespace MusicLyricApp.Utils
                     }
                 }
 
-                if (i < inputList.Count - 1)
+                if (i < inputList.Count)
                 {
                     var lastVo = inputList[inputList.Count - 1];
                     AddLine(lastVo.Timestamp, durationTimestamp, lastVo.Content);
