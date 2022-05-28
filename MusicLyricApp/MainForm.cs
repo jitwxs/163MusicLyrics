@@ -166,7 +166,7 @@ namespace MusicLyricApp
                     {
                         var name = info.Name;
 
-                        if (name.EndsWith(info.Extension))
+                        if (!string.IsNullOrWhiteSpace(info.Extension) && name.EndsWith(info.Extension))
                         {
                             name = name.Remove(name.Length - info.Extension.Length);
                         }
