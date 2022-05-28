@@ -127,12 +127,7 @@ namespace MusicLyricApp
         /// </summary>
         private void ReloadConfig()
         {
-            var ids = Search_Text.Text.Trim().Split(',');
-            _globalSearchInfo.InputIds = new string[ids.Length];
-            for (var i = 0; i < ids.Length; i++)
-            {
-                _globalSearchInfo.InputIds[i] = ids[i].Trim();
-            }
+            ReloadInputIdText();
 
             _globalSearchInfo.SongIds.Clear();
             
@@ -147,6 +142,52 @@ namespace MusicLyricApp
             else
             {
                 _api = new NetEaseMusicApiV2();
+            }
+        }
+
+        private void ReloadInputIdText()
+        {
+            var inputText = Search_Text.Text.Trim();
+            
+            // 判断是否是目录
+            if (Directory.Exists(inputText))
+            {
+                var subFileNameList = new List<string>();
+                
+                var directoryInfo = new DirectoryInfo(inputText);
+                foreach (var info in directoryInfo.GetFileSystemInfos())
+                {
+                    if (info is DirectoryInfo)
+                    {
+                        // 文件夹，跳过处理，不做递归
+                        continue;
+                    }
+                    else
+                    {
+                        var name = info.Name;
+
+                        if (!string.IsNullOrWhiteSpace(info.Extension) && name.EndsWith(info.Extension))
+                        {
+                            name = name.Remove(name.Length - info.Extension.Length);
+                        }
+
+                        name = name.Trim();
+                        
+                        subFileNameList.Add(name);
+                    }
+                }
+
+                _globalSearchInfo.InputIds = subFileNameList.ToArray();
+            }
+            else
+            {
+                // 不是目录，认为是实际的 ID
+                var ids = Search_Text.Text.Trim().Split(',');
+                _globalSearchInfo.InputIds = new string[ids.Length];
+                for (var i = 0; i < ids.Length; i++)
+                {
+                    _globalSearchInfo.InputIds[i] = ids[i].Trim();
+                }
             }
         }
 
