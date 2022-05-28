@@ -5,11 +5,11 @@
 
 ### How To Use
 
-[👉163MusicLyrics Wiki](https://github.com/jitwxs/163MusicLyrics/wiki)
+[👉163MusicLyrics Use Guide](https://github.com/jitwxs/163MusicLyrics/wiki)
 
 - [x] 支持网易云、QQ音乐两家音乐提供商 Support 163Music, QQMusic Music Provider
 - [x] 支持输入歌曲 ID、输入专辑 ID、完整链接的方式进行查询 Support input song ID, enter album ID, full url way to query
-- [x] 支持批量查询 Support batch query
+- [x] 支持批量查询 && 扫盘查询 Support batch query && scan directory query
 - [x] 支持多种歌词原文和译文的组织方式 Support multiple original lyrics and translation lyrics organization
 - [x] 支持提取（部分）歌曲试听链接 Support extraction (part) song audition link
 - [x] 支持多种保存命名规则、文件编码、输出格式 Support multiple saving naming rules, file encoding, output format
