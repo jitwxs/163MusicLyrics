@@ -7,46 +7,31 @@ namespace MusicLyricAppTest.Bean
     public class MusicLyricsVoTest
     {
         [Test]
-        public void TestLyricTimestamp()
+        public void TestLyricLineVo()
         {
-            // 空数据 && 不合法
-            foreach (var scenario in new[]
-                     {
-                         new LyricTimestamp(""), 
-                         new LyricTimestamp("[12131"),
-                         new LyricTimestamp("-1]")
-                     })
-            {
-                Assert.AreEqual(0, scenario.Minute);
-                Assert.AreEqual(0, scenario.Second);
-                Assert.AreEqual(0, scenario.Millisecond);
+            var scenario1 = new LyricLineVo("[00:12.526]綺麗な嘘ごと自分を騙し続けて");
             
-                Assert.AreEqual("[00:00.000]", scenario.ToString());
-            }
+            Assert.AreEqual("[00:12.53]", scenario1.Timestamp.PrintTimestamp("[mm:ss.SS]", DotTypeEnum.HALF_UP));
             
-            // scenario1 [1:2.3]
-            var scenario1 = new LyricTimestamp("[1:2.3]");
-            Assert.AreEqual(1, scenario1.Minute);
-            Assert.AreEqual(2, scenario1.Second);
-            Assert.AreEqual(3, scenario1.Millisecond);
+            var scenario2 = new LyricLineVo("[00:12.526]綺麗な嘘ごと自分を騙し続けて");
             
-            Assert.AreEqual("[01:02.003]", scenario1.ToString());
+            Assert.AreEqual("[00:12.52]", scenario2.Timestamp.PrintTimestamp("[mm:ss.SS]", DotTypeEnum.DOWN));
             
-            // scenario2 [00:39.17]
-            var scenario2 = new LyricTimestamp("[[00:39.17]");
-            Assert.AreEqual(0, scenario2.Minute);
-            Assert.AreEqual(39, scenario2.Second);
-            Assert.AreEqual(17, scenario2.Millisecond);
+            var scenario3 = new LyricLineVo("[00:12.526]綺麗な嘘ごと自分を騙し続けて");
+
+            Assert.AreEqual("[00:12.526]", scenario3.Timestamp.PrintTimestamp("[mm:ss.SSS]", DotTypeEnum.DOWN));
             
-            Assert.AreEqual("[00:39.017]", scenario2.ToString());
+            var scenario4 = new LyricLineVo("[00:12.523]綺麗な嘘ごと自分を騙し続けて");
+
+            Assert.AreEqual("[00:12.52]", scenario4.Timestamp.PrintTimestamp("[mm:ss.SS]", DotTypeEnum.HALF_UP));
             
-            // scenario3 [00:39.17]
-            var scenario3 = new LyricTimestamp("[00:2]");
-            Assert.AreEqual(0, scenario3.Minute);
-            Assert.AreEqual(2, scenario3.Second);
-            Assert.AreEqual(0, scenario3.Millisecond);
+            var scenario5 = new LyricLineVo("[00:00.000] 作词 : Kirara Magic");
+
+            Assert.AreEqual("[00:00.00]", scenario5.Timestamp.PrintTimestamp("[mm:ss.SS]", DotTypeEnum.HALF_UP));
             
-            Assert.AreEqual("[00:02.000]", scenario3.ToString());
+            var scenario6 = new LyricLineVo("[01:10.050] 作词 : Kirara Magic");
+
+            Assert.AreEqual("[01:10.50]", scenario6.Timestamp.PrintTimestamp("[mm:ss.SS]", DotTypeEnum.HALF_UP));
         }
     }
 }
