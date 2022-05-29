@@ -61,6 +61,6 @@ If this project brings you convenience, welcome to star to let more people disco
 
 
 <div align="center">
-    <img src="./images/alipay_donate.jpg" height="200" style="float:left;margin-right:20px;margin-left: 310px">
-    <img src="./images/wechat_donate.jpg" height="200" style="float:left">
+    <img src="https://cdn.jsdelivr.net/gh/jitwxs/cdn/blog/configuration/alipay_donate_full.jpg" height="200" style="float:left;margin-right:20px;margin-left: 310px">
+    <img src="https://cdn.jsdelivr.net/gh/jitwxs/cdn/blog/configuration/wechat_donate_full.jpg" height="200" style="float:left">
 </div> 
