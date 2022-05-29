@@ -11,9 +11,11 @@ namespace MusicLyricApp.Utils
         /// 将 Lrc 格式，转换为 Srt 格式
         /// </summary>
         /// <param name="inputList">歌词行数据</param>
+        /// <param name="timestampFormat">时间戳格式</param>
+        /// <param name="dotType">时间戳截位规则</param>
         /// <param name="duration">时长 ms</param>
         /// <returns></returns>
-        public static string LrcToSrt(List<LyricLineVo> inputList, long duration)
+        public static string LrcToSrt(List<LyricLineVo> inputList, string timestampFormat, DotTypeEnum dotType, long duration)
         {
             if (inputList.Count == 0)
             {
@@ -28,7 +30,7 @@ namespace MusicLyricApp.Utils
                 sb
                     .Append(index++)
                     .Append(Environment.NewLine)
-                    .Append(start.ToString(OutputFormatEnum.SRT)).Append(" --> ").Append(end.ToString(OutputFormatEnum.SRT))
+                    .Append(start.PrintTimestamp(timestampFormat, dotType)).Append(" --> ").Append(end.PrintTimestamp(timestampFormat, dotType))
                     .Append(Environment.NewLine)
                     .Append(content)
                     .Append(Environment.NewLine)

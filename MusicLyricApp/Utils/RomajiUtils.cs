@@ -23,11 +23,7 @@ namespace MusicLyricApp.Utils
                 foreach (var vo in inputList)
                 {
                     var content = await converter.Convert(vo.Content, To.Romaji, mode, system, "(", ")");
-                    resultList.Add(new LyricLineVo
-                    {
-                        Content = content,
-                        Timestamp = vo.Timestamp
-                    });
+                    resultList.Add(new LyricLineVo(content, vo.Timestamp));
                 }
 
                 return resultList;

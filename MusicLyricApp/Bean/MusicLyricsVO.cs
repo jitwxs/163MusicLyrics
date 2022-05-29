@@ -47,9 +47,8 @@ namespace MusicLyricApp.Bean
     // 强制两位类型
     public enum DotTypeEnum
     {
-        [Description("不启用")] DISABLE = 0,
-        [Description("截位")] DOWN = 1,
-        [Description("四舍五入")] HALF_UP = 2
+        [Description("截位")] DOWN = 0,
+        [Description("四舍五入")] HALF_UP = 1
     }
 
     // 输出文件格式
@@ -200,18 +199,12 @@ namespace MusicLyricApp.Bean
 
     public class LyricTimestamp : IComparable
     {
-        public long Minute { get; private set; }
+        public long Minute { get; }
 
-        public string MinuteS { get; private set; }
-        
-        public long Second { get; private set; }
+        public long Second { get; }
 
-        public string SecondS { get; private set; }
-        
-        public long Millisecond { get; private set; }
+        public long Millisecond { get; }
 
-        public string MillisecondS { get; private set; }
-        
         public long TimeOffset { get;}
 
         public LyricTimestamp(long millisecond)
@@ -225,10 +218,6 @@ namespace MusicLyricApp.Bean
             Second = millisecond % 60;
 
             Minute = millisecond / 60;
-            
-            UpdateMinute(Minute);
-            UpdateSecond(Second);
-            UpdateMillisecond(Millisecond);
         }
         
         public LyricTimestamp(string timestamp)
@@ -255,23 +244,7 @@ namespace MusicLyricApp.Bean
                 }
             }
             
-            UpdateMinute(Minute);
-            UpdateSecond(Second);
-            UpdateMillisecond(Millisecond);
-
             TimeOffset = (Minute * 60 + Second) * 1000 + Millisecond;
-        }
-        
-        public string ToString(OutputFormatEnum outputFormat)
-        {
-            if (outputFormat == OutputFormatEnum.LRC)
-            {
-                return "[" + MinuteS + ":" + SecondS + "." + MillisecondS + "]";
-            }
-            else
-            {
-                return "00:" + MinuteS + ":" + SecondS + "," + MillisecondS;
-            }
         }
 
         public int CompareTo(object input)
@@ -306,24 +279,83 @@ namespace MusicLyricApp.Bean
             }
         }
         
-        private void UpdateMinute(long value)
+        public string PrintTimestamp(string timestampFormat, DotTypeEnum dotTypeEnum)
         {
-            Minute = value;
-            MinuteS = value.ToString("00");
-        }
-        
-        private void UpdateSecond(long value)
-        {
-            Second = value;
-            SecondS = value.ToString("00");
+            var output = timestampFormat;
+
+            long actualMinute;
+            if (output.Contains("HH"))
+            {
+                var hour = Minute / 60;
+                actualMinute  = Minute % 60;
+                output = output.Replace("HH", hour.ToString("00"));
+            }
+            else
+            {
+                actualMinute = Minute;
+            }
+
+            if (output.Contains("mm"))
+            {
+                output = output.Replace("mm", actualMinute.ToString("00"));
+            }
+
+            if (output.Contains("ss"))
+            {
+                output = output.Replace("ss", Second.ToString("00"));
+            }
+            
+            if (output.Contains("SSS"))
+            {
+                output = output.Replace("SSS", Millisecond.ToString("000"));
+            }
+            
+            if (output.Contains("SS"))
+            {
+                var actualMillisecond = AdjustMillisecondScale(2, dotTypeEnum);
+                output = output.Replace("SS", actualMillisecond.ToString("00"));
+            }
+            
+            if (output.Contains("S"))
+            {
+                var actualMillisecond = AdjustMillisecondScale(1, dotTypeEnum);
+                output = output.Replace("S", actualMillisecond.ToString("0"));
+            }
+
+            return output;
         }
 
-        public void UpdateMillisecond(long value, int scale = 3)
+        /// <summary>
+        /// 调整毫秒位数
+        /// </summary>
+        /// <param name="scale">位数，取值为 1 ~ 3</param>
+        /// <param name="dotTypeEnum">截位规则</param>
+        /// <returns></returns>
+        private long AdjustMillisecondScale(int scale, DotTypeEnum dotTypeEnum)
         {
-            var format = new StringBuilder().Insert(0, "0", scale).ToString(); 
-            
-            Millisecond = value;
-            MillisecondS = Millisecond.ToString(format);
+            var limit = 1;
+            for (var i = 0; i < scale; i++)
+            {
+                limit *= 10;
+            }
+
+            var actualMillisecond = Millisecond;
+
+            while (actualMillisecond >= limit)
+            {
+                var round = 0;
+                if (dotTypeEnum == DotTypeEnum.HALF_UP)
+                {
+                    if (actualMillisecond % 10 >= 5)
+                    {
+                        round = 1;
+                    }
+                }
+
+                actualMillisecond = actualMillisecond / 10 + round;
+            }
+
+            return actualMillisecond;
         }
     }
     
@@ -339,7 +371,13 @@ namespace MusicLyricApp.Bean
         /// </summary>
         public string Content { get; set; }
 
-        public LyricLineVo(string lyricLine = "")
+        public LyricLineVo(string content, LyricTimestamp timestamp)
+        {
+            Timestamp = timestamp;
+            Content = content;
+        }
+
+        public LyricLineVo(string lyricLine)
         {
             var index = lyricLine.IndexOf("]");
             if (index == -1)
@@ -381,10 +419,10 @@ namespace MusicLyricApp.Bean
 
             return false;
         }
-        
-        public override string ToString()
+
+        public string Print(string timestampFormat, DotTypeEnum dotType)
         {
-            return Timestamp.ToString(OutputFormatEnum.LRC) + Content;
+            return Timestamp.PrintTimestamp(timestampFormat, dotType) + Content.Trim();
         }
     }
 

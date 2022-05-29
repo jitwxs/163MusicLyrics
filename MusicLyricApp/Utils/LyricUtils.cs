@@ -19,15 +19,19 @@ namespace MusicLyricApp.Utils
         /// <returns></returns>
         public static async Task<string> GetOutputContent(LyricVo lyricVo, SearchInfo searchInfo)
         {
+            var dotType = searchInfo.SettingBean.Param.DotType;
+            
             var voList = await FormatLyric(lyricVo.Lyric, lyricVo.TranslateLyric, searchInfo);
 
             if (searchInfo.SettingBean.Param.OutputFileFormat == OutputFormatEnum.SRT)
             {
-                return SrtUtils.LrcToSrt(voList, lyricVo.Duration);
+                var timestampFormat = searchInfo.SettingBean.Param.SrtTimestampFormat;
+                return SrtUtils.LrcToSrt(voList, timestampFormat, dotType, lyricVo.Duration);
             }
             else
             {
-                return string.Join(Environment.NewLine,  from o in voList select o.ToString());
+                var timestampFormat = searchInfo.SettingBean.Param.LrcTimestampFormat;
+                return string.Join(Environment.NewLine,  from o in voList select o.Print(timestampFormat, dotType));
             }
         }
 
@@ -42,9 +46,8 @@ namespace MusicLyricApp.Utils
         {
             var showLrcType = searchInfo.SettingBean.Param.ShowLrcType;
             var searchSource = searchInfo.SettingBean.Param.SearchSource;
-            var dotType = searchInfo.SettingBean.Param.DotType;
 
-            var originLyrics = SplitLrc(originLrc, searchSource, dotType);
+            var originLyrics = SplitLrc(originLrc, searchSource);
 
             /*
              * 1、原文歌词不存在
@@ -60,7 +63,7 @@ namespace MusicLyricApp.Utils
             // 译文处理，启用罗马音进行转换，否则使用原始的译文
             var romajiConfig = searchInfo.SettingBean.Config.RomajiConfig;
             
-            var translateLyrics = SplitLrc(translateLrc, searchSource, dotType);
+            var translateLyrics = SplitLrc(translateLrc, searchSource);
 
             if (romajiConfig.Enable)
             {
@@ -106,7 +109,7 @@ namespace MusicLyricApp.Utils
         /**
          * 切割歌词
          */
-        private static List<LyricLineVo> SplitLrc(string lrc, SearchSourceEnum searchSource, DotTypeEnum dotType)
+        private static List<LyricLineVo> SplitLrc(string lrc, SearchSourceEnum searchSource)
         {
             // 换行符统一
             var temp = lrc
@@ -132,8 +135,6 @@ namespace MusicLyricApp.Utils
                 {
                     continue;
                 }
-
-                SetMillisecondScale(lyricLineVo, dotType, 2);
 
                 resultList.Add(lyricLineVo);
             }
@@ -218,42 +219,6 @@ namespace MusicLyricApp.Utils
             }
 
             return compareTo;
-        }
-
-        /**
-         * 设置毫秒位数
-         */
-        public static void SetMillisecondScale(LyricLineVo vo, DotTypeEnum dotTypeEnum, int scale)
-        {
-            if (dotTypeEnum == DotTypeEnum.DISABLE)
-            {
-                return;
-            }
-
-            var timestamp = vo.Timestamp;
-
-            if (timestamp.MillisecondS.Length <= scale)
-            {
-                return;
-            }
-
-            var millisecond = timestamp.Millisecond;
-            
-            if (millisecond > 100)
-            {
-                var round = 0;
-                if (dotTypeEnum == DotTypeEnum.HALF_UP)
-                {
-                    if (millisecond % 10 >= 5)
-                    {
-                        round = 1;
-                    }
-                }
-
-                millisecond = millisecond / 10 + round;
-            }
-
-            timestamp.UpdateMillisecond(millisecond, scale);
         }
     }
 }
