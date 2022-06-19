@@ -71,11 +71,21 @@ namespace MusicLyricApp.Bean
         /// 指定歌词合并的分隔符
         /// </summary>
         public string LrcMergeSeparator = String.Empty;
+        
+        /// <summary>
+        /// LRC 歌词时间戳格式
+        /// </summary>
+        public string LrcTimestampFormat = "[mm:ss.SSS]";
+
+        /// <summary>
+        /// SRT 歌词时间戳格式
+        /// </summary>
+        public string SrtTimestampFormat = "HH:mm:ss,SSS";
 
         /// <summary>
         /// 小数位处理策略
         /// </summary>
-        public DotTypeEnum DotType = DotTypeEnum.DISABLE;
+        public DotTypeEnum DotType = DotTypeEnum.DOWN;
 
         /// <summary>
         /// 输出文件名类型

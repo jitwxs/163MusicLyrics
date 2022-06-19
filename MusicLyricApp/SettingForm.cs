@@ -8,35 +8,32 @@ namespace MusicLyricApp
 {
     public partial class SettingForm : Form
     {
-        private readonly ConfigBean _configBean;
+        private readonly SettingBean _settingBean;
 
-        public SettingForm(ConfigBean configBean)
+        public SettingForm(SettingBean settingBean)
         {
+            _settingBean = settingBean;
+
             InitializeComponent();
 
-            _configBean = configBean;
-
-            RememberParam_CheckBox.Checked = _configBean.RememberParam;
-            AutoReadClipboard_CheckBox.Checked = _configBean.AutoReadClipboard;
-            AutoCheckUpdate_CheckBox.Checked = _configBean.AutoCheckUpdate;
-
-            var romajiConfig = _configBean.RomajiConfig;
-            ShowRomaji_CheckBox.Checked = romajiConfig.Enable;
-            RomajiMode_ComboBox.SelectedIndex = (int)romajiConfig.ModeEnum;
-            RomajiSystem_ComboBox.SelectedIndex = (int)romajiConfig.SystemEnum;
+            AfterInitializeComponent();
+            
             ShowRomajiChangeListener(ShowRomaji_CheckBox.Checked);
         }
 
         private void Save_Btn_Click(object sender, EventArgs e)
         {
-            _configBean.RememberParam = RememberParam_CheckBox.Checked;
-            _configBean.AutoReadClipboard = AutoReadClipboard_CheckBox.Checked;
-            _configBean.AutoCheckUpdate = AutoCheckUpdate_CheckBox.Checked;
+            _settingBean.Config.RememberParam = RememberParam_CheckBox.Checked;
+            _settingBean.Config.AutoReadClipboard = AutoReadClipboard_CheckBox.Checked;
+            _settingBean.Config.AutoCheckUpdate = AutoCheckUpdate_CheckBox.Checked;
 
-            var romajiConfig = _configBean.RomajiConfig;
-            romajiConfig.Enable = ShowRomaji_CheckBox.Checked;
-            romajiConfig.ModeEnum = (RomajiModeEnum)RomajiMode_ComboBox.SelectedIndex;
-            romajiConfig.SystemEnum = (RomajiSystemEnum)RomajiSystem_ComboBox.SelectedIndex;
+            _settingBean.Param.DotType = (DotTypeEnum)Dot_ComboBox.SelectedIndex;
+            _settingBean.Param.LrcTimestampFormat = LrcTimestampFormat_TextBox.Text;
+            _settingBean.Param.SrtTimestampFormat = SrtTimestampFormat_TextBox.Text;
+
+            _settingBean.Config.RomajiConfig.Enable = ShowRomaji_CheckBox.Checked;
+            _settingBean.Config.RomajiConfig.ModeEnum = (RomajiModeEnum)RomajiMode_ComboBox.SelectedIndex;
+            _settingBean.Config.RomajiConfig.SystemEnum = (RomajiSystemEnum)RomajiSystem_ComboBox.SelectedIndex;
 
             Close();
         }

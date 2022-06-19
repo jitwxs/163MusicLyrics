@@ -43,6 +43,8 @@ namespace MusicLyricApp
             }
             
             InitializeComponent();
+            AfterInitializeComponent();
+
             InitialConfig();
 
             TrySetHighDPIFont("Segoe UI");
@@ -73,7 +75,6 @@ namespace MusicLyricApp
             LrcType_ComboBox.SelectedIndex = (int) paramConfig.ShowLrcType;
             SearchSource_ComboBox.SelectedIndex = (int) paramConfig.SearchSource;
             SearchType_ComboBox.SelectedIndex = (int) paramConfig.SearchType;
-            Dot_TextBox.SelectedIndex = (int) paramConfig.DotType;
             OutputFormat_CombBox.SelectedIndex = (int) paramConfig.OutputFileFormat;
             LrcMergeSeparator_TextBox.Text = paramConfig.LrcMergeSeparator;
             
@@ -694,16 +695,6 @@ namespace MusicLyricApp
         }
 
         /// <summary>
-        /// 小数位配置，变更事件
-        /// </summary>
-        private void Dot_TextBox_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            _globalSearchInfo.SettingBean.Param.DotType = (DotTypeEnum)Dot_TextBox.SelectedIndex;
-            ReloadConfig();
-            UpdateLrcTextBox(string.Empty);
-        }
-
-        /// <summary>
         /// 控制台，键盘事件
         /// </summary>
         private void Console_TextBox_KeyDown(object sender, KeyEventArgs e)
@@ -781,9 +772,11 @@ namespace MusicLyricApp
             {
                 if (_settingForm == null || _settingForm.IsDisposed)
                 {
-                    _settingForm = new SettingForm(_globalSearchInfo.SettingBean.Config);
-                    _settingForm.Location = new Point(Left + Constants.SettingFormOffset, Top + Constants.SettingFormOffset);
-                    _settingForm.StartPosition = FormStartPosition.Manual;
+                    _settingForm = new SettingForm(_globalSearchInfo.SettingBean)
+                    {
+                        Location = new Point(Left + Constants.SettingFormOffset, Top + Constants.SettingFormOffset),
+                        StartPosition = FormStartPosition.Manual
+                    };
                     _settingForm.Show();
                 }
                 else

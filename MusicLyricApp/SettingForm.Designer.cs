@@ -25,6 +25,25 @@ namespace MusicLyricApp
             base.Dispose(disposing);
         }
 
+        private void AfterInitializeComponent()
+        {
+            this.RomajiMode_ComboBox.Items.AddRange(GlobalUtils.GetEnumDescArray<RomajiModeEnum>());
+            this.RomajiSystem_ComboBox.Items.AddRange(GlobalUtils.GetEnumDescArray<RomajiSystemEnum>());
+            this.Dot_ComboBox.Items.AddRange(GlobalUtils.GetEnumDescArray<DotTypeEnum>());
+
+            RememberParam_CheckBox.Checked = _settingBean.Config.RememberParam;
+            AutoReadClipboard_CheckBox.Checked = _settingBean.Config.AutoReadClipboard;
+            AutoCheckUpdate_CheckBox.Checked = _settingBean.Config.AutoCheckUpdate;
+
+            LrcTimestampFormat_TextBox.Text = _settingBean.Param.LrcTimestampFormat;
+            SrtTimestampFormat_TextBox.Text = _settingBean.Param.SrtTimestampFormat;
+            Dot_ComboBox.SelectedIndex = (int)_settingBean.Param.DotType;
+
+            ShowRomaji_CheckBox.Checked = _settingBean.Config.RomajiConfig.Enable;
+            RomajiMode_ComboBox.SelectedIndex = (int)_settingBean.Config.RomajiConfig.ModeEnum;
+            RomajiSystem_ComboBox.SelectedIndex = (int)_settingBean.Config.RomajiConfig.SystemEnum;
+        }
+
         #region Windows Form Designer generated code
 
         /// <summary>
@@ -38,20 +57,26 @@ namespace MusicLyricApp
             this.RememberParam_CheckBox = new System.Windows.Forms.CheckBox();
             this.AutoReadClipboard_CheckBox = new System.Windows.Forms.CheckBox();
             this.AutoCheckUpdate_CheckBox = new System.Windows.Forms.CheckBox();
-            this.label1 = new System.Windows.Forms.Label();
             this.ShowRomaji_CheckBox = new System.Windows.Forms.CheckBox();
             this.RomajiMode_ComboBox = new System.Windows.Forms.ComboBox();
             this.label3 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
             this.RomajiSystem_ComboBox = new System.Windows.Forms.ComboBox();
             this.label2 = new System.Windows.Forms.Label();
+            this.label5 = new System.Windows.Forms.Label();
+            this.label6 = new System.Windows.Forms.Label();
+            this.label7 = new System.Windows.Forms.Label();
+            this.LrcTimestampFormat_TextBox = new System.Windows.Forms.TextBox();
+            this.SrtTimestampFormat_TextBox = new System.Windows.Forms.TextBox();
+            this.label8 = new System.Windows.Forms.Label();
+            this.Dot_ComboBox = new System.Windows.Forms.ComboBox();
             this.SuspendLayout();
             // 
             // Save_Btn
             // 
-            this.Save_Btn.Location = new System.Drawing.Point(148, 161);
+            this.Save_Btn.Location = new System.Drawing.Point(294, 252);
             this.Save_Btn.Name = "Save_Btn";
-            this.Save_Btn.Size = new System.Drawing.Size(166, 44);
+            this.Save_Btn.Size = new System.Drawing.Size(114, 44);
             this.Save_Btn.TabIndex = 0;
             this.Save_Btn.Text = "保存";
             this.Save_Btn.UseVisualStyleBackColor = true;
@@ -59,7 +84,7 @@ namespace MusicLyricApp
             // 
             // RememberParam_CheckBox
             // 
-            this.RememberParam_CheckBox.Location = new System.Drawing.Point(12, 17);
+            this.RememberParam_CheckBox.Location = new System.Drawing.Point(15, 206);
             this.RememberParam_CheckBox.Name = "RememberParam_CheckBox";
             this.RememberParam_CheckBox.Size = new System.Drawing.Size(78, 24);
             this.RememberParam_CheckBox.TabIndex = 1;
@@ -68,7 +93,7 @@ namespace MusicLyricApp
             // 
             // AutoReadClipboard_CheckBox
             // 
-            this.AutoReadClipboard_CheckBox.Location = new System.Drawing.Point(148, 15);
+            this.AutoReadClipboard_CheckBox.Location = new System.Drawing.Point(144, 206);
             this.AutoReadClipboard_CheckBox.Name = "AutoReadClipboard_CheckBox";
             this.AutoReadClipboard_CheckBox.Size = new System.Drawing.Size(112, 26);
             this.AutoReadClipboard_CheckBox.TabIndex = 2;
@@ -77,25 +102,16 @@ namespace MusicLyricApp
             // 
             // AutoCheckUpdate_CheckBox
             // 
-            this.AutoCheckUpdate_CheckBox.Location = new System.Drawing.Point(12, 168);
+            this.AutoCheckUpdate_CheckBox.Location = new System.Drawing.Point(15, 259);
             this.AutoCheckUpdate_CheckBox.Name = "AutoCheckUpdate_CheckBox";
             this.AutoCheckUpdate_CheckBox.Size = new System.Drawing.Size(97, 32);
             this.AutoCheckUpdate_CheckBox.TabIndex = 3;
             this.AutoCheckUpdate_CheckBox.Text = "自动检查更新";
             this.AutoCheckUpdate_CheckBox.UseVisualStyleBackColor = true;
             // 
-            // label1
-            // 
-            this.label1.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.label1.Location = new System.Drawing.Point(8, 49);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(315, 2);
-            this.label1.TabIndex = 4;
-            this.label1.Text = "label1";
-            // 
             // ShowRomaji_CheckBox
             // 
-            this.ShowRomaji_CheckBox.Location = new System.Drawing.Point(12, 61);
+            this.ShowRomaji_CheckBox.Location = new System.Drawing.Point(15, 104);
             this.ShowRomaji_CheckBox.Name = "ShowRomaji_CheckBox";
             this.ShowRomaji_CheckBox.Size = new System.Drawing.Size(120, 30);
             this.ShowRomaji_CheckBox.TabIndex = 5;
@@ -107,15 +123,14 @@ namespace MusicLyricApp
             // 
             this.RomajiMode_ComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.RomajiMode_ComboBox.FormattingEnabled = true;
-            this.RomajiMode_ComboBox.Items.AddRange(GlobalUtils.GetEnumDescArray<RomajiModeEnum>());
-            this.RomajiMode_ComboBox.Location = new System.Drawing.Point(232, 61);
+            this.RomajiMode_ComboBox.Location = new System.Drawing.Point(87, 148);
             this.RomajiMode_ComboBox.Name = "RomajiMode_ComboBox";
-            this.RomajiMode_ComboBox.Size = new System.Drawing.Size(82, 20);
+            this.RomajiMode_ComboBox.Size = new System.Drawing.Size(100, 20);
             this.RomajiMode_ComboBox.TabIndex = 7;
             // 
             // label3
             // 
-            this.label3.Location = new System.Drawing.Point(148, 66);
+            this.label3.Location = new System.Drawing.Point(13, 154);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(68, 18);
             this.label3.TabIndex = 8;
@@ -123,7 +138,7 @@ namespace MusicLyricApp
             // 
             // label4
             // 
-            this.label4.Location = new System.Drawing.Point(148, 107);
+            this.label4.Location = new System.Drawing.Point(221, 151);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(68, 18);
             this.label4.TabIndex = 9;
@@ -133,33 +148,97 @@ namespace MusicLyricApp
             // 
             this.RomajiSystem_ComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.RomajiSystem_ComboBox.FormattingEnabled = true;
-            this.RomajiSystem_ComboBox.Items.AddRange(GlobalUtils.GetEnumDescArray<RomajiSystemEnum>());
-            this.RomajiSystem_ComboBox.Location = new System.Drawing.Point(232, 107);
+            this.RomajiSystem_ComboBox.Location = new System.Drawing.Point(308, 148);
             this.RomajiSystem_ComboBox.Name = "RomajiSystem_ComboBox";
-            this.RomajiSystem_ComboBox.Size = new System.Drawing.Size(82, 20);
+            this.RomajiSystem_ComboBox.Size = new System.Drawing.Size(100, 20);
             this.RomajiSystem_ComboBox.TabIndex = 10;
             // 
             // label2
             // 
             this.label2.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.label2.Location = new System.Drawing.Point(12, 144);
+            this.label2.Location = new System.Drawing.Point(15, 87);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(315, 2);
+            this.label2.Size = new System.Drawing.Size(410, 2);
             this.label2.TabIndex = 11;
-            this.label2.Text = "label2";
+            this.label2.Text = "分割线";
+            // 
+            // label5
+            // 
+            this.label5.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.label5.Location = new System.Drawing.Point(15, 184);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(410, 2);
+            this.label5.TabIndex = 12;
+            this.label5.Text = "分割线";
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(13, 15);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(65, 12);
+            this.label6.TabIndex = 13;
+            this.label6.Text = "LRC 时间戳";
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Location = new System.Drawing.Point(228, 15);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(65, 12);
+            this.label7.TabIndex = 14;
+            this.label7.Text = "SRT 时间戳";
+            // 
+            // LrcTimestampFormat_TextBox
+            // 
+            this.LrcTimestampFormat_TextBox.Location = new System.Drawing.Point(108, 12);
+            this.LrcTimestampFormat_TextBox.Name = "LrcTimestampFormat_TextBox";
+            this.LrcTimestampFormat_TextBox.Size = new System.Drawing.Size(100, 21);
+            this.LrcTimestampFormat_TextBox.TabIndex = 15;
+            // 
+            // SrtTimestampFormat_TextBox
+            // 
+            this.SrtTimestampFormat_TextBox.Location = new System.Drawing.Point(321, 12);
+            this.SrtTimestampFormat_TextBox.Name = "SrtTimestampFormat_TextBox";
+            this.SrtTimestampFormat_TextBox.Size = new System.Drawing.Size(100, 21);
+            this.SrtTimestampFormat_TextBox.TabIndex = 16;
+            // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.Location = new System.Drawing.Point(13, 54);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(77, 12);
+            this.label8.TabIndex = 17;
+            this.label8.Text = "毫秒截位规则";
+            // 
+            // Dot_ComboBox
+            // 
+            this.Dot_ComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.Dot_ComboBox.FormattingEnabled = true;
+            this.Dot_ComboBox.Location = new System.Drawing.Point(108, 51);
+            this.Dot_ComboBox.Name = "Dot_ComboBox";
+            this.Dot_ComboBox.Size = new System.Drawing.Size(100, 20);
+            this.Dot_ComboBox.TabIndex = 18;
             // 
             // SettingForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(328, 217);
+            this.ClientSize = new System.Drawing.Size(433, 321);
+            this.Controls.Add(this.Dot_ComboBox);
+            this.Controls.Add(this.label8);
+            this.Controls.Add(this.SrtTimestampFormat_TextBox);
+            this.Controls.Add(this.LrcTimestampFormat_TextBox);
+            this.Controls.Add(this.label7);
+            this.Controls.Add(this.label6);
+            this.Controls.Add(this.label5);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.RomajiSystem_ComboBox);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.RomajiMode_ComboBox);
             this.Controls.Add(this.ShowRomaji_CheckBox);
-            this.Controls.Add(this.label1);
             this.Controls.Add(this.AutoCheckUpdate_CheckBox);
             this.Controls.Add(this.AutoReadClipboard_CheckBox);
             this.Controls.Add(this.RememberParam_CheckBox);
@@ -170,6 +249,7 @@ namespace MusicLyricApp
             this.Name = "SettingForm";
             this.Text = "设置";
             this.ResumeLayout(false);
+            this.PerformLayout();
         }
 
         private System.Windows.Forms.ComboBox RomajiSystem_ComboBox;
@@ -182,8 +262,6 @@ namespace MusicLyricApp
 
         private System.Windows.Forms.CheckBox ShowRomaji_CheckBox;
 
-        private System.Windows.Forms.Label label1;
-
         private System.Windows.Forms.CheckBox AutoCheckUpdate_CheckBox;
 
         private System.Windows.Forms.CheckBox AutoReadClipboard_CheckBox;
@@ -193,5 +271,13 @@ namespace MusicLyricApp
         private System.Windows.Forms.Button Save_Btn;
 
         #endregion
+
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.TextBox LrcTimestampFormat_TextBox;
+        private System.Windows.Forms.TextBox SrtTimestampFormat_TextBox;
+        private System.Windows.Forms.Label label8;
+        private System.Windows.Forms.ComboBox Dot_ComboBox;
     }
 }
