@@ -25,6 +25,11 @@ namespace MusicLyricApp.Bean
         /// 自动检查更新
         /// </summary>
         public bool AutoCheckUpdate = true;
+        
+        /// <summary>
+        /// 译文缺省规则
+        /// </summary>
+        public TranslateLyricDefaultRuleEnum TranslateLyricDefaultRule = TranslateLyricDefaultRuleEnum.IGNORE;
 
         /// <summary>
         /// 罗马音相关配置

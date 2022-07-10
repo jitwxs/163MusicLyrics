@@ -30,6 +30,7 @@ namespace MusicLyricApp
             this.RomajiMode_ComboBox.Items.AddRange(GlobalUtils.GetEnumDescArray<RomajiModeEnum>());
             this.RomajiSystem_ComboBox.Items.AddRange(GlobalUtils.GetEnumDescArray<RomajiSystemEnum>());
             this.Dot_ComboBox.Items.AddRange(GlobalUtils.GetEnumDescArray<DotTypeEnum>());
+            this.TranLyricDefaultRule_ComboBox.Items.AddRange(GlobalUtils.GetEnumDescArray<TranslateLyricDefaultRuleEnum>());
 
             RememberParam_CheckBox.Checked = _settingBean.Config.RememberParam;
             AutoReadClipboard_CheckBox.Checked = _settingBean.Config.AutoReadClipboard;
@@ -42,6 +43,7 @@ namespace MusicLyricApp
             ShowRomaji_CheckBox.Checked = _settingBean.Config.RomajiConfig.Enable;
             RomajiMode_ComboBox.SelectedIndex = (int)_settingBean.Config.RomajiConfig.ModeEnum;
             RomajiSystem_ComboBox.SelectedIndex = (int)_settingBean.Config.RomajiConfig.SystemEnum;
+            TranLyricDefaultRule_ComboBox.SelectedIndex = (int)_settingBean.Config.TranslateLyricDefaultRule;
         }
 
         #region Windows Form Designer generated code
@@ -70,6 +72,8 @@ namespace MusicLyricApp
             this.SrtTimestampFormat_TextBox = new System.Windows.Forms.TextBox();
             this.label8 = new System.Windows.Forms.Label();
             this.Dot_ComboBox = new System.Windows.Forms.ComboBox();
+            this.label1 = new System.Windows.Forms.Label();
+            this.TranLyricDefaultRule_ComboBox = new System.Windows.Forms.ComboBox();
             this.SuspendLayout();
             // 
             // Save_Btn
@@ -130,7 +134,7 @@ namespace MusicLyricApp
             // 
             // label3
             // 
-            this.label3.Location = new System.Drawing.Point(13, 154);
+            this.label3.Location = new System.Drawing.Point(15, 150);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(68, 18);
             this.label3.TabIndex = 8;
@@ -138,7 +142,7 @@ namespace MusicLyricApp
             // 
             // label4
             // 
-            this.label4.Location = new System.Drawing.Point(221, 151);
+            this.label4.Location = new System.Drawing.Point(228, 150);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(68, 18);
             this.label4.TabIndex = 9;
@@ -148,7 +152,7 @@ namespace MusicLyricApp
             // 
             this.RomajiSystem_ComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.RomajiSystem_ComboBox.FormattingEnabled = true;
-            this.RomajiSystem_ComboBox.Location = new System.Drawing.Point(308, 148);
+            this.RomajiSystem_ComboBox.Location = new System.Drawing.Point(319, 147);
             this.RomajiSystem_ComboBox.Name = "RomajiSystem_ComboBox";
             this.RomajiSystem_ComboBox.Size = new System.Drawing.Size(100, 20);
             this.RomajiSystem_ComboBox.TabIndex = 10;
@@ -221,11 +225,30 @@ namespace MusicLyricApp
             this.Dot_ComboBox.Size = new System.Drawing.Size(100, 20);
             this.Dot_ComboBox.TabIndex = 18;
             // 
+            // label1
+            // 
+            this.label1.Location = new System.Drawing.Point(228, 112);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(82, 17);
+            this.label1.TabIndex = 19;
+            this.label1.Text = "译文缺省规则";
+            // 
+            // TranLyricDefaultRule_ComboBox
+            // 
+            this.TranLyricDefaultRule_ComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.TranLyricDefaultRule_ComboBox.FormattingEnabled = true;
+            this.TranLyricDefaultRule_ComboBox.Location = new System.Drawing.Point(321, 109);
+            this.TranLyricDefaultRule_ComboBox.Name = "TranLyricDefaultRule_ComboBox";
+            this.TranLyricDefaultRule_ComboBox.Size = new System.Drawing.Size(98, 20);
+            this.TranLyricDefaultRule_ComboBox.TabIndex = 20;
+            // 
             // SettingForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(433, 321);
+            this.Controls.Add(this.TranLyricDefaultRule_ComboBox);
+            this.Controls.Add(this.label1);
             this.Controls.Add(this.Dot_ComboBox);
             this.Controls.Add(this.label8);
             this.Controls.Add(this.SrtTimestampFormat_TextBox);
@@ -251,6 +274,9 @@ namespace MusicLyricApp
             this.ResumeLayout(false);
             this.PerformLayout();
         }
+
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.ComboBox TranLyricDefaultRule_ComboBox;
 
         private System.Windows.Forms.ComboBox RomajiSystem_ComboBox;
 
