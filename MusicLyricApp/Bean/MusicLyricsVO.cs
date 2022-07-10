@@ -412,7 +412,7 @@ namespace MusicLyricApp.Bean
                 return true;
             }
 
-            if ("//".Equals(Content))
+            if ("//".Equals(Content.Trim()))
             {
                 return true;
             }
