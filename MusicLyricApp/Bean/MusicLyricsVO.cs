@@ -85,6 +85,14 @@ namespace MusicLyricApp.Bean
         [Description("平文式")] HEPBURN = 2,
     }
 
+    // 译文缺省规则
+    public enum TranslateLyricDefaultRuleEnum
+    {
+        [Description("忽略展示")] IGNORE = 0,
+        [Description("展示空行")] EMPTY_LINE = 1,
+        [Description("填充原文")] FILL_ORIGIN = 2,
+    }
+
     /**
      * 错误码
      */

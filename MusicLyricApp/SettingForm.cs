@@ -34,6 +34,7 @@ namespace MusicLyricApp
             _settingBean.Config.RomajiConfig.Enable = ShowRomaji_CheckBox.Checked;
             _settingBean.Config.RomajiConfig.ModeEnum = (RomajiModeEnum)RomajiMode_ComboBox.SelectedIndex;
             _settingBean.Config.RomajiConfig.SystemEnum = (RomajiSystemEnum)RomajiSystem_ComboBox.SelectedIndex;
+            _settingBean.Config.TranslateLyricDefaultRule = (TranslateLyricDefaultRuleEnum)TranLyricDefaultRule_ComboBox.SelectedIndex;
 
             Close();
         }

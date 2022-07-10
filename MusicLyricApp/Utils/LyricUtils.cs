@@ -79,7 +79,7 @@ namespace MusicLyricApp.Utils
                 return translateLyrics;
             }
 
-            List<LyricLineVo> res = null;
+            List<LyricLineVo> res;
             switch (showLrcType)
             {
                 case ShowLrcTypeEnum.ORIGIN_PRIOR_ISOLATED:
@@ -102,8 +102,11 @@ namespace MusicLyricApp.Utils
                 case ShowLrcTypeEnum.TRANSLATE_PRIOR_MERGE:
                     res = MergeLrc(originLyrics, translateLyrics, searchInfo.SettingBean.Param.LrcMergeSeparator, false);
                     break;
+                default:
+                    throw new NotSupportedException("not support showLrcType: " + showLrcType);
             }
-            return res;
+
+            return DealTranslateLyricDefaultRule(res, searchInfo.SettingBean.Config.TranslateLyricDefaultRule);
         }
 
         /**
@@ -180,9 +183,9 @@ namespace MusicLyricApp.Utils
         /**
          * 双语歌词合并
          */
-        private static List<LyricLineVo> MergeLrc(List<LyricLineVo> originLrcs, List<LyricLineVo> translateLrcs, string splitStr, bool hasOriginLrcPrior)
+        private static List<LyricLineVo> MergeLrc(List<LyricLineVo> originList, List<LyricLineVo> translateList, string splitStr, bool hasOriginLrcPrior)
         {
-            var c = SortLrc(originLrcs, translateLrcs, hasOriginLrcPrior);
+            var c = SortLrc(originList, translateList, hasOriginLrcPrior);
             
             var list = new List<LyricLineVo>
             {
@@ -206,6 +209,54 @@ namespace MusicLyricApp.Utils
             return list;
         }
 
+        /**
+         * 译文缺省逻辑处理
+         */
+        private static List<LyricLineVo> DealTranslateLyricDefaultRule(List<LyricLineVo> voList, TranslateLyricDefaultRuleEnum rule)
+        {
+            if (rule != TranslateLyricDefaultRuleEnum.IGNORE)
+            {
+                var timestampCounts = new Dictionary<long, int>();
+
+                foreach (var key in voList.Select(one => one.Timestamp.TimeOffset))
+                {
+                    if (timestampCounts.ContainsKey(key))
+                    {
+                        timestampCounts[key] += 1;
+                    }
+                    else
+                    {
+                        timestampCounts.Add(key,1);
+                    }
+                }
+
+                var dealTimestamps = (from pair in timestampCounts where pair.Value == 1 select pair.Key).ToList();
+                dealTimestamps.Sort((a, b) => a.CompareTo(b));
+
+                var dealTimestampIndex = 0;
+                
+                for (var i = 0; i < voList.Count; i++)
+                {
+                    var cur = voList[i];
+                    var timestamp = dealTimestamps[dealTimestampIndex];
+
+                    if (cur.Timestamp.TimeOffset == timestamp)
+                    {
+                        var content = rule == TranslateLyricDefaultRuleEnum.FILL_ORIGIN ? cur.Content : "";
+                        voList.Insert(++i, new LyricLineVo(content, cur.Timestamp));
+                        dealTimestampIndex++;
+
+                        if (dealTimestampIndex >= dealTimestamps.Count)
+                        {
+                            break;
+                        }
+                    }
+                }
+            }
+            
+            return voList;
+        }
+        
         /**
          * 歌词排序函数
          */
