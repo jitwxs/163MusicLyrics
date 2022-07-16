@@ -65,6 +65,8 @@ namespace MusicLyricApp.Utils
             
             var translateLyrics = SplitLrc(translateLrc, searchSource);
 
+            translateLyrics = DealTranslateLyricDefaultRule(originLyrics, translateLyrics, searchInfo.SettingBean.Config.TranslateLyricDefaultRule);
+            
             if (romajiConfig.Enable)
             {
                 translateLyrics = await RomajiUtils.ToRomaji(originLyrics, translateLyrics, romajiConfig);
@@ -106,7 +108,7 @@ namespace MusicLyricApp.Utils
                     throw new NotSupportedException("not support showLrcType: " + showLrcType);
             }
 
-            return DealTranslateLyricDefaultRule(res, searchInfo.SettingBean.Config.TranslateLyricDefaultRule);
+            return res;
         }
 
         /**
@@ -212,49 +214,33 @@ namespace MusicLyricApp.Utils
         /**
          * 译文缺省逻辑处理
          */
-        private static List<LyricLineVo> DealTranslateLyricDefaultRule(List<LyricLineVo> voList, TranslateLyricDefaultRuleEnum rule)
+        private static List<LyricLineVo> DealTranslateLyricDefaultRule(List<LyricLineVo> originList, List<LyricLineVo> translateList, TranslateLyricDefaultRuleEnum rule)
         {
-            if (rule != TranslateLyricDefaultRuleEnum.IGNORE)
+            if (rule == TranslateLyricDefaultRuleEnum.IGNORE)
             {
-                var timestampCounts = new Dictionary<long, int>();
+                return translateList;
+            }
 
-                foreach (var key in voList.Select(one => one.Timestamp.TimeOffset))
-                {
-                    if (timestampCounts.ContainsKey(key))
-                    {
-                        timestampCounts[key] += 1;
-                    }
-                    else
-                    {
-                        timestampCounts.Add(key,1);
-                    }
-                }
-
-                var dealTimestamps = (from pair in timestampCounts where pair.Value == 1 select pair.Key).ToList();
-                dealTimestamps.Sort((a, b) => a.CompareTo(b));
-
-                var dealTimestampIndex = 0;
-                
-                for (var i = 0; i < voList.Count; i++)
-                {
-                    var cur = voList[i];
-                    var timestamp = dealTimestamps[dealTimestampIndex];
-
-                    if (cur.Timestamp.TimeOffset == timestamp)
-                    {
-                        var content = rule == TranslateLyricDefaultRuleEnum.FILL_ORIGIN ? cur.Content : "";
-                        voList.Insert(++i, new LyricLineVo(content, cur.Timestamp));
-                        dealTimestampIndex++;
-
-                        if (dealTimestampIndex >= dealTimestamps.Count)
-                        {
-                            break;
-                        }
-                    }
-                }
+            var originTimeOffsetMap = ConvertLyricLineVoListToMapByTimeOffset(originList);
+            var translateTimeOffsetMap = ConvertLyricLineVoListToMapByTimeOffset(translateList);
+            
+            foreach (var pair in translateTimeOffsetMap.Where(pair => originTimeOffsetMap.ContainsKey(pair.Key)))
+            {
+                originTimeOffsetMap.Remove(pair.Key);
             }
             
-            return voList;
+            foreach (var pair in originTimeOffsetMap)
+            {
+                var content = rule == TranslateLyricDefaultRuleEnum.FILL_ORIGIN ? pair.Value.Content : "";
+
+                translateTimeOffsetMap[pair.Key] = new LyricLineVo(content, pair.Value.Timestamp);
+            }
+
+            var res = new List<LyricLineVo>(translateTimeOffsetMap.Values);
+
+            res.Sort();
+            
+            return res;
         }
         
         /**
@@ -270,6 +256,18 @@ namespace MusicLyricApp.Utils
             }
 
             return compareTo;
+        }
+
+        private static Dictionary<long, LyricLineVo> ConvertLyricLineVoListToMapByTimeOffset(List<LyricLineVo> lyricLineVos)
+        {
+            var map = new Dictionary<long, LyricLineVo>();
+            
+            foreach (var one in lyricLineVos)
+            {
+                map[one.Timestamp.TimeOffset] = one;
+            }
+
+            return map;
         }
     }
 }
