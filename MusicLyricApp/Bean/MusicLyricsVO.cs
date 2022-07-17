@@ -207,25 +207,11 @@ namespace MusicLyricApp.Bean
 
     public class LyricTimestamp : IComparable
     {
-        public long Minute { get; }
-
-        public long Second { get; }
-
-        public long Millisecond { get; }
-
         public long TimeOffset { get;}
 
         public LyricTimestamp(long millisecond)
         {
             TimeOffset = millisecond;
-            
-            Millisecond = millisecond % 1000;
-
-            millisecond /= 1000;
-
-            Second = millisecond % 60;
-
-            Minute = millisecond / 60;
         }
         
         public LyricTimestamp(string timestamp)
@@ -233,6 +219,7 @@ namespace MusicLyricApp.Bean
             if (string.IsNullOrWhiteSpace(timestamp) || timestamp[0] != '[' || timestamp[timestamp.Length - 1] != ']')
             {
                 // 不支持的格式
+                TimeOffset = 0;
             }
             else
             {
@@ -240,19 +227,20 @@ namespace MusicLyricApp.Bean
 
                 var split = timestamp.Split(':');
 
-                Minute = GlobalUtils.toInt(split[0], 0);
+                var minute = GlobalUtils.toInt(split[0], 0);
             
                 split = split[1].Split('.');
 
-                Second = GlobalUtils.toInt(split[0], 0);
+                var second = GlobalUtils.toInt(split[0], 0);
+
+                TimeOffset = (minute * 60 + second) * 1000;
 
                 if (split.Length > 1)
                 {
-                    Millisecond = GlobalUtils.toInt(split[1], 0);
+                    // 三位毫秒，右填充 0
+                    TimeOffset += GlobalUtils.toInt(split[1].PadRight(3, '0'), 0);
                 }
             }
-            
-            TimeOffset = (Minute * 60 + Second) * 1000 + Millisecond;
         }
 
         public int CompareTo(object input)
@@ -287,20 +275,58 @@ namespace MusicLyricApp.Bean
             }
         }
         
-        public string PrintTimestamp(string timestampFormat, DotTypeEnum dotTypeEnum)
+        public string PrintTimestamp(string timestampFormat, DotTypeEnum dotType)
         {
             var output = timestampFormat;
 
+            int msDigit;
+            if (output.Contains("SSS"))
+            {
+                msDigit = 3;
+            } else if (output.Contains("SS"))
+            {
+                msDigit = 2;
+            } else if (output.Contains("S"))
+            {
+                msDigit = 1;
+            }
+            else
+            {
+                msDigit = 3;
+            }
+            
+            long offset;
+            if (msDigit == 3)
+            {
+                offset = TimeOffset;
+            }
+            else
+            {
+                if (dotType == DotTypeEnum.DOWN)
+                {
+                    offset = TimeOffset / 10 * 10;
+                }
+                else
+                {
+                    offset = (TimeOffset + 5) / 10 * 10;
+                }
+            }
+
+            var ms = offset % 1000;
+            offset /= 1000;
+            var minute = offset / 60;
+            var second = offset - minute * 60;
+            
             long actualMinute;
             if (output.Contains("HH"))
             {
-                var hour = Minute / 60;
-                actualMinute  = Minute % 60;
+                var hour = minute / 60;
+                actualMinute  = minute % 60;
                 output = output.Replace("HH", hour.ToString("00"));
             }
             else
             {
-                actualMinute = Minute;
+                actualMinute = minute;
             }
 
             if (output.Contains("mm"))
@@ -310,60 +336,25 @@ namespace MusicLyricApp.Bean
 
             if (output.Contains("ss"))
             {
-                output = output.Replace("ss", Second.ToString("00"));
+                output = output.Replace("ss", second.ToString("00"));
             }
-            
+
             if (output.Contains("SSS"))
             {
-                output = output.Replace("SSS", Millisecond.ToString("000"));
+                output = output.Replace("SSS", ms.ToString("000"));
             }
             
             if (output.Contains("SS"))
             {
-                var actualMillisecond = AdjustMillisecondScale(2, dotTypeEnum);
-                output = output.Replace("SS", actualMillisecond.ToString("00"));
+                output = output.Replace("SS", (ms / 10).ToString("00"));
             }
             
             if (output.Contains("S"))
             {
-                var actualMillisecond = AdjustMillisecondScale(1, dotTypeEnum);
-                output = output.Replace("S", actualMillisecond.ToString("0"));
+                output = output.Replace("S", (ms / 100).ToString("0"));
             }
 
             return output;
-        }
-
-        /// <summary>
-        /// 调整毫秒位数
-        /// </summary>
-        /// <param name="scale">位数，取值为 1 ~ 3</param>
-        /// <param name="dotTypeEnum">截位规则</param>
-        /// <returns></returns>
-        private long AdjustMillisecondScale(int scale, DotTypeEnum dotTypeEnum)
-        {
-            var limit = 1;
-            for (var i = 0; i < scale; i++)
-            {
-                limit *= 10;
-            }
-
-            var actualMillisecond = Millisecond;
-
-            while (actualMillisecond >= limit)
-            {
-                var round = 0;
-                if (dotTypeEnum == DotTypeEnum.HALF_UP)
-                {
-                    if (actualMillisecond % 10 >= 5)
-                    {
-                        round = 1;
-                    }
-                }
-
-                actualMillisecond = actualMillisecond / 10 + round;
-            }
-
-            return actualMillisecond;
         }
     }
     
