@@ -31,7 +31,7 @@ namespace MusicLyricAppTest.Bean
             
             var scenario6 = new LyricLineVo("[01:10.050] 作词 : Kirara Magic");
 
-            Assert.AreEqual("[01:10.50]", scenario6.Timestamp.PrintTimestamp("[mm:ss.SS]", DotTypeEnum.HALF_UP));
+            Assert.AreEqual("[01:10.05]", scenario6.Timestamp.PrintTimestamp("[mm:ss.SS]", DotTypeEnum.HALF_UP));
         }
     }
 }
