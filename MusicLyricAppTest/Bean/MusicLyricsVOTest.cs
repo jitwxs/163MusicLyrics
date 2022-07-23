@@ -33,5 +33,12 @@ namespace MusicLyricAppTest.Bean
 
             Assert.AreEqual("[01:10.05]", scenario6.Timestamp.PrintTimestamp("[mm:ss.SS]", DotTypeEnum.HALF_UP));
         }
+
+        [Test]
+        public void TestLyricTimestamp()
+        {
+            var timestamp = new LyricTimestamp("[End]");
+            Assert.AreEqual(0, timestamp.TimeOffset);
+        }
     }
 }
