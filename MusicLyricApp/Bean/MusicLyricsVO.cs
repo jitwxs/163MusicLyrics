@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using System.Text;
 using System.Web;
 using MusicLyricApp.Exception;
 using MusicLyricApp.Utils;
@@ -29,7 +28,7 @@ namespace MusicLyricApp.Bean
         [Description("歌手 - 歌曲名")] SINGER_NAME = 1,
         [Description("歌曲名")] NAME = 2
     }
-    
+
     // 搜索来源
     public enum SearchSourceEnum
     {
@@ -76,7 +75,7 @@ namespace MusicLyricApp.Bean
         [Description("送假名")] OKURIGANA = 2,
         [Description("注音假名")] FURIGANA = 3,
     }
-    
+
     // 罗马音字体系
     public enum RomajiSystemEnum
     {
@@ -207,13 +206,17 @@ namespace MusicLyricApp.Bean
 
     public class LyricTimestamp : IComparable
     {
-        public long TimeOffset { get;}
+        public long TimeOffset { get; }
 
         public LyricTimestamp(long millisecond)
         {
             TimeOffset = millisecond;
         }
-        
+
+        /// <summary>
+        /// 初始化 LyricTimestamp
+        /// </summary>
+        /// <param name="timestamp">[mm:ss.SSS] or [mm:ss]</param>
         public LyricTimestamp(string timestamp)
         {
             if (string.IsNullOrWhiteSpace(timestamp) || timestamp[0] != '[' || timestamp[timestamp.Length - 1] != ']')
@@ -228,18 +231,22 @@ namespace MusicLyricApp.Bean
                 var split = timestamp.Split(':');
 
                 var minute = GlobalUtils.toInt(split[0], 0);
-            
-                split = split[1].Split('.');
 
-                var second = GlobalUtils.toInt(split[0], 0);
-
-                TimeOffset = (minute * 60 + second) * 1000;
-
+                int second = 0, millisecond = 0;
                 if (split.Length > 1)
                 {
-                    // 三位毫秒，右填充 0
-                    TimeOffset += GlobalUtils.toInt(split[1].PadRight(3, '0'), 0);
+                    split = split[1].Split('.');
+
+                    second = GlobalUtils.toInt(split[0], 0);
+
+                    if (split.Length > 1)
+                    {
+                        // 三位毫秒，右填充 0
+                        millisecond = GlobalUtils.toInt(split[1].PadRight(3, '0'), 0);
+                    }
                 }
+
+                TimeOffset = (minute * 60 + second) * 1000 + millisecond;
             }
         }
 
@@ -249,12 +256,12 @@ namespace MusicLyricApp.Bean
             {
                 throw new MusicLyricException(ErrorMsg.SYSTEM_ERROR);
             }
-            
+
             if (TimeOffset == obj.TimeOffset)
             {
                 return 0;
             }
-            
+
             if (TimeOffset == -1)
             {
                 return -1;
@@ -274,7 +281,7 @@ namespace MusicLyricApp.Bean
                 return -1;
             }
         }
-        
+
         public string PrintTimestamp(string timestampFormat, DotTypeEnum dotType)
         {
             var output = timestampFormat;
@@ -283,10 +290,12 @@ namespace MusicLyricApp.Bean
             if (output.Contains("SSS"))
             {
                 msDigit = 3;
-            } else if (output.Contains("SS"))
+            }
+            else if (output.Contains("SS"))
             {
                 msDigit = 2;
-            } else if (output.Contains("S"))
+            }
+            else if (output.Contains("S"))
             {
                 msDigit = 1;
             }
@@ -294,7 +303,7 @@ namespace MusicLyricApp.Bean
             {
                 msDigit = 3;
             }
-            
+
             long offset;
             if (msDigit == 3)
             {
@@ -316,12 +325,12 @@ namespace MusicLyricApp.Bean
             offset /= 1000;
             var minute = offset / 60;
             var second = offset - minute * 60;
-            
+
             long actualMinute;
             if (output.Contains("HH"))
             {
                 var hour = minute / 60;
-                actualMinute  = minute % 60;
+                actualMinute = minute % 60;
                 output = output.Replace("HH", hour.ToString("00"));
             }
             else
@@ -343,12 +352,12 @@ namespace MusicLyricApp.Bean
             {
                 output = output.Replace("SSS", ms.ToString("000"));
             }
-            
+
             if (output.Contains("SS"))
             {
                 output = output.Replace("SS", (ms / 10).ToString("00"));
             }
-            
+
             if (output.Contains("S"))
             {
                 output = output.Replace("S", (ms / 100).ToString("0"));
@@ -357,14 +366,14 @@ namespace MusicLyricApp.Bean
             return output;
         }
     }
-    
+
     /// <summary>
     /// 当行歌词信息
     /// </summary>
     public class LyricLineVo : IComparable
     {
         public LyricTimestamp Timestamp { get; set; }
-        
+
         /// <summary>
         /// 歌词正文
         /// </summary>
