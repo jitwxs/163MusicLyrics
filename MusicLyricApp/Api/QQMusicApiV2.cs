@@ -50,6 +50,7 @@ namespace MusicLyricApp.Api
                 result[songId] = new SongVo
                 {
                     Links = links,
+                    Pics = BuildPicUrl(song.Album),
                     Name = song.Name,
                     Singer = ContractSinger(song.Singer),
                     Album = song.Album.Name,
@@ -81,7 +82,7 @@ namespace MusicLyricApp.Api
         /// <summary>
         /// 拼接歌手名
         /// </summary>
-        public static string ContractSinger(QQMusicBean.Singer[] singers)
+        private static string ContractSinger(QQMusicBean.Singer[] singers)
         {
             if (singers == null || !singers.Any())
             {
@@ -95,6 +96,11 @@ namespace MusicLyricApp.Api
             }
 
             return sb.Remove(sb.Length - 1, 1).ToString();
+        }
+
+        private static string BuildPicUrl(QQMusicBean.Album album)
+        {
+            return "https://y.qq.com/music/photo_new/T002R300x300M000" + album.Pmid + ".jpg";
         }
     }
 }

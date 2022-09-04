@@ -100,14 +100,17 @@ namespace MusicLyricApp.Bean
         public const string SUCCESS = "成功";
         public const string SEARCH_RESULT_STAGE = "查询成功，结果已暂存";
         public const string MUST_SEARCH_BEFORE_SAVE = "您必须先搜索，才能保存内容";
-        public const string MUST_SEARCH_BEFORE_COPY_SONG_URL = "您必须先搜索，才能获取直链";
+        public const string MUST_SEARCH_BEFORE_GET_SONG_URL = "您必须先搜索，才能获取歌曲链接";
+        public const string MUST_SEARCH_BEFORE_GET_SONG_PIC = "您必须先搜索，才能获取歌曲封面";
         public const string INPUT_ID_ILLEGAL = "您输入的ID不合法";
         public const string ALBUM_NOT_EXIST = "专辑信息暂未被收录或查询失败";
         public const string SONG_NOT_EXIST = "歌曲信息暂未被收录或查询失败";
         public const string LRC_NOT_EXIST = "歌词信息暂未被收录或查询失败";
         public const string FUNCTION_NOT_SUPPORT = "该功能暂不可用，请等待后续更新";
-        public const string SONG_URL_COPY_SUCCESS = "歌曲直链，已复制到剪切板";
+        public const string SONG_URL_GET_SUCCESS = "歌曲直链，已复制到剪切板";
         public const string SONG_URL_GET_FAILED = "歌曲直链，获取失败";
+        public const string SONG_PIC_GET_SUCCESS = "歌曲封面，已复制到剪切板";
+        public const string SONG_PIC_GET_FAILED = "歌曲封面，获取失败";
         public const string DEPENDENCY_LOSS = "缺少必须依赖，请前往项目主页下载 {0} 插件";
         public const string SAVE_COMPLETE = "保存完毕，成功 {0} 跳过 {1}";
 
@@ -158,9 +161,14 @@ namespace MusicLyricApp.Bean
         public string Album { get; set; }
 
         /// <summary>
-        /// 歌曲直链 Url
+        /// 歌曲链接 Url
         /// </summary>
         public string Links { get; set; }
+        
+        /// <summary>
+        /// 歌曲封面 Url
+        /// </summary>
+        public string Pics { get; set; }
 
         /// <summary>
         /// 歌曲时长 ms
