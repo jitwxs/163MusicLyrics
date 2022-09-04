@@ -113,7 +113,7 @@ namespace MusicLyricApp.Api
                 return null;
             }
 
-            return obj["req"]["data"]["sip"][0].ToString() + obj["req_0"]["data"]["midurlinfo"][0]["purl"] + ToString();
+            return obj["req"]["data"]["sip"][0].ToString() + obj["req_0"]["data"]["midurlinfo"][0]["purl"];
         }
 
         private static string ResolveRespJson(string callBackSign, string val)

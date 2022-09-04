@@ -70,6 +70,7 @@ namespace MusicLyricApp
             this.OutputFormat_Label = new System.Windows.Forms.Label();
             this.OutputFormat_CombBox = new System.Windows.Forms.ComboBox();
             this.SearchSource_ComboBox = new System.Windows.Forms.ComboBox();
+            this.SongPic_Btn = new System.Windows.Forms.Button();
             this.Top_MenuStrip.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -112,9 +113,9 @@ namespace MusicLyricApp
             // 
             // Search_Btn
             // 
-            this.Search_Btn.Location = new System.Drawing.Point(387, 28);
+            this.Search_Btn.Location = new System.Drawing.Point(387, 34);
             this.Search_Btn.Name = "Search_Btn";
-            this.Search_Btn.Size = new System.Drawing.Size(93, 73);
+            this.Search_Btn.Size = new System.Drawing.Size(93, 67);
             this.Search_Btn.TabIndex = 2;
             this.Search_Btn.Text = "搜索 Enter";
             this.Search_Btn.UseVisualStyleBackColor = true;
@@ -154,7 +155,7 @@ namespace MusicLyricApp
             // 
             this.Search_Text.Location = new System.Drawing.Point(89, 80);
             this.Search_Text.Name = "Search_Text";
-            this.Search_Text.Size = new System.Drawing.Size(204, 21);
+            this.Search_Text.Size = new System.Drawing.Size(196, 21);
             this.Search_Text.TabIndex = 1;
             // 
             // OutputName_Label
@@ -231,11 +232,11 @@ namespace MusicLyricApp
             // 
             // SongLink_Btn
             // 
-            this.SongLink_Btn.Location = new System.Drawing.Point(299, 80);
+            this.SongLink_Btn.Location = new System.Drawing.Point(299, 78);
             this.SongLink_Btn.Name = "SongLink_Btn";
-            this.SongLink_Btn.Size = new System.Drawing.Size(70, 22);
+            this.SongLink_Btn.Size = new System.Drawing.Size(38, 22);
             this.SongLink_Btn.TabIndex = 21;
-            this.SongLink_Btn.Text = "歌曲链接";
+            this.SongLink_Btn.Text = "歌曲";
             this.SongLink_Btn.UseVisualStyleBackColor = true;
             this.SongLink_Btn.Click += new System.EventHandler(this.SongLink_Btn_Click);
             // 
@@ -251,12 +252,7 @@ namespace MusicLyricApp
             // 
             // Top_MenuStrip
             // 
-            this.Top_MenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.Home_MItem,
-            this.Wiki_MItem,
-            this.Issue_MItem,
-            this.CheckVersion_MItem,
-            this.Setting_MItem});
+            this.Top_MenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { this.Home_MItem, this.Wiki_MItem, this.Issue_MItem, this.CheckVersion_MItem, this.Setting_MItem });
             this.Top_MenuStrip.Location = new System.Drawing.Point(0, 0);
             this.Top_MenuStrip.Name = "Top_MenuStrip";
             this.Top_MenuStrip.Size = new System.Drawing.Size(492, 25);
@@ -327,12 +323,23 @@ namespace MusicLyricApp
             this.SearchSource_ComboBox.TabIndex = 30;
             this.SearchSource_ComboBox.SelectedIndexChanged += new System.EventHandler(this.SearchSource_ComboBox_SelectedIndexChanged);
             // 
+            // SongPic_Btn
+            // 
+            this.SongPic_Btn.Location = new System.Drawing.Point(343, 77);
+            this.SongPic_Btn.Name = "SongPic_Btn";
+            this.SongPic_Btn.Size = new System.Drawing.Size(39, 23);
+            this.SongPic_Btn.TabIndex = 31;
+            this.SongPic_Btn.Text = "封面";
+            this.SongPic_Btn.UseVisualStyleBackColor = true;
+            this.SongPic_Btn.Click += new System.EventHandler(this.SongPic_Btn_Click);
+            // 
             // MainForm
             // 
             this.AcceptButton = this.Search_Btn;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(492, 475);
+            this.Controls.Add(this.SongPic_Btn);
             this.Controls.Add(this.SearchSource_ComboBox);
             this.Controls.Add(this.OutputFormat_CombBox);
             this.Controls.Add(this.OutputFormat_Label);
@@ -361,7 +368,7 @@ namespace MusicLyricApp
             this.MainMenuStrip = this.Top_MenuStrip;
             this.MaximizeBox = false;
             this.Name = "MainForm";
-            this.Text = "云音乐歌词提取 " + Constants.Version;
+            this.Text = "云音乐歌词提取 v4.9";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
             this.MouseEnter += new System.EventHandler(this.MainForm_MouseEnter);
             this.Top_MenuStrip.ResumeLayout(false);
@@ -369,6 +376,8 @@ namespace MusicLyricApp
             this.ResumeLayout(false);
             this.PerformLayout();
         }
+
+        private System.Windows.Forms.Button SongPic_Btn;
 
         private System.Windows.Forms.ToolStripMenuItem Setting_MItem;
 

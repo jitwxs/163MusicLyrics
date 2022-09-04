@@ -26,10 +26,12 @@ namespace MusicLyricApp
             _settingBean.Config.RememberParam = RememberParam_CheckBox.Checked;
             _settingBean.Config.AutoReadClipboard = AutoReadClipboard_CheckBox.Checked;
             _settingBean.Config.AutoCheckUpdate = AutoCheckUpdate_CheckBox.Checked;
+            _settingBean.Param.IgnoreEmptyLyric = IgnoreEmptyLyric_CheckBox.Checked;
 
             _settingBean.Param.DotType = (DotTypeEnum)Dot_ComboBox.SelectedIndex;
             _settingBean.Param.LrcTimestampFormat = LrcTimestampFormat_TextBox.Text;
             _settingBean.Param.SrtTimestampFormat = SrtTimestampFormat_TextBox.Text;
+            _settingBean.Param.TranslateMatchPrecisionDeviation = int.Parse(TranslateMatchPrecisionDeviation_TextBox.Text);
 
             _settingBean.Config.RomajiConfig.Enable = ShowRomaji_CheckBox.Checked;
             _settingBean.Config.RomajiConfig.ModeEnum = (RomajiModeEnum)RomajiMode_ComboBox.SelectedIndex;
@@ -57,6 +59,14 @@ namespace MusicLyricApp
             
             RomajiMode_ComboBox.Enabled = isEnable;
             RomajiSystem_ComboBox.Enabled = isEnable;
+        }
+
+        private void LrcMatchDigit_TextBox_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if(e.KeyChar!='\b' && !char.IsDigit(e.KeyChar))
+            {
+                e.Handled = true;
+            }
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using MusicLyricApp.Bean;
 using MusicLyricApp.Utils;
 
@@ -35,9 +36,11 @@ namespace MusicLyricApp
             RememberParam_CheckBox.Checked = _settingBean.Config.RememberParam;
             AutoReadClipboard_CheckBox.Checked = _settingBean.Config.AutoReadClipboard;
             AutoCheckUpdate_CheckBox.Checked = _settingBean.Config.AutoCheckUpdate;
+            IgnoreEmptyLyric_CheckBox.Checked = _settingBean.Param.IgnoreEmptyLyric;
 
             LrcTimestampFormat_TextBox.Text = _settingBean.Param.LrcTimestampFormat;
             SrtTimestampFormat_TextBox.Text = _settingBean.Param.SrtTimestampFormat;
+            TranslateMatchPrecisionDeviation_TextBox.Text = _settingBean.Param.TranslateMatchPrecisionDeviation.ToString();
             Dot_ComboBox.SelectedIndex = (int)_settingBean.Param.DotType;
 
             ShowRomaji_CheckBox.Checked = _settingBean.Config.RomajiConfig.Enable;
@@ -74,11 +77,15 @@ namespace MusicLyricApp
             this.Dot_ComboBox = new System.Windows.Forms.ComboBox();
             this.label1 = new System.Windows.Forms.Label();
             this.TranLyricDefaultRule_ComboBox = new System.Windows.Forms.ComboBox();
+            this.label9 = new System.Windows.Forms.Label();
+            this.TranslateMatchPrecisionDeviation_TextBox = new System.Windows.Forms.TextBox();
+            this.label10 = new System.Windows.Forms.Label();
+            this.IgnoreEmptyLyric_CheckBox = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // Save_Btn
             // 
-            this.Save_Btn.Location = new System.Drawing.Point(294, 252);
+            this.Save_Btn.Location = new System.Drawing.Point(305, 254);
             this.Save_Btn.Name = "Save_Btn";
             this.Save_Btn.Size = new System.Drawing.Size(114, 44);
             this.Save_Btn.TabIndex = 0;
@@ -88,7 +95,7 @@ namespace MusicLyricApp
             // 
             // RememberParam_CheckBox
             // 
-            this.RememberParam_CheckBox.Location = new System.Drawing.Point(15, 206);
+            this.RememberParam_CheckBox.Location = new System.Drawing.Point(12, 254);
             this.RememberParam_CheckBox.Name = "RememberParam_CheckBox";
             this.RememberParam_CheckBox.Size = new System.Drawing.Size(78, 24);
             this.RememberParam_CheckBox.TabIndex = 1;
@@ -97,7 +104,7 @@ namespace MusicLyricApp
             // 
             // AutoReadClipboard_CheckBox
             // 
-            this.AutoReadClipboard_CheckBox.Location = new System.Drawing.Point(144, 206);
+            this.AutoReadClipboard_CheckBox.Location = new System.Drawing.Point(138, 252);
             this.AutoReadClipboard_CheckBox.Name = "AutoReadClipboard_CheckBox";
             this.AutoReadClipboard_CheckBox.Size = new System.Drawing.Size(112, 26);
             this.AutoReadClipboard_CheckBox.TabIndex = 2;
@@ -106,7 +113,7 @@ namespace MusicLyricApp
             // 
             // AutoCheckUpdate_CheckBox
             // 
-            this.AutoCheckUpdate_CheckBox.Location = new System.Drawing.Point(15, 259);
+            this.AutoCheckUpdate_CheckBox.Location = new System.Drawing.Point(12, 293);
             this.AutoCheckUpdate_CheckBox.Name = "AutoCheckUpdate_CheckBox";
             this.AutoCheckUpdate_CheckBox.Size = new System.Drawing.Size(97, 32);
             this.AutoCheckUpdate_CheckBox.TabIndex = 3;
@@ -115,9 +122,9 @@ namespace MusicLyricApp
             // 
             // ShowRomaji_CheckBox
             // 
-            this.ShowRomaji_CheckBox.Location = new System.Drawing.Point(15, 104);
+            this.ShowRomaji_CheckBox.Location = new System.Drawing.Point(13, 107);
             this.ShowRomaji_CheckBox.Name = "ShowRomaji_CheckBox";
-            this.ShowRomaji_CheckBox.Size = new System.Drawing.Size(120, 30);
+            this.ShowRomaji_CheckBox.Size = new System.Drawing.Size(120, 25);
             this.ShowRomaji_CheckBox.TabIndex = 5;
             this.ShowRomaji_CheckBox.Text = "译文显示罗马音";
             this.ShowRomaji_CheckBox.UseVisualStyleBackColor = true;
@@ -129,12 +136,12 @@ namespace MusicLyricApp
             this.RomajiMode_ComboBox.FormattingEnabled = true;
             this.RomajiMode_ComboBox.Location = new System.Drawing.Point(87, 148);
             this.RomajiMode_ComboBox.Name = "RomajiMode_ComboBox";
-            this.RomajiMode_ComboBox.Size = new System.Drawing.Size(100, 20);
+            this.RomajiMode_ComboBox.Size = new System.Drawing.Size(121, 20);
             this.RomajiMode_ComboBox.TabIndex = 7;
             // 
             // label3
             // 
-            this.label3.Location = new System.Drawing.Point(15, 150);
+            this.label3.Location = new System.Drawing.Point(12, 151);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(68, 18);
             this.label3.TabIndex = 8;
@@ -142,7 +149,7 @@ namespace MusicLyricApp
             // 
             // label4
             // 
-            this.label4.Location = new System.Drawing.Point(228, 150);
+            this.label4.Location = new System.Drawing.Point(13, 192);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(68, 18);
             this.label4.TabIndex = 9;
@@ -152,9 +159,9 @@ namespace MusicLyricApp
             // 
             this.RomajiSystem_ComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.RomajiSystem_ComboBox.FormattingEnabled = true;
-            this.RomajiSystem_ComboBox.Location = new System.Drawing.Point(319, 147);
+            this.RomajiSystem_ComboBox.Location = new System.Drawing.Point(89, 190);
             this.RomajiSystem_ComboBox.Name = "RomajiSystem_ComboBox";
-            this.RomajiSystem_ComboBox.Size = new System.Drawing.Size(100, 20);
+            this.RomajiSystem_ComboBox.Size = new System.Drawing.Size(119, 20);
             this.RomajiSystem_ComboBox.TabIndex = 10;
             // 
             // label2
@@ -169,7 +176,7 @@ namespace MusicLyricApp
             // label5
             // 
             this.label5.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.label5.Location = new System.Drawing.Point(15, 184);
+            this.label5.Location = new System.Drawing.Point(15, 230);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(410, 2);
             this.label5.TabIndex = 12;
@@ -242,11 +249,49 @@ namespace MusicLyricApp
             this.TranLyricDefaultRule_ComboBox.Size = new System.Drawing.Size(98, 20);
             this.TranLyricDefaultRule_ComboBox.TabIndex = 20;
             // 
+            // label9
+            // 
+            this.label9.Location = new System.Drawing.Point(228, 151);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(82, 24);
+            this.label9.TabIndex = 21;
+            this.label9.Text = "译文匹配精度";
+            // 
+            // TranslateMatchPrecisionDeviation_TextBox
+            // 
+            this.TranslateMatchPrecisionDeviation_TextBox.Location = new System.Drawing.Point(321, 147);
+            this.TranslateMatchPrecisionDeviation_TextBox.Name = "TranslateMatchPrecisionDeviation_TextBox";
+            this.TranslateMatchPrecisionDeviation_TextBox.Size = new System.Drawing.Size(73, 21);
+            this.TranslateMatchPrecisionDeviation_TextBox.TabIndex = 22;
+            this.TranslateMatchPrecisionDeviation_TextBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.LrcMatchDigit_TextBox_KeyPress);
+            // 
+            // label10
+            // 
+            this.label10.Font = new System.Drawing.Font("宋体", 10F);
+            this.label10.Location = new System.Drawing.Point(400, 149);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(24, 18);
+            this.label10.TabIndex = 23;
+            this.label10.Text = "MS";
+            // 
+            // IgnoreEmptyLyric_CheckBox
+            // 
+            this.IgnoreEmptyLyric_CheckBox.Location = new System.Drawing.Point(228, 188);
+            this.IgnoreEmptyLyric_CheckBox.Name = "IgnoreEmptyLyric_CheckBox";
+            this.IgnoreEmptyLyric_CheckBox.Size = new System.Drawing.Size(98, 25);
+            this.IgnoreEmptyLyric_CheckBox.TabIndex = 24;
+            this.IgnoreEmptyLyric_CheckBox.Text = "忽略空行歌词";
+            this.IgnoreEmptyLyric_CheckBox.UseVisualStyleBackColor = true;
+            // 
             // SettingForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(433, 321);
+            this.ClientSize = new System.Drawing.Size(433, 334);
+            this.Controls.Add(this.IgnoreEmptyLyric_CheckBox);
+            this.Controls.Add(this.label10);
+            this.Controls.Add(this.TranslateMatchPrecisionDeviation_TextBox);
+            this.Controls.Add(this.label9);
             this.Controls.Add(this.TranLyricDefaultRule_ComboBox);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.Dot_ComboBox);
@@ -274,6 +319,13 @@ namespace MusicLyricApp
             this.ResumeLayout(false);
             this.PerformLayout();
         }
+
+        private System.Windows.Forms.CheckBox IgnoreEmptyLyric_CheckBox;
+
+        private System.Windows.Forms.Label label10;
+
+        private System.Windows.Forms.Label label9;
+        private System.Windows.Forms.TextBox TranslateMatchPrecisionDeviation_TextBox;
 
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.ComboBox TranLyricDefaultRule_ComboBox;

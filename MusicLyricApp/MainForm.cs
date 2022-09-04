@@ -402,34 +402,33 @@ namespace MusicLyricApp
         }
 
         /// <summary>
-        /// 获取直链按钮，点击事件
+        /// 获取歌曲链接按钮，点击事件
         /// </summary>
         private void SongLink_Btn_Click(object sender, EventArgs e)
         {
             if (_globalSaveVoMap == null || _globalSaveVoMap.Count == 0)
             {
-                MessageBox.Show(ErrorMsg.MUST_SEARCH_BEFORE_COPY_SONG_URL, "提示");
+                MessageBox.Show(ErrorMsg.MUST_SEARCH_BEFORE_GET_SONG_URL, "提示");
                 return;
             }
 
-            var log = new StringBuilder();
             if (_globalSaveVoMap.Count > 1)
             {
-                // 输出日志
+                var csv = new CsvBean();
+                
+                csv.AddColumn("id");
+                csv.AddColumn("songLink");
+    
                 foreach (var songId in _globalSearchInfo.SongIds)
                 {
                     _globalSaveVoMap.TryGetValue(songId, out var saveVo);
 
-                    var link = "failure";
-                    if (saveVo != null)
-                    {
-                        link = saveVo.SongVo.Links ?? "failure";
-                    }
-
-                    log.Append($"ID: {songId}, Links: {link}").Append(Environment.NewLine);
+                    csv.AddData(songId);
+                    csv.AddData(saveVo == null ? string.Empty : saveVo.SongVo.Links);
+                    csv.NextLine();
                 }
 
-                UpdateLrcTextBox(log.ToString());
+                UpdateLrcTextBox(csv.ToString());
             }
             else
             {
@@ -444,12 +443,60 @@ namespace MusicLyricApp
                     else
                     {
                         Clipboard.SetDataObject(link);
-                        MessageBox.Show(ErrorMsg.SONG_URL_COPY_SUCCESS, "提示");
+                        MessageBox.Show(ErrorMsg.SONG_URL_GET_SUCCESS, "提示");
                     }
                 }
             }
         }
 
+        /// <summary>
+        /// 获取歌曲封面按钮，点击事件
+        /// </summary>
+        private void SongPic_Btn_Click(object sender, EventArgs e)
+        {
+            if (_globalSaveVoMap == null || _globalSaveVoMap.Count == 0)
+            {
+                MessageBox.Show(ErrorMsg.MUST_SEARCH_BEFORE_GET_SONG_PIC, "提示");
+                return;
+            }
+
+            if (_globalSaveVoMap.Count > 1)
+            {
+                var csv = new CsvBean();
+                
+                csv.AddColumn("id");
+                csv.AddColumn("picLink");
+                
+                foreach (var songId in _globalSearchInfo.SongIds)
+                {
+                    _globalSaveVoMap.TryGetValue(songId, out var saveVo);
+
+                    csv.AddData(songId);
+                    csv.AddData(saveVo == null ? string.Empty : saveVo.SongVo.Pics);
+                    csv.NextLine();
+                }
+
+                UpdateLrcTextBox(csv.ToString());
+            }
+            else
+            {
+                // only loop one times
+                foreach (var item in _globalSaveVoMap)
+                {
+                    var pic = item.Value.SongVo.Pics;
+                    if (pic == null)
+                    {
+                        MessageBox.Show(ErrorMsg.SONG_PIC_GET_FAILED, "提示");
+                    }
+                    else
+                    {
+                        Clipboard.SetDataObject(pic);
+                        MessageBox.Show(ErrorMsg.SONG_PIC_GET_SUCCESS, "提示");
+                    }
+                }
+            }
+        }
+        
         /**
          * 单个保存
          */

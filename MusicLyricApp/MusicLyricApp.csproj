@@ -243,6 +243,7 @@
     <Compile Include="Api\QQMusicApiV2.cs" />
     <Compile Include="Api\QQMusicNativeApi.cs" />
     <Compile Include="Bean\Constants.cs" />
+    <Compile Include="Bean\CsvBean.cs" />
     <Compile Include="Bean\GitHubBase.cs" />
     <Compile Include="Bean\NetEaseMusicBean.cs" />
     <Compile Include="Bean\MusicLyricsVO.cs" />

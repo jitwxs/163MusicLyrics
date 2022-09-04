@@ -41,9 +41,11 @@
     <ItemGroup>
       <Compile Include="Api\NetEaseMusicApiV2.cs" />
       <Compile Include="Api\QQMusicNativeApi.cs" />
+      <Compile Include="Bean\CsvBeanTest.cs" />
       <Compile Include="Bean\LyricTimestampTest.cs" />
       <Compile Include="Bean\MusicLyricsVOTest.cs" />
       <Compile Include="Utils\GlobalUtilsTest.cs" />
+      <Compile Include="Utils\LyricUtilsTest.cs" />
       <Compile Include="Utils\SrtUtilsTest.cs" />
     </ItemGroup>
     <ItemGroup>

@@ -55,6 +55,7 @@ namespace MusicLyricApp.Api
                 result[songId] = new SongVo
                 {
                     Links = datum.Url,
+                    Pics = song.Al.PicUrl,
                     Name = song.Name,
                     Singer = ContractSinger(song.Ar),
                     Album = song.Al.Name,
