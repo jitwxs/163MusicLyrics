@@ -36,6 +36,7 @@ namespace MusicLyricApp
             RememberParam_CheckBox.Checked = _settingBean.Config.RememberParam;
             AutoReadClipboard_CheckBox.Checked = _settingBean.Config.AutoReadClipboard;
             AutoCheckUpdate_CheckBox.Checked = _settingBean.Config.AutoCheckUpdate;
+            IgnoreEmptyLyric_CheckBox.Checked = _settingBean.Param.IgnoreEmptyLyric;
 
             LrcTimestampFormat_TextBox.Text = _settingBean.Param.LrcTimestampFormat;
             SrtTimestampFormat_TextBox.Text = _settingBean.Param.SrtTimestampFormat;
@@ -79,6 +80,7 @@ namespace MusicLyricApp
             this.label9 = new System.Windows.Forms.Label();
             this.TranslateMatchPrecisionDeviation_TextBox = new System.Windows.Forms.TextBox();
             this.label10 = new System.Windows.Forms.Label();
+            this.IgnoreEmptyLyric_CheckBox = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // Save_Btn
@@ -120,9 +122,9 @@ namespace MusicLyricApp
             // 
             // ShowRomaji_CheckBox
             // 
-            this.ShowRomaji_CheckBox.Location = new System.Drawing.Point(15, 104);
+            this.ShowRomaji_CheckBox.Location = new System.Drawing.Point(13, 107);
             this.ShowRomaji_CheckBox.Name = "ShowRomaji_CheckBox";
-            this.ShowRomaji_CheckBox.Size = new System.Drawing.Size(120, 30);
+            this.ShowRomaji_CheckBox.Size = new System.Drawing.Size(120, 25);
             this.ShowRomaji_CheckBox.TabIndex = 5;
             this.ShowRomaji_CheckBox.Text = "译文显示罗马音";
             this.ShowRomaji_CheckBox.UseVisualStyleBackColor = true;
@@ -139,7 +141,7 @@ namespace MusicLyricApp
             // 
             // label3
             // 
-            this.label3.Location = new System.Drawing.Point(15, 150);
+            this.label3.Location = new System.Drawing.Point(12, 151);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(68, 18);
             this.label3.TabIndex = 8;
@@ -147,7 +149,7 @@ namespace MusicLyricApp
             // 
             // label4
             // 
-            this.label4.Location = new System.Drawing.Point(228, 150);
+            this.label4.Location = new System.Drawing.Point(13, 192);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(68, 18);
             this.label4.TabIndex = 9;
@@ -157,9 +159,9 @@ namespace MusicLyricApp
             // 
             this.RomajiSystem_ComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.RomajiSystem_ComboBox.FormattingEnabled = true;
-            this.RomajiSystem_ComboBox.Location = new System.Drawing.Point(319, 147);
+            this.RomajiSystem_ComboBox.Location = new System.Drawing.Point(89, 190);
             this.RomajiSystem_ComboBox.Name = "RomajiSystem_ComboBox";
-            this.RomajiSystem_ComboBox.Size = new System.Drawing.Size(100, 20);
+            this.RomajiSystem_ComboBox.Size = new System.Drawing.Size(119, 20);
             this.RomajiSystem_ComboBox.TabIndex = 10;
             // 
             // label2
@@ -249,34 +251,44 @@ namespace MusicLyricApp
             // 
             // label9
             // 
-            this.label9.Location = new System.Drawing.Point(15, 193);
+            this.label9.Location = new System.Drawing.Point(228, 151);
             this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(99, 24);
+            this.label9.Size = new System.Drawing.Size(82, 24);
             this.label9.TabIndex = 21;
             this.label9.Text = "译文匹配精度";
             // 
             // TranslateMatchPrecisionDeviation_TextBox
             // 
-            this.TranslateMatchPrecisionDeviation_TextBox.Location = new System.Drawing.Point(108, 190);
+            this.TranslateMatchPrecisionDeviation_TextBox.Location = new System.Drawing.Point(321, 147);
             this.TranslateMatchPrecisionDeviation_TextBox.Name = "TranslateMatchPrecisionDeviation_TextBox";
-            this.TranslateMatchPrecisionDeviation_TextBox.Size = new System.Drawing.Size(64, 21);
+            this.TranslateMatchPrecisionDeviation_TextBox.Size = new System.Drawing.Size(73, 21);
             this.TranslateMatchPrecisionDeviation_TextBox.TabIndex = 22;
             this.TranslateMatchPrecisionDeviation_TextBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.LrcMatchDigit_TextBox_KeyPress);
             // 
             // label10
             // 
-            this.label10.Font = new System.Drawing.Font("宋体", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.label10.Location = new System.Drawing.Point(178, 193);
+            this.label10.Font = new System.Drawing.Font("宋体", 10F);
+            this.label10.Location = new System.Drawing.Point(400, 149);
             this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(30, 18);
+            this.label10.Size = new System.Drawing.Size(24, 18);
             this.label10.TabIndex = 23;
-            this.label10.Text = "ms";
+            this.label10.Text = "MS";
+            // 
+            // IgnoreEmptyLyric_CheckBox
+            // 
+            this.IgnoreEmptyLyric_CheckBox.Location = new System.Drawing.Point(228, 188);
+            this.IgnoreEmptyLyric_CheckBox.Name = "IgnoreEmptyLyric_CheckBox";
+            this.IgnoreEmptyLyric_CheckBox.Size = new System.Drawing.Size(98, 25);
+            this.IgnoreEmptyLyric_CheckBox.TabIndex = 24;
+            this.IgnoreEmptyLyric_CheckBox.Text = "忽略空行歌词";
+            this.IgnoreEmptyLyric_CheckBox.UseVisualStyleBackColor = true;
             // 
             // SettingForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(433, 334);
+            this.Controls.Add(this.IgnoreEmptyLyric_CheckBox);
             this.Controls.Add(this.label10);
             this.Controls.Add(this.TranslateMatchPrecisionDeviation_TextBox);
             this.Controls.Add(this.label9);
@@ -307,6 +319,8 @@ namespace MusicLyricApp
             this.ResumeLayout(false);
             this.PerformLayout();
         }
+
+        private System.Windows.Forms.CheckBox IgnoreEmptyLyric_CheckBox;
 
         private System.Windows.Forms.Label label10;
 

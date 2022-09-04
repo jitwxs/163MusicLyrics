@@ -93,6 +93,11 @@ namespace MusicLyricApp.Bean
         public int TranslateMatchPrecisionDeviation = 0;
 
         /// <summary>
+        /// 忽略空的歌词行
+        /// </summary>
+        public bool IgnoreEmptyLyric = true;
+
+        /// <summary>
         /// 小数位处理策略
         /// </summary>
         public DotTypeEnum DotType = DotTypeEnum.DOWN;

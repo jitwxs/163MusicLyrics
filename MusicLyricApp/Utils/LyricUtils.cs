@@ -46,8 +46,9 @@ namespace MusicLyricApp.Utils
         {
             var showLrcType = searchInfo.SettingBean.Param.ShowLrcType;
             var searchSource = searchInfo.SettingBean.Param.SearchSource;
+            var ignoreEmptyLine = searchInfo.SettingBean.Param.IgnoreEmptyLyric;
 
-            var originLyrics = SplitLrc(originLrc, searchSource);
+            var originLyrics = SplitLrc(originLrc, searchSource, ignoreEmptyLine);
 
             /*
              * 1、原文歌词不存在
@@ -63,7 +64,7 @@ namespace MusicLyricApp.Utils
             // 译文处理，启用罗马音进行转换，否则使用原始的译文
             var romajiConfig = searchInfo.SettingBean.Config.RomajiConfig;
             
-            var translateLyrics = SplitLrc(translateLrc, searchSource);
+            var translateLyrics = SplitLrc(translateLrc, searchSource, ignoreEmptyLine);
 
             translateLyrics = DealTranslateLyric(originLyrics, translateLyrics, searchInfo.SettingBean);
             
@@ -114,7 +115,7 @@ namespace MusicLyricApp.Utils
         /**
          * 切割歌词
          */
-        private static List<LyricLineVo> SplitLrc(string lrc, SearchSourceEnum searchSource)
+        private static List<LyricLineVo> SplitLrc(string lrc, SearchSourceEnum searchSource, bool ignoreEmptyLine)
         {
             // 换行符统一
             var temp = lrc
@@ -135,10 +136,16 @@ namespace MusicLyricApp.Utils
 
                 var lyricLineVo = new LyricLineVo(line);
                 
-                // 跳过无效内容
+                // 无效内容处理
                 if (lyricLineVo.IsIllegalContent())
                 {
-                    continue;
+                    if (ignoreEmptyLine)
+                    {
+                        continue;
+                    }
+
+                    // 重置空行内容
+                    lyricLineVo.Content = string.Empty;
                 }
 
                 resultList.Add(lyricLineVo);
