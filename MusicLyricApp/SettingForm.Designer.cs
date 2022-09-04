@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using MusicLyricApp.Bean;
 using MusicLyricApp.Utils;
 
@@ -38,6 +39,7 @@ namespace MusicLyricApp
 
             LrcTimestampFormat_TextBox.Text = _settingBean.Param.LrcTimestampFormat;
             SrtTimestampFormat_TextBox.Text = _settingBean.Param.SrtTimestampFormat;
+            TranslateMatchPrecisionDeviation_TextBox.Text = _settingBean.Param.TranslateMatchPrecisionDeviation.ToString();
             Dot_ComboBox.SelectedIndex = (int)_settingBean.Param.DotType;
 
             ShowRomaji_CheckBox.Checked = _settingBean.Config.RomajiConfig.Enable;
@@ -74,11 +76,14 @@ namespace MusicLyricApp
             this.Dot_ComboBox = new System.Windows.Forms.ComboBox();
             this.label1 = new System.Windows.Forms.Label();
             this.TranLyricDefaultRule_ComboBox = new System.Windows.Forms.ComboBox();
+            this.label9 = new System.Windows.Forms.Label();
+            this.TranslateMatchPrecisionDeviation_TextBox = new System.Windows.Forms.TextBox();
+            this.label10 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // Save_Btn
             // 
-            this.Save_Btn.Location = new System.Drawing.Point(294, 252);
+            this.Save_Btn.Location = new System.Drawing.Point(305, 254);
             this.Save_Btn.Name = "Save_Btn";
             this.Save_Btn.Size = new System.Drawing.Size(114, 44);
             this.Save_Btn.TabIndex = 0;
@@ -88,7 +93,7 @@ namespace MusicLyricApp
             // 
             // RememberParam_CheckBox
             // 
-            this.RememberParam_CheckBox.Location = new System.Drawing.Point(15, 206);
+            this.RememberParam_CheckBox.Location = new System.Drawing.Point(12, 254);
             this.RememberParam_CheckBox.Name = "RememberParam_CheckBox";
             this.RememberParam_CheckBox.Size = new System.Drawing.Size(78, 24);
             this.RememberParam_CheckBox.TabIndex = 1;
@@ -97,7 +102,7 @@ namespace MusicLyricApp
             // 
             // AutoReadClipboard_CheckBox
             // 
-            this.AutoReadClipboard_CheckBox.Location = new System.Drawing.Point(144, 206);
+            this.AutoReadClipboard_CheckBox.Location = new System.Drawing.Point(138, 252);
             this.AutoReadClipboard_CheckBox.Name = "AutoReadClipboard_CheckBox";
             this.AutoReadClipboard_CheckBox.Size = new System.Drawing.Size(112, 26);
             this.AutoReadClipboard_CheckBox.TabIndex = 2;
@@ -106,7 +111,7 @@ namespace MusicLyricApp
             // 
             // AutoCheckUpdate_CheckBox
             // 
-            this.AutoCheckUpdate_CheckBox.Location = new System.Drawing.Point(15, 259);
+            this.AutoCheckUpdate_CheckBox.Location = new System.Drawing.Point(12, 293);
             this.AutoCheckUpdate_CheckBox.Name = "AutoCheckUpdate_CheckBox";
             this.AutoCheckUpdate_CheckBox.Size = new System.Drawing.Size(97, 32);
             this.AutoCheckUpdate_CheckBox.TabIndex = 3;
@@ -129,7 +134,7 @@ namespace MusicLyricApp
             this.RomajiMode_ComboBox.FormattingEnabled = true;
             this.RomajiMode_ComboBox.Location = new System.Drawing.Point(87, 148);
             this.RomajiMode_ComboBox.Name = "RomajiMode_ComboBox";
-            this.RomajiMode_ComboBox.Size = new System.Drawing.Size(100, 20);
+            this.RomajiMode_ComboBox.Size = new System.Drawing.Size(121, 20);
             this.RomajiMode_ComboBox.TabIndex = 7;
             // 
             // label3
@@ -169,7 +174,7 @@ namespace MusicLyricApp
             // label5
             // 
             this.label5.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.label5.Location = new System.Drawing.Point(15, 184);
+            this.label5.Location = new System.Drawing.Point(15, 230);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(410, 2);
             this.label5.TabIndex = 12;
@@ -242,11 +247,39 @@ namespace MusicLyricApp
             this.TranLyricDefaultRule_ComboBox.Size = new System.Drawing.Size(98, 20);
             this.TranLyricDefaultRule_ComboBox.TabIndex = 20;
             // 
+            // label9
+            // 
+            this.label9.Location = new System.Drawing.Point(15, 193);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(99, 24);
+            this.label9.TabIndex = 21;
+            this.label9.Text = "译文匹配精度";
+            // 
+            // TranslateMatchPrecisionDeviation_TextBox
+            // 
+            this.TranslateMatchPrecisionDeviation_TextBox.Location = new System.Drawing.Point(108, 190);
+            this.TranslateMatchPrecisionDeviation_TextBox.Name = "TranslateMatchPrecisionDeviation_TextBox";
+            this.TranslateMatchPrecisionDeviation_TextBox.Size = new System.Drawing.Size(64, 21);
+            this.TranslateMatchPrecisionDeviation_TextBox.TabIndex = 22;
+            this.TranslateMatchPrecisionDeviation_TextBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.LrcMatchDigit_TextBox_KeyPress);
+            // 
+            // label10
+            // 
+            this.label10.Font = new System.Drawing.Font("宋体", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.label10.Location = new System.Drawing.Point(178, 193);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(30, 18);
+            this.label10.TabIndex = 23;
+            this.label10.Text = "ms";
+            // 
             // SettingForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(433, 321);
+            this.ClientSize = new System.Drawing.Size(433, 334);
+            this.Controls.Add(this.label10);
+            this.Controls.Add(this.TranslateMatchPrecisionDeviation_TextBox);
+            this.Controls.Add(this.label9);
             this.Controls.Add(this.TranLyricDefaultRule_ComboBox);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.Dot_ComboBox);
@@ -274,6 +307,11 @@ namespace MusicLyricApp
             this.ResumeLayout(false);
             this.PerformLayout();
         }
+
+        private System.Windows.Forms.Label label10;
+
+        private System.Windows.Forms.Label label9;
+        private System.Windows.Forms.TextBox TranslateMatchPrecisionDeviation_TextBox;
 
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.ComboBox TranLyricDefaultRule_ComboBox;

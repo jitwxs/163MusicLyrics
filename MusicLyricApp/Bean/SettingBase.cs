@@ -88,6 +88,11 @@ namespace MusicLyricApp.Bean
         public string SrtTimestampFormat = "HH:mm:ss,SSS";
 
         /// <summary>
+        /// 译文歌词匹配精度
+        /// </summary>
+        public int TranslateMatchPrecisionDeviation = 0;
+
+        /// <summary>
         /// 小数位处理策略
         /// </summary>
         public DotTypeEnum DotType = DotTypeEnum.DOWN;
