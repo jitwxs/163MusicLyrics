@@ -123,10 +123,10 @@ namespace MusicLyricApp.Utils
             switch (typeEnum)
             {
                 case OutputFilenameTypeEnum.NAME_SINGER:
-                    outputName = songVo.Name + " - " + songVo.Singer;
+                    outputName = $"{songVo.Name} - {songVo.Singer}";
                     break;
                 case OutputFilenameTypeEnum.SINGER_NAME:
-                    outputName = songVo.Singer + " - " + songVo.Name;
+                    outputName = $"{songVo.Singer} - {songVo.Name}";
                     break;
                 case OutputFilenameTypeEnum.NAME:
                     outputName = songVo.Name;
