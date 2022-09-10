@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 using MusicLyricApp.Bean;
 using MusicLyricApp.Utils;
 using Newtonsoft.Json;
@@ -62,7 +63,7 @@ namespace MusicLyricApp.Api
             var data = new Dictionary<string, string>
             {
                 { "callback", "MusicJsonCallback_lrc" },
-                { "pcachetime", currentMillis + "" },
+                { "pcachetime", currentMillis + string.Empty },
                 { "songmid", songMid },
                 { "g_tk", "5381" },
                 { "jsonpCallback", callBack },
@@ -96,8 +97,7 @@ namespace MusicLyricApp.Api
                 "\"platform\": \"20\"}},\"comm\": {\"uin\": 0,\"format\": \"json\",\"ct\": 24,\"cv\": 0}}";
 
             var requestUrl =
-                "https://u.y.qq.com/cgi-bin/musicu.fcg?g_tk=5381&loginUin=0&hostUin=0&format=json&inCharset=utf8&outCharset=utf-8&notice=0&platform=yqq.json&needNewCode=0&data=" +
-                subData;
+                $"https://u.y.qq.com/cgi-bin/musicu.fcg?g_tk=5381&loginUin=0&hostUin=0&format=json&inCharset=utf8&outCharset=utf-8&notice=0&platform=yqq.json&needNewCode=0&data={subData}";
 
             var headers = new Dictionary<string, string>
             {
@@ -120,23 +120,23 @@ namespace MusicLyricApp.Api
         {
             if (!val.StartsWith(callBackSign))
             {
-                return "";
+                return string.Empty;
             }
 
-            var jsonStr = val.Replace(callBackSign + "(", "");
+            var jsonStr = val.Replace(callBackSign + "(", string.Empty);
             return jsonStr.Remove(jsonStr.Length - 1);
         }
 
         protected virtual string GetGuid()
         {
-            var guid = "";
+            StringBuilder guid = new StringBuilder(10);
             var r = new Random();
             for (var i = 0; i < 10; i++)
             {
-                guid += Convert.ToString(r.Next(10));
+                guid.Append(Convert.ToString(r.Next(10)));
             }
 
-            return guid;
+            return guid.ToString();
         }
     }
 }
