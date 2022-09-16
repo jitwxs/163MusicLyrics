@@ -368,7 +368,7 @@ namespace MusicLyricApp
             this.MainMenuStrip = this.Top_MenuStrip;
             this.MaximizeBox = false;
             this.Name = "MainForm";
-            this.Text = "云音乐歌词提取 v4.9";
+            this.Text = "云音乐歌词提取 " + Constants.Version;
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
             this.MouseEnter += new System.EventHandler(this.MainForm_MouseEnter);
             this.Top_MenuStrip.ResumeLayout(false);
