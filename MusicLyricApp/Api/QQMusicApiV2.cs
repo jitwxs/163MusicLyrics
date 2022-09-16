@@ -100,7 +100,7 @@ namespace MusicLyricApp.Api
 
         private static string BuildPicUrl(QQMusicBean.Album album)
         {
-            return "https://y.qq.com/music/photo_new/T002R300x300M000" + album.Pmid + ".jpg";
+            return $"https://y.qq.com/music/photo_new/T002R300x300M000{album.Pmid}.jpg";
         }
     }
 }
