@@ -70,6 +70,9 @@
   <PropertyGroup>
     <ApplicationIcon>Favicon2.ico</ApplicationIcon>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationManifest>Properties\app.manifest</ApplicationManifest>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Costura, Version=5.8.0.0, Culture=neutral, PublicKeyToken=9919ef960d84173d">
       <HintPath>..\packages\Costura.Fody.5.8.0-alpha0098\lib\netstandard1.0\Costura.dll</HintPath>
@@ -337,6 +340,7 @@
     <Content Include="Favicon2.ico" />
     <Content Include="matrix.bin" />
     <Content Include="NLog.xsd" />
+    <Content Include="Properties\app.manifest" />
     <Content Include="sys.dic" />
     <Content Include="unk.dic" />
   </ItemGroup>

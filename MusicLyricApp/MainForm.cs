@@ -517,21 +517,23 @@ namespace MusicLyricApp
             }
             
             var saveDialog = new SaveFileDialog();
+            saveDialog.FileName = GlobalUtils.GetOutputName(saveVo.SongVo, _globalSearchInfo.SettingBean.Param.OutputFileNameType);
+            saveDialog.Filter = _globalSearchInfo.SettingBean.Param.OutputFileFormat.ToDescription();
+
+            if (saveDialog.ShowDialog() != DialogResult.OK)
+            {
+                return;
+            }
+            
             try
             {
-                saveDialog.FileName = GlobalUtils.GetOutputName(saveVo.SongVo, _globalSearchInfo.SettingBean.Param.OutputFileNameType);
-                saveDialog.Filter = _globalSearchInfo.SettingBean.Param.OutputFileFormat.ToDescription();
-                if (saveDialog.ShowDialog() == DialogResult.OK)
+                using (var sw = new StreamWriter(saveDialog.FileName, false, GlobalUtils.GetEncoding(_globalSearchInfo.SettingBean.Param.Encoding))) 
                 {
-                    using (var sw = new StreamWriter(saveDialog.FileName, false,
-                               GlobalUtils.GetEncoding(_globalSearchInfo.SettingBean.Param.Encoding)))
-                    {
-                        await sw.WriteAsync(await LyricUtils.GetOutputContent(saveVo.LyricVo, _globalSearchInfo));
-                        await sw.FlushAsync();
-                    }
-
-                    MessageBox.Show(string.Format(ErrorMsg.SAVE_COMPLETE, 1, 0), "提示");
+                    await sw.WriteAsync(await LyricUtils.GetOutputContent(saveVo.LyricVo, _globalSearchInfo));
+                    await sw.FlushAsync();
                 }
+
+                MessageBox.Show(string.Format(ErrorMsg.SAVE_COMPLETE, 1, 0), "提示");
             }
             catch (System.Exception ew)
             {
@@ -546,49 +548,52 @@ namespace MusicLyricApp
         private async void BatchSave()
         {
             var saveDialog = new SaveFileDialog();
+            saveDialog.FileName = "直接选择保存路径即可，无需修改此处内容";
+            saveDialog.Filter = _globalSearchInfo.SettingBean.Param.OutputFileFormat.ToDescription();
+
+            if (saveDialog.ShowDialog() != DialogResult.OK)
+            {
+                return;
+            }
+            
+            // 保存
             var skipCount = 0;
             var success = new HashSet<string>();
             
             try
             {
-                saveDialog.FileName = "直接选择保存路径即可，无需修改此处内容";
-                saveDialog.Filter = _globalSearchInfo.SettingBean.Param.OutputFileFormat.ToDescription();
-                if (saveDialog.ShowDialog() == DialogResult.OK)
-                {
-                    var localFilePath = saveDialog.FileName;
-                    // 获取文件后缀
-                    var fileSuffix = localFilePath.Substring(localFilePath.LastIndexOf("."));
-                    //获取文件路径，不带文件名 
-                    var filePath = localFilePath.Substring(0, localFilePath.LastIndexOf("\\"));
-
+                var localFilePath = saveDialog.FileName;
+                // 获取文件后缀
+                var fileSuffix = localFilePath.Substring(localFilePath.LastIndexOf("."));
+                //获取文件路径，不带文件名 
+                var filePath = localFilePath.Substring(0, localFilePath.LastIndexOf("\\"));
                     
-                    foreach (var item in _globalSaveVoMap)
+                foreach (var item in _globalSaveVoMap)
+                {
+                    var saveVo = item.Value;
+                    var lyricVo = saveVo.LyricVo;
+                    if (lyricVo.IsEmpty())
                     {
-                        var saveVo = item.Value;
-                        var lyricVo = saveVo.LyricVo;
-                        if (lyricVo.IsEmpty())
-                        {
-                            skipCount++;
-                            continue;
-                        }
+                        skipCount++;
+                        continue;
+                    }
 
-                        var path = filePath + '/' + GlobalUtils.GetOutputName(saveVo.SongVo, _globalSearchInfo.SettingBean.Param.OutputFileNameType) + fileSuffix;
-                        using(var sw = new StreamWriter(path, false, GlobalUtils.GetEncoding(_globalSearchInfo.SettingBean.Param.Encoding)))
-                        {
-                            await sw.WriteAsync(await LyricUtils.GetOutputContent(lyricVo, _globalSearchInfo));
-                            await sw.FlushAsync();
-                            success.Add(item.Key);
-                        }
+                    var path = filePath + '/' + GlobalUtils.GetOutputName(saveVo.SongVo, _globalSearchInfo.SettingBean.Param.OutputFileNameType) + fileSuffix;
+                    using(var sw = new StreamWriter(path, false, GlobalUtils.GetEncoding(_globalSearchInfo.SettingBean.Param.Encoding)))
+                    {
+                        await sw.WriteAsync(await LyricUtils.GetOutputContent(lyricVo, _globalSearchInfo));
+                        await sw.FlushAsync();
+                        success.Add(item.Key);
                     }
                 }
+                
+                MessageBox.Show(string.Format(ErrorMsg.SAVE_COMPLETE, success.Count, skipCount), "提示");
             }
             catch (System.Exception ew)
             {
                 _logger.Error(ew, "批量保存失败");
                 MessageBox.Show("批量保存失败，错误信息：\n" + ew.Message);
             }
-            
-            MessageBox.Show(string.Format(ErrorMsg.SAVE_COMPLETE, success.Count, skipCount), "提示");
 
             // 输出日志
             var log = new StringBuilder();
