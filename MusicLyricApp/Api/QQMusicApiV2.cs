@@ -27,11 +27,9 @@ namespace MusicLyricApp.Api
             throw new MusicLyricException(ErrorMsg.ALBUM_NOT_EXIST);
         }
 
-        protected override Dictionary<string, SongVo> GetSongVo0(string[] songIds, out Dictionary<string, string> errorMsgDict)
+        protected override Dictionary<string, ResultVo<SongVo>> GetSongVo0(string[] songIds)
         {
-            errorMsgDict = new Dictionary<string, string>();
-            
-            var result = new Dictionary<string, SongVo>();
+            var result = new Dictionary<string, ResultVo<SongVo>>();
             
             foreach (var songId in songIds)
             {
@@ -39,15 +37,15 @@ namespace MusicLyricApp.Api
 
                 if (resp.Code != 0 || resp.Data.Length == 0)
                 {
-                    errorMsgDict[songId] = ErrorMsg.SONG_NOT_EXIST;
+                    result[songId] = new ResultVo<SongVo>(null, ErrorMsg.SONG_NOT_EXIST);
                     continue;
                 }
 
                 var song = resp.Data[0];
 
-               var links = _api.GetSongLink(songId);
+                var links = _api.GetSongLink(songId);
 
-                result[songId] = new SongVo
+                result[songId] = new ResultVo<SongVo>(new SongVo
                 {
                     Links = links,
                     Pics = BuildPicUrl(song.Album),
@@ -55,8 +53,7 @@ namespace MusicLyricApp.Api
                     Singer = ContractSinger(song.Singer),
                     Album = song.Album.Name,
                     Duration = song.Interval * 1000
-                };
-                errorMsgDict[songId] = ErrorMsg.SUCCESS;
+                });
             }
             
             return result;

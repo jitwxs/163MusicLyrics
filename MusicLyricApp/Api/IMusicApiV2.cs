@@ -16,9 +16,8 @@ namespace MusicLyricApp.Api
         /// 获取歌曲信息
         /// </summary>
         /// <param name="songIds">歌曲ID列表</param>
-        /// <param name="errorMsgDict">错误信息</param>
         /// <returns></returns>
-        Dictionary<string, SongVo> GetSongVo(string[] songIds, out Dictionary<string, string> errorMsgDict);
+        Dictionary<string, ResultVo<SongVo>> GetSongVo(string[] songIds);
         
         /// <summary>
         /// 获取歌词信息
