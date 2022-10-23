@@ -462,6 +462,30 @@ namespace MusicLyricApp.Bean
         public SettingBean SettingBean { get; set; }
     }
 
+    public class ResultVo<T>
+    {
+        public T Data { get; }
+
+        public string ErrorMsg { get; }
+
+        public ResultVo(T data, string errorMsg)
+        {
+            Data = data;
+            ErrorMsg = errorMsg;
+        }
+        
+        public ResultVo(T data)
+        {
+            Data = data;
+            ErrorMsg = Bean.ErrorMsg.SUCCESS;
+        }
+
+        public bool IsSuccess()
+        {
+            return ErrorMsg == Bean.ErrorMsg.SUCCESS;
+        }
+    }
+    
     public static class EnumHelper
     {
         public static string ToDescription(this Enum val)

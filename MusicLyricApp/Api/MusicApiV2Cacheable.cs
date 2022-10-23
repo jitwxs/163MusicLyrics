@@ -8,7 +8,7 @@ namespace MusicLyricApp.Api
     {
         protected abstract IEnumerable<string> GetSongIdsFromAlbum0(string albumId);
 
-        protected abstract Dictionary<string, SongVo> GetSongVo0(string[] songIds, out Dictionary<string, string> errorMsgDict);
+        protected abstract Dictionary<string, ResultVo<SongVo>> GetSongVo0(string[] songIds);
 
         protected abstract LyricVo GetLyricVo0(string songId);
         
@@ -28,16 +28,16 @@ namespace MusicLyricApp.Api
             return result;
         }
 
-        public Dictionary<string, SongVo> GetSongVo(string[] songIds, out Dictionary<string, string> errorMsgDict)
+        public Dictionary<string, ResultVo<SongVo>> GetSongVo(string[] songIds)
         {
-            var result = new Dictionary<string, SongVo>();
+            var result = new Dictionary<string, ResultVo<SongVo>>();
             var requestIds = new List<string>();
             
             foreach (var songId in songIds)
             {
                 if (GlobalCache.ContainsSong(songId))
                 {
-                    result[songId] = GlobalCache.GetSong(songId);
+                    result[songId] = new ResultVo<SongVo>(GlobalCache.GetSong(songId));
                 }
                 else
                 {
@@ -45,17 +45,17 @@ namespace MusicLyricApp.Api
                 }
             }
             
-            foreach(var pair in GetSongVo0(requestIds.ToArray(), out errorMsgDict))
+            foreach(var pair in GetSongVo0(requestIds.ToArray()))
             {
                 var songId = pair.Key;
+                var resultVo = pair.Value;
                 
-                if (errorMsgDict[songId] != ErrorMsg.SUCCESS)
+                if (resultVo.IsSuccess())
                 {
-                    continue;
+                    GlobalCache.PutSong(songId, resultVo.Data);
                 }
                 
                 result[songId] = pair.Value;
-                GlobalCache.PutSong(songId, pair.Value);
             }
 
             return result;

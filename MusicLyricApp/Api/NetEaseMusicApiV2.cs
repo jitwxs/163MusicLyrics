@@ -33,35 +33,34 @@ namespace MusicLyricApp.Api
             throw new MusicLyricException(ErrorMsg.ALBUM_NOT_EXIST);
         }
 
-        protected override Dictionary<string, SongVo> GetSongVo0(string[] songIds, out Dictionary<string, string> errorMsgDict)
+        protected override Dictionary<string, ResultVo<SongVo>> GetSongVo0(string[] songIds)
         {
-            errorMsgDict = new Dictionary<string, string>();
-
             var datumResp = _api.GetDatum(songIds);
             var songResp = _api.GetSongs(songIds);
-            var result = new Dictionary<string, SongVo>();
+            var result = new Dictionary<string, ResultVo<SongVo>>();
 
             foreach (var pair in datumResp)
             {
                 var songId = pair.Key;
-                var datum = pair.Value;
 
-                if (!songResp.TryGetValue(songId, out var song))
+                if (songResp.TryGetValue(songId, out var song))
                 {
-                    errorMsgDict[songId] = ErrorMsg.SONG_NOT_EXIST;
-                    continue;
+                    var datum = pair.Value;
+                    
+                    result[songId] = new ResultVo<SongVo>(new SongVo
+                    {
+                        Links = datum.Url,
+                        Pics = song.Al.PicUrl,
+                        Name = song.Name,
+                        Singer = ContractSinger(song.Ar),
+                        Album = song.Al.Name,
+                        Duration = song.Dt
+                    });
                 }
-
-                result[songId] = new SongVo
+                else
                 {
-                    Links = datum.Url,
-                    Pics = song.Al.PicUrl,
-                    Name = song.Name,
-                    Singer = ContractSinger(song.Ar),
-                    Album = song.Al.Name,
-                    Duration = song.Dt
-                };
-                errorMsgDict[songId] = ErrorMsg.SUCCESS;
+                    result[songId] = new ResultVo<SongVo>(null, ErrorMsg.SONG_NOT_EXIST);
+                }
             }
 
             return result;
