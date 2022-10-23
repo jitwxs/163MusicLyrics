@@ -32,9 +32,15 @@ namespace MusicLyricApp.Bean
 
             public LyricResult Decode()
             {
-                Lyric = Encoding.UTF8.GetString(Convert.FromBase64String(Lyric));
+                if (Lyric != null)
+                {
+                    Lyric = Encoding.UTF8.GetString(Convert.FromBase64String(Lyric));
+                }
 
-                Trans = Encoding.UTF8.GetString(Convert.FromBase64String(Trans));
+                if (Trans != null)
+                {
+                    Trans = Encoding.UTF8.GetString(Convert.FromBase64String(Trans));
+                }
 
                 return this;
             }
