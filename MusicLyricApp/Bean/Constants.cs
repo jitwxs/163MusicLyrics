@@ -18,5 +18,9 @@ namespace MusicLyricApp.Bean
             IpaDicPath + "\\sys.dic",
             IpaDicPath + "\\unk.dic",
         };
+        
+        public static readonly string[] VerbatimLyricDependency = {
+            Environment.CurrentDirectory + "\\QQMusicVerbatim.dll",
+        };
     }
 }

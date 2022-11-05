@@ -36,8 +36,8 @@ namespace MusicLyricApp
             RememberParam_CheckBox.Checked = _settingBean.Config.RememberParam;
             AutoReadClipboard_CheckBox.Checked = _settingBean.Config.AutoReadClipboard;
             AutoCheckUpdate_CheckBox.Checked = _settingBean.Config.AutoCheckUpdate;
+            VerbatimLyric_CheckBox.Checked = _settingBean.Config.EnableVerbatimLyric;
             IgnoreEmptyLyric_CheckBox.Checked = _settingBean.Param.IgnoreEmptyLyric;
-            VerbatimLyric_CheckBox.Checked = _settingBean.Param.EnableVerbatimLyric;
 
             LrcTimestampFormat_TextBox.Text = _settingBean.Param.LrcTimestampFormat;
             SrtTimestampFormat_TextBox.Text = _settingBean.Param.SrtTimestampFormat;
@@ -293,6 +293,7 @@ namespace MusicLyricApp
             this.VerbatimLyric_CheckBox.TabIndex = 25;
             this.VerbatimLyric_CheckBox.Text = "逐字歌词（QQ音乐）";
             this.VerbatimLyric_CheckBox.UseVisualStyleBackColor = true;
+            this.VerbatimLyric_CheckBox.CheckedChanged += new System.EventHandler(this.VerbatimLyric_CheckBox_CheckedChanged);
             // 
             // SettingForm
             // 

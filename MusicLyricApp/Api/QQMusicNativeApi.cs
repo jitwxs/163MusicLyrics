@@ -14,10 +14,10 @@ namespace MusicLyricApp.Api
     {
         private static DateTime _dtFrom = new DateTime(1970, 1, 1, 8, 0, 0, 0, DateTimeKind.Local);
 
-        [DllImport("QQMusicCommon.dll", EntryPoint = "?Ddes@qqmusic@@YAHPAE0H@Z", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("QQMusicVerbatim.dll", EntryPoint = "?Ddes@qqmusic@@YAHPAE0H@Z", CallingConvention = CallingConvention.Cdecl)]
         private static extern void func_ddes(sbyte[] a, string b, int c);
 
-        [DllImport("QQMusicCommon.dll", EntryPoint = "?des@qqmusic@@YAHPAE0H@Z", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("QQMusicVerbatim.dll", EntryPoint = "?des@qqmusic@@YAHPAE0H@Z", CallingConvention = CallingConvention.Cdecl)]
         private static extern void func_des(sbyte[] a, string b, int c);
 
         private static readonly Dictionary<string, string> VerbatimXmlMappingDict = new Dictionary<string, string>

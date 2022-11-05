@@ -307,7 +307,7 @@ namespace MusicLyricApp
         /// <exception cref="WebException"></exception>
         private string SingleSearch(string songId)
         {
-            var isVerbatimLyric = _globalSearchInfo.SettingBean.Param.EnableVerbatimLyric;
+            var isVerbatimLyric = _globalSearchInfo.SettingBean.Config.EnableVerbatimLyric;
             var resultMaps = SearchBySongId(new[] { songId }, isVerbatimLyric);
 
             var message = resultMaps[songId];
@@ -336,7 +336,7 @@ namespace MusicLyricApp
         /// <exception cref="WebException"></exception>
         private void BatchSearch(IEnumerable<string> ids)
         {
-            var isVerbatimLyric = _globalSearchInfo.SettingBean.Param.EnableVerbatimLyric;
+            var isVerbatimLyric = _globalSearchInfo.SettingBean.Config.EnableVerbatimLyric;
             var resultMaps = SearchBySongId(ids, isVerbatimLyric);
 
             // 输出日志

@@ -15,6 +15,7 @@
 - [x] 支持多种保存命名规则、文件编码格式 Support multiple saving naming rules, file encoding format
 - [x] 支持 LRC 或 SRT 输出格式 Support lrc or srt output format
 - [x] 日文歌曲支持罗马音 Support romaji in japanese songs
+- [x] QQ 音乐支持逐字歌词模式(卡拉 OK 模式) QQMusic support verbatim mode(karaoke mode)
 
 ### Downloads
 
@@ -48,6 +49,7 @@ You can access [163MusiclyRics Projects](https://github.com/Users/jitwxs/project
 - https://github.com/Binaryify/NeteaseCloudMusicApi
 - https://github.com/Rain120/qq-music-api
 - https://github.com/ElliottSilence/LyricCapture
+- https://github.com/xmcp/QRCD
 
 ### Donate
 

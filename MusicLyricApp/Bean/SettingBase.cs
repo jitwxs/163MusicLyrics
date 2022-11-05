@@ -27,6 +27,11 @@ namespace MusicLyricApp.Bean
         public bool AutoCheckUpdate = true;
         
         /// <summary>
+        /// 启用逐字歌词模式
+        /// </summary>
+        public bool EnableVerbatimLyric = false;
+        
+        /// <summary>
         /// 译文缺省规则
         /// </summary>
         public TranslateLyricDefaultRuleEnum TranslateLyricDefaultRule = TranslateLyricDefaultRuleEnum.IGNORE;
@@ -96,11 +101,6 @@ namespace MusicLyricApp.Bean
         /// 忽略空的歌词行
         /// </summary>
         public bool IgnoreEmptyLyric = true;
-
-        /// <summary>
-        /// 启用逐字歌词模式
-        /// </summary>
-        public bool EnableVerbatimLyric = false;
 
         /// <summary>
         /// 小数位处理策略
