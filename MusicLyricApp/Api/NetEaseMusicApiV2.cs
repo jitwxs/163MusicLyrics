@@ -49,6 +49,8 @@ namespace MusicLyricApp.Api
                     
                     result[songId] = new ResultVo<SongVo>(new SongVo
                     {
+                        Id = long.Parse(song.Id),
+                        DisplayId = songId,
                         Links = datum.Url,
                         Pics = song.Al.PicUrl,
                         Name = song.Name,
@@ -66,9 +68,10 @@ namespace MusicLyricApp.Api
             return result;
         }
 
-        protected override LyricVo GetLyricVo0(string songId)
+        protected override LyricVo GetLyricVo0(SongVo songVo, bool isVerbatim)
         {
-            var resp = _api.GetLyric(songId);
+            // todo isVerbatim just not support
+            var resp = _api.GetLyric(songVo.DisplayId);
 
             if (resp.Code == 200)
             {

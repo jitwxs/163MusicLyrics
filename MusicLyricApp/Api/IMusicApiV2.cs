@@ -22,8 +22,9 @@ namespace MusicLyricApp.Api
         /// <summary>
         /// 获取歌词信息
         /// </summary>
-        /// <param name="songId">歌曲ID</param>
+        /// <param name="songVo">歌曲信息</param>
+        /// <param name="isVerbatim">是否尝试获取逐字歌词</param>
         /// <returns></returns>
-        LyricVo GetLyricVo(string songId);
+        LyricVo GetLyricVo(SongVo songVo, bool isVerbatim);
     }
 }

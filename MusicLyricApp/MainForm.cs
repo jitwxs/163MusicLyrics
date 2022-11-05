@@ -232,7 +232,7 @@ namespace MusicLyricApp
                     try
                     {
                         var songVo = resultVo.Data;
-                        var lyricVo = _api.GetLyricVo(songId);
+                        var lyricVo = _api.GetLyricVo(songVo, false); // todo
                     
                         lyricVo.Duration = songVo.Duration;
                         

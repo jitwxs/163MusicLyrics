@@ -10,7 +10,7 @@ namespace MusicLyricApp.Api
 
         protected abstract Dictionary<string, ResultVo<SongVo>> GetSongVo0(string[] songIds);
 
-        protected abstract LyricVo GetLyricVo0(string songId);
+        protected abstract LyricVo GetLyricVo0(SongVo songVo, bool isVerbatim);
         
         public IEnumerable<string> GetSongIdsFromAlbum(string albumId)
         {
@@ -61,14 +61,16 @@ namespace MusicLyricApp.Api
             return result;
         }
 
-        public LyricVo GetLyricVo(string songId)
+        public LyricVo GetLyricVo(SongVo songVo, bool isVerbatim)
         {
+            var songId = songVo.DisplayId;
+            
             if (GlobalCache.ContainsLyric(songId))
             {
                 return GlobalCache.GetLyric(songId);
             }
 
-            var result = GetLyricVo0(songId);
+            var result = GetLyricVo0(songVo, isVerbatim);
             if (result != null)
             {
                 GlobalCache.PutLyric(songId, result);
