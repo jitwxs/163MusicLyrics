@@ -23,6 +23,10 @@
 
 Enter [Github Release](https://github.com/jitwxs/163musiclyrics/releses) page to download the latest version, you can click [Changelog](https://github.com/jitwxs/163musiclyrics/wiki/changelog) View different versions of changes.
 
+**注意:** 为了减少应用的体积，部分非必须功能采用插件形式，具体请参阅 Use Guide。
+
+**Attention:** For reduce application's size，some non-necessary feature implements by plugins, pls see Use Guide to learn more.
+
 ![screenshot](./images/latest_version.png)
 
 ### Contribution
