@@ -13,6 +13,11 @@ namespace MusicLyricApp.Utils
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
+        public static string GetSongKey(string displayId, bool verbatimLyric)
+        {
+            return displayId + "_" + verbatimLyric;
+        }
+        
         /// <summary>
         /// 输入参数校验
         /// </summary>
@@ -102,7 +107,7 @@ namespace MusicLyricApp.Utils
         /**
          * 检查字符串是否为数字
          */
-        private static bool CheckNum(string s)
+        public static bool CheckNum(string s)
         {
             return Regex.IsMatch(s, "^\\d+$", RegexOptions.Compiled);
         }

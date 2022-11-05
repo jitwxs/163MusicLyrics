@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using MusicLyricApp.Bean;
 using MusicLyricApp.Cache;
+using MusicLyricApp.Utils;
 
 namespace MusicLyricApp.Api
 {
@@ -63,17 +64,17 @@ namespace MusicLyricApp.Api
 
         public LyricVo GetLyricVo(SongVo songVo, bool isVerbatim)
         {
-            var songId = songVo.DisplayId;
+            var cacheKey = GlobalUtils.GetSongKey(songVo.DisplayId, isVerbatim);
             
-            if (GlobalCache.ContainsLyric(songId))
+            if (GlobalCache.ContainsLyric(cacheKey))
             {
-                return GlobalCache.GetLyric(songId);
+                return GlobalCache.GetLyric(cacheKey);
             }
 
             var result = GetLyricVo0(songVo, isVerbatim);
             if (result != null)
             {
-                GlobalCache.PutLyric(songId, result);
+                GlobalCache.PutLyric(cacheKey, result);
             }
 
             return result;

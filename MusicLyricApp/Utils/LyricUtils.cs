@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using MusicLyricApp.Bean;
 
@@ -33,6 +34,87 @@ namespace MusicLyricApp.Utils
                 var timestampFormat = searchInfo.SettingBean.Param.LrcTimestampFormat;
                 return string.Join(Environment.NewLine,  from o in voList select o.Print(timestampFormat, dotType));
             }
+        }
+
+        /// <summary>
+        /// 处理逐字歌词格式为常规格式
+        /// </summary>
+        public static string DealVerbatimLyric(string originLrc, SearchSourceEnum searchSource)
+        {
+            var originLyrics = SplitLrc(originLrc);
+
+            var defaultParam = new PersistParamBean();
+            var sb = new StringBuilder();
+            
+            for (var j = 0; j < originLyrics.Length; j++)
+            {
+                var content = originLyrics[j];
+                
+                while (true)
+                {
+                    int i = 0, startA = 0, startB = 0;
+                    for (; i < content.Length; i++)
+                    {
+                        var c = content[i];
+
+                        bool needReplaceA = false, needReplaceB = false;
+                    
+                        switch (c)
+                        {
+                            case '[':
+                                startA = i;
+                                break;
+                            case '(':
+                                startB = i;
+                                break;
+                            case ']':
+                                needReplaceA = true;
+                                break;
+                            case ')':
+                                needReplaceB = true;
+                                break;
+                        }
+
+                        if (needReplaceA || needReplaceB)
+                        {
+                            var start = needReplaceA ? startA : startB;
+
+                            var oldValue =  content.Substring(start, i - start + 1);
+
+                            var mid = oldValue.IndexOf(",");
+                            if (mid != -1)
+                            {
+                                var left = oldValue.Substring(1, mid - 1);
+                                var right = oldValue.Substring(mid + 1, oldValue.Length - mid - 2);
+
+                                // 限制为数字
+                                if (GlobalUtils.CheckNum(left) && GlobalUtils.CheckNum(right))
+                                {
+                                    var timestamp = new LyricTimestamp(long.Parse(left));
+
+                                    var newValue = timestamp.PrintTimestamp(defaultParam.LrcTimestampFormat, defaultParam.DotType);
+
+                                    content = content.Replace(oldValue, newValue);
+                                    i = 0;
+                            
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    if (i >= content.Length)
+                    {
+                        break;
+                    }
+                }
+
+                sb
+                    .Append(content)
+                    .Append(Environment.NewLine);
+            }
+
+            return sb.ToString();
         }
 
         /// <summary>
@@ -111,16 +193,22 @@ namespace MusicLyricApp.Utils
             return res;
         }
 
+        private static string[] SplitLrc(string lrc)
+        {
+            // 换行符统一
+            return lrc
+                .Replace("\r\n", "\n")
+                .Replace("\r", "")
+                .Split('\n');
+        }
+
         /**
          * 切割歌词
          */
         private static List<LyricLineVo> SplitLrc(string lrc, SearchSourceEnum searchSource, bool ignoreEmptyLine)
         {
-            // 换行符统一
-            var temp = lrc
-                .Replace("\r\n", "\n")
-                .Replace("\r", "")
-                .Split('\n');
+
+            var temp = SplitLrc(lrc);
 
             var resultList = new List<LyricLineVo>();
 

@@ -27,6 +27,7 @@ namespace MusicLyricApp
             _settingBean.Config.AutoReadClipboard = AutoReadClipboard_CheckBox.Checked;
             _settingBean.Config.AutoCheckUpdate = AutoCheckUpdate_CheckBox.Checked;
             _settingBean.Param.IgnoreEmptyLyric = IgnoreEmptyLyric_CheckBox.Checked;
+            _settingBean.Param.EnableVerbatimLyric = VerbatimLyric_CheckBox.Checked;
 
             _settingBean.Param.DotType = (DotTypeEnum)Dot_ComboBox.SelectedIndex;
             _settingBean.Param.LrcTimestampFormat = LrcTimestampFormat_TextBox.Text;

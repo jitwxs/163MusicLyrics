@@ -160,14 +160,17 @@ namespace MusicLyricApp.Api
                     s = decompressText;
                 }
 
-                switch (pair.Key)
+                if (!string.IsNullOrWhiteSpace(s))
                 {
-                    case "orig":
-                        result.Lyric = s;
-                        break;
-                    case "ts":
-                        result.Trans = s;
-                        break;
+                    switch (pair.Key)
+                    {
+                        case "orig":
+                            result.Lyric = LyricUtils.DealVerbatimLyric(s, SearchSourceEnum.QQ_MUSIC);
+                            break;
+                        case "ts":
+                            result.Trans = LyricUtils.DealVerbatimLyric(s, SearchSourceEnum.QQ_MUSIC);
+                            break;
+                    }
                 }
             }
 
