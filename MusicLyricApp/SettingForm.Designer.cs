@@ -36,6 +36,7 @@ namespace MusicLyricApp
             RememberParam_CheckBox.Checked = _settingBean.Config.RememberParam;
             AutoReadClipboard_CheckBox.Checked = _settingBean.Config.AutoReadClipboard;
             AutoCheckUpdate_CheckBox.Checked = _settingBean.Config.AutoCheckUpdate;
+            VerbatimLyric_CheckBox.Checked = _settingBean.Config.EnableVerbatimLyric;
             IgnoreEmptyLyric_CheckBox.Checked = _settingBean.Param.IgnoreEmptyLyric;
 
             LrcTimestampFormat_TextBox.Text = _settingBean.Param.LrcTimestampFormat;
@@ -81,11 +82,12 @@ namespace MusicLyricApp
             this.TranslateMatchPrecisionDeviation_TextBox = new System.Windows.Forms.TextBox();
             this.label10 = new System.Windows.Forms.Label();
             this.IgnoreEmptyLyric_CheckBox = new System.Windows.Forms.CheckBox();
+            this.VerbatimLyric_CheckBox = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // Save_Btn
             // 
-            this.Save_Btn.Location = new System.Drawing.Point(305, 254);
+            this.Save_Btn.Location = new System.Drawing.Point(305, 278);
             this.Save_Btn.Name = "Save_Btn";
             this.Save_Btn.Size = new System.Drawing.Size(114, 44);
             this.Save_Btn.TabIndex = 0;
@@ -95,7 +97,7 @@ namespace MusicLyricApp
             // 
             // RememberParam_CheckBox
             // 
-            this.RememberParam_CheckBox.Location = new System.Drawing.Point(12, 254);
+            this.RememberParam_CheckBox.Location = new System.Drawing.Point(12, 278);
             this.RememberParam_CheckBox.Name = "RememberParam_CheckBox";
             this.RememberParam_CheckBox.Size = new System.Drawing.Size(78, 24);
             this.RememberParam_CheckBox.TabIndex = 1;
@@ -104,7 +106,7 @@ namespace MusicLyricApp
             // 
             // AutoReadClipboard_CheckBox
             // 
-            this.AutoReadClipboard_CheckBox.Location = new System.Drawing.Point(138, 252);
+            this.AutoReadClipboard_CheckBox.Location = new System.Drawing.Point(138, 276);
             this.AutoReadClipboard_CheckBox.Name = "AutoReadClipboard_CheckBox";
             this.AutoReadClipboard_CheckBox.Size = new System.Drawing.Size(112, 26);
             this.AutoReadClipboard_CheckBox.TabIndex = 2;
@@ -113,7 +115,7 @@ namespace MusicLyricApp
             // 
             // AutoCheckUpdate_CheckBox
             // 
-            this.AutoCheckUpdate_CheckBox.Location = new System.Drawing.Point(12, 293);
+            this.AutoCheckUpdate_CheckBox.Location = new System.Drawing.Point(12, 317);
             this.AutoCheckUpdate_CheckBox.Name = "AutoCheckUpdate_CheckBox";
             this.AutoCheckUpdate_CheckBox.Size = new System.Drawing.Size(97, 32);
             this.AutoCheckUpdate_CheckBox.TabIndex = 3;
@@ -176,7 +178,7 @@ namespace MusicLyricApp
             // label5
             // 
             this.label5.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.label5.Location = new System.Drawing.Point(15, 230);
+            this.label5.Location = new System.Drawing.Point(15, 254);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(410, 2);
             this.label5.TabIndex = 12;
@@ -283,11 +285,22 @@ namespace MusicLyricApp
             this.IgnoreEmptyLyric_CheckBox.Text = "忽略空行歌词";
             this.IgnoreEmptyLyric_CheckBox.UseVisualStyleBackColor = true;
             // 
+            // VerbatimLyric_CheckBox
+            // 
+            this.VerbatimLyric_CheckBox.Location = new System.Drawing.Point(228, 226);
+            this.VerbatimLyric_CheckBox.Name = "VerbatimLyric_CheckBox";
+            this.VerbatimLyric_CheckBox.Size = new System.Drawing.Size(137, 25);
+            this.VerbatimLyric_CheckBox.TabIndex = 25;
+            this.VerbatimLyric_CheckBox.Text = "逐字歌词（QQ音乐）";
+            this.VerbatimLyric_CheckBox.UseVisualStyleBackColor = true;
+            this.VerbatimLyric_CheckBox.CheckedChanged += new System.EventHandler(this.VerbatimLyric_CheckBox_CheckedChanged);
+            // 
             // SettingForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(433, 334);
+            this.ClientSize = new System.Drawing.Size(433, 356);
+            this.Controls.Add(this.VerbatimLyric_CheckBox);
             this.Controls.Add(this.IgnoreEmptyLyric_CheckBox);
             this.Controls.Add(this.label10);
             this.Controls.Add(this.TranslateMatchPrecisionDeviation_TextBox);
@@ -319,6 +332,8 @@ namespace MusicLyricApp
             this.ResumeLayout(false);
             this.PerformLayout();
         }
+
+        private System.Windows.Forms.CheckBox VerbatimLyric_CheckBox;
 
         private System.Windows.Forms.CheckBox IgnoreEmptyLyric_CheckBox;
 

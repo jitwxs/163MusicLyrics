@@ -146,6 +146,16 @@ namespace MusicLyricApp.Bean
     public class SongVo
     {
         /// <summary>
+        /// 内部 ID
+        /// </summary>
+        public long Id { get; set; }
+        
+        /// <summary>
+        /// 前端展示的 ID
+        /// </summary>
+        public string DisplayId { get; set; }
+        
+        /// <summary>
         /// 歌曲名
         /// </summary>
         public string Name { get; set; }

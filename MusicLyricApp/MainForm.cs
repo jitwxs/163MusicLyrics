@@ -195,7 +195,7 @@ namespace MusicLyricApp
         /// <summary>
         /// 根据歌曲ID查询
         /// </summary>
-        private Dictionary<string, string> SearchBySongId(IEnumerable<string> songIds)
+        private Dictionary<string, string> SearchBySongId(IEnumerable<string> songIds, bool isVerbatimLyric)
         {
             var errorMsgDict = new Dictionary<string, string>();
 
@@ -204,7 +204,7 @@ namespace MusicLyricApp
 
             foreach (var songId in songIds)
             {
-                if (GlobalCache.ContainsSaveVo(songId))
+                if (GlobalCache.ContainsSaveVo(songId, isVerbatimLyric))
                 {
                     errorMsgDict.Add(songId, ErrorMsg.SUCCESS);
                 }
@@ -232,11 +232,11 @@ namespace MusicLyricApp
                     try
                     {
                         var songVo = resultVo.Data;
-                        var lyricVo = _api.GetLyricVo(songId);
+                        var lyricVo = _api.GetLyricVo(songVo, isVerbatimLyric);
                     
                         lyricVo.Duration = songVo.Duration;
                         
-                        GlobalCache.PutSaveVo(songId, new SaveVo(songId, songVo, lyricVo));
+                        GlobalCache.PutSaveVo(songId, isVerbatimLyric, new SaveVo(songId, songVo, lyricVo));
 
                         msg = ErrorMsg.SUCCESS;
                     }
@@ -307,13 +307,14 @@ namespace MusicLyricApp
         /// <exception cref="WebException"></exception>
         private string SingleSearch(string songId)
         {
-            var resultMaps = SearchBySongId(new[] { songId });
+            var isVerbatimLyric = _globalSearchInfo.SettingBean.Config.EnableVerbatimLyric;
+            var resultMaps = SearchBySongId(new[] { songId }, isVerbatimLyric);
 
             var message = resultMaps[songId];
 
             if (message == ErrorMsg.SUCCESS)
             {
-                var result = GlobalCache.GetSaveVo(songId);
+                var result = GlobalCache.GetSaveVo(songId, isVerbatimLyric);
 
                 // 3、加入结果集
                 _globalSaveVoMap.Add(songId, result);
@@ -335,7 +336,8 @@ namespace MusicLyricApp
         /// <exception cref="WebException"></exception>
         private void BatchSearch(IEnumerable<string> ids)
         {
-            var resultMaps = SearchBySongId(ids);
+            var isVerbatimLyric = _globalSearchInfo.SettingBean.Config.EnableVerbatimLyric;
+            var resultMaps = SearchBySongId(ids, isVerbatimLyric);
 
             // 输出日志
             var log = new StringBuilder();
@@ -347,7 +349,7 @@ namespace MusicLyricApp
 
                 if (message == ErrorMsg.SUCCESS)
                 {
-                    _globalSaveVoMap.Add(songId, GlobalCache.GetSaveVo(songId));
+                    _globalSaveVoMap.Add(songId, GlobalCache.GetSaveVo(songId, isVerbatimLyric));
                 }
 
                 log.Append($"ID: {songId}, Result: {message}").Append(Environment.NewLine);

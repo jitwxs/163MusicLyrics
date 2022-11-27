@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using System.Text;
+using System.Xml;
 using MusicLyricApp.Bean;
 using MusicLyricApp.Utils;
 using Newtonsoft.Json;
@@ -12,6 +14,20 @@ namespace MusicLyricApp.Api
     {
         private static DateTime _dtFrom = new DateTime(1970, 1, 1, 8, 0, 0, 0, DateTimeKind.Local);
 
+        [DllImport("QQMusicVerbatim.dll", EntryPoint = "?Ddes@qqmusic@@YAHPAE0H@Z", CallingConvention = CallingConvention.Cdecl)]
+        private static extern void func_ddes(sbyte[] a, string b, int c);
+
+        [DllImport("QQMusicVerbatim.dll", EntryPoint = "?des@qqmusic@@YAHPAE0H@Z", CallingConvention = CallingConvention.Cdecl)]
+        private static extern void func_des(sbyte[] a, string b, int c);
+
+        private static readonly Dictionary<string, string> VerbatimXmlMappingDict = new Dictionary<string, string>
+        {
+            { "content", "orig" }, // 原文
+            { "contentts", "ts" }, // 译文
+            { "contentroma", "roma" }, // 罗马音
+            { "Lyric_1", "lyric" }, // 解压后的内容
+        };
+        
         protected override string HttpRefer()
         {
             return "https://c.y.qq.com/";
@@ -63,7 +79,7 @@ namespace MusicLyricApp.Api
             var data = new Dictionary<string, string>
             {
                 { "callback", "MusicJsonCallback_lrc" },
-                { "pcachetime", currentMillis + string.Empty },
+                { "pcachetime", currentMillis.ToString() },
                 { "songmid", songMid },
                 { "g_tk", "5381" },
                 { "jsonpCallback", callBack },
@@ -84,6 +100,83 @@ namespace MusicLyricApp.Api
             return result.Decode();
         }
 
+        public QQMusicBean.LyricResult GetVerbatimLyric(long songId)
+        {
+            var resp = SendHttp("https://c.y.qq.com/qqmusic/fcgi-bin/lyric_download.fcg", new Dictionary<string, string>
+            {
+                { "version", "15" },
+                { "miniversion", "82" },
+                { "lrctype", "4" },
+                { "musicid", songId.ToString() },
+            });
+            // qq music 返回的内容需要去除注释
+            resp = resp.Replace("<!--", "").Replace("-->", "");
+
+            var dict = new Dictionary<string, XmlNode>();
+
+            XmlUtils.RecursionFindElement(XmlUtils.Create(resp), VerbatimXmlMappingDict, dict);
+
+            var result = new QQMusicBean.LyricResult
+            {
+                Code = 0,
+                Lyric = "",
+                Trans = ""
+            };
+
+            foreach (var pair in dict)
+            {
+                var text = pair.Value.InnerText;
+
+                if (string.IsNullOrWhiteSpace(text))
+                {
+                    continue;
+                }
+                
+                var sz = MathUtils.ConvertStringToHexSbytes(text, out var sbytes);
+                
+                func_ddes(sbytes,  "!@#)(NHLiuy*$%^&", sz);
+                func_des(sbytes, "123ZXC!@#)(*$%^&", sz);
+                func_ddes(sbytes, "!@#)(*$%^&abcDEF", sz);
+
+                var decompressBytes = MathUtils.SharpZipLibDecompress(MathUtils.SbytesToBytes(sbytes, sz));
+                var decompressText = Encoding.UTF8.GetString(decompressBytes);
+
+                var s = "";
+                if (decompressText.Contains("<?xml"))
+                {
+                    var doc = XmlUtils.Create(decompressText);
+                
+                    var subDict = new Dictionary<string, XmlNode>();
+                
+                    XmlUtils.RecursionFindElement(doc, VerbatimXmlMappingDict, subDict);
+
+                    if (subDict.TryGetValue("lyric", out var d))
+                    {
+                        s = d.Attributes["LyricContent"].InnerText;
+                    }
+                }
+                else
+                {
+                    s = decompressText;
+                }
+
+                if (!string.IsNullOrWhiteSpace(s))
+                {
+                    switch (pair.Key)
+                    {
+                        case "orig":
+                            result.Lyric = LyricUtils.DealVerbatimLyric(s, SearchSourceEnum.QQ_MUSIC);
+                            break;
+                        case "ts":
+                            result.Trans = LyricUtils.DealVerbatimLyric(s, SearchSourceEnum.QQ_MUSIC);
+                            break;
+                    }
+                }
+            }
+
+            return result;
+        }
+        
         public string GetSongLink(string songMid)
         {
             var guid = GetGuid();

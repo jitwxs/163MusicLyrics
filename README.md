@@ -15,12 +15,17 @@
 - [x] 支持多种保存命名规则、文件编码格式 Support multiple saving naming rules, file encoding format
 - [x] 支持 LRC 或 SRT 输出格式 Support lrc or srt output format
 - [x] 日文歌曲支持罗马音 Support romaji in japanese songs
+- [x] QQ 音乐支持逐字歌词模式(卡拉 OK 模式) QQMusic support verbatim mode(karaoke mode)
 
 ### Downloads
 
 进入 [GitHub Release](https://github.com/jitwxs/163MusicLyrics/releases) 页下载最新版本即可，您可点击 [ChangeLog](https://github.com/jitwxs/163MusicLyrics/wiki/ChangeLog) 查看不同版本的变更。
 
 Enter [Github Release](https://github.com/jitwxs/163musiclyrics/releses) page to download the latest version, you can click [Changelog](https://github.com/jitwxs/163musiclyrics/wiki/changelog) View different versions of changes.
+
+**注意:** 为了减少应用的体积，部分非必须功能采用插件形式，具体请参阅 Use Guide。
+
+**Attention:** For reduce application's size，some non-necessary feature implements by plugins, pls see Use Guide to learn more.
 
 ![screenshot](./images/latest_version.png)
 
@@ -48,6 +53,7 @@ You can access [163MusiclyRics Projects](https://github.com/Users/jitwxs/project
 - https://github.com/Binaryify/NeteaseCloudMusicApi
 - https://github.com/Rain120/qq-music-api
 - https://github.com/ElliottSilence/LyricCapture
+- https://github.com/xmcp/QRCD
 
 ### Donate
 

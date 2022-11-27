@@ -19,6 +19,8 @@ namespace MusicLyricApp
             AfterInitializeComponent();
             
             ShowRomajiChangeListener(ShowRomaji_CheckBox.Checked);
+            
+            VerbatimLyricChangeListener(VerbatimLyric_CheckBox.Checked);
         }
 
         private void Save_Btn_Click(object sender, EventArgs e)
@@ -33,6 +35,7 @@ namespace MusicLyricApp
             _settingBean.Param.SrtTimestampFormat = SrtTimestampFormat_TextBox.Text;
             _settingBean.Param.TranslateMatchPrecisionDeviation = int.Parse(TranslateMatchPrecisionDeviation_TextBox.Text);
 
+            _settingBean.Config.EnableVerbatimLyric = VerbatimLyric_CheckBox.Checked;
             _settingBean.Config.RomajiConfig.Enable = ShowRomaji_CheckBox.Checked;
             _settingBean.Config.RomajiConfig.ModeEnum = (RomajiModeEnum)RomajiMode_ComboBox.SelectedIndex;
             _settingBean.Config.RomajiConfig.SystemEnum = (RomajiSystemEnum)RomajiSystem_ComboBox.SelectedIndex;
@@ -66,6 +69,21 @@ namespace MusicLyricApp
             if(e.KeyChar!='\b' && !char.IsDigit(e.KeyChar))
             {
                 e.Handled = true;
+            }
+        }
+
+        private void VerbatimLyric_CheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            VerbatimLyricChangeListener(VerbatimLyric_CheckBox.Checked);
+        }
+        
+        private void VerbatimLyricChangeListener(bool isEnable)
+        {
+            // 检查依赖
+            if (isEnable && Constants.VerbatimLyricDependency.Any(e => !File.Exists(e)))
+            {
+                MessageBox.Show(string.Format(ErrorMsg.DEPENDENCY_LOSS, "Verbatim"), "提示");
+                VerbatimLyric_CheckBox.Checked = false;
             }
         }
     }

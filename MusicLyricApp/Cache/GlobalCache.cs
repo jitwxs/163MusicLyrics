@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using MusicLyricApp.Bean;
+using MusicLyricApp.Utils;
 
 namespace MusicLyricApp.Cache
 {
@@ -50,20 +51,26 @@ namespace MusicLyricApp.Cache
 
         private static readonly Dictionary<string, SaveVo> SaveVoCache = new Dictionary<string, SaveVo>();
 
-        public static bool ContainsSaveVo(string songId)
+        public static bool ContainsSaveVo(string songId, bool isVerbatimLyric)
         {
-            return SaveVoCache.ContainsKey(songId);
+            var cacheKey = GlobalUtils.GetSongKey(songId, isVerbatimLyric);
+            
+            return SaveVoCache.ContainsKey(cacheKey);
         }
 
-        public static SaveVo GetSaveVo(string songId)
+        public static SaveVo GetSaveVo(string songId, bool isVerbatimLyric)
         {
-            SaveVoCache.TryGetValue(songId, out var result);
+            var cacheKey = GlobalUtils.GetSongKey(songId, isVerbatimLyric);
+            
+            SaveVoCache.TryGetValue(cacheKey, out var result);
             return result;
         }
 
-        public static void PutSaveVo(string songId, SaveVo saveVo)
+        public static void PutSaveVo(string songId, bool isVerbatimLyric, SaveVo saveVo)
         {
-            SaveVoCache.Add(songId, saveVo);
+            var cacheKey = GlobalUtils.GetSongKey(songId, isVerbatimLyric);
+            
+            SaveVoCache.Add(cacheKey, saveVo);
         }
 
         /* --------------------------------------------------------------------------------------------------------- */
