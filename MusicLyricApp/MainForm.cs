@@ -370,7 +370,7 @@ namespace MusicLyricApp
         /// <summary>
         /// 搜索按钮，点击事件
         /// </summary>
-        private async void Search_Btn_Click(object sender, EventArgs e)
+        public async void Search_Btn_Click(object sender, EventArgs e)
         {
             ReloadConfig();
             CleanTextBox();
@@ -435,7 +435,7 @@ namespace MusicLyricApp
                     throw new MusicLyricException(res.ErrorMsg);
                 }
                 
-                FormUtils.OpenForm(_blurForm, x => new BlurForm(res.Data), this);
+                FormUtils.OpenForm(_blurForm, x => new BlurForm(res.Data, this), this);
             }
             catch (WebException ex)
             {

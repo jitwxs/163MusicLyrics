@@ -418,7 +418,7 @@ namespace MusicLyricApp
         private System.Windows.Forms.Button Save_Btn;
         private System.Windows.Forms.ComboBox OutputName_ComboBox;
         private System.Windows.Forms.ComboBox LrcType_ComboBox;
-        private System.Windows.Forms.TextBox Search_Text;
+        public System.Windows.Forms.TextBox Search_Text;
         private System.Windows.Forms.Label OutputName_Label;
         private System.Windows.Forms.Label LrcMergeSeparator_Label;
         private System.Windows.Forms.TextBox LrcMergeSeparator_TextBox;

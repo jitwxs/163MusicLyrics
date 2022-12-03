@@ -146,9 +146,9 @@ namespace MusicLyricApp.Bean
     {
         public SearchTypeEnum SearchType { get; set; }
 
-        public List<SongSearchResultVo> SongVos { get; set; }
+        public List<SongSearchResultVo> SongVos = new List<SongSearchResultVo>();
 
-        public List<AlbumSearchResultVo> AlbumVos { get; set; }
+        public List<AlbumSearchResultVo> AlbumVos = new List<AlbumSearchResultVo>();
 
         public class SongSearchResultVo
         {

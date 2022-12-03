@@ -31,30 +31,34 @@ namespace MusicLyricApp.Bean
                 switch (searchType)
                 {
                     case SearchTypeEnum.SONG_ID:
-                        vo.SongVos = new List<SearchResultVo.SongSearchResultVo>();
-                        foreach (var song in Songs)
+                        if (Songs != null && Songs.Length > 0)
                         {
-                            vo.SongVos.Add(new SearchResultVo.SongSearchResultVo
+                            foreach (var song in Songs)
                             {
-                                DisplayId = song.Id,
-                                SongName = song.Name,
-                                AuthorName = song.Ar.Select(e => e.Name).ToArray(),
-                                AlbumName = song.Al.Name,
-                                Duration = song.Dt
-                            });
+                                vo.SongVos.Add(new SearchResultVo.SongSearchResultVo
+                                {
+                                    DisplayId = song.Id,
+                                    SongName = song.Name,
+                                    AuthorName = song.Ar.Select(e => e.Name).ToArray(),
+                                    AlbumName = song.Al.Name,
+                                    Duration = song.Dt
+                                });
+                            }
                         }
                         break;
                     case SearchTypeEnum.ALBUM_ID:
-                        vo.AlbumVos = new List<SearchResultVo.AlbumSearchResultVo>();
-                        foreach (var album in Albums)
+                        if (Albums != null && Albums.Length > 0)
                         {
-                            vo.AlbumVos.Add(new SearchResultVo.AlbumSearchResultVo
+                            foreach (var album in Albums)
                             {
-                                DisplayId = album.Id.ToString(),
-                                AlbumName = album.Name,
-                                AuthorName = album.Artists.Select(e => e.Name).ToArray(),
-                                Company = album.Company
-                            });
+                                vo.AlbumVos.Add(new SearchResultVo.AlbumSearchResultVo
+                                {
+                                    DisplayId = album.Id.ToString(),
+                                    AlbumName = album.Name,
+                                    AuthorName = album.Artists.Select(e => e.Name).ToArray(),
+                                    Company = album.Company
+                                });
+                            }
                         }
                         break;
                 }
