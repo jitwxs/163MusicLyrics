@@ -19,6 +19,11 @@ namespace MusicLyricApp.Api
             _api = new NetEaseMusicNativeApi();
         }
 
+        protected override SearchSourceEnum Source0()
+        {
+            return SearchSourceEnum.NET_EASE_MUSIC;
+        }
+
         protected override IEnumerable<string> GetSongIdsFromAlbum0(string albumId)
         {
             var resp = _api.GetAlbum(albumId);
@@ -92,7 +97,20 @@ namespace MusicLyricApp.Api
 
             throw new MusicLyricException(ErrorMsg.LRC_NOT_EXIST);
         }
-        
+
+        protected override ResultVo<SearchResultVo> Search0(string keyword, SearchTypeEnum searchType)
+        {
+            var resp = _api.Search(keyword, searchType);
+            
+            if (resp == null || resp.Code != 200)
+            {
+                _logger.Error("NetEaseMusicApiV2 Search0 failed, resp: {Resp}", resp.ToJson());
+                return new ResultVo<SearchResultVo>(null, ErrorMsg.NETWORK_ERROR);
+            }
+
+            return new ResultVo<SearchResultVo>(resp.Result.convert(searchType));
+        }
+
         /// <summary>
         /// 拼接歌手名
         /// </summary>

@@ -7,12 +7,21 @@ namespace MusicLyricApp.Api
 {
     public abstract class MusicApiV2Cacheable : IMusicApiV2
     {
+        protected abstract SearchSourceEnum Source0();
+        
         protected abstract IEnumerable<string> GetSongIdsFromAlbum0(string albumId);
 
         protected abstract Dictionary<string, ResultVo<SongVo>> GetSongVo0(string[] songIds);
 
         protected abstract LyricVo GetLyricVo0(SongVo songVo, bool isVerbatim);
-        
+
+        protected abstract  ResultVo<SearchResultVo> Search0(string keyword, SearchTypeEnum searchType);
+
+        public SearchSourceEnum Source()
+        {
+            return Source0();
+        }
+
         public IEnumerable<string> GetSongIdsFromAlbum(string albumId)
         {
             if (GlobalCache.ContainsAlbumSongIds(albumId))
@@ -75,6 +84,24 @@ namespace MusicLyricApp.Api
             if (result != null)
             {
                 GlobalCache.PutLyric(cacheKey, result);
+            }
+
+            return result;
+        }
+
+        public ResultVo<SearchResultVo> Search(string keyword, SearchTypeEnum searchType)
+        {
+            var cacheKey = Source0() + "_" + searchType + "_" + keyword;
+            
+            if (GlobalCache.ContainsSearchResultVo(cacheKey))
+            {
+                return new ResultVo<SearchResultVo>(GlobalCache.GetSearchResultVo(cacheKey));
+            }
+
+            var result = Search0(keyword, searchType);
+            if (result != null && result.IsSuccess())
+            {
+                GlobalCache.PutSearchResultVo(cacheKey, result.Data);
             }
 
             return result;

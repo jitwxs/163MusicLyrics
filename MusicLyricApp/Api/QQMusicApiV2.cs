@@ -15,6 +15,11 @@ namespace MusicLyricApp.Api
             _api = new QQMusicNativeApi();
         }
 
+        protected override SearchSourceEnum Source0()
+        {
+            return SearchSourceEnum.QQ_MUSIC;
+        }
+
         protected override IEnumerable<string> GetSongIdsFromAlbum0(string albumId)
         {
             var resp = _api.GetAlbum(albumId);
@@ -77,7 +82,13 @@ namespace MusicLyricApp.Api
            
             return lyricVo;
         }
-        
+
+        protected override ResultVo<SearchResultVo> Search0(string keyword, SearchTypeEnum searchType)
+        {
+            // todo not support
+            throw new MusicLyricException(ErrorMsg.FUNCTION_NOT_SUPPORT);
+        }
+
         /// <summary>
         /// 拼接歌手名
         /// </summary>

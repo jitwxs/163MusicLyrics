@@ -13,11 +13,11 @@ namespace MusicLyricAppTest.Api
         {
             var res = _api.Search("Slow", SearchTypeEnum.SONG_ID);
             
-            Assert.AreNotEqual(0, res.SongCount);
+            Assert.AreNotEqual(0, res.Result.SongCount);
             
             res = _api.Search("Slow", SearchTypeEnum.ALBUM_ID);
             
-            Assert.AreNotEqual(0, res.AlbumCount);
+            Assert.AreNotEqual(0, res.Result.AlbumCount);
         }
     }
 }

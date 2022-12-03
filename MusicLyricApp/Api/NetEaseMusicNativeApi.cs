@@ -36,7 +36,7 @@ namespace MusicLyricApp.Api
             return "https://music.163.com/";
         }
 
-        public SearchResultData Search(string keyword, SearchTypeEnum searchType)
+        public SearchResult Search(string keyword, SearchTypeEnum searchType)
         {
             const string url = "https://music.163.com/weapi/cloudsearch/get/web";
 
@@ -62,14 +62,7 @@ namespace MusicLyricApp.Api
                 { "offset", "0" }
             };
 
-            var res = JsonConvert.DeserializeObject<SearchResult>(SendHttp(url, Prepare(JsonConvert.SerializeObject(data))));
-
-            if (res == null || res.Code != 200)
-            {
-                throw new MusicLyricException(ErrorMsg.NETWORK_ERROR);
-            }
-
-            return res.Result;
+            return JsonConvert.DeserializeObject<SearchResult>(SendHttp(url, Prepare(JsonConvert.SerializeObject(data))));
         }
 
        /// <summary>

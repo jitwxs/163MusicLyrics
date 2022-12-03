@@ -103,6 +103,7 @@ namespace MusicLyricApp.Bean
         public const string MUST_SEARCH_BEFORE_SAVE = "您必须先搜索，才能保存内容";
         public const string MUST_SEARCH_BEFORE_GET_SONG_URL = "您必须先搜索，才能获取歌曲链接";
         public const string MUST_SEARCH_BEFORE_GET_SONG_PIC = "您必须先搜索，才能获取歌曲封面";
+        public const string INPUT_CONENT_EMPLT = "输入内容不能为空";
         public const string INPUT_ID_ILLEGAL = "您输入的ID不合法";
         public const string ALBUM_NOT_EXIST = "专辑信息暂未被收录或查询失败";
         public const string SONG_NOT_EXIST = "歌曲信息暂未被收录或查询失败";
@@ -141,6 +142,45 @@ namespace MusicLyricApp.Bean
         public LyricVo LyricVo { get; }
     }
 
+    public class SearchResultVo
+    {
+        public SearchTypeEnum SearchType { get; set; }
+
+        public List<SongSearchResultVo> SongVos { get; set; }
+
+        public List<AlbumSearchResultVo> AlbumVos { get; set; }
+
+        public class SongSearchResultVo
+        {
+            public string DisplayId { get; set; }
+            
+            public string SongName { get; set; }
+
+            public string[] AuthorName { get; set; }
+            
+            public string AlbumName { get; set; }
+            
+            /// <summary>
+            /// 歌曲时长 ms
+            /// </summary>
+            public long Duration { get; set; }
+        }
+        
+        public class AlbumSearchResultVo
+        {
+            public string DisplayId { get; set; }
+            
+            public string AlbumName { get; set; }
+
+            public string[] AuthorName { get; set; }
+            
+            /// <summary>
+            /// 发行公司
+            /// </summary>
+            public string Company { get; set; }
+        }
+    }
+    
     /// <summary>
     /// 歌曲信息
     /// </summary>

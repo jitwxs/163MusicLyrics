@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace MusicLyricApp.Bean
 {
@@ -9,19 +10,60 @@ namespace MusicLyricApp.Bean
         public SearchResultData Result { get; set; }
         
         public long Code { get; set; }
+        
+        public class SearchResultData
+        {
+            public Song[] Songs { get; set; }
+            
+            public long SongCount { get; set; }
+            
+            public Album[] Albums { get; set; }
+            
+            public long AlbumCount { get; set; }
+            
+            public SearchResultVo convert(SearchTypeEnum searchType)
+            {
+                var vo = new SearchResultVo
+                {
+                    SearchType = searchType
+                };
+
+                switch (searchType)
+                {
+                    case SearchTypeEnum.SONG_ID:
+                        vo.SongVos = new List<SearchResultVo.SongSearchResultVo>();
+                        foreach (var song in Songs)
+                        {
+                            vo.SongVos.Add(new SearchResultVo.SongSearchResultVo
+                            {
+                                DisplayId = song.Id,
+                                SongName = song.Name,
+                                AuthorName = song.Ar.Select(e => e.Name).ToArray(),
+                                AlbumName = song.Al.Name,
+                                Duration = song.Dt
+                            });
+                        }
+                        break;
+                    case SearchTypeEnum.ALBUM_ID:
+                        vo.AlbumVos = new List<SearchResultVo.AlbumSearchResultVo>();
+                        foreach (var album in Albums)
+                        {
+                            vo.AlbumVos.Add(new SearchResultVo.AlbumSearchResultVo
+                            {
+                                DisplayId = album.Id.ToString(),
+                                AlbumName = album.Name,
+                                AuthorName = album.Artists.Select(e => e.Name).ToArray(),
+                                Company = album.Company
+                            });
+                        }
+                        break;
+                }
+
+                return vo;
+            }
+        }
     }
-    
-    public class SearchResultData
-    {
-        public Song[] Songs { get; set; }
-            
-        public long SongCount { get; set; }
-            
-        public Album[] Albums { get; set; }
-            
-        public long AlbumCount { get; set; }
-    }
-    
+
     public class SongUrls
     {
         public Datum[] Data { get; set; }
@@ -135,6 +177,9 @@ namespace MusicLyricApp.Bean
         public object Crbt { get; set; }
         public string Cf { get; set; }
         public Al Al { get; set; }
+        /// <summary>
+        /// 时长，单位ms
+        /// </summary>
         public long Dt { get; set; }
         public H H { get; set; }
         public H M { get; set; }

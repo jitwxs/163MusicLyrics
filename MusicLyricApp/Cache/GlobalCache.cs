@@ -92,5 +92,25 @@ namespace MusicLyricApp.Cache
         {
             LyricCache.Add(songId, albumResult);
         }
+        
+        /* --------------------------------------------------------------------------------------------------------- */
+
+        private static readonly Dictionary<string, SearchResultVo> searchResultVoCache = new Dictionary<string, SearchResultVo>();
+
+        public static bool ContainsSearchResultVo(string keyword)
+        {
+            return searchResultVoCache.ContainsKey(keyword);
+        }
+
+        public static SearchResultVo GetSearchResultVo(string keyword)
+        {
+            searchResultVoCache.TryGetValue(keyword, out var result);
+            return result;
+        }
+
+        public static void PutSearchResultVo(string keyword, SearchResultVo vo)
+        {
+            searchResultVoCache.Add(keyword, vo);
+        }
     }
 }
