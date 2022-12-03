@@ -271,6 +271,12 @@
     <Compile Include="SettingForm.Designer.cs">
       <DependentUpon>SettingForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="ShortcutForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ShortcutForm.Designer.cs">
+      <DependentUpon>ShortcutForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="UpgradeForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -301,6 +307,9 @@
     </Compile>
     <EmbeddedResource Include="SettingForm.resx">
       <DependentUpon>SettingForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ShortcutForm.resx">
+      <DependentUpon>ShortcutForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="UpgradeForm.resx">
       <DependentUpon>UpgradeForm.cs</DependentUpon>

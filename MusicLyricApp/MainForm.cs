@@ -34,6 +34,8 @@ namespace MusicLyricApp
 
         private UpgradeForm _upgradeForm;
 
+        private ShortcutForm _shortcutForm;
+
         public MainForm()
         {
             // 禁止多开
@@ -859,6 +861,22 @@ namespace MusicLyricApp
             else if (input == CheckVersion_MItem)
             {
                 ThreadPool.QueueUserWorkItem(p => CheckLatestVersion(true));
+            }
+            else if (input == ShortCut_MItem)
+            {
+                if (_shortcutForm == null || _shortcutForm.IsDisposed)
+                {
+                    _shortcutForm = new ShortcutForm
+                    {
+                        Location = new Point(Left + Constants.SettingFormOffset, Top + Constants.SettingFormOffset),
+                        StartPosition = FormStartPosition.Manual
+                    };
+                    _shortcutForm.Show();
+                }
+                else
+                {
+                    _shortcutForm.Activate();
+                }
             }
         }
 
