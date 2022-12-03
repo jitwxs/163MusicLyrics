@@ -3,6 +3,9 @@ using System.Linq;
 
 namespace MusicLyricApp.Bean
 {
+    /// <summary>
+    /// 搜索接口结果
+    /// </summary>
     public class SearchResult
     {
         public bool NeedLogin { get; set; }
@@ -128,6 +131,28 @@ namespace MusicLyricApp.Bean
         public string Lyric { get; set; }
     }
 
+    /// <summary>
+    /// 歌单接口返回结果
+    /// </summary>
+    public class PlaylistResult
+    {
+        public long Code { get; set; }
+        
+        public string Urls { get; set; }
+        
+        public string RelatedVideos { get; set; }
+        
+        public Playlist Playlist { get; set; }
+        
+        /// <summary>
+        /// 歌单具体歌曲
+        /// </summary>
+        public Privilege[] Privileges { get; set; }
+    }
+    
+    /// <summary>
+    /// 专辑接口返回结果
+    /// </summary>
     public class AlbumResult
     {
         public Song[] Songs { get; set; }
@@ -135,6 +160,71 @@ namespace MusicLyricApp.Bean
         public Album Album { get; set; }
     }
 
+    /// <summary>
+    /// 歌单信息
+    /// </summary>
+    public class Playlist
+    {
+        public string Id { get; set; }
+        
+        public string Name { get; set; }
+        
+        /// <summary>
+        /// 歌单封面 ID
+        /// </summary>
+        public long CoverImgId { get; set; }
+        
+        /// <summary>
+        /// 歌单封面 URL
+        /// </summary>
+        public string CoverImgUrl { get; set; }
+        
+        /// <summary>
+        /// 创建者 ID
+        /// </summary>
+        public long UserId { get; set; }
+        
+        /// <summary>
+        /// 创建者
+        /// </summary>
+        public Creator Creator { get; set; }
+        
+        /// <summary>
+        /// 歌单创建时间
+        /// </summary>
+        public long CreateTime { get; set; }
+        
+        public int Status { get; set; }
+        
+        /// <summary>
+        /// 订阅数量
+        /// </summary>
+        public long SubscribedCount { get; set; }
+        
+        /// <summary>
+        /// 分享数量
+        /// </summary>
+        public long ShareCount { get; set; }
+        
+        /// <summary>
+        /// 评论数量
+        /// </summary>
+        public long CommentCount { get; set; }
+        
+        /// <summary>
+        /// 歌单描述
+        /// </summary>
+        public string Description { get; set; }
+        
+        /// <summary>
+        /// 歌单标签
+        /// </summary>
+        public string[] Tags { get; set; }
+    }
+
+    /// <summary>
+    /// 专辑
+    /// </summary>
     public class Album
     {
         public object[] Songs { get; set; }
@@ -251,13 +341,44 @@ namespace MusicLyricApp.Bean
         public bool Followed { get; set; }
     }
 
+    /// <summary>
+    ///  创建者
+    /// </summary>
+    public class Creator
+    {
+        /// <summary>
+        /// 用户 ID
+        /// </summary>
+        public long UserId { get; set; }
+        
+        /// <summary>
+        /// 昵称
+        /// </summary>
+        public string Nickname { get; set; }
+
+        /// <summary>
+        /// 个人介绍
+        /// </summary>
+        public string Signature { get; set; }
+        
+        /// <summary>
+        /// 描述
+        /// </summary>
+        public string Description { get; set; }
+        
+        /// <summary>
+        /// 头像地址
+        /// </summary>
+        public string AvatarUrl { get; set; }
+    }
+
     public class ResourceInfo
     {
         public long Id { get; set; }
         public long UserId { get; set; }
         public string Name { get; set; }
         public object ImgUrl { get; set; }
-        public object Creator { get; set; }
+        public Creator Creator { get; set; }
     }
 
     public class Privilege
