@@ -1,10 +1,9 @@
 ﻿using System.Text;
-using System.Windows.Forms;
 using Markdig;
 
 namespace MusicLyricApp
 {
-    public partial class ShortcutForm : Form
+    public partial class ShortcutForm : MusicLyricForm
     {
         public ShortcutForm()
         {
@@ -34,19 +33,6 @@ namespace MusicLyricApp
                 .Append("</table>");
             
             Shortcut_Browser.DocumentText = Markdown.ToHtml(sb.ToString());
-        }
-        
-        /// <summary>
-        /// listener keyboard key
-        /// </summary>
-        protected override bool ProcessDialogKey(Keys keyData)
-        {
-            if (ModifierKeys == Keys.None && keyData == Keys.Escape)
-            {
-                Close();
-                return true;
-            }
-            return base.ProcessDialogKey(keyData);
         }
     }
 }

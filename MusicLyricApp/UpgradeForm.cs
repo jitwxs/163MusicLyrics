@@ -1,12 +1,11 @@
 ﻿using System;
-using System.Windows.Forms;
 using Markdig;
 using MusicLyricApp.Bean;
 using NLog;
 
 namespace MusicLyricApp
 {
-    public partial class UpgradeForm : Form
+    public partial class UpgradeForm : MusicLyricForm
     {
         private readonly GitHubInfo _gitHubInfo;
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
@@ -47,19 +46,6 @@ namespace MusicLyricApp
             {
                 Logger.Error(ex, "打开失败");
             }
-        }
-        
-        /// <summary>
-        /// listener keyboard key
-        /// </summary>
-        protected override bool ProcessDialogKey(Keys keyData)
-        {
-            if (ModifierKeys == Keys.None && keyData == Keys.Escape)
-            {
-                Close();
-                return true;
-            }
-            return base.ProcessDialogKey(keyData);
         }
     }
 }

@@ -19,7 +19,7 @@ using NLog;
 
 namespace MusicLyricApp
 {
-    public partial class MainForm : Form
+    public partial class MainForm : MusicLyricForm
     {
         private readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
@@ -815,21 +815,6 @@ namespace MusicLyricApp
                 // 精确搜索
                 Search_Btn_Click(sender, e);
             }
-        }
-        
-        /// <summary>
-        /// listener keyboard key
-        /// </summary>
-        protected override bool ProcessDialogKey(Keys keyData)
-        {
-            // close
-            if (ModifierKeys == Keys.None && keyData == Keys.Escape)
-            {
-                Close();
-                return true;
-            }
-
-            return base.ProcessDialogKey(keyData);
         }
 
         /// <summary>

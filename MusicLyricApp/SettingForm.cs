@@ -6,7 +6,7 @@ using MusicLyricApp.Bean;
 
 namespace MusicLyricApp
 {
-    public partial class SettingForm : Form
+    public partial class SettingForm : MusicLyricForm
     {
         private readonly SettingBean _settingBean;
 
@@ -85,19 +85,6 @@ namespace MusicLyricApp
                 MessageBox.Show(string.Format(ErrorMsg.DEPENDENCY_LOSS, "Verbatim"), "提示");
                 VerbatimLyric_CheckBox.Checked = false;
             }
-        }
-        
-        /// <summary>
-        /// listener keyboard key
-        /// </summary>
-        protected override bool ProcessDialogKey(Keys keyData)
-        {
-            if (ModifierKeys == Keys.None && keyData == Keys.Escape)
-            {
-                Close();
-                return true;
-            }
-            return base.ProcessDialogKey(keyData);
         }
     }
 }
