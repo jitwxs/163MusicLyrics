@@ -227,7 +227,7 @@ namespace MusicLyricApp.Api
 
         protected virtual string GetGuid()
         {
-            StringBuilder guid = new StringBuilder(10);
+            var guid = new StringBuilder(10);
             var r = new Random();
             for (var i = 0; i < 10; i++)
             {
