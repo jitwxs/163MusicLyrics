@@ -350,19 +350,27 @@ namespace MusicLyricApp
 
             foreach (var kvp in resultMaps)
             {
-                var songId = kvp.Key;
-                var message = kvp.Value;
+                string songId = kvp.Key, message = kvp.Value;
 
+                log.Append($"{songId}");
+                
                 if (message == ErrorMsg.SUCCESS)
                 {
-                    _globalSaveVoMap.Add(songId, GlobalCache.GetSaveVo(songId, isVerbatimLyric));
+                    var songVo = GlobalCache.GetSaveVo(songId, isVerbatimLyric);
+                    _globalSaveVoMap.Add(songId, songVo);
+                    
+                    log.Append($" => {songVo.SongVo.Name}");
                 }
 
-                log.Append($"ID: {songId}, Result: {message}").Append(Environment.NewLine);
+                log
+                    .Append($" => {message}")
+                    .Append(Environment.NewLine);
             }
 
-            log.Append("---Total：" + resultMaps.Count + ", Success：" + _globalSaveVoMap.Count + ", Failure：" +
-                       (resultMaps.Count - _globalSaveVoMap.Count) + "---").Append(Environment.NewLine);
+            log
+                .Append(Environment.NewLine)
+                .Append($"Total {resultMaps.Count} Success {_globalSaveVoMap.Count} Failure {resultMaps.Count - _globalSaveVoMap.Count}")
+                .Append(Environment.NewLine);
 
             UpdateLrcTextBox(log.ToString());
         }
@@ -433,6 +441,10 @@ namespace MusicLyricApp
                 if (!res.IsSuccess())
                 {
                     throw new MusicLyricException(res.ErrorMsg);
+                }
+                if (res.Data.IsEmpty())
+                {
+                    throw new MusicLyricException(ErrorMsg.SEARCH_RESULT_EMPTY);
                 }
                 
                 FormUtils.OpenForm(_blurForm, x => new BlurForm(res.Data, this), this);
@@ -654,7 +666,7 @@ namespace MusicLyricApp
             foreach (var songId in _globalSearchInfo.SongIds)
             {
                 log
-                    .Append($"ID: {songId}, Result: {(success.Contains(songId) ? "success" : "failure")}")
+                    .Append($"{songId} => {(success.Contains(songId) ? "success" : "failure")}")
                     .Append(Environment.NewLine);
             }
             UpdateLrcTextBox(log.ToString());

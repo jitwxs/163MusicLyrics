@@ -99,7 +99,7 @@ namespace MusicLyricApp.Bean
     public static class ErrorMsg
     {
         public const string SUCCESS = "成功";
-        public const string SEARCH_RESULT_STAGE = "查询成功，结果已暂存";
+        public const string SEARCH_RESULT_EMPTY = "查询结果为空，请修改查询条件";
         public const string MUST_SEARCH_BEFORE_SAVE = "您必须先搜索，才能保存内容";
         public const string MUST_SEARCH_BEFORE_GET_SONG_URL = "您必须先搜索，才能获取歌曲链接";
         public const string MUST_SEARCH_BEFORE_GET_SONG_PIC = "您必须先搜索，才能获取歌曲封面";
@@ -146,10 +146,15 @@ namespace MusicLyricApp.Bean
     {
         public SearchTypeEnum SearchType { get; set; }
 
-        public List<SongSearchResultVo> SongVos = new List<SongSearchResultVo>();
+        public readonly List<SongSearchResultVo> SongVos = new List<SongSearchResultVo>();
 
-        public List<AlbumSearchResultVo> AlbumVos = new List<AlbumSearchResultVo>();
+        public readonly List<AlbumSearchResultVo> AlbumVos = new List<AlbumSearchResultVo>();
 
+        public bool IsEmpty()
+        {
+            return SongVos.Count == 0 && AlbumVos.Count == 0;
+        }
+        
         public class SongSearchResultVo
         {
             public string DisplayId { get; set; }
