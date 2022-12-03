@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
@@ -655,17 +656,14 @@ namespace MusicLyricApp
                 // 根据最新配置，更新输出歌词
                 if (_globalSaveVoMap != null && _globalSaveVoMap.Count == 1)
                 {
-                    // only loop one times
-                    foreach (var lyricVo in _globalSaveVoMap.Values.Select(saveVo => saveVo.LyricVo))
+                    var lyricVo = _globalSaveVoMap.Values.First().LyricVo;
+                    if (lyricVo.IsEmpty())
                     {
-                        if (lyricVo.IsEmpty())
-                        {
-                            Console_TextBox.Text = ErrorMsg.LRC_NOT_EXIST;
-                        }
-                        else
-                        {
-                            Console_TextBox.Text = await LyricUtils.GetOutputContent(lyricVo, _globalSearchInfo);
-                        }
+                        Console_TextBox.Text = ErrorMsg.LRC_NOT_EXIST;
+                    }
+                    else
+                    {
+                        Console_TextBox.Text = await LyricUtils.GetOutputContent(lyricVo, _globalSearchInfo);
                     }
                 }
             }
