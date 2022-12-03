@@ -85,7 +85,6 @@ namespace MusicLyricApp
             this.Console_TextBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.Console_TextBox.Size = new System.Drawing.Size(472, 203);
             this.Console_TextBox.TabIndex = 3;
-            this.Console_TextBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.Console_TextBox_KeyDown);
             // 
             // Singer_TextBox
             // 
@@ -384,11 +383,13 @@ namespace MusicLyricApp
             this.Controls.Add(this.Top_MenuStrip);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.KeyPreview = true;
             this.MainMenuStrip = this.Top_MenuStrip;
             this.MaximizeBox = false;
             this.Name = "MainForm";
             this.Text = "云音乐歌词提取 " + Constants.Version;
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
+            this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.MainForm_KeyDown);
             this.MouseEnter += new System.EventHandler(this.MainForm_MouseEnter);
             this.Top_MenuStrip.ResumeLayout(false);
             this.Top_MenuStrip.PerformLayout();

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
@@ -757,14 +756,20 @@ namespace MusicLyricApp
         }
 
         /// <summary>
-        /// 控制台，键盘事件
+        /// 键盘事件
         /// </summary>
-        private void Console_TextBox_KeyDown(object sender, KeyEventArgs e)
+        private void MainForm_KeyDown(object sender, KeyEventArgs e)
         {
-            // 全选操作
-            if (e.Control && e.KeyCode == Keys.A)
+            // 保存操作
+            if (e.Control && e.KeyCode == Keys.S)
             {
-                ((TextBox)sender).SelectAll();
+                Save_Btn_Click(sender, e);
+            }
+            
+            // 精确搜索
+            if (e.KeyCode == Keys.Enter)
+            {
+                Search_Btn_Click(sender, e);
             }
         }
 
