@@ -35,6 +35,8 @@ namespace MusicLyricApp
 
         private ShortcutForm _shortcutForm;
 
+        private BlurForm _blurForm;
+
         public MainForm()
         {
             // 禁止多开
@@ -133,12 +135,14 @@ namespace MusicLyricApp
             ReloadInputIdText();
 
             _globalSearchInfo.SongIds.Clear();
-            
-            var param = _globalSearchInfo.SettingBean.Param;
+            _globalSearchInfo.SettingBean.Param.LrcMergeSeparator = LrcMergeSeparator_TextBox.Text;
 
-            param.LrcMergeSeparator = LrcMergeSeparator_TextBox.Text;
+            ReloadMusicApi();
+        }
 
-            if (param.SearchSource == SearchSourceEnum.QQ_MUSIC)
+        private void ReloadMusicApi()
+        {
+            if (_globalSearchInfo.SettingBean.Param.SearchSource == SearchSourceEnum.QQ_MUSIC)
             {
                 _api = new QQMusicApiV2();
             }
@@ -413,6 +417,44 @@ namespace MusicLyricApp
             }
         }
 
+        private async void Blur_Search_Btn_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                var keyword = Search_Text.Text.Trim();
+                if (string.IsNullOrWhiteSpace(keyword))
+                {
+                    throw new MusicLyricException(ErrorMsg.INPUT_CONENT_EMPLT);
+                }
+                
+                ReloadMusicApi();
+
+                var res = _api.Search(keyword, _globalSearchInfo.SettingBean.Param.SearchType);
+                if (!res.IsSuccess())
+                {
+                    throw new MusicLyricException(res.ErrorMsg);
+                }
+                
+                FormUtils.OpenForm(_blurForm, x => new BlurForm(res.Data), this);
+            }
+            catch (WebException ex)
+            {
+                _logger.Error(ex, "Blur Search Network error, delay: {Delay}", await NetworkUtils.GetWebRoundtripTimeAsync());
+                MessageBox.Show(ErrorMsg.NETWORK_ERROR, "错误");
+            }
+            catch (MusicLyricException ex)
+            {
+                _logger.Error("Blur Search Business failed, param: {SearchParam}, type: {SearchType}, message: {ErrorMsg}",
+                    Search_Text.Text, _globalSearchInfo.SettingBean.Param.SearchType, ex.Message);
+                MessageBox.Show(ex.Message, "提示");
+            }
+            catch (System.Exception ex)
+            {
+                _logger.Error(ex);
+                MessageBox.Show(ErrorMsg.SYSTEM_ERROR, "错误");
+            }
+        }
+        
         /// <summary>
         /// 获取歌曲链接按钮，点击事件
         /// </summary>
@@ -756,19 +798,21 @@ namespace MusicLyricApp
         }
 
         /// <summary>
-        /// 键盘事件
+        /// 窗体键盘事件
         /// </summary>
         private void MainForm_KeyDown(object sender, KeyEventArgs e)
         {
-            // 保存操作
             if (e.Control && e.KeyCode == Keys.S)
             {
+                // 保存操作
                 Save_Btn_Click(sender, e);
-            }
-            
-            // 精确搜索
-            if (e.KeyCode == Keys.Enter)
+            } else if (e.Control && e.KeyCode == Keys.Enter)
             {
+                // 模糊搜索
+                Blur_Search_Btn_Click(sender, e);
+            } else if (e.KeyCode == Keys.Enter)
+            {
+                // 精确搜索
                 Search_Btn_Click(sender, e);
             }
         }
@@ -852,19 +896,7 @@ namespace MusicLyricApp
             }
             else if (input == Setting_MItem)
             {
-                if (_settingForm == null || _settingForm.IsDisposed)
-                {
-                    _settingForm = new SettingForm(_globalSearchInfo.SettingBean)
-                    {
-                        Location = new Point(Left + Constants.SettingFormOffset, Top + Constants.SettingFormOffset),
-                        StartPosition = FormStartPosition.Manual
-                    };
-                    _settingForm.Show();
-                }
-                else
-                {
-                    _settingForm.Activate();
-                }
+                FormUtils.OpenForm(_settingForm, x => new SettingForm(_globalSearchInfo.SettingBean), this);
             }
             else if (input == Issue_MItem)
             {
@@ -884,19 +916,7 @@ namespace MusicLyricApp
             }
             else if (input == ShortCut_MItem)
             {
-                if (_shortcutForm == null || _shortcutForm.IsDisposed)
-                {
-                    _shortcutForm = new ShortcutForm
-                    {
-                        Location = new Point(Left + Constants.SettingFormOffset, Top + Constants.SettingFormOffset),
-                        StartPosition = FormStartPosition.Manual
-                    };
-                    _shortcutForm.Show();
-                }
-                else
-                {
-                    _shortcutForm.Activate();
-                }
+                FormUtils.OpenForm(_shortcutForm, x => new ShortcutForm(), this);
             }
         }
 
@@ -949,17 +969,7 @@ namespace MusicLyricApp
                 {
                     void Action()
                     {
-                        if (_upgradeForm == null || _upgradeForm.IsDisposed)
-                        {
-                            _upgradeForm = new UpgradeForm(info);
-                            _upgradeForm.Location = new Point(Left + Constants.SettingFormOffset, Top + Constants.SettingFormOffset);
-                            _upgradeForm.StartPosition = FormStartPosition.Manual;
-                            _upgradeForm.Show();
-                        }
-                        else
-                        {
-                            _upgradeForm.Activate();
-                        }
+                        FormUtils.OpenForm(_upgradeForm, x => new UpgradeForm(info), this);
                     }
                     Invoke((Action)Action);
                 }

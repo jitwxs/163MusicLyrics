@@ -255,6 +255,12 @@
     <Compile Include="Bean\MusicLyricsVO.cs" />
     <Compile Include="Bean\QQMusicBean.cs" />
     <Compile Include="Bean\SettingBase.cs" />
+    <Compile Include="BlurForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="BlurForm.Designer.cs">
+      <DependentUpon>BlurForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Cache\GlobalCache.cs" />
     <Compile Include="Exception\MusicLyricException.cs" />
     <Compile Include="MainForm.cs">
@@ -283,6 +289,7 @@
     <Compile Include="UpgradeForm.Designer.cs">
       <DependentUpon>UpgradeForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Utils\FormUtils.cs" />
     <Compile Include="Utils\LyricUtils.cs" />
     <Compile Include="Utils\HttpUtils.cs" />
     <Compile Include="Utils\JsonUtils.cs" />
