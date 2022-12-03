@@ -53,6 +53,8 @@ namespace MusicLyricApp
             this.Controls.Add(this.Shortcut_Browser);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.MaximizeBox = false;
+            this.MinimizeBox = false;
             this.Name = "ShortcutForm";
             this.Text = "快捷键";
             this.ResumeLayout(false);

@@ -62,12 +62,12 @@ namespace MusicLyricApp
             // 
             this.Blur_ContextMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { this.Blur_Download_ToolStripMenuItem });
             this.Blur_ContextMenuStrip.Name = "Blur_ContextMenuStrip";
-            this.Blur_ContextMenuStrip.Size = new System.Drawing.Size(153, 48);
+            this.Blur_ContextMenuStrip.Size = new System.Drawing.Size(101, 26);
             // 
             // Blur_Download_ToolStripMenuItem
             // 
             this.Blur_Download_ToolStripMenuItem.Name = "Blur_Download_ToolStripMenuItem";
-            this.Blur_Download_ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.Blur_Download_ToolStripMenuItem.Size = new System.Drawing.Size(100, 22);
             this.Blur_Download_ToolStripMenuItem.Text = "下载";
             this.Blur_Download_ToolStripMenuItem.Click += new System.EventHandler(this.Blur_Download_ToolStripMenuItem_Click);
             // 
@@ -78,6 +78,8 @@ namespace MusicLyricApp
             this.Controls.Add(this.Blur_DataGridView);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.MaximizeBox = false;
+            this.MinimizeBox = false;
             this.Name = "BlurForm";
             this.Text = "搜索结果";
             ((System.ComponentModel.ISupportInitialize)(this.Blur_DataGridView)).EndInit();
