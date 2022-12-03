@@ -45,13 +45,18 @@ namespace MusicLyricApp.Api
             return resp.ToEntity<QQMusicBean.AlbumResult>();
         }
 
-        public QQMusicBean.SongResult GetSong(string songMid)
+        /// <summary>
+        /// query music song
+        /// </summary>
+        /// <param name="id">query song by id, support songId and midId, eg: 001RaE0n4RrGX9 or 204422870</param>
+        /// <returns>music song</returns>
+        public QQMusicBean.SongResult GetSong(string id)
         {
             const string callBack = "getOneSongInfoCallback";
 
             var data = new Dictionary<string, string>
             {
-                { "songmid", songMid },
+                { GlobalUtils.CheckNum(id) ? "songid" : "songmid", id},
                 { "tpl", "yqq_song_detail" },
                 { "format", "jsonp" },
                 { "callback", callBack },
