@@ -142,10 +142,13 @@ namespace MusicLyricApp.Bean
         
         public string RelatedVideos { get; set; }
         
-        public Playlist Playlist { get; set; }
-        
         /// <summary>
-        /// 歌单具体歌曲
+        /// 歌单作者信息
+        /// </summary>
+        public Playlist Playlist { get; set; }
+
+        /// <summary>
+        /// 歌单歌曲权限信息
         /// </summary>
         public Privilege[] Privileges { get; set; }
     }
@@ -220,6 +223,11 @@ namespace MusicLyricApp.Bean
         /// 歌单标签
         /// </summary>
         public string[] Tags { get; set; }
+        
+        /// <summary>
+        /// 歌单歌曲列表信息
+        /// </summary>
+        public Song[] Tracks { get; set; }
     }
 
     /// <summary>

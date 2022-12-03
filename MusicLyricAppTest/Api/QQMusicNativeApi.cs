@@ -37,5 +37,13 @@ namespace MusicLyricAppTest.Api
             var link = _api.GetSongLink("0028gDJg3aMcO1");
             Console.WriteLine(link);
         }
+        
+        [Test]
+        public void TestGetPlaylist()
+        {
+            var res = _api.GetPlaylist("8694686726");
+            
+            Console.WriteLine(res);
+        }
     }
 }

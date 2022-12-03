@@ -45,6 +45,25 @@ namespace MusicLyricApp.Api
             return resp.ToEntity<QQMusicBean.AlbumResult>();
         }
 
+        public QQMusicBean.PlaylistResult GetPlaylist(string playlistId)
+        {
+            var data = new Dictionary<string, string>
+            {
+                { "disstid", playlistId },
+                { "format", "json" },
+                { "outCharset", "utf8" },
+                { "type", "1" },
+                { "json", "1" },
+                { "utf8", "1" },
+                { "onlysong", "0" }, // 返回歌曲明细
+                { "new_format", "1" },
+                
+            };
+            var resp = SendHttp("https://c.y.qq.com/qzone/fcg-bin/fcg_ucc_getcdinfo_byids_cp.fcg", data);
+
+            return resp.ToEntity<QQMusicBean.PlaylistResult>();
+        }
+
         /// <summary>
         /// query music song
         /// </summary>
