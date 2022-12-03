@@ -2,6 +2,26 @@
 
 namespace MusicLyricApp.Bean
 {
+    public class SearchResult
+    {
+        public bool NeedLogin { get; set; }
+        
+        public SearchResultData Result { get; set; }
+        
+        public long Code { get; set; }
+    }
+    
+    public class SearchResultData
+    {
+        public Song[] Songs { get; set; }
+            
+        public long SongCount { get; set; }
+            
+        public Album[] Albums { get; set; }
+            
+        public long AlbumCount { get; set; }
+    }
+    
     public class SongUrls
     {
         public Datum[] Data { get; set; }

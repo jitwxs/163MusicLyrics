@@ -7,6 +7,7 @@ using System.Numerics;
 using System.Security.Cryptography;
 using System.Text;
 using MusicLyricApp.Bean;
+using MusicLyricApp.Exception;
 using Newtonsoft.Json;
 
 namespace MusicLyricApp.Api
@@ -14,12 +15,11 @@ namespace MusicLyricApp.Api
     public class NetEaseMusicNativeApi : BaseNativeApi
     {
         // General
-        private const string _MODULUS =
+        private const string MODULUS =
             "00e0b509f6259df8642dbc35662901477df22677ec152b5ff68ace615bb7b725152b3ab17a876aea8a5aa76d2e417629ec4ee341f56135fccf695280104e0312ecbda92557c93870114af6c9d05c4f7f0c3685b7a46bee255932575cce10b424d813cfe4875d3e82047b97ddef52741d546b8e289dc6935b3ece0462db0a22b8e7";
-
-        private const string _NONCE = "0CoJUm6Qyw8W8jud";
-        private const string _PUBKEY = "010001";
-        private const string _VI = "0102030405060708";
+        private const string NONCE = "0CoJUm6Qyw8W8jud";
+        private const string PUBKEY = "010001";
+        private const string VI = "0102030405060708";
 
         // use keygen in c#
         private readonly string _secretKey;
@@ -34,6 +34,42 @@ namespace MusicLyricApp.Api
         protected override string HttpRefer()
         {
             return "https://music.163.com/";
+        }
+
+        public SearchResultData Search(string keyword, SearchTypeEnum searchType)
+        {
+            const string url = "https://music.163.com/weapi/cloudsearch/get/web";
+
+            string type;
+            switch (searchType)
+            {
+                case SearchTypeEnum.SONG_ID:
+                    type = "1";
+                    break;
+                case SearchTypeEnum.ALBUM_ID:
+                    type = "10";
+                    break;
+                default:
+                    throw new MusicLyricException(ErrorMsg.SYSTEM_ERROR); 
+            }
+            
+            var data = new Dictionary<string, string>
+            {
+                { "csrf_token", string.Empty },
+                { "s", keyword },
+                { "type", type },
+                { "limit", "20" },
+                { "offset", "0" }
+            };
+
+            var res = JsonConvert.DeserializeObject<SearchResult>(SendHttp(url, Prepare(JsonConvert.SerializeObject(data))));
+
+            if (res == null || res.Code != 200)
+            {
+                throw new MusicLyricException(ErrorMsg.NETWORK_ERROR);
+            }
+
+            return res.Result;
         }
 
        /// <summary>
@@ -121,7 +157,7 @@ namespace MusicLyricApp.Api
             
             var data = new Dictionary<string, string>
             {
-                { "id", songId.ToString() },
+                { "id", songId },
                 { "os", "pc" },
                 { "lv", "-1" },
                 { "kv", "-1" },
@@ -145,10 +181,11 @@ namespace MusicLyricApp.Api
         {
             const string url = "https://music.163.com/weapi/song/enhance/player/url?csrf_token=";
 
-            var data = new GetSongUrlJson
+            var data = new Dictionary<string, string>
             {
-                ids = songId,
-                br = bitrate
+                { "ids", $"[{string.Join(",", songId)}]" },
+                { "br", bitrate.ToString() },
+                { "csrf_token", string.Empty }
             };
 
             var raw = SendHttp(url, Prepare(JsonConvert.SerializeObject(data)));
@@ -186,31 +223,10 @@ namespace MusicLyricApp.Api
             return JsonConvert.DeserializeObject<DetailResult>(raw);
         }
 
-        private class GetSongUrlJson
-        {
-            public string[] ids;
-            public long br;
-            public string csrf_token = string.Empty;
-        }
-
-        private string CreateSecretKey(int length)
-        {
-            var str = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-            var sb = new StringBuilder(length);
-            var rnd = new Random();
-            
-            for (var i = 0; i < length; ++i)
-            {
-                sb.Append(str[rnd.Next(0, str.Length)]);
-            }
-
-            return sb.ToString();
-        }
-
         private Dictionary<string, string> Prepare(string raw)
         {
-            Dictionary<string, string> data = new Dictionary<string, string>();
-            data["params"] = AESEncode(raw, _NONCE);
+            var data = new Dictionary<string, string>();
+            data["params"] = AESEncode(raw, NONCE);
             data["params"] = AESEncode(data["params"], _secretKey);
             data["encSecKey"] = _encSecKey;
 
@@ -218,21 +234,19 @@ namespace MusicLyricApp.Api
         }
 
         // encrypt mod
-        private string RSAEncode(string text)
+        private static string RSAEncode(string text)
         {
-            string srtext = new string(text.Reverse().ToArray());
+            var srtext = new string(text.Reverse().ToArray());
             var a = BCHexDec(BitConverter.ToString(Encoding.Default.GetBytes(srtext)).Replace("-", string.Empty));
-            var b = BCHexDec(_PUBKEY);
-            var c = BCHexDec(_MODULUS);
+            var b = BCHexDec(PUBKEY);
+            var c = BCHexDec(MODULUS);
             var key = BigInteger.ModPow(a, b, c).ToString("x");
             key = key.PadLeft(256, '0');
-            if (key.Length > 256)
-                return key.Substring(key.Length - 256, 256);
-            else
-                return key;
+            
+            return key.Length > 256 ? key.Substring(key.Length - 256, 256) : key;
         }
 
-        private BigInteger BCHexDec(string hex)
+        private static BigInteger BCHexDec(string hex)
         {
             var dec = new BigInteger(0);
             var len = hex.Length;
@@ -246,10 +260,10 @@ namespace MusicLyricApp.Api
             return dec;
         }
 
-        private string AESEncode(string secretData, string secret = "TA3YiYCfY2dDJQgg")
+        private static string AESEncode(string secretData, string secret = "TA3YiYCfY2dDJQgg")
         {
             byte[] encrypted;
-            byte[] IV = Encoding.UTF8.GetBytes(_VI);
+            var IV = Encoding.UTF8.GetBytes(VI);
 
             using (var aes = Aes.Create())
             {
@@ -274,6 +288,20 @@ namespace MusicLyricApp.Api
             }
 
             return Convert.ToBase64String(encrypted);
+        }
+        
+        private static string CreateSecretKey(int length)
+        {
+            const string str = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+            var sb = new StringBuilder(length);
+            var rnd = new Random();
+            
+            for (var i = 0; i < length; ++i)
+            {
+                sb.Append(str[rnd.Next(0, str.Length)]);
+            }
+
+            return sb.ToString();
         }
     }
 }
