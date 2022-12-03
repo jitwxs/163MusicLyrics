@@ -1,11 +1,15 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
+using System.Text.RegularExpressions;
 using System.Xml;
 
 namespace MusicLyricApp.Utils
 {
     public static class XmlUtils
     {
+        private static Regex _badAmpersand = new Regex("&(?![a-zA-Z]{2,6};|#[0-9]{2,4};)");
+        
+        private static string _goodAmpersand = "&amp;";
+        
         /// <summary>
         /// 创建 XML DOM
         /// </summary>
@@ -14,6 +18,9 @@ namespace MusicLyricApp.Utils
         public static XmlDocument Create(string content)
         {
             content = RemoveIllegalContent(content);
+            
+            // replace & symbol
+            content = _badAmpersand.Replace(content, _goodAmpersand);
             
             var doc = new XmlDocument();
             
