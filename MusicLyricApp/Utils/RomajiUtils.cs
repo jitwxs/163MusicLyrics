@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Kawazu;
 using MusicLyricApp.Bean;
@@ -10,8 +11,11 @@ namespace MusicLyricApp.Utils
     public static class RomajiUtils
     {
         public static async Task<List<LyricLineVo>> ToRomaji(List<LyricLineVo> inputList, List<LyricLineVo> faultList,
-            RomajiConfigBean romajiConfig)
+            RomajiConfigBean romajiConfig, SettingBean settingBean)
         {
+            var timestampFormat = settingBean.Param.LrcTimestampFormat;
+            var dotType = settingBean.Param.DotType;
+            
             if (inputList.Any(vo => Utilities.HasKana(vo.Content)))
             {
                 var converter = new KawazuConverter();
@@ -22,8 +26,16 @@ namespace MusicLyricApp.Utils
 
                 foreach (var vo in inputList)
                 {
-                    var content = await converter.Convert(vo.Content, To.Romaji, mode, system, "(", ")");
-                    resultList.Add(new LyricLineVo(content, vo.Timestamp));
+                    // need try split sub lyricLineVO, resolve verbatim lyric mode
+                    var content = new StringBuilder();
+                    foreach (var subVo in LyricLineVo.Split(vo))
+                    {
+                        var subContent = await converter.Convert(subVo.Content, To.Romaji, mode, system, "(", ")");
+                        
+                        content.Append(subVo.Timestamp.PrintTimestamp(timestampFormat, dotType) + subContent);
+                    }
+                    
+                    resultList.Add(new LyricLineVo(content.ToString()));
                 }
 
                 return resultList;
