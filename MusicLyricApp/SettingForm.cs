@@ -86,5 +86,18 @@ namespace MusicLyricApp
                 VerbatimLyric_CheckBox.Checked = false;
             }
         }
+        
+        /// <summary>
+        /// listener keyboard key
+        /// </summary>
+        protected override bool ProcessDialogKey(Keys keyData)
+        {
+            if (ModifierKeys == Keys.None && keyData == Keys.Escape)
+            {
+                Close();
+                return true;
+            }
+            return base.ProcessDialogKey(keyData);
+        }
     }
 }

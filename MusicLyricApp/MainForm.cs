@@ -772,6 +772,21 @@ namespace MusicLyricApp
                 Search_Btn_Click(sender, e);
             }
         }
+        
+        /// <summary>
+        /// listener keyboard key
+        /// </summary>
+        protected override bool ProcessDialogKey(Keys keyData)
+        {
+            // close
+            if (ModifierKeys == Keys.None && keyData == Keys.Escape)
+            {
+                Close();
+                return true;
+            }
+
+            return base.ProcessDialogKey(keyData);
+        }
 
         /// <summary>
         /// 配置下拉框，属性变更事件

@@ -48,5 +48,18 @@ namespace MusicLyricApp
                 Logger.Error(ex, "打开失败");
             }
         }
+        
+        /// <summary>
+        /// listener keyboard key
+        /// </summary>
+        protected override bool ProcessDialogKey(Keys keyData)
+        {
+            if (ModifierKeys == Keys.None && keyData == Keys.Escape)
+            {
+                Close();
+                return true;
+            }
+            return base.ProcessDialogKey(keyData);
+        }
     }
 }

@@ -20,13 +20,13 @@ namespace MusicLyricApp
                 .Append("<th class='td'>快捷键</th>")
                 .Append("<tbody align='center'>")
                 .Append("<tr>")
-                .Append("<th class='td'>精确搜索</th>").Append("<td class='td'>Enter</td>")
+                .Append("<th class='td'>精确搜索</th>").Append("<td class='td'><kbd>Enter</kbd></td>")
                 .Append("</tr>")
                 .Append("<tr>")
-                .Append("<th class='td'>模糊搜索</th>").Append("<td class='td'>Ctrl + Enter</td>")
+                .Append("<th class='td'>模糊搜索</th>").Append("<td class='td'><kbd>Ctrl</kbd> + <kbd>Enter</kbd></td>")
                 .Append("</tr>")
                 .Append("<tr>")
-                .Append("<th class='td'>保存</th>").Append("<td class='td'>Ctrl + S</td>")
+                .Append("<th class='td'>保存</th>").Append("<td class='td'><kbd>Ctrl</kbd> + <kbd>S</kbd></td>")
                 .Append("</tr>")
                 .Append("</tbody>")
                 .Append("</tr>")
@@ -34,6 +34,19 @@ namespace MusicLyricApp
                 .Append("</table>");
             
             Shortcut_Browser.DocumentText = Markdown.ToHtml(sb.ToString());
+        }
+        
+        /// <summary>
+        /// listener keyboard key
+        /// </summary>
+        protected override bool ProcessDialogKey(Keys keyData)
+        {
+            if (ModifierKeys == Keys.None && keyData == Keys.Escape)
+            {
+                Close();
+                return true;
+            }
+            return base.ProcessDialogKey(keyData);
         }
     }
 }
