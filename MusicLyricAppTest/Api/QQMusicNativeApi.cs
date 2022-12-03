@@ -11,7 +11,12 @@ namespace MusicLyricAppTest.Api
         [Test]
         public void GetSong()
         {
-            _api.GetSong("003KDOb01SUyD5");
+            var res1 = _api.GetSong("204422870");
+            var res2= _api.GetSong("001RaE0n4RrGX9");
+            
+            Assert.AreEqual(res1.Code, res2.Code);
+            Assert.AreEqual(res1.Data.Length, res2.Data.Length);
+            Assert.AreEqual(res1.Data[0].Id, res2.Data[0].Id);
         }
         
         [Test]

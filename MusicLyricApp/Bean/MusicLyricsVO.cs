@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Web;
 using MusicLyricApp.Exception;
 using MusicLyricApp.Utils;
@@ -416,6 +417,64 @@ namespace MusicLyricApp.Bean
                 Timestamp = new LyricTimestamp(lyricLine.Substring(0, index + 1));
                 Content = lyricLine.Substring(index + 1);
             }
+        }
+
+        public static List<LyricLineVo> Split(LyricLineVo main)
+        {
+            const string timestampPattern = @"\[\d+:\d+.\d+]";
+
+            var mainContent = main.Content;
+            var mc = Regex.Matches(mainContent, timestampPattern);
+
+            // not exist sub
+            if (mc.Count == 0)
+            {
+                return new List<LyricLineVo> { main };
+            }
+
+            var result = new List<LyricLineVo>();
+
+            var index = 0;
+
+            string timestamp = "", nextTimestamp = "";
+            int timestampIndex = 0, nextTimestampIndex = 0;
+            while (index < mc.Count)
+            {
+                if (index == 0)
+                {
+                    timestamp = mc[index].Value;
+                    timestampIndex = mainContent.IndexOf(timestamp, StringComparison.Ordinal);
+                    
+                    // add first
+                    result.Add(new LyricLineVo(mainContent.Substring(0, timestampIndex), main.Timestamp));
+                }
+                
+                // find next timestamp
+                if (index + 1 < mc.Count)
+                {
+                    nextTimestamp = mc[index + 1].Value;
+                    nextTimestampIndex = mainContent.IndexOf(nextTimestamp, timestampIndex + timestamp.Length, StringComparison.Ordinal);
+                    
+                    // add current
+                    var startIndex = timestampIndex + timestamp.Length;
+                    var content = mainContent.Substring(startIndex, nextTimestampIndex - startIndex);
+                    result.Add(new LyricLineVo(content, new LyricTimestamp(timestamp)));
+                }
+                else
+                {
+                    // already in end
+                    var content = mainContent.Substring(timestampIndex + timestamp.Length);
+                    result.Add(new LyricLineVo(content, new LyricTimestamp(timestamp)));
+                }
+                
+                // let next to current
+                timestamp = nextTimestamp;
+                timestampIndex = nextTimestampIndex;
+
+                index++;
+            }
+
+            return result;
         }
 
         public int CompareTo(object input)

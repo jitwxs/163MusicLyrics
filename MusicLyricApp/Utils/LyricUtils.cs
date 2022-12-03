@@ -151,7 +151,7 @@ namespace MusicLyricApp.Utils
             
             if (romajiConfig.Enable)
             {
-                translateLyrics = await RomajiUtils.ToRomaji(originLyrics, translateLyrics, romajiConfig);
+                translateLyrics = await RomajiUtils.ToRomaji(originLyrics, translateLyrics, romajiConfig, searchInfo.SettingBean);
             }
 
             /*

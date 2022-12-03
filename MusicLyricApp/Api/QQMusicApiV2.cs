@@ -48,7 +48,7 @@ namespace MusicLyricApp.Api
                 result[songId] = new ResultVo<SongVo>(new SongVo
                 {
                     Id = song.Id,
-                    DisplayId = songId,
+                    DisplayId = song.Mid,
                     Links = links,
                     Pics = BuildPicUrl(song.Album),
                     Name = song.Name,
