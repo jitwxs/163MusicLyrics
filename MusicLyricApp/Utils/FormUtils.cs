@@ -7,11 +7,11 @@ namespace MusicLyricApp.Utils
 {
     public class FormUtils
     {
-        public static void OpenForm(Form openForm, Func<int, Form> createFunc, Form baseForm)
+        public static void OpenForm(MusicLyricForm openForm, Func<MusicLyricForm> createFunc, MusicLyricForm baseForm)
         {
             if (openForm == null || openForm.IsDisposed)
             {
-                openForm = createFunc.Invoke(0);
+                openForm = createFunc.Invoke();
 
                 openForm.Location = new Point(baseForm.Left + Constants.SettingFormOffset,
                     baseForm.Top + Constants.SettingFormOffset);
@@ -21,6 +21,7 @@ namespace MusicLyricApp.Utils
             }
             else
             {
+                openForm.RestoreWindow();
                 openForm.Activate();
             }
         }

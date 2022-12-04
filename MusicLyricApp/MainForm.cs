@@ -398,7 +398,7 @@ namespace MusicLyricApp
                     throw new MusicLyricException(ErrorMsg.SEARCH_RESULT_EMPTY);
                 }
                 
-                FormUtils.OpenForm(_blurForm, x => new BlurForm(resultVo, this), this);
+                FormUtils.OpenForm(_blurForm, () => _blurForm = new BlurForm(resultVo, this), this);
             }
             catch (WebException ex)
             {
@@ -840,7 +840,7 @@ namespace MusicLyricApp
             }
             else if (input == Setting_MItem)
             {
-                FormUtils.OpenForm(_settingForm, x => new SettingForm(_globalSearchInfo.SettingBean), this);
+                FormUtils.OpenForm(_settingForm, () => _settingForm = new SettingForm(_globalSearchInfo.SettingBean), this);
             }
             else if (input == Issue_MItem)
             {
@@ -860,7 +860,7 @@ namespace MusicLyricApp
             }
             else if (input == ShortCut_MItem)
             {
-                FormUtils.OpenForm(_shortcutForm, x => new ShortcutForm(), this);
+                FormUtils.OpenForm(_shortcutForm, () => _shortcutForm = new ShortcutForm(), this);
             }
         }
 
@@ -913,7 +913,7 @@ namespace MusicLyricApp
                 {
                     void Action()
                     {
-                        FormUtils.OpenForm(_upgradeForm, x => new UpgradeForm(info), this);
+                        FormUtils.OpenForm(_upgradeForm, () => _upgradeForm = new UpgradeForm(info), this);
                     }
                     Invoke((Action)Action);
                 }
