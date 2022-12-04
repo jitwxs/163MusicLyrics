@@ -21,7 +21,6 @@ namespace MusicLyricApp.Utils
             }
             else
             {
-                openForm.RestoreWindow();
                 openForm.Activate();
             }
         }
