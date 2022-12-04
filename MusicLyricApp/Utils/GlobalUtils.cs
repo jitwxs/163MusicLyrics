@@ -48,75 +48,69 @@ namespace MusicLyricApp.Utils
                 throw new MusicLyricException(ErrorMsg.INPUT_ID_ILLEGAL);
             }
 
-            if (searchSource == SearchSourceEnum.NET_EASE_MUSIC)
+            // 搜索词是数字+字母的组合，直接通过
+            if (Regex.IsMatch(input, @"^[a-zA-Z0-9]*$"))
             {
-                // 输入是数字，直接返回
-                if (CheckNum(input))
-                {
-                    return input;
-                }
-                
-                // ID 提取
-                var keyword = searchType == SearchTypeEnum.SONG_ID ? "song?id=" : "album?id=";
-                var index = input.IndexOf(keyword, StringComparison.Ordinal);
-                if (index == -1)
-                {
-                    throw new MusicLyricException(ErrorMsg.INPUT_ID_ILLEGAL);
-                }
-                
-                var sb = new StringBuilder();
-                foreach (var c in input.Substring(index + keyword.Length).ToCharArray())
-                {
-                    if (char.IsNumber(c))
-                    {
-                        sb.Append(c);
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
-
-                if (sb.Length == 0 || !CheckNum(sb.ToString())) 
-                {
-                    throw new MusicLyricException(ErrorMsg.INPUT_ID_ILLEGAL);
-                }
-
-                return sb.ToString();
+                return input;
             }
 
-            if (searchSource == SearchSourceEnum.QQ_MUSIC)
+            // URL 截取
+            string urlKeyword;
+            switch (searchSource)
             {
-                if (input.Contains("/"))
-                {
-                    // ID 提取
-                    var keyword = searchType == SearchTypeEnum.SONG_ID ? "songDetail/" : "albumDetail/";
-                    var index = input.IndexOf(keyword, StringComparison.Ordinal);
-                    if (index != -1)
+                case SearchSourceEnum.NET_EASE_MUSIC:
+                    switch (searchType)
                     {
-                        var sb = new StringBuilder();
-                        foreach (var c in input.Substring(index + keyword.Length).ToCharArray())
-                        {
-                            if (c == '/')
-                            {
-                                break;
-                            }
-                            sb.Append(c);
-                        }
-
-                        if (sb.Length > 0)
-                        {
-                            return sb.ToString();
-                        }
+                        case SearchTypeEnum.SONG_ID:
+                            urlKeyword = "song?id=";
+                            break;
+                        case SearchTypeEnum.ALBUM_ID:
+                            urlKeyword = "album?id=";
+                            break;
+                        case SearchTypeEnum.PLAYLIST_ID:
+                            urlKeyword = "playlist?id=";
+                            break;
+                        default:
+                            throw new MusicLyricException(ErrorMsg.FUNCTION_NOT_SUPPORT);
                     }
-                }
-                else
+                    break;
+                case SearchSourceEnum.QQ_MUSIC:
+                    switch (searchType)
+                    {
+                        case SearchTypeEnum.SONG_ID:
+                            urlKeyword = "songDetail/";
+                            break;
+                        case SearchTypeEnum.ALBUM_ID:
+                            urlKeyword = "albumDetail/";
+                            break;
+                        case SearchTypeEnum.PLAYLIST_ID:
+                            urlKeyword = "playlist/";
+                            break;
+                        default:
+                            throw new MusicLyricException(ErrorMsg.FUNCTION_NOT_SUPPORT);
+                    }
+                    break;
+                default:
+                    throw new MusicLyricException(ErrorMsg.FUNCTION_NOT_SUPPORT);
+            }
+            
+            var index = input.IndexOf(urlKeyword, StringComparison.Ordinal);
+            if (index == -1)
+            {
+                throw new MusicLyricException(ErrorMsg.INPUT_ID_ILLEGAL);
+            }
+            
+            var sb = new StringBuilder();
+            foreach (var c in input.Substring(index + urlKeyword.Length).ToCharArray())
+            {
+                if (c == '/')
                 {
-                    return input;
+                    break;
                 }
+                sb.Append(c);
             }
 
-            throw new MusicLyricException(ErrorMsg.INPUT_ID_ILLEGAL);
+            return sb.ToString();
         }
 
         /**

@@ -41,7 +41,8 @@ namespace MusicLyricApp.Bean
     public enum SearchTypeEnum
     {
         [Description("单曲")] SONG_ID = 0,
-        [Description("专辑")] ALBUM_ID = 1
+        [Description("专辑")] ALBUM_ID = 1,
+        [Description("歌单")] PLAYLIST_ID = 2,
     }
 
     // 强制两位类型
@@ -153,10 +154,12 @@ namespace MusicLyricApp.Bean
         public readonly List<SongSearchResultVo> SongVos = new List<SongSearchResultVo>();
 
         public readonly List<AlbumSearchResultVo> AlbumVos = new List<AlbumSearchResultVo>();
+        
+        public readonly List<PlaylistResultVo> PlaylistVos = new List<PlaylistResultVo>();
 
         public bool IsEmpty()
         {
-            return SongVos.Count == 0 && AlbumVos.Count == 0;
+            return SongVos.Count == 0 && AlbumVos.Count == 0 && PlaylistVos.Count == 0;
         }
         
         public class SongSearchResultVo
@@ -187,6 +190,25 @@ namespace MusicLyricApp.Bean
             /// 发行公司
             /// </summary>
             public string Company { get; set; }
+        }
+        
+        public class PlaylistResultVo
+        {
+            public string DisplayId { get; set; }
+            
+            public string PlaylistName { get; set; }
+            
+            public string AuthorName { get; set; }
+            
+            /// <summary>
+            /// 歌单描述
+            /// </summary>
+            public string Description { get; set; }
+            
+            /// <summary>
+            /// 播放数量
+            /// </summary>
+            public long PlayCount { get; set; }
         }
     }
 

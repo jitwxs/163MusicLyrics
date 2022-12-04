@@ -140,7 +140,7 @@ namespace MusicLyricApp.Api
                 return ResultVo<SearchResultVo>.Failure(ErrorMsg.NETWORK_ERROR);
             }
 
-            return new ResultVo<SearchResultVo>(resp.Result.convert(searchType));
+            return new ResultVo<SearchResultVo>(resp.Result.Convert(searchType));
         }
     }
 }

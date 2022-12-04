@@ -25,6 +25,10 @@ namespace MusicLyricAppTest.Api
             res = _api.Search("Slow", SearchTypeEnum.ALBUM_ID);
             
             Assert.AreNotEqual(0, res.Result.AlbumCount);
+            
+            res = _api.Search("阴天快乐", SearchTypeEnum.PLAYLIST_ID);
+            
+            Assert.AreNotEqual(0, res.Result.PlaylistCount);
         }
 
         [Test]

@@ -264,6 +264,12 @@ namespace MusicLyricApp
                             _globalSearchInfo.SongIds.Add(simpleSongVo.DisplayId);
                         }
                         break;
+                    case SearchTypeEnum.PLAYLIST_ID:
+                        foreach (var simpleSongVo in _api.GetPlaylistVo(id).Assert().Data.SimpleSongVos)
+                        {
+                            _globalSearchInfo.SongIds.Add(simpleSongVo.DisplayId);
+                        }
+                        break;
                     case SearchTypeEnum.SONG_ID:
                         _globalSearchInfo.SongIds.Add(id);
                         break;

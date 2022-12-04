@@ -17,15 +17,26 @@ namespace MusicLyricApp.Bean
         
         public class SearchResultData
         {
+            /* SearchType = SONG */
             public Song[] Songs { get; set; }
             
             public long SongCount { get; set; }
+            
+            /* SearchType = ALBUM */
             
             public Album[] Albums { get; set; }
             
             public long AlbumCount { get; set; }
             
-            public SearchResultVo convert(SearchTypeEnum searchType)
+            /* SearchType = PLAYLIST */
+            
+            public SimplePlaylist[] Playlists { get; set; }
+            
+            public long PlaylistCount { get; set; }
+            
+            /* ----- */
+            
+            public SearchResultVo Convert(SearchTypeEnum searchType)
             {
                 var vo = new SearchResultVo
                 {
@@ -35,7 +46,7 @@ namespace MusicLyricApp.Bean
                 switch (searchType)
                 {
                     case SearchTypeEnum.SONG_ID:
-                        if (Songs != null && Songs.Length > 0)
+                        if (SongCount > 0)
                         {
                             foreach (var song in Songs)
                             {
@@ -51,7 +62,7 @@ namespace MusicLyricApp.Bean
                         }
                         break;
                     case SearchTypeEnum.ALBUM_ID:
-                        if (Albums != null && Albums.Length > 0)
+                        if (AlbumCount > 0)
                         {
                             foreach (var album in Albums)
                             {
@@ -61,6 +72,22 @@ namespace MusicLyricApp.Bean
                                     AlbumName = album.Name,
                                     AuthorName = album.Artists.Select(e => e.Name).ToArray(),
                                     Company = album.Company
+                                });
+                            }
+                        }
+                        break;
+                    case SearchTypeEnum.PLAYLIST_ID:
+                        if (PlaylistCount > 0)
+                        {
+                            foreach (var playlist in Playlists)
+                            {
+                                vo.PlaylistVos.Add(new SearchResultVo.PlaylistResultVo()
+                                {
+                                    DisplayId = playlist.Id,
+                                    PlaylistName = playlist.Name,
+                                    AuthorName = playlist.Creator.Nickname,
+                                    Description = playlist.Description,
+                                    PlayCount = playlist.PlayCount
                                 });
                             }
                         }
@@ -188,9 +215,9 @@ namespace MusicLyricApp.Bean
     }
 
     /// <summary>
-    /// 歌单信息
+    /// 模糊搜索歌单返回的结果，仅有部分属性
     /// </summary>
-    public class Playlist
+    public class SimplePlaylist
     {
         public string Id { get; set; }
         
@@ -198,11 +225,6 @@ namespace MusicLyricApp.Bean
         /// 歌单名
         /// </summary>
         public string Name { get; set; }
-        
-        /// <summary>
-        /// 歌单封面 ID
-        /// </summary>
-        public long CoverImgId { get; set; }
         
         /// <summary>
         /// 歌单封面 URL
@@ -218,6 +240,27 @@ namespace MusicLyricApp.Bean
         /// 创建者
         /// </summary>
         public Creator Creator { get; set; }
+        
+        /// <summary>
+        /// 歌单描述
+        /// </summary>
+        public string Description { get; set; }
+        
+        /// <summary>
+        /// 播放数量
+        /// </summary>
+        public long PlayCount { get; set; }
+    }
+
+    /// <summary>
+    /// 精确搜索歌单返回的结果
+    /// </summary>
+    public class Playlist : SimplePlaylist
+    {
+        /// <summary>
+        /// 歌单封面 ID
+        /// </summary>
+        public long CoverImgId { get; set; }
         
         /// <summary>
         /// 歌单创建时间
@@ -240,11 +283,6 @@ namespace MusicLyricApp.Bean
         /// 评论数量
         /// </summary>
         public long CommentCount { get; set; }
-        
-        /// <summary>
-        /// 歌单描述
-        /// </summary>
-        public string Description { get; set; }
         
         /// <summary>
         /// 歌单标签

@@ -40,6 +40,7 @@ namespace MusicLyricApp.Api
         {
             const string url = "https://music.163.com/weapi/cloudsearch/get/web";
 
+            // 1: 单曲, 10: 专辑, 100: 歌手, 1000: 歌单, 1002: 用户, 1004: MV, 1006: 歌词, 1009: 电台, 1014: 视频, 1018:综合, 2000:声音
             string type;
             switch (searchType)
             {
@@ -48,6 +49,9 @@ namespace MusicLyricApp.Api
                     break;
                 case SearchTypeEnum.ALBUM_ID:
                     type = "10";
+                    break;
+                case SearchTypeEnum.PLAYLIST_ID:
+                    type = "1000";
                     break;
                 default:
                     throw new MusicLyricException(ErrorMsg.SYSTEM_ERROR); 
@@ -62,7 +66,9 @@ namespace MusicLyricApp.Api
                 { "offset", "0" }
             };
 
-            return JsonConvert.DeserializeObject<SearchResult>(SendHttp(url, Prepare(JsonConvert.SerializeObject(data))));
+            var res = SendHttp(url, Prepare(JsonConvert.SerializeObject(data)));
+
+            return JsonConvert.DeserializeObject<SearchResult>(res);
         }
 
        /// <summary>
