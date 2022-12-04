@@ -49,6 +49,7 @@
       <Compile Include="Utils\GlobalUtilsTest.cs" />
       <Compile Include="Utils\LyricUtilsTest.cs" />
       <Compile Include="Utils\SrtUtilsTest.cs" />
+      <Compile Include="Utils\XmlUtils.cs" />
     </ItemGroup>
     <ItemGroup>
       <ProjectReference Include="..\MusicLyricApp\MusicLyricApp.csproj">
