@@ -25,7 +25,7 @@ namespace MusicLyricApp.Api
 
         public ResultVo<AlbumVo> GetAlbumVo(string albumId)
         {
-            return GlobalCache.Process(CacheType.ALBUM, albumId, e => GetAlbumVo0(albumId));
+            return GlobalCache.Process(CacheType.ALBUM_VO, albumId, e => GetAlbumVo0(albumId));
         }
 
         public Dictionary<string, ResultVo<SongVo>> GetSongVo(string[] songIds)

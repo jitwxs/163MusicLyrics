@@ -59,6 +59,15 @@ namespace MusicLyricApp.Cache
                 return default;
             }
         }
+
+        public static void DoCache<TValue>(CacheType cacheType, Func<TValue, object> keyFunc, IEnumerable<TValue> values)
+        {
+            foreach (var value in values)
+            {
+                var key = keyFunc.Invoke(value);
+                DoCache(cacheType, key, value);
+            }
+        }
         
         public static void DoCache(CacheType cacheType, object key, object value)
         {
@@ -66,8 +75,9 @@ namespace MusicLyricApp.Cache
             {
                 Cache.Add(cacheType, new Dictionary<object, object>());
             }
-                
-            Cache[cacheType].Add(key, value);
+
+            // add the key if it's non-existent.
+            Cache[cacheType][key] = value;
         }
     }
 
@@ -81,7 +91,7 @@ namespace MusicLyricApp.Cache
         /// 网易云音乐 DATUM
         /// </summary>
         NET_EASE_DATUM,
-        
+
         /// <summary>
         /// QQ 音乐歌曲
         /// </summary>
@@ -102,7 +112,7 @@ namespace MusicLyricApp.Cache
         /**
          * 专辑
          */
-        ALBUM,
+        ALBUM_VO,
         /// <summary>
         /// 查询结果
         /// </summary>

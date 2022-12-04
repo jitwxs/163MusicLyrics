@@ -28,6 +28,9 @@ namespace MusicLyricApp.Api
             var resp = _api.GetAlbum(albumId);
             if (resp.Code == 200)
             {
+                // cache song
+                GlobalCache.DoCache(CacheType.NET_EASE_SONG, value => value.Id, resp.Songs);
+                
                 return new ResultVo<AlbumVo>(resp.Convert());
             }
             else
