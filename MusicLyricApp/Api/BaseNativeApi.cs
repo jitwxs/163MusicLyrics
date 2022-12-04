@@ -2,6 +2,7 @@
 using System.Collections.Specialized;
 using System.Net;
 using System.Text;
+using MusicLyricApp.Utils;
 
 namespace MusicLyricApp.Api
 {
@@ -23,7 +24,7 @@ namespace MusicLyricApp.Api
         /// <param name="method">模式</param>
         /// <exception cref="WebException"></exception>
         /// <returns></returns>
-        protected string SendHttp(string url, Dictionary<string, string> paramDict)
+        protected string SendPost(string url, Dictionary<string, string> paramDict)
         {
             string result;
             using (var wc = new WebClient())
@@ -44,6 +45,20 @@ namespace MusicLyricApp.Api
             }
 
             return result;
+        }
+        
+        protected string SendJsonPost(string url, Dictionary<string, object> paramDict)
+        {
+            using (var wc = new WebClient())
+            {
+                wc.Encoding = Encoding.UTF8;
+                wc.Headers.Add(HttpRequestHeader.ContentType, "application/json");
+                wc.Headers.Add(HttpRequestHeader.Referer, HttpRefer());
+                wc.Headers.Add(HttpRequestHeader.UserAgent, Useragent);
+                wc.Headers.Add(HttpRequestHeader.Cookie, Cookie);
+
+                return wc.UploadString(url, paramDict.ToJson());
+            }
         }
     }
 }

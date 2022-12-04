@@ -6,6 +6,135 @@ namespace MusicLyricApp.Bean
 {
     public class QQMusicBean
     {
+        public class MusicFcgApiResult
+        {
+            public long Code { get; set; }
+            
+            public long Ts { get; set; }
+            
+            public long StartTs { get; set; }
+            
+            public string Traceid { get; set; }
+            
+            public MusicFcgReq Req { get; set; }
+            
+            public MusicFcgReq0 Req_0 { get; set; }
+
+            public MusicFcgReq1 Req_1 { get; set; }
+
+            public class MusicFcgReq
+            {
+                public long Code { get; set; }
+                
+                public MusicFcgReqData Data { get; set; }
+
+                public class MusicFcgReqData
+                {
+                    public string[] Sip { get; set; }
+                    
+                    public string Keepalivefile { get; set; }
+                    
+                    public string Testfile2g { get; set; }
+                    
+                    public string Testfilewifi { get; set; }
+                }
+            }
+            
+            public class MusicFcgReq0
+            {
+                public long Code { get; set; }
+                
+                public MusicFcgReq0Data Data { get; set; }
+
+                public class MusicFcgReq0Data
+                {
+                    public string[] Sip { get; set; }
+                    
+                    public string Testfile2g { get; set; }
+                    
+                    public string Testfilewifi { get; set; }
+                    
+                    public MusicFcgReq0DataMidurlinfo[] Midurlinfo { get; set; }
+                }
+                
+                public class MusicFcgReq0DataMidurlinfo
+                {
+                    public string Songmid { get; set; }
+                    
+                    public string Purl { get; set; }
+                }
+            }
+            
+            public class MusicFcgReq1
+            {
+                public long Code { get; set; }
+
+                public MusicFcgReq1Data Data { get; set; }
+
+                public class MusicFcgReq1Data
+                {
+                    public long Code { get; set; }
+                    
+                    public long Ver { get; set; }
+                    
+                    public MusicFcgReq1DataBody Body { get; set; }
+                    
+                    public MusicFcgReq1DataMeta Meta { get; set; }
+
+                    public class MusicFcgReq1DataBody
+                    {
+                        /// <summary>
+                        /// 专辑查询结果
+                        /// </summary>
+                        public MusicFcgReq1DataBodyAlbum Album { get; set; }
+                        
+                        /// <summary>
+                        /// 单曲查询结果
+                        /// </summary>
+                        public MusicFcgReq1DataBodySong Song { get; set; }
+
+                        public class MusicFcgReq1DataBodyAlbum
+                        {
+                            public Album[] List { get; set; }
+                        }
+                        
+                        public class MusicFcgReq1DataBodySong
+                        {
+                            public Song[] List { get; set; }
+                        }
+                    }
+
+                    public class MusicFcgReq1DataMeta
+                    {
+                        /// <summary>
+                        /// 当前页数
+                        /// </summary>
+                        public long Curpage { get; set; }
+                        
+                        /// <summary>
+                        /// 下一页
+                        /// </summary>
+                        public long Nextpage { get; set; }
+                        
+                        /// <summary>
+                        /// 每页数量
+                        /// </summary>
+                        public long Perpage { get; set; }
+                        
+                        /// <summary>
+                        /// 查询关键字
+                        /// </summary>
+                        public string Query { get; set; }
+                        
+                        /// <summary>
+                        /// 累计数量
+                        /// </summary>
+                        public long Sum { get; set; }
+                    }
+                }
+            }
+        }
+        
         /// <summary>
         /// 专辑查询接口返回结果
         /// </summary>
@@ -163,24 +292,41 @@ namespace MusicLyricApp.Bean
 
         public class Song
         {
+            /// <summary>
+            /// 所属专辑
+            /// </summary>
             public Album Album { get; set; }
 
             public string Id { get; set; }
 
+            /// <summary>
+            /// 时长，单位 s
+            /// </summary>
             public int Interval { get; set; }
 
             public string Mid { get; set; }
 
+            /// <summary>
+            /// 歌曲名
+            /// </summary>
             public string Name { get; set; }
+            
+            /// <summary>
+            /// 歌曲描述
+            /// </summary>
+            public string Desc { get; set; }
 
             public Singer[] Singer { get; set; }
 
+            /// <summary>
+            /// 标题
+            /// </summary>
             public string Title { get; set; }
             
             /// <summary>
             /// 发布时间，eg: 2005-07-08
             /// </summary>
-            public string TimePublic { get; set; }
+            public string Time_public { get; set; }
             
             public SimpleSongVo ConvertSimple()
             {

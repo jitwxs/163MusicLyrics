@@ -66,7 +66,7 @@ namespace MusicLyricApp.Api
                 { "offset", "0" }
             };
 
-            var res = SendHttp(url, Prepare(JsonConvert.SerializeObject(data)));
+            var res = SendPost(url, Prepare(JsonConvert.SerializeObject(data)));
 
             return JsonConvert.DeserializeObject<SearchResult>(res);
         }
@@ -138,7 +138,7 @@ namespace MusicLyricApp.Api
                 { "csrf_token", string.Empty },
             };
 
-            var raw = SendHttp(url, Prepare(JsonConvert.SerializeObject(data)));
+            var raw = SendPost(url, Prepare(JsonConvert.SerializeObject(data)));
             
             return JsonConvert.DeserializeObject<AlbumResult>(raw);
         }
@@ -157,7 +157,7 @@ namespace MusicLyricApp.Api
                 { "n", "1000" }
             };
             
-            var raw = SendHttp(url, Prepare(JsonConvert.SerializeObject(data)));
+            var raw = SendPost(url, Prepare(JsonConvert.SerializeObject(data)));
 
             return JsonConvert.DeserializeObject<PlaylistResult>(raw);
         }
@@ -183,7 +183,7 @@ namespace MusicLyricApp.Api
                 { "csrf_token", string.Empty }
             };
 
-            var raw = SendHttp(url, Prepare(JsonConvert.SerializeObject(data)));
+            var raw = SendPost(url, Prepare(JsonConvert.SerializeObject(data)));
             
             return JsonConvert.DeserializeObject<LyricResult>(raw);
         }
@@ -206,7 +206,7 @@ namespace MusicLyricApp.Api
                 { "csrf_token", string.Empty }
             };
 
-            var raw = SendHttp(url, Prepare(JsonConvert.SerializeObject(data)));
+            var raw = SendPost(url, Prepare(JsonConvert.SerializeObject(data)));
 
             return JsonConvert.DeserializeObject<SongUrls>(raw);
         }
@@ -236,7 +236,7 @@ namespace MusicLyricApp.Api
                 { "csrf_token", string.Empty },
             };
             
-            var raw = SendHttp(url, Prepare(JsonConvert.SerializeObject(data)));
+            var raw = SendPost(url, Prepare(JsonConvert.SerializeObject(data)));
 
             return JsonConvert.DeserializeObject<DetailResult>(raw);
         }

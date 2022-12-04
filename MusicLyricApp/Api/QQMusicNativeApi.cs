@@ -4,9 +4,8 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Xml;
 using MusicLyricApp.Bean;
+using MusicLyricApp.Exception;
 using MusicLyricApp.Utils;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 namespace MusicLyricApp.Api
 {
@@ -14,10 +13,12 @@ namespace MusicLyricApp.Api
     {
         private static DateTime _dtFrom = new DateTime(1970, 1, 1, 8, 0, 0, 0, DateTimeKind.Local);
 
-        [DllImport("QQMusicVerbatim.dll", EntryPoint = "?Ddes@qqmusic@@YAHPAE0H@Z", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("QQMusicVerbatim.dll", EntryPoint = "?Ddes@qqmusic@@YAHPAE0H@Z",
+            CallingConvention = CallingConvention.Cdecl)]
         private static extern void func_ddes(sbyte[] a, string b, int c);
 
-        [DllImport("QQMusicVerbatim.dll", EntryPoint = "?des@qqmusic@@YAHPAE0H@Z", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("QQMusicVerbatim.dll", EntryPoint = "?des@qqmusic@@YAHPAE0H@Z",
+            CallingConvention = CallingConvention.Cdecl)]
         private static extern void func_des(sbyte[] a, string b, int c);
 
         private static readonly Dictionary<string, string> VerbatimXmlMappingDict = new Dictionary<string, string>
@@ -27,10 +28,54 @@ namespace MusicLyricApp.Api
             { "contentroma", "roma" }, // 罗马音
             { "Lyric_1", "lyric" }, // 解压后的内容
         };
-        
+
         protected override string HttpRefer()
         {
             return "https://c.y.qq.com/";
+        }
+
+        public QQMusicBean.MusicFcgApiResult Search(string keyword, SearchTypeEnum searchType)
+        {
+            // 0：单曲，1：歌手，2：专辑，3：歌单，7：歌词
+            string type;
+            switch (searchType)
+            {
+                case SearchTypeEnum.SONG_ID:
+                    type = "0";
+                    break;
+                case SearchTypeEnum.ALBUM_ID:
+                    type = "2";
+                    break;
+                case SearchTypeEnum.PLAYLIST_ID:
+                    type = "3";
+                    break;
+                default:
+                    throw new MusicLyricException(ErrorMsg.SYSTEM_ERROR);
+            }
+
+            var data = new Dictionary<string, object>
+            {
+                {
+                    "req_1", new Dictionary<string, object>
+                    {
+                        { "method", "DoSearchForQQMusicDesktop" },
+                        { "module", "music.search.SearchCgiService" },
+                        {
+                            "param", new Dictionary<string, object>
+                            {
+                                { "num_per_page", "20" },
+                                { "page_num", "1" },
+                                { "query", keyword },
+                                { "search_type", type },
+                            }
+                        }
+                    }
+                }
+            };
+
+            var resp = SendJsonPost("https://u.y.qq.com/cgi-bin/musicu.fcg", data);
+
+            return resp.ToEntity<QQMusicBean.MusicFcgApiResult>();
         }
 
         public QQMusicBean.AlbumResult GetAlbum(string albumMid)
@@ -40,7 +85,7 @@ namespace MusicLyricApp.Api
                 { "albummid", albumMid }
             };
 
-            var resp = SendHttp("https://c.y.qq.com/v8/fcg-bin/fcg_v8_album_info_cp.fcg", data);
+            var resp = SendPost("https://c.y.qq.com/v8/fcg-bin/fcg_v8_album_info_cp.fcg", data);
 
             return resp.ToEntity<QQMusicBean.AlbumResult>();
         }
@@ -57,9 +102,8 @@ namespace MusicLyricApp.Api
                 { "utf8", "1" },
                 { "onlysong", "0" }, // 返回歌曲明细
                 { "new_format", "1" },
-                
             };
-            var resp = SendHttp("https://c.y.qq.com/qzone/fcg-bin/fcg_ucc_getcdinfo_byids_cp.fcg", data);
+            var resp = SendPost("https://c.y.qq.com/qzone/fcg-bin/fcg_ucc_getcdinfo_byids_cp.fcg", data);
 
             return resp.ToEntity<QQMusicBean.PlaylistResult>();
         }
@@ -75,7 +119,7 @@ namespace MusicLyricApp.Api
 
             var data = new Dictionary<string, string>
             {
-                { GlobalUtils.CheckNum(id) ? "songid" : "songmid", id},
+                { GlobalUtils.CheckNum(id) ? "songid" : "songmid", id },
                 { "tpl", "yqq_song_detail" },
                 { "format", "jsonp" },
                 { "callback", callBack },
@@ -89,7 +133,7 @@ namespace MusicLyricApp.Api
                 { "needNewCode", "0" },
             };
 
-            var resp = SendHttp("https://c.y.qq.com/v8/fcg-bin/fcg_play_single_song.fcg", data);
+            var resp = SendPost("https://c.y.qq.com/v8/fcg-bin/fcg_play_single_song.fcg", data);
 
             return ResolveRespJson(callBack, resp).ToEntity<QQMusicBean.SongResult>();
         }
@@ -117,7 +161,7 @@ namespace MusicLyricApp.Api
                 { "needNewCode", "0" },
             };
 
-            var resp = SendHttp("https://c.y.qq.com/lyric/fcgi-bin/fcg_query_lyric_new.fcg", data);
+            var resp = SendPost("https://c.y.qq.com/lyric/fcgi-bin/fcg_query_lyric_new.fcg", data);
 
             var result = ResolveRespJson(callBack, resp).ToEntity<QQMusicBean.LyricResult>();
 
@@ -126,7 +170,7 @@ namespace MusicLyricApp.Api
 
         public QQMusicBean.LyricResult GetVerbatimLyric(string songId)
         {
-            var resp = SendHttp("https://c.y.qq.com/qqmusic/fcgi-bin/lyric_download.fcg", new Dictionary<string, string>
+            var resp = SendPost("https://c.y.qq.com/qqmusic/fcgi-bin/lyric_download.fcg", new Dictionary<string, string>
             {
                 { "version", "15" },
                 { "miniversion", "82" },
@@ -155,10 +199,10 @@ namespace MusicLyricApp.Api
                 {
                     continue;
                 }
-                
+
                 var sz = MathUtils.ConvertStringToHexSbytes(text, out var sbytes);
-                
-                func_ddes(sbytes,  "!@#)(NHLiuy*$%^&", sz);
+
+                func_ddes(sbytes, "!@#)(NHLiuy*$%^&", sz);
                 func_des(sbytes, "123ZXC!@#)(*$%^&", sz);
                 func_ddes(sbytes, "!@#)(*$%^&abcDEF", sz);
 
@@ -169,9 +213,9 @@ namespace MusicLyricApp.Api
                 if (decompressText.Contains("<?xml"))
                 {
                     var doc = XmlUtils.Create(decompressText);
-                
+
                     var subDict = new Dictionary<string, XmlNode>();
-                
+
                     XmlUtils.RecursionFindElement(doc, VerbatimXmlMappingDict, subDict);
 
                     if (subDict.TryGetValue("lyric", out var d))
@@ -200,37 +244,67 @@ namespace MusicLyricApp.Api
 
             return result;
         }
-        
+
         public ResultVo<string> GetSongLink(string songMid)
         {
             var guid = GetGuid();
 
-            var subData =
-                "{\"req\": {\"module\": \"CDN.SrfCdnDispatchServer\",\"method\": \"GetCdnDispatch\"," +
-                "\"param\": {\"guid\": \"" + guid + "\",\"calltype\": 0,\"userip\": \"\"}}," +
-                "\"req_0\": {\"module\": \"vkey.GetVkeyServer\",\"method\": \"CgiGetVkey\",\"param\": " +
-                "{\"guid\": \"8348972662\",\"songmid\": [\"" + songMid +
-                "\"],\"songtype\": [1],\"uin\": \"0\",\"loginflag\": 1," +
-                "\"platform\": \"20\"}},\"comm\": {\"uin\": 0,\"format\": \"json\",\"ct\": 24,\"cv\": 0}}";
-
-            var requestUrl =
-                $"https://u.y.qq.com/cgi-bin/musicu.fcg?g_tk=5381&loginUin=0&hostUin=0&format=json&inCharset=utf8&outCharset=utf-8&notice=0&platform=yqq.json&needNewCode=0&data={subData}";
-
-            var headers = new Dictionary<string, string>
+            var data = new Dictionary<string, object>
             {
-                { "Accept", "application/json" },
-                { "User-Agent", Useragent }
+                {
+                    "req", new Dictionary<string, object>
+                    {
+                        { "method", "GetCdnDispatch" },
+                        { "module", "CDN.SrfCdnDispatchServer" },
+                        {
+                            "param", new Dictionary<string, object>
+                            {
+                                { "guid", guid },
+                                { "calltype", "0" },
+                                { "userip", "" },
+                            }
+                        }
+                    }
+                },
+                {
+                    "req_0", new Dictionary<string, object>
+                    {
+                        { "method", "CgiGetVkey" },
+                        { "module", "vkey.GetVkeyServer" },
+                        {
+                            "param", new Dictionary<string, object>
+                            {
+                                { "guid", "8348972662" },
+                                { "songmid", new[] {songMid } },
+                                { "songtype", new[] { 1 } },
+                                { "uin", "0" },
+                                { "loginflag", 1 },
+                                { "platform", "20" },
+                            }
+                        }
+                    }
+                },
+                {
+                    "comm", new Dictionary<string, object>
+                    {
+                        { "uin", 0 },
+                        { "format", "json" },
+                        { "ct", 24 },
+                        { "cv", 0 },
+                    }
+                }
             };
 
-            var resp = HttpUtils.HttpGet(requestUrl, "application/json", headers);
-            var obj = (JObject)JsonConvert.DeserializeObject(resp);
+            var resp = SendJsonPost("https://u.y.qq.com/cgi-bin/musicu.fcg", data);
+            
+            var res = resp.ToEntity<QQMusicBean.MusicFcgApiResult>();
 
             var link = "";
-            if (obj["code"].ToString() == "0")
+            if (res.Code == 0 && res.Req.Code == 0 && res.Req_0.Code == 0)
             {
-                link = obj["req"]["data"]["sip"][0].ToString() + obj["req_0"]["data"]["midurlinfo"][0]["purl"];
+                link = res.Req.Data.Sip[0] + res.Req_0.Data.Midurlinfo[0].Purl;
             }
-
+            
             return new ResultVo<string>(link);
         }
 

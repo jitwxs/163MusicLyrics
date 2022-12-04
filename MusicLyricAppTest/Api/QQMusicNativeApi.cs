@@ -1,4 +1,5 @@
 ﻿using System;
+using MusicLyricApp.Bean;
 using NUnit.Framework;
 
 namespace MusicLyricAppTest.Api
@@ -43,6 +44,14 @@ namespace MusicLyricAppTest.Api
         {
             var res = _api.GetPlaylist("8694686726");
             
+            Console.WriteLine(res);
+        }
+
+
+        [Test]
+        public void TestSearch()
+        {
+            var res = _api.Search("未闻花名", SearchTypeEnum.SONG_ID);
             Console.WriteLine(res);
         }
     }
