@@ -56,7 +56,7 @@ namespace MusicLyricApp.Api
             
             foreach (var songId in songIds)
             {
-                ResultVo<QQMusicBean.Song> SongCacheFunc(int e)
+                ResultVo<QQMusicBean.Song> SongCacheFunc()
                 {
                     var resp = _api.GetSong(songId);
                     return resp.IsIllegal() ? ResultVo<QQMusicBean.Song>.Failure(ErrorMsg.SONG_NOT_EXIST) : new ResultVo<QQMusicBean.Song>(resp.Data[0]);

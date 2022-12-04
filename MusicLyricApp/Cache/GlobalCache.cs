@@ -9,7 +9,7 @@ namespace MusicLyricApp.Cache
         private static readonly Dictionary<CacheType, Dictionary<object, object>> Cache =
             new Dictionary<CacheType, Dictionary<object, object>>();
 
-        public static ResultVo<T> Process<T>(CacheType cacheType, object key, Func<int, ResultVo<T>> cacheFunc)
+        public static ResultVo<T> Process<T>(CacheType cacheType, object key, Func<ResultVo<T>> cacheFunc)
         {
             var cache = Query<T>(cacheType, key);
             if (cache != null)
@@ -17,7 +17,7 @@ namespace MusicLyricApp.Cache
                 return new ResultVo<T>(cache);
             }
 
-            var res = cacheFunc.Invoke(0);
+            var res = cacheFunc.Invoke();
             if (res.IsSuccess())
             {
                 DoCache(cacheType, key, res.Data);

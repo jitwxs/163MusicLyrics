@@ -29,12 +29,12 @@ namespace MusicLyricApp.Api
 
         public ResultVo<PlaylistVo> GetPlaylistVo(string playlistId)
         {
-            return GlobalCache.Process(CacheType.PLAYLIST_VO, playlistId, e => GetPlaylistVo0(playlistId));
+            return GlobalCache.Process(CacheType.PLAYLIST_VO, playlistId, () => GetPlaylistVo0(playlistId));
         }
 
         public ResultVo<AlbumVo> GetAlbumVo(string albumId)
         {
-            return GlobalCache.Process(CacheType.ALBUM_VO, albumId, e => GetAlbumVo0(albumId));
+            return GlobalCache.Process(CacheType.ALBUM_VO, albumId, () => GetAlbumVo0(albumId));
         }
 
         public Dictionary<string, ResultVo<SongVo>> GetSongVo(string[] songIds)
@@ -60,12 +60,12 @@ namespace MusicLyricApp.Api
 
         public ResultVo<string> GetSongLink(string songId)
         {
-            return GlobalCache.Process(CacheType.SONG_LINK, songId, e => GetSongLink0(songId));
+            return GlobalCache.Process(CacheType.SONG_LINK, songId, () => GetSongLink0(songId));
         }
 
         public ResultVo<LyricVo> GetLyricVo(string id, string displayId, bool isVerbatim)
         {
-            ResultVo<LyricVo> CacheFunc(int e) => GetLyricVo0(id, displayId, isVerbatim);
+            ResultVo<LyricVo> CacheFunc() => GetLyricVo0(id, displayId, isVerbatim);
 
             return GlobalCache.Process(CacheType.LYRIC_VO, GlobalUtils.GetSongKey(displayId, isVerbatim), CacheFunc);
         }
@@ -74,7 +74,7 @@ namespace MusicLyricApp.Api
         {
             var cacheKey = Source0() + "_" + searchType + "_" + keyword;
 
-            ResultVo<SearchResultVo> CacheFunc(int e) => Search0(keyword, searchType);
+            ResultVo<SearchResultVo> CacheFunc() => Search0(keyword, searchType);
 
             return GlobalCache.Process(CacheType.SEARCH_RESULT_VO, cacheKey, CacheFunc);
         }
