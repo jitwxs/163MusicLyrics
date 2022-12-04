@@ -29,7 +29,8 @@ namespace MusicLyricAppTest.Api
         [Test]
         public void GetAlbum()
         {
-            _api.GetAlbum("000IdMCY2pTAiz");
+            var resp = _api.GetAlbum("000IdMCY2pTAiz");
+            Console.WriteLine(resp);
         }
         
         [Test]
@@ -51,7 +52,7 @@ namespace MusicLyricAppTest.Api
         [Test]
         public void TestSearch()
         {
-            var res = _api.Search("未闻花名", SearchTypeEnum.SONG_ID);
+            var res = _api.Search("慰问", SearchTypeEnum.PLAYLIST_ID);
             Console.WriteLine(res);
         }
     }

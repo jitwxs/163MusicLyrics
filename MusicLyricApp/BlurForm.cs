@@ -29,9 +29,9 @@ namespace MusicLyricApp
             {
                 case SearchTypeEnum.SONG_ID:
                     // Add columns.
-                    table.Columns.Add("歌曲名", typeof(string));
-                    table.Columns.Add("作者名 ", typeof(string));
-                    table.Columns.Add("专辑名", typeof(string));
+                    table.Columns.Add("歌曲", typeof(string));
+                    table.Columns.Add("歌手 ", typeof(string));
+                    table.Columns.Add("专辑", typeof(string));
                     table.Columns.Add("时长", typeof(string));
 
                     // Add rows.
@@ -44,15 +44,16 @@ namespace MusicLyricApp
                         var duration = new LyricTimestamp(songVo.Duration).PrintTimestamp("mm:ss", DotTypeEnum.DOWN);
 
                         _ids[i] = songVo.DisplayId;
-                        table.Rows.Add(songVo.SongName, string.Join(",", songVo.AuthorName), songVo.AlbumName,
+                        table.Rows.Add(songVo.Title, string.Join(",", songVo.AuthorName), songVo.AlbumName,
                             duration);
                     }
                     break;
                 case SearchTypeEnum.ALBUM_ID:
                     // Add columns.
-                    table.Columns.Add("专辑名", typeof(string));
-                    table.Columns.Add("作者名 ", typeof(string));
-                    table.Columns.Add("发行公司", typeof(string));
+                    table.Columns.Add("专辑", typeof(string));
+                    table.Columns.Add("歌手 ", typeof(string));
+                    table.Columns.Add("歌曲数量", typeof(string));
+                    table.Columns.Add("发行时间", typeof(string));
 
                     // Add rows.
                     var albumVos = searchResultVo.AlbumVos;
@@ -63,7 +64,7 @@ namespace MusicLyricApp
                         var albumVo = albumVos[i];
 
                         _ids[i] = albumVo.DisplayId;
-                        table.Rows.Add(albumVo.AlbumName, string.Join(",", albumVo.AuthorName), albumVo.Company);
+                        table.Rows.Add(albumVo.AlbumName, string.Join(",", albumVo.AuthorName), albumVo.SongCount, albumVo.PublishTime);
                     }
                     break;
                 case SearchTypeEnum.PLAYLIST_ID:
@@ -71,6 +72,7 @@ namespace MusicLyricApp
                     table.Columns.Add("歌单名", typeof(string));
                     table.Columns.Add("作者名 ", typeof(string));
                     table.Columns.Add("描述", typeof(string));
+                    table.Columns.Add("歌曲数量", typeof(string));
                     table.Columns.Add("播放量", typeof(string));
                     
                     // Add rows.
@@ -82,7 +84,7 @@ namespace MusicLyricApp
                         var playlistVo = playlistVos[i];
 
                         _ids[i] = playlistVo.DisplayId;
-                        table.Rows.Add(playlistVo.PlaylistName, playlistVo.AuthorName, playlistVo.Description, playlistVo.PlayCount);
+                        table.Rows.Add(playlistVo.PlaylistName, playlistVo.AuthorName, playlistVo.Description, playlistVo.SongCount, playlistVo.PlayCount);
                     }
                     break;
             }

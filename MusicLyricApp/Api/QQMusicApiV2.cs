@@ -2,7 +2,6 @@
 using System.Linq;
 using MusicLyricApp.Bean;
 using MusicLyricApp.Cache;
-using MusicLyricApp.Exception;
 
 namespace MusicLyricApp.Api
 {
@@ -108,8 +107,14 @@ namespace MusicLyricApp.Api
 
         protected override ResultVo<SearchResultVo> Search0(string keyword, SearchTypeEnum searchType)
         {
-            // todo not support
-            throw new MusicLyricException(ErrorMsg.FUNCTION_NOT_SUPPORT);
+            var resp = _api.Search(keyword, searchType);
+
+            if (resp.Code == 0 && resp.Req_1.Code == 0 && resp.Req_1.Data.Code == 0)
+            {
+                return new ResultVo<SearchResultVo>(resp.Req_1.Data.Body.Convert(searchType));
+            }
+            
+            return ResultVo<SearchResultVo>.Failure(ErrorMsg.NETWORK_ERROR);
         }
     }
 }

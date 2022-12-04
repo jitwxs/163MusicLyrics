@@ -36,18 +36,18 @@ namespace MusicLyricApp.Api
 
         public QQMusicBean.MusicFcgApiResult Search(string keyword, SearchTypeEnum searchType)
         {
-            // 0：单曲，1：歌手，2：专辑，3：歌单，7：歌词
-            string type;
+            // 0单曲 2专辑 1歌手 3歌单 7歌词 12mv
+            int type;
             switch (searchType)
             {
                 case SearchTypeEnum.SONG_ID:
-                    type = "0";
+                    type = 0;
                     break;
                 case SearchTypeEnum.ALBUM_ID:
-                    type = "2";
+                    type = 2;
                     break;
                 case SearchTypeEnum.PLAYLIST_ID:
-                    type = "3";
+                    type = 3;
                     break;
                 default:
                     throw new MusicLyricException(ErrorMsg.SYSTEM_ERROR);

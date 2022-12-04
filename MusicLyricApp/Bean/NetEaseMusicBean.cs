@@ -53,7 +53,7 @@ namespace MusicLyricApp.Bean
                                 vo.SongVos.Add(new SearchResultVo.SongSearchResultVo
                                 {
                                     DisplayId = song.Id,
-                                    SongName = song.Name,
+                                    Title = song.Name,
                                     AuthorName = song.Ar.Select(e => e.Name).ToArray(),
                                     AlbumName = song.Al.Name,
                                     Duration = song.Dt
@@ -71,7 +71,8 @@ namespace MusicLyricApp.Bean
                                     DisplayId = album.Id.ToString(),
                                     AlbumName = album.Name,
                                     AuthorName = album.Artists.Select(e => e.Name).ToArray(),
-                                    Company = album.Company
+                                    SongCount = album.Size,
+                                    PublishTime = GlobalUtils.FormatDate(album.PublishTime)
                                 });
                             }
                         }
@@ -87,7 +88,8 @@ namespace MusicLyricApp.Bean
                                     PlaylistName = playlist.Name,
                                     AuthorName = playlist.Creator.Nickname,
                                     Description = playlist.Description,
-                                    PlayCount = playlist.PlayCount
+                                    PlayCount = playlist.PlayCount,
+                                    SongCount = playlist.TrackCount,
                                 });
                             }
                         }
@@ -250,6 +252,11 @@ namespace MusicLyricApp.Bean
         /// 播放数量
         /// </summary>
         public long PlayCount { get; set; }
+        
+        /// <summary>
+        /// 歌曲数量
+        /// </summary>
+        public long TrackCount { get; set; }
     }
 
     /// <summary>
@@ -300,7 +307,6 @@ namespace MusicLyricApp.Bean
     /// </summary>
     public class Album
     {
-        public object[] Songs { get; set; }
         public bool Paid { get; set; }
         public bool OnSale { get; set; }
         public long PicId { get; set; }
@@ -323,6 +329,9 @@ namespace MusicLyricApp.Bean
         public string Name { get; set; }
         public long Id { get; set; }
         public string Type { get; set; }
+        /// <summary>
+        /// 歌曲数量
+        /// </summary>
         public long Size { get; set; }
         public string PicIdStr { get; set; }
         public Info Info { get; set; }

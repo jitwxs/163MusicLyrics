@@ -166,7 +166,7 @@ namespace MusicLyricApp.Bean
         {
             public string DisplayId { get; set; }
             
-            public string SongName { get; set; }
+            public string Title { get; set; }
 
             public string[] AuthorName { get; set; }
             
@@ -187,9 +187,14 @@ namespace MusicLyricApp.Bean
             public string[] AuthorName { get; set; }
             
             /// <summary>
-            /// 发行公司
+            /// 歌曲数量
             /// </summary>
-            public string Company { get; set; }
+            public long SongCount { get; set; }
+            
+            /// <summary>
+            /// 发行时间
+            /// </summary>
+            public string PublishTime { get; set; }
         }
         
         public class PlaylistResultVo
@@ -209,6 +214,11 @@ namespace MusicLyricApp.Bean
             /// 播放数量
             /// </summary>
             public long PlayCount { get; set; }
+            
+            /// <summary>
+            /// 歌曲数量
+            /// </summary>
+            public long SongCount { get; set; }
         }
     }
 
