@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using MusicLyricApp.Bean;
+using MusicLyricApp.Cache;
 using MusicLyricApp.Utils;
 using NUnit.Framework;
 
@@ -44,6 +45,30 @@ namespace MusicLyricAppTest.Api
         public void Test()
         {
             _api.GetAlbumVo("148191532");
+        }
+        
+        [Test]
+        public void TestGetPlaylist()
+        {
+            const string playlistId = "7050074027";
+            
+            var res = _api.GetPlaylistVo(playlistId);
+            
+            Assert.True(res.IsSuccess());
+
+            var resData = res.Data;
+
+            var cacheData = GlobalCache.Query<PlaylistVo>(CacheType.PLAYLIST_VO, playlistId);
+            
+            // playlistVo 正确缓存
+            Assert.AreEqual(resData, cacheData);
+            
+            foreach (var simpleSongVo in resData.SimpleSongVos)
+            {
+                // song 正确缓存
+                Assert.NotNull(GlobalCache.Query<Song>(CacheType.NET_EASE_SONG, simpleSongVo.Id));
+                Assert.NotNull(GlobalCache.Query<Song>(CacheType.NET_EASE_SONG, simpleSongVo.DisplayId));
+            }
         }
     }
 }

@@ -10,17 +10,24 @@ namespace MusicLyricApp.Api
     {
         protected abstract SearchSourceEnum Source0();
         
+        protected abstract ResultVo<PlaylistVo> GetPlaylistVo0(string playlistId);
+        
         protected abstract ResultVo<AlbumVo> GetAlbumVo0(string albumId);
 
         protected abstract Dictionary<string, ResultVo<SongVo>> GetSongVo0(string[] songIds);
 
-        protected abstract ResultVo<LyricVo> GetLyricVo0(long id, string displayId, bool isVerbatim);
+        protected abstract ResultVo<LyricVo> GetLyricVo0(string id, string displayId, bool isVerbatim);
 
         protected abstract  ResultVo<SearchResultVo> Search0(string keyword, SearchTypeEnum searchType);
 
         public SearchSourceEnum Source()
         {
             return Source0();
+        }
+
+        public ResultVo<PlaylistVo> GetPlaylistVo(string playlistId)
+        {
+            return GlobalCache.Process(CacheType.PLAYLIST_VO, playlistId, e => GetPlaylistVo0(playlistId));
         }
 
         public ResultVo<AlbumVo> GetAlbumVo(string albumId)
@@ -49,7 +56,7 @@ namespace MusicLyricApp.Api
             return result;
         }
 
-        public ResultVo<LyricVo> GetLyricVo(long id, string displayId, bool isVerbatim)
+        public ResultVo<LyricVo> GetLyricVo(string id, string displayId, bool isVerbatim)
         {
             ResultVo<LyricVo> CacheFunc(int e) => GetLyricVo0(id, displayId, isVerbatim);
 

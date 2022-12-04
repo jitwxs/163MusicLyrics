@@ -105,6 +105,7 @@ namespace MusicLyricApp.Bean
         public const string MUST_SEARCH_BEFORE_GET_SONG_PIC = "您必须先搜索，才能获取歌曲封面";
         public const string INPUT_CONENT_EMPLT = "输入内容不能为空";
         public const string INPUT_ID_ILLEGAL = "您输入的ID不合法";
+        public const string PLAYLIST_NOT_EXIST = "歌单信息暂未被收录或查询失败";
         public const string ALBUM_NOT_EXIST = "专辑信息暂未被收录或查询失败";
         public const string SONG_NOT_EXIST = "歌曲信息暂未被收录或查询失败";
         public const string LRC_NOT_EXIST = "歌词信息暂未被收录或查询失败";
@@ -190,6 +191,32 @@ namespace MusicLyricApp.Bean
     }
 
     /// <summary>
+    /// 歌单信息
+    /// </summary>
+    public class PlaylistVo
+    {
+        /// <summary>
+        /// 歌单名
+        /// </summary>
+        public string Name { get; set; }
+        
+        /// <summary>
+        /// 作者名
+        /// </summary>
+        public string AuthorName { get; set; }
+        
+        /// <summary>
+        /// 歌单描述
+        /// </summary>
+        public string Description { get; set; }
+        
+        /// <summary>
+        /// 歌曲信息
+        /// </summary>
+        public SimpleSongVo[] SimpleSongVos { get; set; } 
+    }
+    
+    /// <summary>
     /// 专辑信息
     /// </summary>
     public class AlbumVo
@@ -208,11 +235,6 @@ namespace MusicLyricApp.Bean
         /// 专辑描述
         /// </summary>
         public string Desc { get; set; }
-        
-        /// <summary>
-        /// 包含的歌曲数量
-        /// </summary>
-        public int Total { get; set; }
 
         /// <summary>
         /// 歌曲信息
@@ -225,12 +247,15 @@ namespace MusicLyricApp.Bean
         public string TimePublic { get; set; } 
     }
 
+    /// <summary>
+    /// 歌曲简略信息
+    /// </summary>
     public class SimpleSongVo
     {
         /// <summary>
         /// 内部 ID
         /// </summary>
-        public long Id { get; set; }
+        public string Id { get; set; }
         
         /// <summary>
         /// 前端展示的 ID
@@ -474,7 +499,7 @@ namespace MusicLyricApp.Bean
     }
 
     /// <summary>
-    /// 当行歌词信息
+    /// 单行歌词信息
     /// </summary>
     public class LyricLineVo : IComparable
     {

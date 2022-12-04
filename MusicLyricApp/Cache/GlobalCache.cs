@@ -48,7 +48,7 @@ namespace MusicLyricApp.Cache
             return result;
         }
                 
-        private static T Query<T>(CacheType cacheType, object key)
+        public static T Query<T>(CacheType cacheType, object key)
         {
             if (Cache.ContainsKey(cacheType) && Cache[cacheType].ContainsKey(key))
             {
@@ -113,6 +113,10 @@ namespace MusicLyricApp.Cache
          * 专辑
          */
         ALBUM_VO,
+        /**
+         * 歌单
+         */
+        PLAYLIST_VO,
         /// <summary>
         /// 查询结果
         /// </summary>

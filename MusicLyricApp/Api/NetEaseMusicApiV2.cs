@@ -23,6 +23,23 @@ namespace MusicLyricApp.Api
             return SearchSourceEnum.NET_EASE_MUSIC;
         }
 
+        protected override ResultVo<PlaylistVo> GetPlaylistVo0(string playlistId)
+        {
+           var resp = _api.GetPlaylist(playlistId);
+
+           if (resp.Code == 200)
+           {
+               // cache song
+               GlobalCache.DoCache(CacheType.NET_EASE_SONG, value => value.Id, resp.Playlist.Tracks);
+               
+               return new ResultVo<PlaylistVo>(resp.Convert());
+           }
+           else
+           {
+               return ResultVo<PlaylistVo>.Failure(ErrorMsg.PLAYLIST_NOT_EXIST);
+           }
+        }
+
         protected override ResultVo<AlbumVo> GetAlbumVo0(string albumId)
         {
             var resp = _api.GetAlbum(albumId);
@@ -30,12 +47,10 @@ namespace MusicLyricApp.Api
             {
                 // cache song
                 GlobalCache.DoCache(CacheType.NET_EASE_SONG, value => value.Id, resp.Songs);
-                
                 return new ResultVo<AlbumVo>(resp.Convert());
             }
             else
             {
-                _logger.Error("NetEaseMusicApiV2 GetAlbumVo0 failed, resp: {Resp}", resp.ToJson());
                 return ResultVo<AlbumVo>.Failure(ErrorMsg.ALBUM_NOT_EXIST);
             }
         }
@@ -73,7 +88,7 @@ namespace MusicLyricApp.Api
                     
                     result[songId] = new ResultVo<SongVo>(new SongVo
                     {
-                        Id = long.Parse(song.Id),
+                        Id = song.Id,
                         DisplayId = songId,
                         Links = datum.Url,
                         Pics = song.Al.PicUrl,
@@ -92,7 +107,7 @@ namespace MusicLyricApp.Api
             return result;
         }
 
-        protected override ResultVo<LyricVo> GetLyricVo0(long id, string displayId, bool isVerbatim)
+        protected override ResultVo<LyricVo> GetLyricVo0(string id, string displayId, bool isVerbatim)
         {
             // todo isVerbatim just not support
             var resp = _api.GetLyric(displayId);

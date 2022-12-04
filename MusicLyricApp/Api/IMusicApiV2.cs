@@ -6,7 +6,13 @@ namespace MusicLyricApp.Api
     public interface IMusicApiV2
     {
         SearchSourceEnum Source();
-        
+
+        /// <summary>
+        /// 获取歌单信息
+        /// </summary>
+        /// <param name="playlistId">歌单ID</param>
+        ResultVo<PlaylistVo> GetPlaylistVo(string playlistId);
+
         /// <summary>
         /// 获取专辑信息
         /// </summary>
@@ -27,7 +33,7 @@ namespace MusicLyricApp.Api
         /// <param name="displayId">歌曲服务商显示 ID</param>
         /// <param name="isVerbatim">是否尝试获取逐字歌词</param>
         /// <returns></returns>
-        ResultVo<LyricVo> GetLyricVo(long id, string displayId, bool isVerbatim);
+        ResultVo<LyricVo> GetLyricVo(string id, string displayId, bool isVerbatim);
 
         /// <summary>
         /// 获取搜索结果

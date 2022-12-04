@@ -24,7 +24,6 @@ namespace MusicLyricApp.Bean
                     Name = Data.Name,
                     Company = Data.Company,
                     Desc = Data.Desc,
-                    Total = Data.Total,
                     SimpleSongVos = Data.List.Select(e => e.ConvertSimple()).ToArray(),
                     TimePublic = Data.ADate
                 };
@@ -39,6 +38,18 @@ namespace MusicLyricApp.Bean
             public long Code { get; set; }
             
             public Playlist[] Cdlist { get; set; }
+            
+            public PlaylistVo Convert()
+            {
+                var playlist = Cdlist[0];
+                return new PlaylistVo
+                {
+                    Name = playlist.Dissname,
+                    AuthorName = playlist.Nickname,
+                    Description = playlist.Desc,
+                    SimpleSongVos = playlist.SongList.Select(e => e.ConvertSimple()).ToArray()
+                };
+            }
         }
 
         /// <summary>
@@ -154,7 +165,7 @@ namespace MusicLyricApp.Bean
         {
             public Album Album { get; set; }
 
-            public long Id { get; set; }
+            public string Id { get; set; }
 
             public int Interval { get; set; }
 
@@ -170,6 +181,17 @@ namespace MusicLyricApp.Bean
             /// 发布时间，eg: 2005-07-08
             /// </summary>
             public string TimePublic { get; set; }
+            
+            public SimpleSongVo ConvertSimple()
+            {
+                return new SimpleSongVo
+                {
+                    Id = Id,
+                    DisplayId = Mid,
+                    Name = Name,
+                    Singer = string.Join(",", Singer.Select(e => e.Name))
+                };
+            }
         }
 
         public class AlbumInfo
@@ -231,7 +253,7 @@ namespace MusicLyricApp.Bean
             {
                 return new SimpleSongVo
                 {
-                    Id = Songid,
+                    Id = Songid.ToString(),
                     DisplayId = Songmid,
                     Name = Songname,
                     Singer = string.Join(",", singer.Select(e => e.Name))

@@ -152,6 +152,17 @@ namespace MusicLyricApp.Bean
         /// 歌单歌曲权限信息
         /// </summary>
         public Privilege[] Privileges { get; set; }
+
+        public PlaylistVo Convert()
+        {
+            return new PlaylistVo
+            {
+                Name = Playlist.Name,
+                AuthorName = Playlist.Creator.Nickname,
+                Description = Playlist.Description,
+                SimpleSongVos = Playlist.Tracks.Select(e => e.ConvertSimple()).ToArray()
+            };
+        }
     }
     
     /// <summary>
@@ -170,7 +181,6 @@ namespace MusicLyricApp.Bean
                 Name = Album.Name,
                 Company = Album.Company,
                 Desc = Album.Description,
-                Total = Songs.Length,
                 SimpleSongVos = Songs.Select(e => e.ConvertSimple()).ToArray(),
                 TimePublic = GlobalUtils.FormatDate(Album.PublishTime)
             };
@@ -184,6 +194,9 @@ namespace MusicLyricApp.Bean
     {
         public string Id { get; set; }
         
+        /// <summary>
+        /// 歌单名
+        /// </summary>
         public string Name { get; set; }
         
         /// <summary>
@@ -321,7 +334,7 @@ namespace MusicLyricApp.Bean
         {
             return new SimpleSongVo
             {
-                Id = long.Parse(Id),
+                Id = Id,
                 DisplayId = Id,
                 Name = Name,
                 Singer = string.Join(",", Ar.Select(e => e.Name))

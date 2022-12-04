@@ -124,14 +124,14 @@ namespace MusicLyricApp.Api
             return result.Decode();
         }
 
-        public QQMusicBean.LyricResult GetVerbatimLyric(long songId)
+        public QQMusicBean.LyricResult GetVerbatimLyric(string songId)
         {
             var resp = SendHttp("https://c.y.qq.com/qqmusic/fcgi-bin/lyric_download.fcg", new Dictionary<string, string>
             {
                 { "version", "15" },
                 { "miniversion", "82" },
                 { "lrctype", "4" },
-                { "musicid", songId.ToString() },
+                { "musicid", songId },
             });
             // qq music 返回的内容需要去除注释
             resp = resp.Replace("<!--", "").Replace("-->", "");

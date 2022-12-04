@@ -4,15 +4,11 @@ using System.Text;
 using MusicLyricApp.Bean;
 using MusicLyricApp.Cache;
 using MusicLyricApp.Exception;
-using MusicLyricApp.Utils;
-using NLog;
 
 namespace MusicLyricApp.Api
 {
     public class QQMusicApiV2 : MusicApiV2Cacheable
     {
-        private readonly Logger _logger = LogManager.GetCurrentClassLogger();
-        
         private readonly QQMusicNativeApi _api;
         
         public QQMusicApiV2()
@@ -25,6 +21,23 @@ namespace MusicLyricApp.Api
             return SearchSourceEnum.QQ_MUSIC;
         }
 
+        protected override ResultVo<PlaylistVo> GetPlaylistVo0(string playlistId)
+        {
+            var resp = _api.GetPlaylist(playlistId);
+            if (resp.Code == 0)
+            {
+                // cache song
+                GlobalCache.DoCache(CacheType.QQ_MUSIC_SONG, value => value.Id, resp.Cdlist[0].SongList);
+                GlobalCache.DoCache(CacheType.QQ_MUSIC_SONG, value => value.Mid, resp.Cdlist[0].SongList);
+                
+                return new ResultVo<PlaylistVo>(resp.Convert());
+            }
+            else
+            {
+                return ResultVo<PlaylistVo>.Failure(ErrorMsg.PLAYLIST_NOT_EXIST);
+            }
+        }
+
         protected override ResultVo<AlbumVo> GetAlbumVo0(string albumId)
         {
             var resp = _api.GetAlbum(albumId);
@@ -34,7 +47,6 @@ namespace MusicLyricApp.Api
             }
             else
             {
-                _logger.Error("QQMusicApiV2 GetAlbumVo0 failed, resp: {Resp}", resp.ToJson());
                 return ResultVo<AlbumVo>.Failure(ErrorMsg.ALBUM_NOT_EXIST);
             }
         }
@@ -81,7 +93,7 @@ namespace MusicLyricApp.Api
             return result;
         }
 
-        protected override ResultVo<LyricVo> GetLyricVo0(long id, string displayId, bool isVerbatim)
+        protected override ResultVo<LyricVo> GetLyricVo0(string id, string displayId, bool isVerbatim)
         {
             var resp = isVerbatim ? _api.GetVerbatimLyric(id) : _api.GetLyric(displayId);
 
