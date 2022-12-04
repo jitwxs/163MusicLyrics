@@ -7,15 +7,16 @@
 
 [👉163MusicLyrics Use Guide](https://github.com/jitwxs/163MusicLyrics/wiki)
 
-- [x] 支持网易云、QQ音乐两家音乐提供商 Support 163Music, QQMusic Music Provider
-- [x] 支持输入歌曲 ID、输入专辑 ID、完整链接的方式进行查询 Support input song ID, enter album ID, full url way to query
+- [x] 支持网易云音乐、QQ音乐两家音乐提供商 Support NetEaseMusic, QQMusic Music Provider
+- [x] 支持单曲、专辑、歌单三种查询类别，ID 和完整链接方式均可查询（即精确查询）Support search type: Song, Album, Playlist, you can query by ID or full-url (that is exact query)
+- [x] 网易云音乐每种查询类别均支持关键字查询（即模糊查询）In NetEaseMusic, the each search type both support query by keywords (that is blur query)
 - [x] 支持批量查询 && 扫盘查询 Support batch query && scan directory query
 - [x] 支持多种歌词原文和译文的组织方式 Support multiple original lyrics and translation lyrics organization
 - [x] 支持提取（部分）歌曲试听链接 Support extraction (part) song audition link
 - [x] 支持多种保存命名规则、文件编码格式 Support multiple saving naming rules, file encoding format
 - [x] 支持 LRC 或 SRT 输出格式 Support lrc or srt output format
 - [x] 日文歌曲支持罗马音 Support romaji in japanese songs
-- [x] QQ 音乐支持逐字歌词模式(卡拉 OK 模式) QQMusic support verbatim mode(karaoke mode)
+- [x] QQ 音乐支持逐字歌词模式(卡拉 OK 模式) In QQMusic, support verbatim mode(karaoke mode)
 
 ### Downloads
 
