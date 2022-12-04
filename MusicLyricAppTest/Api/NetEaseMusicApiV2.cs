@@ -1,14 +1,17 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using MusicLyricApp.Bean;
+using MusicLyricApp.Cache;
 using MusicLyricApp.Utils;
 using NUnit.Framework;
-using static MusicLyricApp.Api.NetEaseMusicApiV2;
 
 namespace MusicLyricAppTest.Api
 {
     [TestFixture]
     public class NetEaseMusicApiV2
     {
+        private MusicLyricApp.Api.NetEaseMusicApiV2 _api = new MusicLyricApp.Api.NetEaseMusicApiV2();
+        
         private const string DETAILS_TEST_DATA =
             "{\"Songs\":[{\"Name\":\"如果星星能记得(Vocaloid)\",\"Id\":447309968,\"Pst\":0,\"T\":0," +
             "\"Ar\":[{\"Id\":12200045,\"Name\":\"石页\",\"Tns\":[],\"Alias\":[]}],\"Alia\":[],\"Pop\":75.0,\"St\":0," +
@@ -23,7 +26,7 @@ namespace MusicLyricAppTest.Api
             "\"Flag\":2}],\"Code\":200}";
         
         [Test]
-        public void ContractSingerTest()
+        public void TestContractSinger()
         {
             var rawDetails = DETAILS_TEST_DATA.ToEntity<DetailResult>();
 
@@ -33,9 +36,39 @@ namespace MusicLyricAppTest.Api
             details.Songs[0].Ar.Add(new Ar() { Name = "name-1" });
             details.Songs[0].Ar.Add(new Ar() { Name = "name-2" });
 
-            Assert.AreEqual("石页", ContractSinger(rawDetails.Songs[0].Ar));
-            Assert.AreEqual("name-1,name-2", ContractSinger(details.Songs[0].Ar));
-            Assert.AreEqual(string.Empty, ContractSinger(new List<Ar>()));
+            Assert.AreEqual("石页", string.Join(",", rawDetails.Songs[0].Ar.Select(e => e.Name)));
+            Assert.AreEqual("name-1,name-2", string.Join(",", details.Songs[0].Ar.Select(e => e.Name)));
+            Assert.AreEqual(string.Empty, string.Join(",",new List<Ar>().Select(e => e.Name)));
+        }
+
+        [Test]
+        public void Test()
+        {
+            _api.GetAlbumVo("148191532");
+        }
+        
+        [Test]
+        public void TestGetPlaylist()
+        {
+            const string playlistId = "7050074027";
+            
+            var res = _api.GetPlaylistVo(playlistId);
+            
+            Assert.True(res.IsSuccess());
+
+            var resData = res.Data;
+
+            var cacheData = GlobalCache.Query<PlaylistVo>(CacheType.PLAYLIST_VO, playlistId);
+            
+            // playlistVo 正确缓存
+            Assert.AreEqual(resData, cacheData);
+            
+            foreach (var simpleSongVo in resData.SimpleSongVos)
+            {
+                // song 正确缓存
+                Assert.NotNull(GlobalCache.Query<Song>(CacheType.NET_EASE_SONG, simpleSongVo.Id));
+                Assert.NotNull(GlobalCache.Query<Song>(CacheType.NET_EASE_SONG, simpleSongVo.DisplayId));
+            }
         }
     }
 }

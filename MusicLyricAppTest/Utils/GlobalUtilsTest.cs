@@ -1,4 +1,5 @@
-﻿using MusicLyricApp.Bean;
+﻿using System;
+using MusicLyricApp.Bean;
 using MusicLyricApp.Exception;
 using NUnit.Framework;
 using static MusicLyricApp.Utils.GlobalUtils;
@@ -8,6 +9,13 @@ namespace MusicLyricAppTest.Utils
     [TestFixture]
     public class GlobalUtilsTest
     {
+        [Test]
+        public void TestFormatDate()
+        {
+            var res = FormatDate(1657900800000);
+            Console.WriteLine(res);
+        }
+        
         [Test]
         public void TestCheckInputIdWithNumber()
         {
@@ -41,6 +49,9 @@ namespace MusicLyricAppTest.Utils
             Assert.AreEqual("122305109",
                 CheckInputId("https://music.163.com/#/album?id=122305109", SearchSourceEnum.NET_EASE_MUSIC,
                     SearchTypeEnum.ALBUM_ID));
+            Assert.AreEqual("7050074027",
+                CheckInputId("https://music.163.com/#/playlist?id=7050074027", SearchSourceEnum.NET_EASE_MUSIC,
+                    SearchTypeEnum.PLAYLIST_ID));
 
             Assert.AreEqual("002owtOq052wu9",
                 CheckInputId("https://y.qq.com/n/ryqq/songDetail/002owtOq052wu9", SearchSourceEnum.QQ_MUSIC,
@@ -48,6 +59,9 @@ namespace MusicLyricAppTest.Utils
             Assert.AreEqual("000k0h474UtgAL",
                 CheckInputId("https://y.qq.com/n/ryqq/albumDetail/000k0h474UtgAL", SearchSourceEnum.QQ_MUSIC,
                     SearchTypeEnum.ALBUM_ID));
+            Assert.AreEqual("8694686726",
+                CheckInputId("https://y.qq.com/n/ryqq/playlist/8694686726", SearchSourceEnum.QQ_MUSIC,
+                    SearchTypeEnum.PLAYLIST_ID));
 
             Assert.Throws(typeof(MusicLyricException),
                 () => CheckInputId("https://y.qq.com/n/ryqq/singer/004cyCLc1ByKPx", SearchSourceEnum.QQ_MUSIC,

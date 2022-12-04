@@ -40,6 +40,8 @@
     </ItemGroup>
     <ItemGroup>
       <Compile Include="Api\NetEaseMusicApiV2.cs" />
+      <Compile Include="Api\NetEaseMusicNativeApi.cs" />
+      <Compile Include="Api\QQMusicApiV2.cs" />
       <Compile Include="Api\QQMusicNativeApi.cs" />
       <Compile Include="Bean\CsvBeanTest.cs" />
       <Compile Include="Bean\LyricTimestampTest.cs" />
@@ -47,6 +49,7 @@
       <Compile Include="Utils\GlobalUtilsTest.cs" />
       <Compile Include="Utils\LyricUtilsTest.cs" />
       <Compile Include="Utils\SrtUtilsTest.cs" />
+      <Compile Include="Utils\XmlUtils.cs" />
     </ItemGroup>
     <ItemGroup>
       <ProjectReference Include="..\MusicLyricApp\MusicLyricApp.csproj">

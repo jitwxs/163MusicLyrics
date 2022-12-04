@@ -20,18 +20,24 @@ namespace MusicLyricApp.Utils
         /// <returns></returns>
         public static async Task<string> GetOutputContent(LyricVo lyricVo, SearchInfo searchInfo)
         {
-            var dotType = searchInfo.SettingBean.Param.DotType;
+            var param = searchInfo.SettingBean.Param;
+            
+            var dotType = param.DotType;
+            var timestampFormat = param.OutputFileFormat == OutputFormatEnum.SRT ? param.SrtTimestampFormat : param.LrcTimestampFormat;
             
             var voList = await FormatLyric(lyricVo.Lyric, lyricVo.TranslateLyric, searchInfo);
 
-            if (searchInfo.SettingBean.Param.OutputFileFormat == OutputFormatEnum.SRT)
+            if (searchInfo.SettingBean.Config.EnableVerbatimLyric)
             {
-                var timestampFormat = searchInfo.SettingBean.Param.SrtTimestampFormat;
+                voList = FormatSubLineLyric(voList, timestampFormat, dotType);
+            }
+            
+            if (param.OutputFileFormat == OutputFormatEnum.SRT)
+            {
                 return SrtUtils.LrcToSrt(voList, timestampFormat, dotType, lyricVo.Duration);
             }
             else
             {
-                var timestampFormat = searchInfo.SettingBean.Param.LrcTimestampFormat;
                 return string.Join(Environment.NewLine,  from o in voList select o.Print(timestampFormat, dotType));
             }
         }
@@ -118,6 +124,26 @@ namespace MusicLyricApp.Utils
         }
 
         /// <summary>
+        /// need try split sub lyricLineVO, resolve verbatim lyric mode
+        /// </summary>
+        /// <returns></returns>
+        private static List<LyricLineVo> FormatSubLineLyric(List<LyricLineVo> vos, string timestampFormat, DotTypeEnum dotType)
+        {
+            var res = new List<LyricLineVo>();
+            foreach (var vo in vos)
+            {
+                var sb = new StringBuilder();
+                foreach (var subVo in LyricLineVo.Split(vo))
+                {
+                    sb.Append(subVo.Timestamp.PrintTimestamp(timestampFormat, dotType) + subVo.Content);
+                }
+                
+                res.Add(new LyricLineVo(sb.ToString()));
+            }
+            return res;
+        }
+        
+        /// <summary>
         /// 歌词格式化
         /// </summary>
         /// <param name="originLrc">原始的歌词内容</param>
@@ -151,7 +177,7 @@ namespace MusicLyricApp.Utils
             
             if (romajiConfig.Enable)
             {
-                translateLyrics = await RomajiUtils.ToRomaji(originLyrics, translateLyrics, romajiConfig, searchInfo.SettingBean);
+                translateLyrics = await RomajiUtils.ToRomaji(originLyrics, translateLyrics, romajiConfig);
             }
 
             /*

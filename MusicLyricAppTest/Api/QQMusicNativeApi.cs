@@ -1,4 +1,5 @@
 ﻿using System;
+using MusicLyricApp.Bean;
 using NUnit.Framework;
 
 namespace MusicLyricAppTest.Api
@@ -28,7 +29,8 @@ namespace MusicLyricAppTest.Api
         [Test]
         public void GetAlbum()
         {
-            _api.GetAlbum("000IdMCY2pTAiz");
+            var resp = _api.GetAlbum("000IdMCY2pTAiz");
+            Console.WriteLine(resp);
         }
         
         [Test]
@@ -36,6 +38,22 @@ namespace MusicLyricAppTest.Api
         {
             var link = _api.GetSongLink("0028gDJg3aMcO1");
             Console.WriteLine(link);
+        }
+        
+        [Test]
+        public void TestGetPlaylist()
+        {
+            var res = _api.GetPlaylist("8694686726");
+            
+            Console.WriteLine(res);
+        }
+
+
+        [Test]
+        public void TestSearch()
+        {
+            var res = _api.Search("慰问", SearchTypeEnum.PLAYLIST_ID);
+            Console.WriteLine(res);
         }
     }
 }

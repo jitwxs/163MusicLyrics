@@ -41,7 +41,8 @@ namespace MusicLyricApp.Bean
     public enum SearchTypeEnum
     {
         [Description("单曲")] SONG_ID = 0,
-        [Description("专辑")] ALBUM_ID = 1
+        [Description("专辑")] ALBUM_ID = 1,
+        [Description("歌单")] PLAYLIST_ID = 2,
     }
 
     // 强制两位类型
@@ -99,11 +100,13 @@ namespace MusicLyricApp.Bean
     public static class ErrorMsg
     {
         public const string SUCCESS = "成功";
-        public const string SEARCH_RESULT_STAGE = "查询成功，结果已暂存";
+        public const string SEARCH_RESULT_EMPTY = "查询结果为空，请修改查询条件";
         public const string MUST_SEARCH_BEFORE_SAVE = "您必须先搜索，才能保存内容";
         public const string MUST_SEARCH_BEFORE_GET_SONG_URL = "您必须先搜索，才能获取歌曲链接";
         public const string MUST_SEARCH_BEFORE_GET_SONG_PIC = "您必须先搜索，才能获取歌曲封面";
+        public const string INPUT_CONENT_EMPLT = "输入内容不能为空";
         public const string INPUT_ID_ILLEGAL = "您输入的ID不合法";
+        public const string PLAYLIST_NOT_EXIST = "歌单信息暂未被收录或查询失败";
         public const string ALBUM_NOT_EXIST = "专辑信息暂未被收录或查询失败";
         public const string SONG_NOT_EXIST = "歌曲信息暂未被收录或查询失败";
         public const string LRC_NOT_EXIST = "歌词信息暂未被收录或查询失败";
@@ -142,14 +145,149 @@ namespace MusicLyricApp.Bean
     }
 
     /// <summary>
-    /// 歌曲信息
+    /// 搜索结果
     /// </summary>
-    public class SongVo
+    public class SearchResultVo
+    {
+        public SearchTypeEnum SearchType { get; set; }
+
+        public readonly List<SongSearchResultVo> SongVos = new List<SongSearchResultVo>();
+
+        public readonly List<AlbumSearchResultVo> AlbumVos = new List<AlbumSearchResultVo>();
+        
+        public readonly List<PlaylistResultVo> PlaylistVos = new List<PlaylistResultVo>();
+
+        public bool IsEmpty()
+        {
+            return SongVos.Count == 0 && AlbumVos.Count == 0 && PlaylistVos.Count == 0;
+        }
+        
+        public class SongSearchResultVo
+        {
+            public string DisplayId { get; set; }
+            
+            public string Title { get; set; }
+
+            public string[] AuthorName { get; set; }
+            
+            public string AlbumName { get; set; }
+            
+            /// <summary>
+            /// 歌曲时长 ms
+            /// </summary>
+            public long Duration { get; set; }
+        }
+        
+        public class AlbumSearchResultVo
+        {
+            public string DisplayId { get; set; }
+            
+            public string AlbumName { get; set; }
+
+            public string[] AuthorName { get; set; }
+            
+            /// <summary>
+            /// 歌曲数量
+            /// </summary>
+            public long SongCount { get; set; }
+            
+            /// <summary>
+            /// 发行时间
+            /// </summary>
+            public string PublishTime { get; set; }
+        }
+        
+        public class PlaylistResultVo
+        {
+            public string DisplayId { get; set; }
+            
+            public string PlaylistName { get; set; }
+            
+            public string AuthorName { get; set; }
+            
+            /// <summary>
+            /// 歌单描述
+            /// </summary>
+            public string Description { get; set; }
+            
+            /// <summary>
+            /// 播放数量
+            /// </summary>
+            public long PlayCount { get; set; }
+            
+            /// <summary>
+            /// 歌曲数量
+            /// </summary>
+            public long SongCount { get; set; }
+        }
+    }
+
+    /// <summary>
+    /// 歌单信息
+    /// </summary>
+    public class PlaylistVo
+    {
+        /// <summary>
+        /// 歌单名
+        /// </summary>
+        public string Name { get; set; }
+        
+        /// <summary>
+        /// 作者名
+        /// </summary>
+        public string AuthorName { get; set; }
+        
+        /// <summary>
+        /// 歌单描述
+        /// </summary>
+        public string Description { get; set; }
+        
+        /// <summary>
+        /// 歌曲信息
+        /// </summary>
+        public SimpleSongVo[] SimpleSongVos { get; set; } 
+    }
+    
+    /// <summary>
+    /// 专辑信息
+    /// </summary>
+    public class AlbumVo
+    {
+        /// <summary>
+        /// 专辑名
+        /// </summary>
+        public string Name { get; set; }
+        
+        /// <summary>
+        /// 发行公司
+        /// </summary>
+        public string Company { get; set; }
+        
+        /// <summary>
+        /// 专辑描述
+        /// </summary>
+        public string Desc { get; set; }
+
+        /// <summary>
+        /// 歌曲信息
+        /// </summary>
+        public SimpleSongVo[] SimpleSongVos { get; set; } 
+        
+        /// <summary>
+        /// 发布时间，eg: 2005-07-08
+        /// </summary>
+        public string TimePublic { get; set; } 
+    }
+
+    /// <summary>
+    /// 歌曲简略信息
+    /// </summary>
+    public class SimpleSongVo
     {
         /// <summary>
         /// 内部 ID
         /// </summary>
-        public long Id { get; set; }
+        public string Id { get; set; }
         
         /// <summary>
         /// 前端展示的 ID
@@ -160,21 +298,22 @@ namespace MusicLyricApp.Bean
         /// 歌曲名
         /// </summary>
         public string Name { get; set; }
-
+        
         /// <summary>
         /// 歌手名
         /// </summary>
         public string Singer { get; set; }
+    }
 
+    /// <summary>
+    /// 歌曲信息
+    /// </summary>
+    public class SongVo : SimpleSongVo
+    {
         /// <summary>
         /// 所属专辑名
         /// </summary>
         public string Album { get; set; }
-
-        /// <summary>
-        /// 歌曲链接 Url
-        /// </summary>
-        public string Links { get; set; }
         
         /// <summary>
         /// 歌曲封面 Url
@@ -387,7 +526,7 @@ namespace MusicLyricApp.Bean
     }
 
     /// <summary>
-    /// 当行歌词信息
+    /// 单行歌词信息
     /// </summary>
     public class LyricLineVo : IComparable
     {
@@ -533,14 +672,21 @@ namespace MusicLyricApp.Bean
 
     public class ResultVo<T>
     {
-        public T Data { get; }
+        public T Data { get; set; }
 
-        public string ErrorMsg { get; }
+        public string ErrorMsg { get; set; }
 
-        public ResultVo(T data, string errorMsg)
+        private ResultVo()
         {
-            Data = data;
-            ErrorMsg = errorMsg;
+        }
+
+        public static ResultVo<T> Failure(string errorMsg)
+        {
+            return new ResultVo<T>
+            {
+                Data = default,
+                ErrorMsg = errorMsg
+            };
         }
         
         public ResultVo(T data)
@@ -552,6 +698,16 @@ namespace MusicLyricApp.Bean
         public bool IsSuccess()
         {
             return ErrorMsg == Bean.ErrorMsg.SUCCESS;
+        }
+
+        public ResultVo<T> Assert()
+        {
+            if (!IsSuccess())
+            {
+                throw new MusicLyricException(ErrorMsg);
+            }
+
+            return this;
         }
     }
     

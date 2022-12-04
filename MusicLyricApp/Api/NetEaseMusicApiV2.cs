@@ -1,8 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using MusicLyricApp.Bean;
-using MusicLyricApp.Exception;
+using MusicLyricApp.Cache;
 using MusicLyricApp.Utils;
 using NLog;
 
@@ -19,97 +18,136 @@ namespace MusicLyricApp.Api
             _api = new NetEaseMusicNativeApi();
         }
 
-        protected override IEnumerable<string> GetSongIdsFromAlbum0(string albumId)
+        protected override SearchSourceEnum Source0()
         {
-            var resp = _api.GetAlbum(albumId);
+            return SearchSourceEnum.NET_EASE_MUSIC;
+        }
+
+        protected override ResultVo<PlaylistVo> GetPlaylistVo0(string playlistId)
+        {
+            var resp = _api.GetPlaylist(playlistId);
 
             if (resp.Code == 200)
             {
-                return resp.Songs.Select(song => song.Id);
+                // cache song
+                GlobalCache.DoCache(CacheType.NET_EASE_SONG, value => value.Id, resp.Playlist.Tracks);
+
+                return new ResultVo<PlaylistVo>(resp.Convert());
             }
+            else
+            {
+                return ResultVo<PlaylistVo>.Failure(ErrorMsg.PLAYLIST_NOT_EXIST);
+            }
+        }
 
-            _logger.Error("NetEaseMusicApiV2 GetSongIdsFromAlbum failed, resp: {Resp}", resp.ToJson());
-
-            throw new MusicLyricException(ErrorMsg.ALBUM_NOT_EXIST);
+        protected override ResultVo<AlbumVo> GetAlbumVo0(string albumId)
+        {
+            var resp = _api.GetAlbum(albumId);
+            if (resp.Code == 200)
+            {
+                // cache song
+                GlobalCache.DoCache(CacheType.NET_EASE_SONG, value => value.Id, resp.Songs);
+                return new ResultVo<AlbumVo>(resp.Convert());
+            }
+            else
+            {
+                return ResultVo<AlbumVo>.Failure(ErrorMsg.ALBUM_NOT_EXIST);
+            }
         }
 
         protected override Dictionary<string, ResultVo<SongVo>> GetSongVo0(string[] songIds)
         {
-            var datumResp = _api.GetDatum(songIds);
-            var songResp = _api.GetSongs(songIds);
+            // 从缓存中查询 Song，并将非命中的数据查询后加入缓存
+            var cacheSongDict = GlobalCache
+                .BatchQuery<string, Song>(CacheType.NET_EASE_SONG, songIds, out var notHitKeys)
+                .ToDictionary(pair => pair.Key, pair => pair.Value);
+
+            foreach (var pair in _api.GetSongs(notHitKeys))
+            {
+                cacheSongDict.Add(pair.Key, pair.Value);
+                // add cache
+                GlobalCache.DoCache(CacheType.NET_EASE_SONG, pair.Key, pair.Value);
+            }
+
             var result = new Dictionary<string, ResultVo<SongVo>>();
 
-            foreach (var pair in datumResp)
+            foreach (var songId in songIds)
             {
-                var songId = pair.Key;
+                cacheSongDict.TryGetValue(songId, out var song);
 
-                if (songResp.TryGetValue(songId, out var song))
+                if (song != null)
                 {
-                    var datum = pair.Value;
-                    
                     result[songId] = new ResultVo<SongVo>(new SongVo
                     {
-                        Id = long.Parse(song.Id),
+                        Id = song.Id,
                         DisplayId = songId,
-                        Links = datum.Url,
                         Pics = song.Al.PicUrl,
                         Name = song.Name,
-                        Singer = ContractSinger(song.Ar),
+                        Singer = string.Join(",", song.Ar.Select(e => e.Name)),
                         Album = song.Al.Name,
                         Duration = song.Dt
                     });
                 }
                 else
                 {
-                    result[songId] = new ResultVo<SongVo>(null, ErrorMsg.SONG_NOT_EXIST);
+                    result[songId] = ResultVo<SongVo>.Failure(ErrorMsg.SONG_NOT_EXIST);
                 }
             }
 
             return result;
         }
 
-        protected override LyricVo GetLyricVo0(SongVo songVo, bool isVerbatim)
+        protected override ResultVo<string> GetSongLink0(string songId)
+        {
+            var resp = _api.GetDatum(new[] { songId });
+
+            resp.TryGetValue(songId, out var datum);
+
+            if (datum == null)
+            {
+                return ResultVo<string>.Failure(ErrorMsg.SONG_URL_GET_SUCCESS);
+            }
+            else
+            {
+                return new ResultVo<string>(datum.Url);
+            }
+        }
+
+        protected override ResultVo<LyricVo> GetLyricVo0(string id, string displayId, bool isVerbatim)
         {
             // todo isVerbatim just not support
-            var resp = _api.GetLyric(songVo.DisplayId);
+            var resp = _api.GetLyric(displayId);
 
-            if (resp.Code == 200)
+            if (resp.Code != 200)
             {
-                var lyricVo = new LyricVo();
-                if (resp.Lrc != null)
-                {
-                    lyricVo.SetLyric(resp.Lrc.Lyric);
-                }
-                if (resp.Tlyric != null)
-                {
-                    lyricVo.SetTranslateLyric(resp.Tlyric.Lyric);
-                }
-
-                return lyricVo;
+                return ResultVo<LyricVo>.Failure(ErrorMsg.LRC_NOT_EXIST);
             }
 
-            _logger.Error("NetEaseMusicApiV2 GetLyricVo failed, resp: {Resp}", resp.ToJson());
+            var lyricVo = new LyricVo();
+            if (resp.Lrc != null)
+            {
+                lyricVo.SetLyric(resp.Lrc.Lyric);
+            }
 
-            throw new MusicLyricException(ErrorMsg.LRC_NOT_EXIST);
+            if (resp.Tlyric != null)
+            {
+                lyricVo.SetTranslateLyric(resp.Tlyric.Lyric);
+            }
+
+            return new ResultVo<LyricVo>(lyricVo);
         }
-        
-        /// <summary>
-        /// 拼接歌手名
-        /// </summary>
-        public static string ContractSinger(List<Ar> arList)
+
+        protected override ResultVo<SearchResultVo> Search0(string keyword, SearchTypeEnum searchType)
         {
-            if (arList == null || !arList.Any())
+            var resp = _api.Search(keyword, searchType);
+
+            if (resp == null || resp.Code != 200)
             {
-                return string.Empty;
+                _logger.Error("NetEaseMusicApiV2 Search0 failed, resp: {Resp}", resp.ToJson());
+                return ResultVo<SearchResultVo>.Failure(ErrorMsg.NETWORK_ERROR);
             }
 
-            var sb = new StringBuilder();
-            foreach (var ar in arList)
-            {
-                sb.Append(ar.Name).Append(',');
-            }
-
-            return sb.Remove(sb.Length - 1, 1).ToString();
+            return new ResultVo<SearchResultVo>(resp.Result.Convert(searchType));
         }
     }
 }

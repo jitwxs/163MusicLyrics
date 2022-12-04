@@ -13,11 +13,26 @@ namespace MusicLyricApp.Utils
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
+        public static Dictionary<string, string> BatchGetSongKey(IEnumerable<string> displayId, bool verbatimLyric)
+        {
+            return displayId.ToDictionary(id => id, id => GetSongKey(id, verbatimLyric));
+        }
+        
         public static string GetSongKey(string displayId, bool verbatimLyric)
         {
             return displayId + "_" + verbatimLyric;
         }
-        
+
+        public static string FormatDate(long millisecond)
+        {
+            var date = (new DateTime(1970, 1, 1))
+                .AddMilliseconds(double.Parse(millisecond.ToString()))
+                .AddHours(8) // +8 时区
+                ;
+            
+            return date.ToString("yyyy-MM-dd HH:mm:ss");
+        }
+
         /// <summary>
         /// 输入参数校验
         /// </summary>
@@ -33,75 +48,75 @@ namespace MusicLyricApp.Utils
                 throw new MusicLyricException(ErrorMsg.INPUT_ID_ILLEGAL);
             }
 
-            if (searchSource == SearchSourceEnum.NET_EASE_MUSIC)
+            // 网易云，纯数字，直接通过
+            if (searchSource == SearchSourceEnum.NET_EASE_MUSIC && CheckNum(input))
             {
-                // 输入是数字，直接返回
-                if (CheckNum(input))
-                {
-                    return input;
-                }
-                
-                // ID 提取
-                var keyword = searchType == SearchTypeEnum.SONG_ID ? "song?id=" : "album?id=";
-                var index = input.IndexOf(keyword, StringComparison.Ordinal);
-                if (index == -1)
-                {
-                    throw new MusicLyricException(ErrorMsg.INPUT_ID_ILLEGAL);
-                }
-                
-                var sb = new StringBuilder();
-                foreach (var c in input.Substring(index + keyword.Length).ToCharArray())
-                {
-                    if (char.IsNumber(c))
-                    {
-                        sb.Append(c);
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
-
-                if (sb.Length == 0 || !CheckNum(sb.ToString())) 
-                {
-                    throw new MusicLyricException(ErrorMsg.INPUT_ID_ILLEGAL);
-                }
-
-                return sb.ToString();
+                return input;
             }
 
-            if (searchSource == SearchSourceEnum.QQ_MUSIC)
+            // QQ 音乐，数字+字母，直接通过
+            if (searchSource == SearchSourceEnum.QQ_MUSIC && Regex.IsMatch(input, @"^[a-zA-Z0-9]*$"))
             {
-                if (input.Contains("/"))
-                {
-                    // ID 提取
-                    var keyword = searchType == SearchTypeEnum.SONG_ID ? "songDetail/" : "albumDetail/";
-                    var index = input.IndexOf(keyword, StringComparison.Ordinal);
-                    if (index != -1)
-                    {
-                        var sb = new StringBuilder();
-                        foreach (var c in input.Substring(index + keyword.Length).ToCharArray())
-                        {
-                            if (c == '/')
-                            {
-                                break;
-                            }
-                            sb.Append(c);
-                        }
-
-                        if (sb.Length > 0)
-                        {
-                            return sb.ToString();
-                        }
-                    }
-                }
-                else
-                {
-                    return input;
-                }
+                return input;
             }
 
-            throw new MusicLyricException(ErrorMsg.INPUT_ID_ILLEGAL);
+            // URL 截取
+            string urlKeyword;
+            switch (searchSource)
+            {
+                case SearchSourceEnum.NET_EASE_MUSIC:
+                    switch (searchType)
+                    {
+                        case SearchTypeEnum.SONG_ID:
+                            urlKeyword = "song?id=";
+                            break;
+                        case SearchTypeEnum.ALBUM_ID:
+                            urlKeyword = "album?id=";
+                            break;
+                        case SearchTypeEnum.PLAYLIST_ID:
+                            urlKeyword = "playlist?id=";
+                            break;
+                        default:
+                            throw new MusicLyricException(ErrorMsg.FUNCTION_NOT_SUPPORT);
+                    }
+                    break;
+                case SearchSourceEnum.QQ_MUSIC:
+                    switch (searchType)
+                    {
+                        case SearchTypeEnum.SONG_ID:
+                            urlKeyword = "songDetail/";
+                            break;
+                        case SearchTypeEnum.ALBUM_ID:
+                            urlKeyword = "albumDetail/";
+                            break;
+                        case SearchTypeEnum.PLAYLIST_ID:
+                            urlKeyword = "playlist/";
+                            break;
+                        default:
+                            throw new MusicLyricException(ErrorMsg.FUNCTION_NOT_SUPPORT);
+                    }
+                    break;
+                default:
+                    throw new MusicLyricException(ErrorMsg.FUNCTION_NOT_SUPPORT);
+            }
+            
+            var index = input.IndexOf(urlKeyword, StringComparison.Ordinal);
+            if (index == -1)
+            {
+                throw new MusicLyricException(ErrorMsg.INPUT_ID_ILLEGAL);
+            }
+            
+            var sb = new StringBuilder();
+            foreach (var c in input.Substring(index + urlKeyword.Length).ToCharArray())
+            {
+                if (c == '/')
+                {
+                    break;
+                }
+                sb.Append(c);
+            }
+
+            return sb.ToString();
         }
 
         /**

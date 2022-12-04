@@ -1,12 +1,11 @@
 ﻿using System;
-using System.Windows.Forms;
 using Markdig;
 using MusicLyricApp.Bean;
 using NLog;
 
 namespace MusicLyricApp
 {
-    public partial class UpgradeForm : Form
+    public partial class UpgradeForm : MusicLyricForm
     {
         private readonly GitHubInfo _gitHubInfo;
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();

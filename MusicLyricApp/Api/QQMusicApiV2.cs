@@ -1,8 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using MusicLyricApp.Bean;
-using MusicLyricApp.Exception;
+using MusicLyricApp.Cache;
 
 namespace MusicLyricApp.Api
 {
@@ -15,16 +14,39 @@ namespace MusicLyricApp.Api
             _api = new QQMusicNativeApi();
         }
 
-        protected override IEnumerable<string> GetSongIdsFromAlbum0(string albumId)
+        protected override SearchSourceEnum Source0()
         {
-            var resp = _api.GetAlbum(albumId);
+            return SearchSourceEnum.QQ_MUSIC;
+        }
 
+        protected override ResultVo<PlaylistVo> GetPlaylistVo0(string playlistId)
+        {
+            var resp = _api.GetPlaylist(playlistId);
             if (resp.Code == 0)
             {
-                return resp.Data.List.Select(albumSong => albumSong.Songmid);
+                // cache song
+                GlobalCache.DoCache(CacheType.QQ_MUSIC_SONG, value => value.Id, resp.Cdlist[0].SongList);
+                GlobalCache.DoCache(CacheType.QQ_MUSIC_SONG, value => value.Mid, resp.Cdlist[0].SongList);
+                
+                return new ResultVo<PlaylistVo>(resp.Convert());
             }
+            else
+            {
+                return ResultVo<PlaylistVo>.Failure(ErrorMsg.PLAYLIST_NOT_EXIST);
+            }
+        }
 
-            throw new MusicLyricException(ErrorMsg.ALBUM_NOT_EXIST);
+        protected override ResultVo<AlbumVo> GetAlbumVo0(string albumId)
+        {
+            var resp = _api.GetAlbum(albumId);
+            if (resp.Code == 0)
+            {
+                return new ResultVo<AlbumVo>(resp.Convert());
+            }
+            else
+            {
+                return ResultVo<AlbumVo>.Failure(ErrorMsg.ALBUM_NOT_EXIST);
+            }
         }
 
         protected override Dictionary<string, ResultVo<SongVo>> GetSongVo0(string[] songIds)
@@ -33,73 +55,66 @@ namespace MusicLyricApp.Api
             
             foreach (var songId in songIds)
             {
-                var resp = _api.GetSong(songId);
-
-                if (resp.Code != 0 || resp.Data.Length == 0)
+                ResultVo<QQMusicBean.Song> SongCacheFunc()
                 {
-                    result[songId] = new ResultVo<SongVo>(null, ErrorMsg.SONG_NOT_EXIST);
-                    continue;
+                    var resp = _api.GetSong(songId);
+                    return resp.IsIllegal() ? ResultVo<QQMusicBean.Song>.Failure(ErrorMsg.SONG_NOT_EXIST) : new ResultVo<QQMusicBean.Song>(resp.Data[0]);
                 }
-
-                var song = resp.Data[0];
-
-                var links = _api.GetSongLink(songId);
-
-                result[songId] = new ResultVo<SongVo>(new SongVo
+                
+                var songRes = GlobalCache.Process(CacheType.QQ_MUSIC_SONG, songId, SongCacheFunc);
+                if (songRes.IsSuccess())
                 {
-                    Id = song.Id,
-                    DisplayId = song.Mid,
-                    Links = links,
-                    Pics = BuildPicUrl(song.Album),
-                    Name = song.Name,
-                    Singer = ContractSinger(song.Singer),
-                    Album = song.Album.Name,
-                    Duration = song.Interval * 1000
-                });
+                    result[songId] = new ResultVo<SongVo>(new SongVo
+                    {
+                        Id = songRes.Data.Id,
+                        DisplayId = songRes.Data.Mid,
+                        Pics = $"https://y.qq.com/music/photo_new/T002R800x800M000{songRes.Data.Album.Pmid}.jpg",
+                        Name = songRes.Data.Name,
+                        Singer = string.Join(",", songRes.Data.Singer.Select(e => e.Name)),
+                        Album = songRes.Data.Album.Name,
+                        Duration = songRes.Data.Interval * 1000
+                    });
+                }
+                else
+                {
+                    result[songId] = ResultVo<SongVo>.Failure(songRes.ErrorMsg);
+                }
             }
             
             return result;
         }
 
-        protected override LyricVo GetLyricVo0(SongVo songVo, bool isVerbatim)
+        protected override ResultVo<string> GetSongLink0(string songId)
         {
-            var resp = isVerbatim ? _api.GetVerbatimLyric(songVo.Id) : _api.GetLyric(songVo.DisplayId);
+            return _api.GetSongLink(songId);
+        }
+
+        protected override ResultVo<LyricVo> GetLyricVo0(string id, string displayId, bool isVerbatim)
+        {
+            var resp = isVerbatim ? _api.GetVerbatimLyric(id) : _api.GetLyric(displayId);
 
             if (resp.Code != 0)
             {
-                throw new MusicLyricException(ErrorMsg.LRC_NOT_EXIST);
+                return ResultVo<LyricVo>.Failure(ErrorMsg.LRC_NOT_EXIST);
             }
             
             var lyricVo = new LyricVo();
-            
             lyricVo.SetLyric(resp.Lyric);
             lyricVo.SetTranslateLyric(resp.Trans);
            
-            return lyricVo;
-        }
-        
-        /// <summary>
-        /// 拼接歌手名
-        /// </summary>
-        private static string ContractSinger(QQMusicBean.Singer[] singers)
-        {
-            if (singers == null || !singers.Any())
-            {
-                return string.Empty;
-            }
-
-            var sb = new StringBuilder();
-            foreach (var one in singers)
-            {
-                sb.Append(one.Name).Append(',');
-            }
-
-            return sb.Remove(sb.Length - 1, 1).ToString();
+            return new ResultVo<LyricVo>(lyricVo);
         }
 
-        private static string BuildPicUrl(QQMusicBean.Album album)
+        protected override ResultVo<SearchResultVo> Search0(string keyword, SearchTypeEnum searchType)
         {
-            return $"https://y.qq.com/music/photo_new/T002R800x800M000{album.Pmid}.jpg";
+            var resp = _api.Search(keyword, searchType);
+
+            if (resp.Code == 0 && resp.Req_1.Code == 0 && resp.Req_1.Data.Code == 0)
+            {
+                return new ResultVo<SearchResultVo>(resp.Req_1.Data.Body.Convert(searchType));
+            }
+            
+            return ResultVo<SearchResultVo>.Failure(ErrorMsg.NETWORK_ERROR);
         }
     }
 }

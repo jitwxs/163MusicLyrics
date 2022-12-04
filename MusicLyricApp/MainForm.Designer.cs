@@ -67,10 +67,12 @@ namespace MusicLyricApp
             this.Issue_MItem = new System.Windows.Forms.ToolStripMenuItem();
             this.CheckVersion_MItem = new System.Windows.Forms.ToolStripMenuItem();
             this.Setting_MItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.ShortCut_MItem = new System.Windows.Forms.ToolStripMenuItem();
             this.OutputFormat_Label = new System.Windows.Forms.Label();
             this.OutputFormat_CombBox = new System.Windows.Forms.ComboBox();
             this.SearchSource_ComboBox = new System.Windows.Forms.ComboBox();
             this.SongPic_Btn = new System.Windows.Forms.Button();
+            this.Blur_Search_Btn = new System.Windows.Forms.Button();
             this.Top_MenuStrip.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -83,7 +85,6 @@ namespace MusicLyricApp
             this.Console_TextBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.Console_TextBox.Size = new System.Drawing.Size(472, 203);
             this.Console_TextBox.TabIndex = 3;
-            this.Console_TextBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.Console_TextBox_KeyDown);
             // 
             // Singer_TextBox
             // 
@@ -113,11 +114,11 @@ namespace MusicLyricApp
             // 
             // Search_Btn
             // 
-            this.Search_Btn.Location = new System.Drawing.Point(387, 34);
+            this.Search_Btn.Location = new System.Drawing.Point(390, 81);
             this.Search_Btn.Name = "Search_Btn";
-            this.Search_Btn.Size = new System.Drawing.Size(93, 67);
+            this.Search_Btn.Size = new System.Drawing.Size(90, 30);
             this.Search_Btn.TabIndex = 2;
-            this.Search_Btn.Text = "搜索 Enter";
+            this.Search_Btn.Text = "精确搜索";
             this.Search_Btn.UseVisualStyleBackColor = true;
             this.Search_Btn.Click += new System.EventHandler(this.Search_Btn_Click);
             // 
@@ -153,7 +154,7 @@ namespace MusicLyricApp
             // 
             // Search_Text
             // 
-            this.Search_Text.Location = new System.Drawing.Point(89, 80);
+            this.Search_Text.Location = new System.Drawing.Point(89, 85);
             this.Search_Text.Name = "Search_Text";
             this.Search_Text.Size = new System.Drawing.Size(196, 21);
             this.Search_Text.TabIndex = 1;
@@ -232,7 +233,7 @@ namespace MusicLyricApp
             // 
             // SongLink_Btn
             // 
-            this.SongLink_Btn.Location = new System.Drawing.Point(299, 78);
+            this.SongLink_Btn.Location = new System.Drawing.Point(299, 85);
             this.SongLink_Btn.Name = "SongLink_Btn";
             this.SongLink_Btn.Size = new System.Drawing.Size(38, 22);
             this.SongLink_Btn.TabIndex = 21;
@@ -244,7 +245,7 @@ namespace MusicLyricApp
             // 
             this.SearchType_ComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.SearchType_ComboBox.FormattingEnabled = true;
-            this.SearchType_ComboBox.Location = new System.Drawing.Point(11, 81);
+            this.SearchType_ComboBox.Location = new System.Drawing.Point(11, 85);
             this.SearchType_ComboBox.Name = "SearchType_ComboBox";
             this.SearchType_ComboBox.Size = new System.Drawing.Size(62, 20);
             this.SearchType_ComboBox.TabIndex = 22;
@@ -252,7 +253,7 @@ namespace MusicLyricApp
             // 
             // Top_MenuStrip
             // 
-            this.Top_MenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { this.Home_MItem, this.Wiki_MItem, this.Issue_MItem, this.CheckVersion_MItem, this.Setting_MItem });
+            this.Top_MenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { this.Home_MItem, this.Wiki_MItem, this.Issue_MItem, this.CheckVersion_MItem, this.ShortCut_MItem, this.Setting_MItem });
             this.Top_MenuStrip.Location = new System.Drawing.Point(0, 0);
             this.Top_MenuStrip.Name = "Top_MenuStrip";
             this.Top_MenuStrip.Size = new System.Drawing.Size(492, 25);
@@ -294,6 +295,13 @@ namespace MusicLyricApp
             this.Setting_MItem.Text = "更多设置";
             this.Setting_MItem.Click += new System.EventHandler(this.Top_MItem_Click);
             // 
+            // ShortCut_MItem
+            // 
+            this.ShortCut_MItem.Name = "ShortCut_MItem";
+            this.ShortCut_MItem.Size = new System.Drawing.Size(56, 21);
+            this.ShortCut_MItem.Text = "快捷键";
+            this.ShortCut_MItem.Click += new System.EventHandler(this.Top_MItem_Click);
+            // 
             // OutputFormat_Label
             // 
             this.OutputFormat_Label.AutoSize = true;
@@ -325,7 +333,7 @@ namespace MusicLyricApp
             // 
             // SongPic_Btn
             // 
-            this.SongPic_Btn.Location = new System.Drawing.Point(343, 77);
+            this.SongPic_Btn.Location = new System.Drawing.Point(345, 85);
             this.SongPic_Btn.Name = "SongPic_Btn";
             this.SongPic_Btn.Size = new System.Drawing.Size(39, 23);
             this.SongPic_Btn.TabIndex = 31;
@@ -333,12 +341,23 @@ namespace MusicLyricApp
             this.SongPic_Btn.UseVisualStyleBackColor = true;
             this.SongPic_Btn.Click += new System.EventHandler(this.SongPic_Btn_Click);
             // 
+            // Blur_Search_Btn
+            // 
+            this.Blur_Search_Btn.Location = new System.Drawing.Point(390, 40);
+            this.Blur_Search_Btn.Name = "Blur_Search_Btn";
+            this.Blur_Search_Btn.Size = new System.Drawing.Size(90, 30);
+            this.Blur_Search_Btn.TabIndex = 32;
+            this.Blur_Search_Btn.Text = "模糊搜索";
+            this.Blur_Search_Btn.UseVisualStyleBackColor = true;
+            this.Blur_Search_Btn.Click += new System.EventHandler(this.Blur_Search_Btn_Click);
+            // 
             // MainForm
             // 
             this.AcceptButton = this.Search_Btn;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(492, 475);
+            this.Controls.Add(this.Blur_Search_Btn);
             this.Controls.Add(this.SongPic_Btn);
             this.Controls.Add(this.SearchSource_ComboBox);
             this.Controls.Add(this.OutputFormat_CombBox);
@@ -365,17 +384,23 @@ namespace MusicLyricApp
             this.Controls.Add(this.Top_MenuStrip);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.KeyPreview = true;
             this.MainMenuStrip = this.Top_MenuStrip;
             this.MaximizeBox = false;
             this.Name = "MainForm";
             this.Text = "云音乐歌词提取 " + Constants.Version;
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
+            this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.MainForm_KeyDown);
             this.MouseEnter += new System.EventHandler(this.MainForm_MouseEnter);
             this.Top_MenuStrip.ResumeLayout(false);
             this.Top_MenuStrip.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
         }
+
+        private System.Windows.Forms.ToolStripMenuItem ShortCut_MItem;
+
+        private System.Windows.Forms.Button Blur_Search_Btn;
 
         private System.Windows.Forms.Button SongPic_Btn;
 
@@ -393,7 +418,7 @@ namespace MusicLyricApp
         private System.Windows.Forms.Button Save_Btn;
         private System.Windows.Forms.ComboBox OutputName_ComboBox;
         private System.Windows.Forms.ComboBox LrcType_ComboBox;
-        private System.Windows.Forms.TextBox Search_Text;
+        public System.Windows.Forms.TextBox Search_Text;
         private System.Windows.Forms.Label OutputName_Label;
         private System.Windows.Forms.Label LrcMergeSeparator_Label;
         private System.Windows.Forms.TextBox LrcMergeSeparator_TextBox;

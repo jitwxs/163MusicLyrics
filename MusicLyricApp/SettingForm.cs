@@ -6,7 +6,7 @@ using MusicLyricApp.Bean;
 
 namespace MusicLyricApp
 {
-    public partial class SettingForm : Form
+    public partial class SettingForm : MusicLyricForm
     {
         private readonly SettingBean _settingBean;
 
