@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using MusicLyricApp.Bean;
 using MusicLyricApp.Cache;
 using MusicLyricApp.Exception;
@@ -70,9 +69,9 @@ namespace MusicLyricApp.Api
                     {
                         Id = songRes.Data.Id,
                         DisplayId = songRes.Data.Mid,
-                        Pics = BuildPicUrl(songRes.Data.Album),
+                        Pics = $"https://y.qq.com/music/photo_new/T002R800x800M000{songRes.Data.Album.Pmid}.jpg",
                         Name = songRes.Data.Name,
-                        Singer = ContractSinger(songRes.Data.Singer),
+                        Singer = string.Join(",", songRes.Data.Singer.Select(e => e.Name)),
                         Album = songRes.Data.Album.Name,
                         Duration = songRes.Data.Interval * 1000
                     });
@@ -111,30 +110,6 @@ namespace MusicLyricApp.Api
         {
             // todo not support
             throw new MusicLyricException(ErrorMsg.FUNCTION_NOT_SUPPORT);
-        }
-
-        /// <summary>
-        /// 拼接歌手名
-        /// </summary>
-        private static string ContractSinger(QQMusicBean.Singer[] singers)
-        {
-            if (singers == null || !singers.Any())
-            {
-                return string.Empty;
-            }
-
-            var sb = new StringBuilder();
-            foreach (var one in singers)
-            {
-                sb.Append(one.Name).Append(',');
-            }
-
-            return sb.Remove(sb.Length - 1, 1).ToString();
-        }
-
-        private static string BuildPicUrl(QQMusicBean.Album album)
-        {
-            return $"https://y.qq.com/music/photo_new/T002R800x800M000{album.Pmid}.jpg";
         }
     }
 }
