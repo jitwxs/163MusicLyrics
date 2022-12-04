@@ -13,11 +13,26 @@ namespace MusicLyricApp.Utils
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
+        public static Dictionary<string, string> BatchGetSongKey(IEnumerable<string> displayId, bool verbatimLyric)
+        {
+            return displayId.ToDictionary(id => id, id => GetSongKey(id, verbatimLyric));
+        }
+        
         public static string GetSongKey(string displayId, bool verbatimLyric)
         {
             return displayId + "_" + verbatimLyric;
         }
-        
+
+        public static string FormatDate(long millisecond)
+        {
+            var date = (new DateTime(1970, 1, 1))
+                .AddMilliseconds(double.Parse(millisecond.ToString()))
+                .AddHours(8) // +8 时区
+                ;
+            
+            return date.ToString("yyyy-MM-dd HH:mm:ss");
+        }
+
         /// <summary>
         /// 输入参数校验
         /// </summary>

@@ -10,6 +10,12 @@ namespace MusicLyricAppTest.Api
         private MusicLyricApp.Api.NetEaseMusicNativeApi _api = new MusicLyricApp.Api.NetEaseMusicNativeApi();
         
         [Test]
+        public void GetAlbum()
+        {
+            _api.GetAlbum("148191532");
+        }
+        
+        [Test]
         public void TestSearch()
         {
             var res = _api.Search("Slow", SearchTypeEnum.SONG_ID);

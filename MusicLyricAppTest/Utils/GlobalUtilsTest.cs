@@ -1,4 +1,5 @@
-﻿using MusicLyricApp.Bean;
+﻿using System;
+using MusicLyricApp.Bean;
 using MusicLyricApp.Exception;
 using NUnit.Framework;
 using static MusicLyricApp.Utils.GlobalUtils;
@@ -8,6 +9,13 @@ namespace MusicLyricAppTest.Utils
     [TestFixture]
     public class GlobalUtilsTest
     {
+        [Test]
+        public void TestFormatDate()
+        {
+            var res = FormatDate(1657900800000);
+            Console.WriteLine(res);
+        }
+        
         [Test]
         public void TestCheckInputIdWithNumber()
         {

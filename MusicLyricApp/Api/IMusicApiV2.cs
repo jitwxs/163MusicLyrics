@@ -8,29 +8,29 @@ namespace MusicLyricApp.Api
         SearchSourceEnum Source();
         
         /// <summary>
-        /// 根据专辑ID获取歌曲ID列表
+        /// 获取专辑信息
         /// </summary>
         /// <param name="albumId">专辑ID</param>
-        /// <returns>歌曲ID列表</returns>
-        IEnumerable<string> GetSongIdsFromAlbum(string albumId);
+        ResultVo<AlbumVo> GetAlbumVo(string albumId);
 
         /// <summary>
         /// 获取歌曲信息
         /// </summary>
         /// <param name="songIds">歌曲ID列表</param>
-        /// <returns></returns>
+        /// <returns>songId, songVo</returns>
         Dictionary<string, ResultVo<SongVo>> GetSongVo(string[] songIds);
         
         /// <summary>
         /// 获取歌词信息
         /// </summary>
-        /// <param name="songVo">歌曲信息</param>
+        /// <param name="id">歌曲服务商内部 ID</param>
+        /// <param name="displayId">歌曲服务商显示 ID</param>
         /// <param name="isVerbatim">是否尝试获取逐字歌词</param>
         /// <returns></returns>
-        LyricVo GetLyricVo(SongVo songVo, bool isVerbatim);
+        ResultVo<LyricVo> GetLyricVo(long id, string displayId, bool isVerbatim);
 
         /// <summary>
-        /// 搜索功能
+        /// 获取搜索结果
         /// </summary>
         /// <param name="keyword">关键词</param>
         /// <param name="searchType">搜索类型</param>

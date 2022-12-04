@@ -201,7 +201,7 @@ namespace MusicLyricApp.Api
             return result;
         }
         
-        public string GetSongLink(string songMid)
+        public ResultVo<string> GetSongLink(string songMid)
         {
             var guid = GetGuid();
 
@@ -225,12 +225,13 @@ namespace MusicLyricApp.Api
             var resp = HttpUtils.HttpGet(requestUrl, "application/json", headers);
             var obj = (JObject)JsonConvert.DeserializeObject(resp);
 
-            if (obj["code"].ToString() != "0")
+            var link = "";
+            if (obj["code"].ToString() == "0")
             {
-                return null;
+                link = obj["req"]["data"]["sip"][0].ToString() + obj["req_0"]["data"]["midurlinfo"][0]["purl"];
             }
 
-            return obj["req"]["data"]["sip"][0].ToString() + obj["req_0"]["data"]["midurlinfo"][0]["purl"];
+            return new ResultVo<string>(link);
         }
 
         private static string ResolveRespJson(string callBackSign, string val)

@@ -142,6 +142,9 @@ namespace MusicLyricApp.Bean
         public LyricVo LyricVo { get; }
     }
 
+    /// <summary>
+    /// 搜索结果
+    /// </summary>
     public class SearchResultVo
     {
         public SearchTypeEnum SearchType { get; set; }
@@ -185,11 +188,44 @@ namespace MusicLyricApp.Bean
             public string Company { get; set; }
         }
     }
-    
+
     /// <summary>
-    /// 歌曲信息
+    /// 专辑信息
     /// </summary>
-    public class SongVo
+    public class AlbumVo
+    {
+        /// <summary>
+        /// 专辑名
+        /// </summary>
+        public string Name { get; set; }
+        
+        /// <summary>
+        /// 发行公司
+        /// </summary>
+        public string Company { get; set; }
+        
+        /// <summary>
+        /// 专辑描述
+        /// </summary>
+        public string Desc { get; set; }
+        
+        /// <summary>
+        /// 包含的歌曲数量
+        /// </summary>
+        public int Total { get; set; }
+
+        /// <summary>
+        /// 歌曲信息
+        /// </summary>
+        public SimpleSongVo[] SimpleSongVos { get; set; } 
+        
+        /// <summary>
+        /// 发布时间，eg: 2005-07-08
+        /// </summary>
+        public string TimePublic { get; set; } 
+    }
+
+    public class SimpleSongVo
     {
         /// <summary>
         /// 内部 ID
@@ -205,12 +241,18 @@ namespace MusicLyricApp.Bean
         /// 歌曲名
         /// </summary>
         public string Name { get; set; }
-
+        
         /// <summary>
         /// 歌手名
         /// </summary>
         public string Singer { get; set; }
+    }
 
+    /// <summary>
+    /// 歌曲信息
+    /// </summary>
+    public class SongVo : SimpleSongVo
+    {
         /// <summary>
         /// 所属专辑名
         /// </summary>
@@ -578,14 +620,21 @@ namespace MusicLyricApp.Bean
 
     public class ResultVo<T>
     {
-        public T Data { get; }
+        public T Data { get; set; }
 
-        public string ErrorMsg { get; }
+        public string ErrorMsg { get; set; }
 
-        public ResultVo(T data, string errorMsg)
+        private ResultVo()
         {
-            Data = data;
-            ErrorMsg = errorMsg;
+        }
+
+        public static ResultVo<T> Failure(string errorMsg)
+        {
+            return new ResultVo<T>
+            {
+                Data = default,
+                ErrorMsg = errorMsg
+            };
         }
         
         public ResultVo(T data)
@@ -597,6 +646,16 @@ namespace MusicLyricApp.Bean
         public bool IsSuccess()
         {
             return ErrorMsg == Bean.ErrorMsg.SUCCESS;
+        }
+
+        public ResultVo<T> Assert()
+        {
+            if (!IsSuccess())
+            {
+                throw new MusicLyricException(ErrorMsg);
+            }
+
+            return this;
         }
     }
     

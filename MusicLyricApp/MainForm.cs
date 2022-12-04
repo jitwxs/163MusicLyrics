@@ -11,7 +11,6 @@ using System.Threading;
 using System.Windows.Forms;
 using MusicLyricApp.Api;
 using MusicLyricApp.Bean;
-using MusicLyricApp.Cache;
 using MusicLyricApp.Exception;
 using MusicLyricApp.Utils;
 using Newtonsoft.Json;
@@ -201,73 +200,43 @@ namespace MusicLyricApp
         /// <summary>
         /// 根据歌曲ID查询
         /// </summary>
-        private Dictionary<string, string> SearchBySongId(IEnumerable<string> songIds, bool isVerbatimLyric)
+        /// <param name="songIds"></param>
+        /// <param name="isVerbatimLyric"></param>
+        /// <returns>songId, result</returns>
+        private Dictionary<string, ResultVo<SaveVo>> SearchBySongId(string[] songIds, bool isVerbatimLyric)
         {
-            var errorMsgDict = new Dictionary<string, string>();
+            var resultDict = new Dictionary<string, ResultVo<SaveVo>>();
 
-            // 1、优先加载缓存
-            var requestId = new List<string>();
-
-            foreach (var songId in songIds)
-            {
-                if (GlobalCache.ContainsSaveVo(songId, isVerbatimLyric))
-                {
-                    errorMsgDict.Add(songId, ErrorMsg.SUCCESS);
-                }
-                else
-                {
-                    requestId.Add(songId);
-                }
-            }
-
-            if (requestId.Count == 0)
-            {
-                return errorMsgDict;
-            }
-
-            // 2、API 请求
-            var songResp = _api.GetSongVo(requestId.ToArray());
+            var songResp = _api.GetSongVo(songIds);
             foreach (var pair in songResp)
             {
                 var songId = pair.Key;
-                var resultVo = pair.Value;
-
-                string msg;
-                if (resultVo.IsSuccess())
+                ResultVo<SaveVo> songResult;
+                
+                try
                 {
-                    try
-                    {
-                        var songVo = resultVo.Data;
-                        var lyricVo = _api.GetLyricVo(songVo, isVerbatimLyric);
+                    var songVo = pair.Value.Assert().Data;
+                    var lyricVo = _api.GetLyricVo(songVo.Id, songVo.DisplayId, isVerbatimLyric).Assert().Data;
                     
-                        lyricVo.Duration = songVo.Duration;
-                        
-                        GlobalCache.PutSaveVo(songId, isVerbatimLyric, new SaveVo(songId, songVo, lyricVo));
+                    lyricVo.Duration = songVo.Duration;
 
-                        msg = ErrorMsg.SUCCESS;
-                    }
-                    catch (WebException ex)
-                    {
-                        _logger.Error(ex, "SearchBySongId network error, delay: {Delay}", NetworkUtils.GetWebRoundtripTime(50));
-
-                        msg = ErrorMsg.NETWORK_ERROR;
-                    }
-                    catch (System.Exception ex)
-                    {
-                        msg = ex.Message;
-                        
-                        _logger.Error(ex, "SearchBySongId error, songId: {SongId}, message: {ErrorMsg}", songId, msg);
-                    }
+                    songResult = new ResultVo<SaveVo>(new SaveVo(songId, songVo, lyricVo));
                 }
-                else
+                catch (WebException ex)
                 {
-                    msg = resultVo.ErrorMsg;
+                    _logger.Error(ex, "SearchBySongId network error, delay: {Delay}", NetworkUtils.GetWebRoundtripTime(50));
+                    songResult = ResultVo<SaveVo>.Failure(ErrorMsg.NETWORK_ERROR);
+                }
+                catch (System.Exception ex)
+                {
+                    _logger.Error(ex, "SearchBySongId error, songId: {SongId}, message: {ErrorMsg}", songId, ex.Message);
+                    songResult = ResultVo<SaveVo>.Failure(ex.Message);
                 }
 
-                errorMsgDict.Add(songId, msg);
+                resultDict.Add(songId, songResult);
             }
             
-            return errorMsgDict;
+            return resultDict;
         }
 
         /// <summary>
@@ -290,11 +259,10 @@ namespace MusicLyricApp
                 switch (searchType)
                 {
                     case SearchTypeEnum.ALBUM_ID:
-                        foreach (var songId in _api.GetSongIdsFromAlbum(id))
+                        foreach (var simpleSongVo in _api.GetAlbumVo(id).Assert().Data.SimpleSongVos)
                         {
-                            _globalSearchInfo.SongIds.Add(songId);
+                            _globalSearchInfo.SongIds.Add(simpleSongVo.DisplayId);
                         }
-
                         break;
                     case SearchTypeEnum.SONG_ID:
                         _globalSearchInfo.SongIds.Add(id);
@@ -309,61 +277,51 @@ namespace MusicLyricApp
         /// 单个歌曲搜索
         /// </summary>
         /// <param name="songId">歌曲ID</param>
-        /// <param name="errorMsg">错误信息</param>
-        /// <exception cref="WebException"></exception>
-        private string SingleSearch(string songId)
+        private void SingleSearch(string songId)
         {
             var isVerbatimLyric = _globalSearchInfo.SettingBean.Config.EnableVerbatimLyric;
-            var resultMaps = SearchBySongId(new[] { songId }, isVerbatimLyric);
 
-            var message = resultMaps[songId];
+            var resDict = SearchBySongId(new[] { songId }, isVerbatimLyric);
+            var result = resDict[songId].Assert().Data;
+            
+            // 加入结果集
+            _globalSaveVoMap.Add(songId, result);
 
-            if (message == ErrorMsg.SUCCESS)
-            {
-                var result = GlobalCache.GetSaveVo(songId, isVerbatimLyric);
-
-                // 3、加入结果集
-                _globalSaveVoMap.Add(songId, result);
-
-                // 4、前端设置
-                SongName_TextBox.Text = result.SongVo.Name;
-                Singer_TextBox.Text = result.SongVo.Singer;
-                Album_TextBox.Text = result.SongVo.Album;
-                UpdateLrcTextBox(string.Empty);
-            }
-
-            return message;
+            // 前端设置
+            SongName_TextBox.Text = result.SongVo.Name;
+            Singer_TextBox.Text = result.SongVo.Singer;
+            Album_TextBox.Text = result.SongVo.Album;
+            UpdateLrcTextBox(string.Empty);
         }
 
         /// <summary>
         /// 批量歌曲搜索
         /// </summary>
-        /// <param name="ids"></param>
-        /// <exception cref="WebException"></exception>
         private void BatchSearch(IEnumerable<string> ids)
         {
             var isVerbatimLyric = _globalSearchInfo.SettingBean.Config.EnableVerbatimLyric;
-            var resultMaps = SearchBySongId(ids, isVerbatimLyric);
+            var resultMaps = SearchBySongId(ids.ToArray(), isVerbatimLyric);
 
             // 输出日志
             var log = new StringBuilder();
 
             foreach (var kvp in resultMaps)
             {
-                string songId = kvp.Key, message = kvp.Value;
+                var songId = kvp.Key;
+                var resultVo = kvp.Value;
 
                 log.Append($"{songId}");
                 
-                if (message == ErrorMsg.SUCCESS)
+                if (resultVo.IsSuccess())
                 {
-                    var songVo = GlobalCache.GetSaveVo(songId, isVerbatimLyric);
-                    _globalSaveVoMap.Add(songId, songVo);
+                    var saveVo = resultVo.Data;
+                    _globalSaveVoMap.Add(songId, saveVo);
                     
-                    log.Append($" => {songVo.SongVo.Name}");
+                    log.Append($" => {saveVo.SongVo.Name}");
                 }
 
                 log
-                    .Append($" => {message}")
+                    .Append($" => {resultVo.ErrorMsg}")
                     .Append(Environment.NewLine);
             }
 
@@ -394,17 +352,8 @@ namespace MusicLyricApp
                     BatchSearch(songIds);
                 }
                 else
-                {
-                    // just loop once
-                    foreach (var songId in songIds)
-                    {
-                        var errorMsg = SingleSearch(songId);
-                        if (errorMsg != ErrorMsg.SUCCESS)
-                        {
-                            MessageBox.Show(errorMsg, "提示");
-                            return;
-                        }
-                    }
+                { 
+                    SingleSearch(songIds.First());
                 }
             }
             catch (WebException ex)
@@ -437,17 +386,13 @@ namespace MusicLyricApp
                 
                 ReloadMusicApi();
 
-                var res = _api.Search(keyword, _globalSearchInfo.SettingBean.Param.SearchType);
-                if (!res.IsSuccess())
-                {
-                    throw new MusicLyricException(res.ErrorMsg);
-                }
-                if (res.Data.IsEmpty())
+                var resultVo = _api.Search(keyword, _globalSearchInfo.SettingBean.Param.SearchType).Assert().Data;
+                if (resultVo.IsEmpty())
                 {
                     throw new MusicLyricException(ErrorMsg.SEARCH_RESULT_EMPTY);
                 }
                 
-                FormUtils.OpenForm(_blurForm, x => new BlurForm(res.Data, this), this);
+                FormUtils.OpenForm(_blurForm, x => new BlurForm(resultVo, this), this);
             }
             catch (WebException ex)
             {

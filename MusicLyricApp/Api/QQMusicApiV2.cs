@@ -2,12 +2,17 @@
 using System.Linq;
 using System.Text;
 using MusicLyricApp.Bean;
+using MusicLyricApp.Cache;
 using MusicLyricApp.Exception;
+using MusicLyricApp.Utils;
+using NLog;
 
 namespace MusicLyricApp.Api
 {
     public class QQMusicApiV2 : MusicApiV2Cacheable
     {
+        private readonly Logger _logger = LogManager.GetCurrentClassLogger();
+        
         private readonly QQMusicNativeApi _api;
         
         public QQMusicApiV2()
@@ -20,16 +25,18 @@ namespace MusicLyricApp.Api
             return SearchSourceEnum.QQ_MUSIC;
         }
 
-        protected override IEnumerable<string> GetSongIdsFromAlbum0(string albumId)
+        protected override ResultVo<AlbumVo> GetAlbumVo0(string albumId)
         {
             var resp = _api.GetAlbum(albumId);
-
             if (resp.Code == 0)
             {
-                return resp.Data.List.Select(albumSong => albumSong.Songmid);
+                return new ResultVo<AlbumVo>(resp.Convert());
             }
-
-            throw new MusicLyricException(ErrorMsg.ALBUM_NOT_EXIST);
+            else
+            {
+                _logger.Error("QQMusicApiV2 GetAlbumVo0 failed, resp: {Resp}", resp.ToJson());
+                return ResultVo<AlbumVo>.Failure(ErrorMsg.ALBUM_NOT_EXIST);
+            }
         }
 
         protected override Dictionary<string, ResultVo<SongVo>> GetSongVo0(string[] songIds)
@@ -38,49 +45,56 @@ namespace MusicLyricApp.Api
             
             foreach (var songId in songIds)
             {
-                var resp = _api.GetSong(songId);
-
-                if (resp.Code != 0 || resp.Data.Length == 0)
+                ResultVo<QQMusicBean.Song> SongCacheFunc(int e)
                 {
-                    result[songId] = new ResultVo<SongVo>(null, ErrorMsg.SONG_NOT_EXIST);
+                    var resp = _api.GetSong(songId);
+                    return resp.IsIllegal() ? ResultVo<QQMusicBean.Song>.Failure(ErrorMsg.SONG_NOT_EXIST) : new ResultVo<QQMusicBean.Song>(resp.Data[0]);
+                }
+                
+                var songRes = GlobalCache.Process(CacheType.QQ_MUSIC_SONG, songId, SongCacheFunc);
+                if (!songRes.IsSuccess())
+                {
+                    result[songId] = ResultVo<SongVo>.Failure(songRes.ErrorMsg);
+                    continue;
+                }
+                
+                var linkRes = GlobalCache.Process(CacheType.QQ_MUSIC_SONG_LINK, songId, e => _api.GetSongLink(songId));
+                if (!linkRes.IsSuccess())
+                {
+                    result[songId] = ResultVo<SongVo>.Failure(linkRes.ErrorMsg);
                     continue;
                 }
 
-                var song = resp.Data[0];
-
-                var links = _api.GetSongLink(songId);
-
                 result[songId] = new ResultVo<SongVo>(new SongVo
                 {
-                    Id = song.Id,
-                    DisplayId = song.Mid,
-                    Links = links,
-                    Pics = BuildPicUrl(song.Album),
-                    Name = song.Name,
-                    Singer = ContractSinger(song.Singer),
-                    Album = song.Album.Name,
-                    Duration = song.Interval * 1000
+                    Id = songRes.Data.Id,
+                    DisplayId = songRes.Data.Mid,
+                    Links = linkRes.Data,
+                    Pics = BuildPicUrl(songRes.Data.Album),
+                    Name = songRes.Data.Name,
+                    Singer = ContractSinger(songRes.Data.Singer),
+                    Album = songRes.Data.Album.Name,
+                    Duration = songRes.Data.Interval * 1000
                 });
             }
             
             return result;
         }
 
-        protected override LyricVo GetLyricVo0(SongVo songVo, bool isVerbatim)
+        protected override ResultVo<LyricVo> GetLyricVo0(long id, string displayId, bool isVerbatim)
         {
-            var resp = isVerbatim ? _api.GetVerbatimLyric(songVo.Id) : _api.GetLyric(songVo.DisplayId);
+            var resp = isVerbatim ? _api.GetVerbatimLyric(id) : _api.GetLyric(displayId);
 
             if (resp.Code != 0)
             {
-                throw new MusicLyricException(ErrorMsg.LRC_NOT_EXIST);
+                return ResultVo<LyricVo>.Failure(ErrorMsg.LRC_NOT_EXIST);
             }
             
             var lyricVo = new LyricVo();
-            
             lyricVo.SetLyric(resp.Lyric);
             lyricVo.SetTranslateLyric(resp.Trans);
            
-            return lyricVo;
+            return new ResultVo<LyricVo>(lyricVo);
         }
 
         protected override ResultVo<SearchResultVo> Search0(string keyword, SearchTypeEnum searchType)

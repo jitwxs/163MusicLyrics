@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using MusicLyricApp.Utils;
 
 namespace MusicLyricApp.Bean
 {
@@ -161,6 +162,19 @@ namespace MusicLyricApp.Bean
         public Song[] Songs { get; set; }
         public long Code { get; set; }
         public Album Album { get; set; }
+
+        public AlbumVo Convert()
+        {
+            return new AlbumVo
+            {
+                Name = Album.Name,
+                Company = Album.Company,
+                Desc = Album.Description,
+                Total = Songs.Length,
+                SimpleSongVos = Songs.Select(e => e.ConvertSimple()).ToArray(),
+                TimePublic = GlobalUtils.FormatDate(Album.PublishTime)
+            };
+        }
     }
 
     /// <summary>
@@ -250,7 +264,7 @@ namespace MusicLyricApp.Bean
         public string Tags { get; set; }
         public Artist[] Artists { get; set; }
         public long Status { get; set; }
-        public object Description { get; set; }
+        public string Description { get; set; }
         public object SubType { get; set; }
         public string BlurPicUrl { get; set; }
         public long CompanyId { get; set; }
@@ -297,8 +311,22 @@ namespace MusicLyricApp.Bean
         public long Mst { get; set; }
         public long Cp { get; set; }
         public long Mv { get; set; }
+        /// <summary>
+        /// 时间戳，eg 1657900800000
+        /// </summary>
         public long PublishTime { get; set; }
         public Privilege Privilege { get; set; }
+
+        public SimpleSongVo ConvertSimple()
+        {
+            return new SimpleSongVo
+            {
+                Id = long.Parse(Id),
+                DisplayId = Id,
+                Name = Name,
+                Singer = string.Join(",", Ar.Select(e => e.Name))
+            };
+        }
     }
 
     public class Info

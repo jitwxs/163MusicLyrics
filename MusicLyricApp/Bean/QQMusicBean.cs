@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Text;
 
 namespace MusicLyricApp.Bean
@@ -15,6 +16,19 @@ namespace MusicLyricApp.Bean
             public AlbumInfo Data { get; set; }
 
             public string Message { get; set; }
+
+            public AlbumVo Convert()
+            {
+                return new AlbumVo
+                {
+                    Name = Data.Name,
+                    Company = Data.Company,
+                    Desc = Data.Desc,
+                    Total = Data.Total,
+                    SimpleSongVos = Data.List.Select(e => e.ConvertSimple()).ToArray(),
+                    TimePublic = Data.ADate
+                };
+            }
         }
 
         /// <summary>
@@ -35,6 +49,11 @@ namespace MusicLyricApp.Bean
             public long Code { get; set; }
 
             public Song[] Data { get; set; }
+
+            public bool IsIllegal()
+            {
+                return Code != 0 || Data.Length == 0;
+            }
         }
 
         /// <summary>
@@ -155,18 +174,35 @@ namespace MusicLyricApp.Bean
 
         public class AlbumInfo
         {
+            /// <summary>
+            /// 专辑时间，eg 2022-03-28
+            /// </summary>
             public string ADate { get; set; }
             
+            /// <summary>
+            /// 发行公司
+            /// </summary>
             public string Company { get; set; }
+            
+            /// <summary>
+            /// 专辑描述
+            /// </summary>
+            public string Desc { get; set; }
 
             public long Id { get; set; }
+            
+            public string Mid { get; set; }
 
+            /// <summary>
+            /// 专辑语言，eg 韩语
+            /// </summary>
             public string Lan { get; set; }
 
             public AlbumSong[] List { get; set; }
 
-            public string Mid { get; set; }
-
+            /// <summary>
+            /// 专辑名
+            /// </summary>
             public string Name { get; set; }
 
             public long Singerid { get; set; }
@@ -175,6 +211,9 @@ namespace MusicLyricApp.Bean
 
             public string Singername { get; set; }
 
+            /// <summary>
+            /// 包含的歌曲数量
+            /// </summary>
             public int Total { get; set; }
         }
 
@@ -187,6 +226,17 @@ namespace MusicLyricApp.Bean
             public string Songmid { get; set; }
 
             public string Songname { get; set; }
+
+            public SimpleSongVo ConvertSimple()
+            {
+                return new SimpleSongVo
+                {
+                    Id = Songid,
+                    DisplayId = Songmid,
+                    Name = Songname,
+                    Singer = string.Join(",", singer.Select(e => e.Name))
+                };
+            }
         }
 
         public class Album

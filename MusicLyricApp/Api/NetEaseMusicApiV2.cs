@@ -1,8 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using MusicLyricApp.Bean;
-using MusicLyricApp.Exception;
+using MusicLyricApp.Cache;
 using MusicLyricApp.Utils;
 using NLog;
 
@@ -24,24 +23,41 @@ namespace MusicLyricApp.Api
             return SearchSourceEnum.NET_EASE_MUSIC;
         }
 
-        protected override IEnumerable<string> GetSongIdsFromAlbum0(string albumId)
+        protected override ResultVo<AlbumVo> GetAlbumVo0(string albumId)
         {
             var resp = _api.GetAlbum(albumId);
-
             if (resp.Code == 200)
             {
-                return resp.Songs.Select(song => song.Id);
+                return new ResultVo<AlbumVo>(resp.Convert());
             }
-
-            _logger.Error("NetEaseMusicApiV2 GetSongIdsFromAlbum failed, resp: {Resp}", resp.ToJson());
-
-            throw new MusicLyricException(ErrorMsg.ALBUM_NOT_EXIST);
+            else
+            {
+                _logger.Error("NetEaseMusicApiV2 GetAlbumVo0 failed, resp: {Resp}", resp.ToJson());
+                return ResultVo<AlbumVo>.Failure(ErrorMsg.ALBUM_NOT_EXIST);
+            }
         }
 
         protected override Dictionary<string, ResultVo<SongVo>> GetSongVo0(string[] songIds)
         {
-            var datumResp = _api.GetDatum(songIds);
-            var songResp = _api.GetSongs(songIds);
+            // 优先从缓存中查询 Song，并将非命中的数据查询后加入缓存
+            var songResp = GlobalCache.BatchQuery<string, Song>(CacheType.NET_EASE_SONG, songIds, out var notHitKeys0)
+                .ToDictionary(pair => pair.Key, pair => pair.Value);
+            foreach (var pair in _api.GetSongs(notHitKeys0))
+            {
+                songResp.Add(pair.Key, pair.Value);
+                GlobalCache.DoCache(CacheType.NET_EASE_SONG, pair.Key, pair.Value);
+            }
+            
+            // 优先从缓存中查询 Datum，并将非命中的数据查询后加入缓存
+            var datumResp = GlobalCache.BatchQuery<string, Datum>(CacheType.NET_EASE_DATUM, songIds, out var notHitKeys1)
+                .ToDictionary(pair => pair.Key, pair => pair.Value);
+
+            foreach (var pair in _api.GetDatum(notHitKeys1))
+            {
+                datumResp.Add(pair.Key, pair.Value);
+                GlobalCache.DoCache(CacheType.NET_EASE_DATUM, pair.Key, pair.Value);
+            }
+
             var result = new Dictionary<string, ResultVo<SongVo>>();
 
             foreach (var pair in datumResp)
@@ -59,43 +75,41 @@ namespace MusicLyricApp.Api
                         Links = datum.Url,
                         Pics = song.Al.PicUrl,
                         Name = song.Name,
-                        Singer = ContractSinger(song.Ar),
+                        Singer = string.Join(",", song.Ar.Select(e => e.Name)),
                         Album = song.Al.Name,
                         Duration = song.Dt
                     });
                 }
                 else
                 {
-                    result[songId] = new ResultVo<SongVo>(null, ErrorMsg.SONG_NOT_EXIST);
+                    result[songId] = ResultVo<SongVo>.Failure(ErrorMsg.SONG_NOT_EXIST);
                 }
             }
 
             return result;
         }
 
-        protected override LyricVo GetLyricVo0(SongVo songVo, bool isVerbatim)
+        protected override ResultVo<LyricVo> GetLyricVo0(long id, string displayId, bool isVerbatim)
         {
             // todo isVerbatim just not support
-            var resp = _api.GetLyric(songVo.DisplayId);
+            var resp = _api.GetLyric(displayId);
 
-            if (resp.Code == 200)
+            if (resp.Code != 200)
             {
-                var lyricVo = new LyricVo();
-                if (resp.Lrc != null)
-                {
-                    lyricVo.SetLyric(resp.Lrc.Lyric);
-                }
-                if (resp.Tlyric != null)
-                {
-                    lyricVo.SetTranslateLyric(resp.Tlyric.Lyric);
-                }
-
-                return lyricVo;
+                return ResultVo<LyricVo>.Failure(ErrorMsg.LRC_NOT_EXIST);
+            }
+            
+            var lyricVo = new LyricVo();
+            if (resp.Lrc != null)
+            {
+                lyricVo.SetLyric(resp.Lrc.Lyric);
+            }
+            if (resp.Tlyric != null)
+            {
+                lyricVo.SetTranslateLyric(resp.Tlyric.Lyric);
             }
 
-            _logger.Error("NetEaseMusicApiV2 GetLyricVo failed, resp: {Resp}", resp.ToJson());
-
-            throw new MusicLyricException(ErrorMsg.LRC_NOT_EXIST);
+            return new ResultVo<LyricVo>(lyricVo);
         }
 
         protected override ResultVo<SearchResultVo> Search0(string keyword, SearchTypeEnum searchType)
@@ -105,29 +119,10 @@ namespace MusicLyricApp.Api
             if (resp == null || resp.Code != 200)
             {
                 _logger.Error("NetEaseMusicApiV2 Search0 failed, resp: {Resp}", resp.ToJson());
-                return new ResultVo<SearchResultVo>(null, ErrorMsg.NETWORK_ERROR);
+                return ResultVo<SearchResultVo>.Failure(ErrorMsg.NETWORK_ERROR);
             }
 
             return new ResultVo<SearchResultVo>(resp.Result.convert(searchType));
-        }
-
-        /// <summary>
-        /// 拼接歌手名
-        /// </summary>
-        public static string ContractSinger(List<Ar> arList)
-        {
-            if (arList == null || !arList.Any())
-            {
-                return string.Empty;
-            }
-
-            var sb = new StringBuilder();
-            foreach (var ar in arList)
-            {
-                sb.Append(ar.Name).Append(',');
-            }
-
-            return sb.Remove(sb.Length - 1, 1).ToString();
         }
     }
 }
