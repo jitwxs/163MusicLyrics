@@ -48,8 +48,14 @@ namespace MusicLyricApp.Utils
                 throw new MusicLyricException(ErrorMsg.INPUT_ID_ILLEGAL);
             }
 
-            // 搜索词是数字+字母的组合，直接通过
-            if (Regex.IsMatch(input, @"^[a-zA-Z0-9]*$"))
+            // 网易云，纯数字，直接通过
+            if (searchSource == SearchSourceEnum.NET_EASE_MUSIC && CheckNum(input))
+            {
+                return input;
+            }
+
+            // QQ 音乐，数字+字母，直接通过
+            if (searchSource == SearchSourceEnum.QQ_MUSIC && Regex.IsMatch(input, @"^[a-zA-Z0-9]*$"))
             {
                 return input;
             }
