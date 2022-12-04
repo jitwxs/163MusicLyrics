@@ -304,11 +304,6 @@ namespace MusicLyricApp.Bean
         /// 所属专辑名
         /// </summary>
         public string Album { get; set; }
-
-        /// <summary>
-        /// 歌曲链接 Url
-        /// </summary>
-        public string Links { get; set; }
         
         /// <summary>
         /// 歌曲封面 Url

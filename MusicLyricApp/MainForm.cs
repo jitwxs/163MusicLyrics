@@ -441,7 +441,7 @@ namespace MusicLyricApp
                     _globalSaveVoMap.TryGetValue(songId, out var saveVo);
 
                     csv.AddData(songId);
-                    csv.AddData(saveVo == null ? string.Empty : saveVo.SongVo.Links);
+                    csv.AddData(_api.GetSongLink(songId).Data);
                     csv.NextLine();
                 }
 
@@ -449,19 +449,15 @@ namespace MusicLyricApp
             }
             else
             {
-                // only loop one times
-                foreach (var item in _globalSaveVoMap)
+                var link = _api.GetSongLink(_globalSaveVoMap.Keys.First());
+                if (link.IsSuccess())
                 {
-                    var link = item.Value.SongVo.Links;
-                    if (link == null)
-                    {
-                        MessageBox.Show(ErrorMsg.SONG_URL_GET_FAILED, "提示");
-                    }
-                    else
-                    {
-                        Clipboard.SetDataObject(link);
-                        MessageBox.Show(ErrorMsg.SONG_URL_GET_SUCCESS, "提示");
-                    }
+                    Clipboard.SetDataObject(link.Data);
+                    MessageBox.Show(ErrorMsg.SONG_URL_GET_SUCCESS, "提示");
+                }
+                else
+                {
+                    MessageBox.Show(ErrorMsg.SONG_URL_GET_FAILED, "提示");
                 }
             }
         }

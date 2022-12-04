@@ -64,33 +64,31 @@ namespace MusicLyricApp.Api
                 }
                 
                 var songRes = GlobalCache.Process(CacheType.QQ_MUSIC_SONG, songId, SongCacheFunc);
-                if (!songRes.IsSuccess())
+                if (songRes.IsSuccess())
+                {
+                    result[songId] = new ResultVo<SongVo>(new SongVo
+                    {
+                        Id = songRes.Data.Id,
+                        DisplayId = songRes.Data.Mid,
+                        Pics = BuildPicUrl(songRes.Data.Album),
+                        Name = songRes.Data.Name,
+                        Singer = ContractSinger(songRes.Data.Singer),
+                        Album = songRes.Data.Album.Name,
+                        Duration = songRes.Data.Interval * 1000
+                    });
+                }
+                else
                 {
                     result[songId] = ResultVo<SongVo>.Failure(songRes.ErrorMsg);
-                    continue;
                 }
-                
-                var linkRes = GlobalCache.Process(CacheType.QQ_MUSIC_SONG_LINK, songId, e => _api.GetSongLink(songId));
-                if (!linkRes.IsSuccess())
-                {
-                    result[songId] = ResultVo<SongVo>.Failure(linkRes.ErrorMsg);
-                    continue;
-                }
-
-                result[songId] = new ResultVo<SongVo>(new SongVo
-                {
-                    Id = songRes.Data.Id,
-                    DisplayId = songRes.Data.Mid,
-                    Links = linkRes.Data,
-                    Pics = BuildPicUrl(songRes.Data.Album),
-                    Name = songRes.Data.Name,
-                    Singer = ContractSinger(songRes.Data.Singer),
-                    Album = songRes.Data.Album.Name,
-                    Duration = songRes.Data.Interval * 1000
-                });
             }
             
             return result;
+        }
+
+        protected override ResultVo<string> GetSongLink0(string songId)
+        {
+            return _api.GetSongLink(songId);
         }
 
         protected override ResultVo<LyricVo> GetLyricVo0(string id, string displayId, bool isVerbatim)

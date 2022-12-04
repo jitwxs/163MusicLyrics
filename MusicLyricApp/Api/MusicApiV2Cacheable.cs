@@ -15,6 +15,8 @@ namespace MusicLyricApp.Api
         protected abstract ResultVo<AlbumVo> GetAlbumVo0(string albumId);
 
         protected abstract Dictionary<string, ResultVo<SongVo>> GetSongVo0(string[] songIds);
+        
+        protected abstract ResultVo<string> GetSongLink0(string songId);
 
         protected abstract ResultVo<LyricVo> GetLyricVo0(string id, string displayId, bool isVerbatim);
 
@@ -54,6 +56,11 @@ namespace MusicLyricApp.Api
             }
 
             return result;
+        }
+
+        public ResultVo<string> GetSongLink(string songId)
+        {
+            return GlobalCache.Process(CacheType.SONG_LINK, songId, e => GetSongLink0(songId));
         }
 
         public ResultVo<LyricVo> GetLyricVo(string id, string displayId, bool isVerbatim)

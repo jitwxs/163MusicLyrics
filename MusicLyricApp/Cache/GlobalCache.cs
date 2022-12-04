@@ -102,14 +102,14 @@ namespace MusicLyricApp.Cache
         QQ_MUSIC_SONG,
 
         /// <summary>
-        /// QQ 音乐 歌曲链接
-        /// </summary>
-        QQ_MUSIC_SONG_LINK,
-
-        /// <summary>
         /// 歌曲
         /// </summary>
         SONG_VO,
+        
+        /// <summary>
+        /// 歌曲链接
+        /// </summary>
+        SONG_LINK,
 
         /// <summary>
         /// 歌词

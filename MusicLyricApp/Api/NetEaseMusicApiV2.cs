@@ -25,19 +25,19 @@ namespace MusicLyricApp.Api
 
         protected override ResultVo<PlaylistVo> GetPlaylistVo0(string playlistId)
         {
-           var resp = _api.GetPlaylist(playlistId);
+            var resp = _api.GetPlaylist(playlistId);
 
-           if (resp.Code == 200)
-           {
-               // cache song
-               GlobalCache.DoCache(CacheType.NET_EASE_SONG, value => value.Id, resp.Playlist.Tracks);
-               
-               return new ResultVo<PlaylistVo>(resp.Convert());
-           }
-           else
-           {
-               return ResultVo<PlaylistVo>.Failure(ErrorMsg.PLAYLIST_NOT_EXIST);
-           }
+            if (resp.Code == 200)
+            {
+                // cache song
+                GlobalCache.DoCache(CacheType.NET_EASE_SONG, value => value.Id, resp.Playlist.Tracks);
+
+                return new ResultVo<PlaylistVo>(resp.Convert());
+            }
+            else
+            {
+                return ResultVo<PlaylistVo>.Failure(ErrorMsg.PLAYLIST_NOT_EXIST);
+            }
         }
 
         protected override ResultVo<AlbumVo> GetAlbumVo0(string albumId)
@@ -57,40 +57,30 @@ namespace MusicLyricApp.Api
 
         protected override Dictionary<string, ResultVo<SongVo>> GetSongVo0(string[] songIds)
         {
-            // 优先从缓存中查询 Song，并将非命中的数据查询后加入缓存
-            var songResp = GlobalCache.BatchQuery<string, Song>(CacheType.NET_EASE_SONG, songIds, out var notHitKeys0)
-                .ToDictionary(pair => pair.Key, pair => pair.Value);
-            foreach (var pair in _api.GetSongs(notHitKeys0))
-            {
-                songResp.Add(pair.Key, pair.Value);
-                GlobalCache.DoCache(CacheType.NET_EASE_SONG, pair.Key, pair.Value);
-            }
-            
-            // 优先从缓存中查询 Datum，并将非命中的数据查询后加入缓存
-            var datumResp = GlobalCache.BatchQuery<string, Datum>(CacheType.NET_EASE_DATUM, songIds, out var notHitKeys1)
+            // 从缓存中查询 Song，并将非命中的数据查询后加入缓存
+            var cacheSongDict = GlobalCache
+                .BatchQuery<string, Song>(CacheType.NET_EASE_SONG, songIds, out var notHitKeys)
                 .ToDictionary(pair => pair.Key, pair => pair.Value);
 
-            foreach (var pair in _api.GetDatum(notHitKeys1))
+            foreach (var pair in _api.GetSongs(notHitKeys))
             {
-                datumResp.Add(pair.Key, pair.Value);
-                GlobalCache.DoCache(CacheType.NET_EASE_DATUM, pair.Key, pair.Value);
+                cacheSongDict.Add(pair.Key, pair.Value);
+                // add cache
+                GlobalCache.DoCache(CacheType.NET_EASE_SONG, pair.Key, pair.Value);
             }
 
             var result = new Dictionary<string, ResultVo<SongVo>>();
 
-            foreach (var pair in datumResp)
+            foreach (var songId in songIds)
             {
-                var songId = pair.Key;
+                cacheSongDict.TryGetValue(songId, out var song);
 
-                if (songResp.TryGetValue(songId, out var song))
+                if (song != null)
                 {
-                    var datum = pair.Value;
-                    
                     result[songId] = new ResultVo<SongVo>(new SongVo
                     {
                         Id = song.Id,
                         DisplayId = songId,
-                        Links = datum.Url,
                         Pics = song.Al.PicUrl,
                         Name = song.Name,
                         Singer = string.Join(",", song.Ar.Select(e => e.Name)),
@@ -107,6 +97,22 @@ namespace MusicLyricApp.Api
             return result;
         }
 
+        protected override ResultVo<string> GetSongLink0(string songId)
+        {
+            var resp = _api.GetDatum(new[] { songId });
+
+            resp.TryGetValue(songId, out var datum);
+
+            if (datum == null)
+            {
+                return ResultVo<string>.Failure(ErrorMsg.SONG_URL_GET_SUCCESS);
+            }
+            else
+            {
+                return new ResultVo<string>(datum.Url);
+            }
+        }
+
         protected override ResultVo<LyricVo> GetLyricVo0(string id, string displayId, bool isVerbatim)
         {
             // todo isVerbatim just not support
@@ -116,12 +122,13 @@ namespace MusicLyricApp.Api
             {
                 return ResultVo<LyricVo>.Failure(ErrorMsg.LRC_NOT_EXIST);
             }
-            
+
             var lyricVo = new LyricVo();
             if (resp.Lrc != null)
             {
                 lyricVo.SetLyric(resp.Lrc.Lyric);
             }
+
             if (resp.Tlyric != null)
             {
                 lyricVo.SetTranslateLyric(resp.Tlyric.Lyric);
@@ -133,7 +140,7 @@ namespace MusicLyricApp.Api
         protected override ResultVo<SearchResultVo> Search0(string keyword, SearchTypeEnum searchType)
         {
             var resp = _api.Search(keyword, searchType);
-            
+
             if (resp == null || resp.Code != 200)
             {
                 _logger.Error("NetEaseMusicApiV2 Search0 failed, resp: {Resp}", resp.ToJson());

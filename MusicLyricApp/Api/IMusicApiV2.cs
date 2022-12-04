@@ -25,7 +25,14 @@ namespace MusicLyricApp.Api
         /// <param name="songIds">歌曲ID列表</param>
         /// <returns>songId, songVo</returns>
         Dictionary<string, ResultVo<SongVo>> GetSongVo(string[] songIds);
-        
+
+        /// <summary>
+        /// 获取歌曲链接
+        /// </summary>
+        /// <param name="songId"></param>
+        /// <returns></returns>
+        ResultVo<string> GetSongLink(string songId);
+
         /// <summary>
         /// 获取歌词信息
         /// </summary>
