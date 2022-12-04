@@ -253,7 +253,7 @@ namespace MusicLyricApp
             // 
             // Top_MenuStrip
             // 
-            this.Top_MenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { this.Home_MItem, this.Wiki_MItem, this.Issue_MItem, this.CheckVersion_MItem, this.Setting_MItem, this.ShortCut_MItem });
+            this.Top_MenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { this.Home_MItem, this.Wiki_MItem, this.Issue_MItem, this.CheckVersion_MItem, this.ShortCut_MItem, this.Setting_MItem });
             this.Top_MenuStrip.Location = new System.Drawing.Point(0, 0);
             this.Top_MenuStrip.Name = "Top_MenuStrip";
             this.Top_MenuStrip.Size = new System.Drawing.Size(492, 25);
