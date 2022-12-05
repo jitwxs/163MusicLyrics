@@ -1,5 +1,6 @@
 [![Release](https://img.shields.io/github/v/release/jitwxs/163MusicLyrics.svg)](https://github.com/jitwxs/163MusicLyrics/releases)
 ![Star](https://badgen.net/github/stars/jitwxs/163MusicLyrics)
+![GitHub all releases](https://img.shields.io/github/downloads/jitwxs/163MusicLyrics/total)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Email](https://img.shields.io/badge/Email-jitwxs%40foxmail.com-brightgreen)](#)
 
