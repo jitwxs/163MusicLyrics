@@ -55,6 +55,12 @@ namespace MusicLyricApp.Utils
             
             foreach (var line in SplitLrc(originLrc))
             {
+                // skip illegal verbatim line, eg: https://y.qq.com/n/ryqq/songDetail/000sNzbP2nHGs2
+                if (!line.EndsWith(")"))
+                {
+                    continue;
+                }
+                
                 var matches = VerbatimRegex.Matches(line);
                 if (matches.Count > 0)
                 {
