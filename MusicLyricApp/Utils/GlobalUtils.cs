@@ -109,11 +109,14 @@ namespace MusicLyricApp.Utils
             var sb = new StringBuilder();
             foreach (var c in input.Substring(index + urlKeyword.Length).ToCharArray())
             {
-                if (c == '/')
+                if (char.IsLetterOrDigit(c))
+                {
+                    sb.Append(c);
+                }
+                else
                 {
                     break;
                 }
-                sb.Append(c);
             }
 
             return sb.ToString();

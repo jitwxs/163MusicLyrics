@@ -224,7 +224,7 @@ namespace MusicLyricApp
                 }
                 catch (WebException ex)
                 {
-                    _logger.Error(ex, "SearchBySongId network error, delay: {Delay}", NetworkUtils.GetWebRoundtripTime(50));
+                    _logger.Error(ex, "SearchBySongId network error, songId: {SongId}, delay: {Delay}", songId, NetworkUtils.GetWebRoundtripTime(50));
                     songResult = ResultVo<SaveVo>.Failure(ErrorMsg.NETWORK_ERROR);
                 }
                 catch (System.Exception ex)
@@ -242,7 +242,7 @@ namespace MusicLyricApp
         /// <summary>
         /// 初始化输入的歌曲 ID 列表
         /// </summary>
-        private void InitInputSongIds()
+        private HashSet<string> InitInputSongIds()
         {
             var inputs = _globalSearchInfo.InputIds;
             if (inputs.Length < 1)
@@ -277,6 +277,8 @@ namespace MusicLyricApp
                         throw new MusicLyricException(ErrorMsg.SYSTEM_ERROR);
                 }
             }
+            
+            return _globalSearchInfo.SongIds;
         }
 
         /// <summary>
@@ -350,9 +352,7 @@ namespace MusicLyricApp
 
             try
             {
-                InitInputSongIds();
-
-                var songIds = _globalSearchInfo.SongIds;
+                var songIds = InitInputSongIds();
                 if (songIds.Count > 1)
                 {
                     BatchSearch(songIds);
@@ -364,18 +364,19 @@ namespace MusicLyricApp
             }
             catch (WebException ex)
             {
-                _logger.Error(ex, "Search Network error, delay: {Delay}", await NetworkUtils.GetWebRoundtripTimeAsync());
+                _logger.Error(ex, "Search network error, param: {SearchParam}, delay: {Delay}", Search_Text.Text, 
+                    await NetworkUtils.GetWebRoundtripTimeAsync());
                 MessageBox.Show(ErrorMsg.NETWORK_ERROR, "错误");
             }
             catch (MusicLyricException ex)
             {
-                _logger.Error("Search Business failed, param: {SearchParam}, type: {SearchType}, message: {ErrorMsg}",
+                _logger.Error("Search music lyric failed, param: {SearchParam}, type: {SearchType}, message: {ErrorMsg}",
                     Search_Text.Text, _globalSearchInfo.SettingBean.Param.SearchType, ex.Message);
                 MessageBox.Show(ex.Message, "提示");
             }
             catch (System.Exception ex)
             {
-                _logger.Error(ex);
+                _logger.Error("Search music lyric exception, param: {SearchParam}, message: {Ex}", Search_Text.Text, ex);
                 MessageBox.Show(ErrorMsg.SYSTEM_ERROR, "错误");
             }
         }

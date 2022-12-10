@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using MusicLyricApp.Bean;
 
@@ -12,6 +13,8 @@ namespace MusicLyricApp.Utils
     /// </summary>
     public abstract class LyricUtils
     {
+        private static readonly Regex VerbatimRegex = new Regex(@"\(\d+,\d+\)");
+        
         /// <summary>
         /// 获取输出结果
         /// </summary>
@@ -47,77 +50,54 @@ namespace MusicLyricApp.Utils
         /// </summary>
         public static string DealVerbatimLyric(string originLrc, SearchSourceEnum searchSource)
         {
-            var originLyrics = SplitLrc(originLrc);
-
             var defaultParam = new PersistParamBean();
             var sb = new StringBuilder();
             
-            for (var j = 0; j < originLyrics.Length; j++)
+            foreach (var line in SplitLrc(originLrc))
             {
-                var content = originLyrics[j];
-                
-                while (true)
+                // skip illegal verbatim line, eg: https://y.qq.com/n/ryqq/songDetail/000sNzbP2nHGs2
+                if (!line.EndsWith(")"))
                 {
-                    int i = 0, startA = 0, startB = 0;
-                    for (; i < content.Length; i++)
+                    continue;
+                }
+                
+                var matches = VerbatimRegex.Matches(line);
+                if (matches.Count > 0)
+                {
+                    int contentStartIndex = 0, i = 0;
+
+                    do
                     {
-                        var c = content[i];
+                        var curMatch = matches[i];
+                        var group = curMatch.Groups[0];
+                        int leftParenthesesIndex = group.Index, parenthesesLength = group.Length;
 
-                        bool needReplaceA = false, needReplaceB = false;
-                    
-                        switch (c)
+                        // (404,202)
+                        var timestamp = line.Substring(leftParenthesesIndex, parenthesesLength);
+                        // 404
+                        timestamp = timestamp.Split(',')[0].Trim().Substring(1);
+                        // format
+                        timestamp = new LyricTimestamp(long.Parse(timestamp))
+                            .PrintTimestamp(defaultParam.LrcTimestampFormat, defaultParam.DotType);
+                        
+                        var content = line.Substring(contentStartIndex, leftParenthesesIndex - contentStartIndex);
+                        // 去除全行时间戳
+                        if (i == 0)
                         {
-                            case '[':
-                                startA = i;
-                                break;
-                            case '(':
-                                startB = i;
-                                break;
-                            case ']':
-                                needReplaceA = true;
-                                break;
-                            case ')':
-                                needReplaceB = true;
-                                break;
+                            content = new LyricLineVo(content).Content;
                         }
+                        
+                        contentStartIndex = leftParenthesesIndex + parenthesesLength;
 
-                        if (needReplaceA || needReplaceB)
-                        {
-                            var start = needReplaceA ? startA : startB;
-
-                            var oldValue =  content.Substring(start, i - start + 1);
-
-                            var mid = oldValue.IndexOf(",");
-                            if (mid != -1)
-                            {
-                                var left = oldValue.Substring(1, mid - 1);
-                                var right = oldValue.Substring(mid + 1, oldValue.Length - mid - 2);
-
-                                // 限制为数字
-                                if (GlobalUtils.CheckNum(left) && GlobalUtils.CheckNum(right))
-                                {
-                                    var timestamp = new LyricTimestamp(long.Parse(left));
-
-                                    var newValue = timestamp.PrintTimestamp(defaultParam.LrcTimestampFormat, defaultParam.DotType);
-
-                                    content = content.Replace(oldValue, newValue);
-                                    i = 0;
-                            
-                                    break;
-                                }
-                            }
-                        }
-                    }
-
-                    if (i >= content.Length)
-                    {
-                        break;
-                    }
+                        sb.Append(timestamp).Append(content);
+                    } while (++i < matches.Count);
+                }
+                else
+                {
+                    sb.Append(line);
                 }
 
-                sb
-                    .Append(content)
-                    .Append(Environment.NewLine);
+                sb.Append(Environment.NewLine);
             }
 
             return sb.ToString();
