@@ -665,7 +665,7 @@ namespace MusicLyricApp.Bean
         /// <summary>
         /// 实际处理的歌曲 ID 列表
         /// </summary>
-        public readonly HashSet<string> SongIds = new HashSet<string>();
+        public readonly Dictionary<string, SearchSourceEnum> SongIds = new Dictionary<string, SearchSourceEnum>();
 
         public SettingBean SettingBeanBackup { get; set; }
 
