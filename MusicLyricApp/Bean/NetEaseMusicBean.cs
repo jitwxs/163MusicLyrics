@@ -9,95 +9,87 @@ namespace MusicLyricApp.Bean
     /// </summary>
     public class SearchResult
     {
-        public bool NeedLogin { get; set; }
+        /* SearchType = SONG */
+        public Song[] Songs { get; set; }
         
-        public SearchResultData Result { get; set; }
+        public long SongCount { get; set; }
         
-        public long Code { get; set; }
+        /* SearchType = ALBUM */
         
-        public class SearchResultData
+        public Album[] Albums { get; set; }
+        
+        public long AlbumCount { get; set; }
+        
+        /* SearchType = PLAYLIST */
+        
+        public SimplePlaylist[] Playlists { get; set; }
+        
+        public long PlaylistCount { get; set; }
+        
+        /* ----- */
+        
+        public SearchResultVo Convert(SearchTypeEnum searchType)
         {
-            /* SearchType = SONG */
-            public Song[] Songs { get; set; }
-            
-            public long SongCount { get; set; }
-            
-            /* SearchType = ALBUM */
-            
-            public Album[] Albums { get; set; }
-            
-            public long AlbumCount { get; set; }
-            
-            /* SearchType = PLAYLIST */
-            
-            public SimplePlaylist[] Playlists { get; set; }
-            
-            public long PlaylistCount { get; set; }
-            
-            /* ----- */
-            
-            public SearchResultVo Convert(SearchTypeEnum searchType)
+            var vo = new SearchResultVo
             {
-                var vo = new SearchResultVo
-                {
-                    SearchType = searchType
-                };
+                SearchType = searchType,
+                SearchSource = SearchSourceEnum.NET_EASE_MUSIC
+            };
 
-                switch (searchType)
-                {
-                    case SearchTypeEnum.SONG_ID:
-                        if (SongCount > 0)
+            switch (searchType)
+            {
+                case SearchTypeEnum.SONG_ID:
+                    if (SongCount > 0)
+                    {
+                        foreach (var song in Songs)
                         {
-                            foreach (var song in Songs)
+                            vo.SongVos.Add(new SearchResultVo.SongSearchResultVo
                             {
-                                vo.SongVos.Add(new SearchResultVo.SongSearchResultVo
-                                {
-                                    DisplayId = song.Id,
-                                    Title = song.Name,
-                                    AuthorName = song.Ar.Select(e => e.Name).ToArray(),
-                                    AlbumName = song.Al.Name,
-                                    Duration = song.Dt
-                                });
-                            }
+                                DisplayId = song.Id,
+                                Title = song.Name,
+                                AuthorName = song.Ar.Select(e => e.Name).ToArray(),
+                                AlbumName = song.Al.Name,
+                                Duration = song.Dt
+                            });
                         }
-                        break;
-                    case SearchTypeEnum.ALBUM_ID:
-                        if (AlbumCount > 0)
+                    }
+                    break;
+                case SearchTypeEnum.ALBUM_ID:
+                    if (AlbumCount > 0)
+                    {
+                        foreach (var album in Albums)
                         {
-                            foreach (var album in Albums)
+                            vo.AlbumVos.Add(new SearchResultVo.AlbumSearchResultVo
                             {
-                                vo.AlbumVos.Add(new SearchResultVo.AlbumSearchResultVo
-                                {
-                                    DisplayId = album.Id.ToString(),
-                                    AlbumName = album.Name,
-                                    AuthorName = album.Artists.Select(e => e.Name).ToArray(),
-                                    SongCount = album.Size,
-                                    PublishTime = GlobalUtils.FormatDate(album.PublishTime)
-                                });
-                            }
+                                DisplayId = album.Id.ToString(),
+                                AlbumName = album.Name,
+                                AuthorName = album.Artists.Select(e => e.Name).ToArray(),
+                                SongCount = album.Size,
+                                PublishTime = GlobalUtils.FormatDate(album.PublishTime)
+                            });
                         }
-                        break;
-                    case SearchTypeEnum.PLAYLIST_ID:
-                        if (PlaylistCount > 0)
+                    }
+                    break;
+                case SearchTypeEnum.PLAYLIST_ID:
+                    if (PlaylistCount > 0)
+                    {
+                        foreach (var playlist in Playlists)
                         {
-                            foreach (var playlist in Playlists)
+                            vo.PlaylistVos.Add(new SearchResultVo.PlaylistResultVo()
                             {
-                                vo.PlaylistVos.Add(new SearchResultVo.PlaylistResultVo()
-                                {
-                                    DisplayId = playlist.Id,
-                                    PlaylistName = playlist.Name,
-                                    AuthorName = playlist.Creator.Nickname,
-                                    Description = playlist.Description,
-                                    PlayCount = playlist.PlayCount,
-                                    SongCount = playlist.TrackCount,
-                                });
-                            }
+                                DisplayId = playlist.Id,
+                                PlaylistName = playlist.Name,
+                                AuthorName = playlist.Creator.Nickname,
+                                Description = playlist.Description,
+                                PlayCount = playlist.PlayCount,
+                                SongCount = playlist.TrackCount,
+                            });
                         }
-                        break;
-                }
-
-                return vo;
+                    }
+                    break;
             }
+
+            return vo;
         }
     }
 

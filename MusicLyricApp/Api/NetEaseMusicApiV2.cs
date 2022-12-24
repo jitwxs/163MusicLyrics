@@ -141,13 +141,13 @@ namespace MusicLyricApp.Api
         {
             var resp = _api.Search(keyword, searchType);
 
-            if (resp == null || resp.Code != 200)
+            if (resp == null)
             {
                 _logger.Error("NetEaseMusicApiV2 Search0 failed, resp: {Resp}", resp.ToJson());
                 return ResultVo<SearchResultVo>.Failure(ErrorMsg.NETWORK_ERROR);
             }
 
-            return new ResultVo<SearchResultVo>(resp.Result.Convert(searchType));
+            return new ResultVo<SearchResultVo>(resp.Convert(searchType));
         }
     }
 }

@@ -295,6 +295,7 @@
     <Compile Include="Utils\HttpUtils.cs" />
     <Compile Include="Utils\JsonUtils.cs" />
     <Compile Include="Utils\GlobalUtils.cs" />
+    <Compile Include="Utils\NetEaseMusicSearchUtils.cs" />
     <Compile Include="Utils\NetworkUtils.cs" />
     <Compile Include="Utils\MathUtils.cs" />
     <Compile Include="Utils\RomajiUtils.cs" />

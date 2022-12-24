@@ -20,7 +20,7 @@ namespace MusicLyricAppTest.Api
         {
             var res = _api.Search("慰问", SearchTypeEnum.PLAYLIST_ID);
             
-            Assert.AreNotEqual(0, res.Result.PlaylistCount);
+            Assert.AreNotEqual(0, res.PlaylistCount);
         }
 
         [Test]
