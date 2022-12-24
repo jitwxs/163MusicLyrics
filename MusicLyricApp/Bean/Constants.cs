@@ -4,7 +4,7 @@ namespace MusicLyricApp.Bean
 {
     public static class Constants
     {
-        public const string Version = "v5.5";
+        public const string Version = "v5.6";
         
         public static readonly string SettingPath = Environment.CurrentDirectory + "\\MusicLyricAppSetting.json";
         

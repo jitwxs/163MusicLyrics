@@ -180,7 +180,8 @@ namespace MusicLyricApp.Bean
                         {
                             var vo = new SearchResultVo
                             {
-                                SearchType = searchType
+                                SearchType = searchType,
+                                SearchSource = SearchSourceEnum.QQ_MUSIC
                             };
 
                             switch (searchType)

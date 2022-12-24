@@ -8,7 +8,9 @@ using System.Security.Cryptography;
 using System.Text;
 using MusicLyricApp.Bean;
 using MusicLyricApp.Exception;
+using MusicLyricApp.Utils;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace MusicLyricApp.Api
 {
@@ -25,7 +27,7 @@ namespace MusicLyricApp.Api
         private readonly string _secretKey;
         private readonly string _encSecKey;
 
-        public NetEaseMusicNativeApi()
+        public NetEaseMusicNativeApi(Func<string> cookieFunc) : base(cookieFunc)
         {
             _secretKey = CreateSecretKey(16);
             _encSecKey = RSAEncode(_secretKey);
@@ -68,7 +70,21 @@ namespace MusicLyricApp.Api
 
             var res = SendPost(url, Prepare(JsonConvert.SerializeObject(data)));
 
-            return JsonConvert.DeserializeObject<SearchResult>(res);
+            var obj = (JObject)JsonConvert.DeserializeObject(res);
+
+            if (obj["code"].ToString() != "200")
+            {
+                return null;
+            }
+
+            var resultStr = obj["result"].ToString();
+
+            if (bool.Parse(obj["abroad"].ToString()))
+            {
+                resultStr = NetEaseMusicSearchUtils.Decode(resultStr);
+            }
+            
+            return JsonConvert.DeserializeObject<SearchResult>(resultStr);
         }
 
        /// <summary>

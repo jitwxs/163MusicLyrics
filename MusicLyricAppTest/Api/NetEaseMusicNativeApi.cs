@@ -7,7 +7,7 @@ namespace MusicLyricAppTest.Api
     [TestFixture]
     public class NetEaseMusicNativeApi
     {
-        private MusicLyricApp.Api.NetEaseMusicNativeApi _api = new MusicLyricApp.Api.NetEaseMusicNativeApi();
+        private MusicLyricApp.Api.NetEaseMusicNativeApi _api = new MusicLyricApp.Api.NetEaseMusicNativeApi(() => "");
         
         [Test]
         public void GetAlbum()
@@ -20,7 +20,7 @@ namespace MusicLyricAppTest.Api
         {
             var res = _api.Search("慰问", SearchTypeEnum.PLAYLIST_ID);
             
-            Assert.AreNotEqual(0, res.Result.PlaylistCount);
+            Assert.AreNotEqual(0, res.PlaylistCount);
         }
 
         [Test]

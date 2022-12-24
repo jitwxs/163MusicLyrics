@@ -37,6 +37,16 @@ namespace MusicLyricApp.Bean
         public TranslateLyricDefaultRuleEnum TranslateLyricDefaultRule = TranslateLyricDefaultRuleEnum.IGNORE;
 
         /// <summary>
+        /// QQ 音乐 Cookie
+        /// </summary>
+        public string QQMusicCookie = "";
+
+        /// <summary>
+        /// 网易云音乐 Cookie
+        /// </summary>
+        public string NetEaseCookie = "";
+        
+        /// <summary>
         /// 罗马音相关配置
         /// </summary>
         public RomajiConfigBean RomajiConfig = new RomajiConfigBean();
