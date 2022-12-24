@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Net;
 using System.Text;
@@ -11,9 +12,16 @@ namespace MusicLyricApp.Api
         public const string Useragent =
             "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Safari/537.36";
 
-        public const string Cookie =
+        public const string DefaultCookie =
             "os=pc;osver=Microsoft-Windows-10-Professional-build-16299.125-64bit;appver=2.0.3.131777;channel=netease;__remember_me=true";
 
+        private Func<string> _cookieFunc;
+
+        protected BaseNativeApi(Func<string> cookieFunc)
+        {
+            _cookieFunc = cookieFunc;
+        }
+        
         protected abstract string HttpRefer();
 
         /// <summary>
@@ -29,10 +37,16 @@ namespace MusicLyricApp.Api
             string result;
             using (var wc = new WebClient())
             {
+                var cookie = _cookieFunc.Invoke();
+                if (string.IsNullOrWhiteSpace(cookie))
+                {
+                    cookie = DefaultCookie;
+                }
+                
                 wc.Headers.Add(HttpRequestHeader.ContentType, "application/x-www-form-urlencoded");
                 wc.Headers.Add(HttpRequestHeader.Referer, HttpRefer());
                 wc.Headers.Add(HttpRequestHeader.UserAgent, Useragent);
-                wc.Headers.Add(HttpRequestHeader.Cookie, Cookie);
+                wc.Headers.Add(HttpRequestHeader.Cookie, cookie);
 
                 var request = new NameValueCollection();
                 foreach (var keyPair in @paramDict)
@@ -51,11 +65,17 @@ namespace MusicLyricApp.Api
         {
             using (var wc = new WebClient())
             {
+                var cookie = _cookieFunc.Invoke();
+                if (string.IsNullOrWhiteSpace(cookie))
+                {
+                    cookie = DefaultCookie;
+                }
+                
                 wc.Encoding = Encoding.UTF8;
                 wc.Headers.Add(HttpRequestHeader.ContentType, "application/json");
                 wc.Headers.Add(HttpRequestHeader.Referer, HttpRefer());
                 wc.Headers.Add(HttpRequestHeader.UserAgent, Useragent);
-                wc.Headers.Add(HttpRequestHeader.Cookie, Cookie);
+                wc.Headers.Add(HttpRequestHeader.Cookie, cookie);
 
                 return wc.UploadString(url, paramDict.ToJson());
             }

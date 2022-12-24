@@ -26,11 +26,7 @@ namespace MusicLyricApp
 
         private readonly SearchInfo _globalSearchInfo = new SearchInfo();
 
-        private Dictionary<SearchSourceEnum, IMusicApiV2> _api = new Dictionary<SearchSourceEnum, IMusicApiV2>
-        {
-            { SearchSourceEnum.QQ_MUSIC, new QQMusicApiV2() },
-            { SearchSourceEnum.NET_EASE_MUSIC, new NetEaseMusicApiV2() }
-        };
+        private Dictionary<SearchSourceEnum, IMusicApiV2> _api;
 
         private SettingForm _settingForm;
 
@@ -90,6 +86,13 @@ namespace MusicLyricApp
             {
                 ThreadPool.QueueUserWorkItem(p => CheckLatestVersion(false));
             }
+            
+            // 4、初始化 _api
+            _api = new Dictionary<SearchSourceEnum, IMusicApiV2>
+            {
+                { SearchSourceEnum.QQ_MUSIC, new QQMusicApiV2(() => _globalSearchInfo.SettingBean.Config.QQMusicCookie) },
+                { SearchSourceEnum.NET_EASE_MUSIC, new NetEaseMusicApiV2(() => _globalSearchInfo.SettingBean.Config.NetEaseCookie) }
+            };
         }
 
         private void TrySetHighDPIFont(string fontName)

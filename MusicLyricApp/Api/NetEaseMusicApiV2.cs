@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using MusicLyricApp.Bean;
 using MusicLyricApp.Cache;
@@ -13,9 +14,9 @@ namespace MusicLyricApp.Api
 
         private readonly NetEaseMusicNativeApi _api;
 
-        public NetEaseMusicApiV2()
+        public NetEaseMusicApiV2(Func<string> cookieFunc)
         {
-            _api = new NetEaseMusicNativeApi();
+            _api = new NetEaseMusicNativeApi(cookieFunc);
         }
 
         protected override SearchSourceEnum Source0()
@@ -33,6 +34,10 @@ namespace MusicLyricApp.Api
                 GlobalCache.DoCache(CacheType.NET_EASE_SONG, value => value.Id, resp.Playlist.Tracks);
 
                 return new ResultVo<PlaylistVo>(resp.Convert());
+            } 
+            else if (resp.Code == 20001)
+            {
+                return ResultVo<PlaylistVo>.Failure(ErrorMsg.NEED_LOGIN);
             }
             else
             {

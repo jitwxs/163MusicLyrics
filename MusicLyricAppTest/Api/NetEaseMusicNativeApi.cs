@@ -7,7 +7,7 @@ namespace MusicLyricAppTest.Api
     [TestFixture]
     public class NetEaseMusicNativeApi
     {
-        private MusicLyricApp.Api.NetEaseMusicNativeApi _api = new MusicLyricApp.Api.NetEaseMusicNativeApi();
+        private MusicLyricApp.Api.NetEaseMusicNativeApi _api = new MusicLyricApp.Api.NetEaseMusicNativeApi(() => "");
         
         [Test]
         public void GetAlbum()

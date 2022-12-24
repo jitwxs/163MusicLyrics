@@ -117,6 +117,7 @@ namespace MusicLyricApp.Bean
         public const string SONG_PIC_GET_FAILED = "歌曲封面，获取失败";
         public const string DEPENDENCY_LOSS = "缺少必须依赖，请前往项目主页下载 {0} 插件";
         public const string SAVE_COMPLETE = "保存完毕，成功 {0} 跳过 {1}";
+        public const string NEED_LOGIN = "该搜索请求需要登陆，请填写 Cookie 后重试";
 
         public const string GET_LATEST_VERSION_FAILED = "获取最新版本失败";
         public const string THIS_IS_LATEST_VERSION = "当前版本已经是最新版本";

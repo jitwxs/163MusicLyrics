@@ -27,7 +27,7 @@ namespace MusicLyricApp.Api
         private readonly string _secretKey;
         private readonly string _encSecKey;
 
-        public NetEaseMusicNativeApi()
+        public NetEaseMusicNativeApi(Func<string> cookieFunc) : base(cookieFunc)
         {
             _secretKey = CreateSecretKey(16);
             _encSecKey = RSAEncode(_secretKey);
