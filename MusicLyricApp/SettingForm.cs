@@ -41,6 +41,9 @@ namespace MusicLyricApp
             _settingBean.Config.RomajiConfig.SystemEnum = (RomajiSystemEnum)RomajiSystem_ComboBox.SelectedIndex;
             _settingBean.Config.TranslateLyricDefaultRule = (TranslateLyricDefaultRuleEnum)TranLyricDefaultRule_ComboBox.SelectedIndex;
 
+            _settingBean.Config.QQMusicCookie = QQMusic_Cookie_TextBox.Text;
+            _settingBean.Config.NetEaseCookie = NetEase_Cookie_TextBox.Text;
+
             Close();
         }
 

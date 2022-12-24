@@ -9,7 +9,8 @@
 [👉163MusicLyrics Use Guide](https://github.com/jitwxs/163MusicLyrics/wiki)
 
 - [x] 支持网易云音乐、QQ音乐两家音乐提供商 Support NetEaseMusic, QQMusic Music Provider
-- [x] 支持单曲、专辑、歌单三种查询类别，ID 和完整链接方式均可查询（即精确查询）Support search type: Song, Album, Playlist, you can query by ID or full-url (that is exact query)
+- [x] 支持单曲、专辑、歌单三种查询类别，ID 和完整链接方式均可查询（即精确查询）Support search type: Song, Album, Playlist,
+  you can query by ID or full-url (that is exact query)
 - [x] 每种查询类别均支持关键字查询（即模糊查询）The each search type both support query by keywords (that is blur query)
 - [x] 支持批量查询 && 扫盘查询 Support batch query && scan directory query
 - [x] 支持多种歌词原文和译文的组织方式 Support multiple original lyrics and translation lyrics organization
@@ -21,13 +22,16 @@
 
 ### Downloads
 
-进入 [GitHub Release](https://github.com/jitwxs/163MusicLyrics/releases) 页下载最新版本即可，您可点击 [ChangeLog](https://github.com/jitwxs/163MusicLyrics/wiki/ChangeLog) 查看不同版本的变更。
+进入 [GitHub Release](https://github.com/jitwxs/163MusicLyrics/releases)
+页下载最新版本即可，您可点击 [ChangeLog](https://github.com/jitwxs/163MusicLyrics/wiki/ChangeLog) 查看不同版本的变更。
 
-Enter [Github Release](https://github.com/jitwxs/163musiclyrics/releses) page to download the latest version, you can click [Changelog](https://github.com/jitwxs/163musiclyrics/wiki/changelog) View different versions of changes.
+Enter [Github Release](https://github.com/jitwxs/163musiclyrics/releses) page to download the latest version, you can
+click [Changelog](https://github.com/jitwxs/163musiclyrics/wiki/changelog) View different versions of changes.
 
 **注意:** 为了减少应用的体积，部分非必须功能采用插件形式，具体请参阅 Use Guide。
 
-**Attention:** For reduce application's size，some non-necessary feature implements by plugins, pls see Use Guide to learn more.
+**Attention:** For reduce application's size，some non-necessary feature implements by plugins, pls see Use Guide to
+learn more.
 
 ![screenshot](./images/latest_version.png)
 
@@ -38,15 +42,16 @@ Enter [Github Release](https://github.com/jitwxs/163musiclyrics/releses) page to
 - 将您的想法或发现的 BUG 填写在 [issuses](https://github.com/jitwxs/163MusicLyrics/issues) 中，我将不定期的进行处理
 - Fork 项目，并提交您的 Pull Requests
 
-You can access [163MusiclyRics Projects](https://github.com/Users/jitwxs/projects/1) to understand the current phase of the project, such as you are willing to contribute power, you can:
+You can access [163MusiclyRics Projects](https://github.com/Users/jitwxs/projects/1) to understand the current phase of
+the project, such as you are willing to contribute power, you can:
 
 - Write feature or bug to [Issuses](https://github.com/jitwxs/163musiclyrics/issues), I will deal it sometimes
 
 - Fork Projects, and commit pull requests
 
-### Stargazers over time 
+### Stargazers over time
 
-[![Stargazers over time](https://starchart.cc/jitwxs/163MusicLyrics.svg)](https://starchart.cc/jitwxs/163MusicLyrics) 
+[![Stargazers over time](https://starchart.cc/jitwxs/163MusicLyrics.svg)](https://starchart.cc/jitwxs/163MusicLyrics)
 
 ### Reference
 
@@ -54,20 +59,29 @@ You can access [163MusiclyRics Projects](https://github.com/Users/jitwxs/project
 
 - https://github.com/Binaryify/NeteaseCloudMusicApi
 - https://github.com/Rain120/qq-music-api
+- https://github.com/jsososo/QQMusicApi
 - https://github.com/ElliottSilence/LyricCapture
 - https://github.com/xmcp/QRCD
+
+第三方使用介绍视频 Third party use guide video
+
+- https://www.bilibili.com/video/BV19R4y197on
+- https://www.xiaohongshu.com/discovery/item/6399a6aa000000001f00987b
 
 ### Donate
 
 如果本项目为您带来方便，欢迎 Star 来让更多人发现和使用它。本项目为个人维护项目，如果您愿意请作者喝一瓶可乐的话，欢迎打赏。
 
-If this project brings you convenience, welcome to star to let more people discover and use it. This project is a personal maintenance project. If you are willing to ask the author to drink a bottle of cola, welcome to donate.
+If this project brings you convenience, welcome to star to let more people discover and use it. This project is a
+personal maintenance project. If you are willing to ask the author to drink a bottle of cola, welcome to donate.
 
->如您选择打赏，记得备注您的昵称，我将为您登记到本页面中。
+| username | donate |
+|:---------|:-------|
+| DJKill   | 3 CNY  |
+
+> 如您选择打赏，记得备注您的昵称，我将为您登记到本页面中。
 >
 >If you choose to donate, remember to note your nickname, I will register to this page.
-
-
 
 <div align="center">
     <img src="https://cdn.jsdelivr.net/gh/jitwxs/cdn/blog/configuration/alipay_donate_full.jpg" height="200" style="float:left;margin-right:20px;margin-left: 310px">

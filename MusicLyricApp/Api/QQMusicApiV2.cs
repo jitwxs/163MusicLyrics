@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using MusicLyricApp.Bean;
 using MusicLyricApp.Cache;
@@ -9,9 +10,9 @@ namespace MusicLyricApp.Api
     {
         private readonly QQMusicNativeApi _api;
         
-        public QQMusicApiV2()
+        public QQMusicApiV2(Func<string> cookieAction)
         {
-            _api = new QQMusicNativeApi();
+            _api = new QQMusicNativeApi(cookieAction);
         }
 
         protected override SearchSourceEnum Source0()

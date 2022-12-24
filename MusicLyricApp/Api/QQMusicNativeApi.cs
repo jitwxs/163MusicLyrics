@@ -29,6 +29,10 @@ namespace MusicLyricApp.Api
             { "Lyric_1", "lyric" }, // 解压后的内容
         };
 
+        public QQMusicNativeApi(Func<string> cookieFunc) : base(cookieFunc)
+        {
+        }
+        
         protected override string HttpRefer()
         {
             return "https://c.y.qq.com/";

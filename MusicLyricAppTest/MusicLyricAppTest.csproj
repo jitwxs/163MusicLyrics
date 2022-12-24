@@ -48,6 +48,7 @@
       <Compile Include="Bean\MusicLyricsVOTest.cs" />
       <Compile Include="Utils\GlobalUtilsTest.cs" />
       <Compile Include="Utils\LyricUtilsTest.cs" />
+      <Compile Include="Utils\NetEaseMusicSearchUtils.cs" />
       <Compile Include="Utils\SrtUtilsTest.cs" />
       <Compile Include="Utils\XmlUtils.cs" />
     </ItemGroup>
