@@ -150,6 +150,8 @@ namespace MusicLyricApp.Bean
     public class SearchResultVo
     {
         public SearchTypeEnum SearchType { get; set; }
+        
+        public SearchSourceEnum SearchSource { get; set; }
 
         public readonly List<SongSearchResultVo> SongVos = new List<SongSearchResultVo>();
 
