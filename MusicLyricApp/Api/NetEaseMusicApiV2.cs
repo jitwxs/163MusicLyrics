@@ -108,7 +108,7 @@ namespace MusicLyricApp.Api
 
             resp.TryGetValue(songId, out var datum);
 
-            if (datum == null)
+            if (datum?.Url == null)
             {
                 return ResultVo<string>.Failure(ErrorMsg.SONG_URL_GET_SUCCESS);
             }
