@@ -7,7 +7,7 @@ namespace MusicLyricAppTest.Api
     [TestFixture]
     public class QQMusicNativeApi
     {
-        private MusicLyricApp.Api.QQMusicNativeApi _api = new MusicLyricApp.Api.QQMusicNativeApi();
+        private MusicLyricApp.Api.QQMusicNativeApi _api = new MusicLyricApp.Api.QQMusicNativeApi(() => "");
         
         [Test]
         public void GetSong()
