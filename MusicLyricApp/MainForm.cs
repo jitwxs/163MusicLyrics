@@ -288,7 +288,7 @@ namespace MusicLyricApp
         /// <param name="songIdDict">歌曲ID</param>
         private void SingleSearch(Dictionary<string, SearchSourceEnum> songIdDict)
         {
-            var isVerbatimLyric = _globalSearchInfo.SettingBean.Config.EnableVerbatimLyric;
+            var isVerbatimLyric = _globalSearchInfo.SettingBean.Param.EnableVerbatimLyric;
 
             var resDict = SearchBySongId(songIdDict, isVerbatimLyric);
             var songId = songIdDict.First().Key;
@@ -310,7 +310,7 @@ namespace MusicLyricApp
         /// </summary>
         private void BatchSearch(Dictionary<string, SearchSourceEnum> ids)
         {
-            var isVerbatimLyric = _globalSearchInfo.SettingBean.Config.EnableVerbatimLyric;
+            var isVerbatimLyric = _globalSearchInfo.SettingBean.Param.EnableVerbatimLyric;
             var resultMaps = SearchBySongId(ids, isVerbatimLyric);
 
             // 输出日志

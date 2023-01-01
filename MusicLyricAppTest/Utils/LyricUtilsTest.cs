@@ -42,7 +42,7 @@ namespace MusicLyricAppTest.Utils
             
             // scenario2: 配置精度误差
 
-            settingBean.Param.TranslateMatchPrecisionDeviation = 20;
+            settingBean.Config.TranslateMatchPrecisionDeviation = 20;
             
             res = LyricUtils.DealTranslateLyric(originList, translateList, settingBean);
             

@@ -25,16 +25,21 @@ namespace MusicLyricApp.Bean
         /// 自动检查更新
         /// </summary>
         public bool AutoCheckUpdate = true;
-        
+
         /// <summary>
-        /// 启用逐字歌词模式
+        /// 保存时跳过纯音乐
         /// </summary>
-        public bool EnableVerbatimLyric = false;
+        public bool IgnorePureMusicInSave = true;
         
         /// <summary>
         /// 译文缺省规则
         /// </summary>
         public TranslateLyricDefaultRuleEnum TranslateLyricDefaultRule = TranslateLyricDefaultRuleEnum.IGNORE;
+        
+        /// <summary>
+        /// 译文歌词匹配精度
+        /// </summary>
+        public int TranslateMatchPrecisionDeviation = 0;
 
         /// <summary>
         /// QQ 音乐 Cookie
@@ -101,11 +106,11 @@ namespace MusicLyricApp.Bean
         /// SRT 歌词时间戳格式
         /// </summary>
         public string SrtTimestampFormat = "HH:mm:ss,SSS";
-
+        
         /// <summary>
-        /// 译文歌词匹配精度
+        /// 启用逐字歌词模式
         /// </summary>
-        public int TranslateMatchPrecisionDeviation = 0;
+        public bool EnableVerbatimLyric = false;
 
         /// <summary>
         /// 忽略空的歌词行

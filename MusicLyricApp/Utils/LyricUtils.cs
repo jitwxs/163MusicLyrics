@@ -30,7 +30,7 @@ namespace MusicLyricApp.Utils
             
             var voList = await FormatLyric(lyricVo.Lyric, lyricVo.TranslateLyric, searchInfo);
 
-            if (searchInfo.SettingBean.Config.EnableVerbatimLyric)
+            if (searchInfo.SettingBean.Param.EnableVerbatimLyric)
             {
                 voList = FormatSubLineLyric(voList, timestampFormat, dotType);
             }
@@ -320,7 +320,7 @@ namespace MusicLyricApp.Utils
         public static List<LyricLineVo> DealTranslateLyric(List<LyricLineVo> originList, List<LyricLineVo> translateList, SettingBean settingBean)
         {
             var rule = settingBean.Config.TranslateLyricDefaultRule;
-            var translatePrecisionDigitDeviation = settingBean.Param.TranslateMatchPrecisionDeviation;
+            var translatePrecisionDigitDeviation = settingBean.Config.TranslateMatchPrecisionDeviation;
             var originTimeOffsetMap = ConvertLyricLineVoListToMapByTimeOffset(originList);
 
             var notMatchTranslateMap = new Dictionary<int, LyricLineVo>();
