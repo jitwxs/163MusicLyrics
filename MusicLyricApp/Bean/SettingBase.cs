@@ -1,10 +1,9 @@
-﻿using System;
-
+﻿
 namespace MusicLyricApp.Bean
 {
     public class SettingBean
     {
-        public readonly ConfigBean Config = new ConfigBean();
+        public ConfigBean Config = new ConfigBean();
 
         public PersistParamBean Param = new PersistParamBean();
     }
