@@ -50,7 +50,7 @@ namespace MusicLyricApp
 
             InitialConfig();
 
-            TrySetHighDPIFont("Segoe UI");
+            TrySetHighDpiFont("Segoe UI");
         }
 
         private void InitialConfig()
@@ -95,7 +95,7 @@ namespace MusicLyricApp
             };
         }
 
-        private void TrySetHighDPIFont(string fontName)
+        private void TrySetHighDpiFont(string fontName)
         {
             //缩放比例大于100%才更改字体
             if (DeviceDpi <= 96) return;
@@ -112,17 +112,16 @@ namespace MusicLyricApp
 
             if (font == null || !fontName.Equals(font.Name)) return;
 
-            Type type = this.GetType();
-            FieldInfo[] fieldInfos = type.GetFields(BindingFlags.NonPublic | BindingFlags.Instance);
-            foreach (FieldInfo fieldInfo in fieldInfos)
+            var fieldInfos =  GetType().GetFields(BindingFlags.NonPublic | BindingFlags.Instance);
+            foreach (var fieldInfo in fieldInfos)
             {
-                Type fieldType = fieldInfo.FieldType;
+                var fieldType = fieldInfo.FieldType;
                 if ("System.Windows.Forms".Equals(fieldType.Namespace))
                 {
                     try
                     {
-                        PropertyInfo propertyInfo = fieldType.GetProperty("Font");
-                        Object obj = fieldInfo.GetValue(this);
+                        var propertyInfo = fieldType.GetProperty("Font");
+                        var obj = fieldInfo.GetValue(this);
                         propertyInfo.SetValue(obj, font);
                     }
                     catch (System.Exception)
@@ -493,9 +492,8 @@ namespace MusicLyricApp
             else
             {
                 // only loop one times
-                foreach (var item in _globalSaveVoMap)
+                foreach (var pic in _globalSaveVoMap.Select(item => item.Value.SongVo.Pics))
                 {
-                    var pic = item.Value.SongVo.Pics;
                     if (pic == null)
                     {
                         MessageBox.Show(ErrorMsg.SONG_PIC_GET_FAILED, "提示");
