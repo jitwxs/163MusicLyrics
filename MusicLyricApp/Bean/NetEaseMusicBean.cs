@@ -130,6 +130,26 @@ namespace MusicLyricApp.Bean
         public Klyric Klyric { get; set; }
         public Lrc Tlyric { get; set; }
         public long Code { get; set; }
+
+        public LyricVo ToVo()
+        {
+            var lyricVo = new LyricVo
+            {
+                SearchSource = SearchSourceEnum.NET_EASE_MUSIC
+            };
+
+            if (Lrc != null)
+            {
+                lyricVo.SetLyric(Lrc.Lyric);
+            }
+
+            if (Tlyric != null)
+            {
+                lyricVo.SetTranslateLyric(Tlyric.Lyric);
+            }
+
+            return lyricVo;
+        }
     }
     
     public class LyricUser

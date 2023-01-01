@@ -10,7 +10,7 @@ namespace MusicLyricAppTest.Api
         private MusicLyricApp.Api.NetEaseMusicNativeApi _api = new MusicLyricApp.Api.NetEaseMusicNativeApi(() => "");
         
         [Test]
-        public void GetAlbum()
+        public void TestGetAlbum()
         {
             _api.GetAlbum("148191532");
         }
@@ -29,6 +29,17 @@ namespace MusicLyricAppTest.Api
             var res = _api.GetPlaylist("7050074027");
             
             Console.WriteLine(res);
+        }
+
+        [Test]
+        public void TestPureGetLyric()
+        {
+            var lyricResult = _api.GetLyric("549702604");
+            Assert.AreEqual(200L, lyricResult.Code);
+
+            var lyricVo = lyricResult.ToVo();
+            Assert.False(lyricVo.IsEmpty());
+            Assert.True(lyricVo.IsPureMusic());
         }
     }
 }

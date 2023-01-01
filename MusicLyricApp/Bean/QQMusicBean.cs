@@ -345,19 +345,24 @@ namespace MusicLyricApp.Bean
 
             public string Trans { get; set; }
 
-            public LyricResult Decode()
+            public LyricVo ToVo()
             {
+                var lyricVo = new LyricVo
+                {
+                    SearchSource = SearchSourceEnum.QQ_MUSIC
+                };
+                
                 if (Lyric != null)
                 {
-                    Lyric = Encoding.UTF8.GetString(Convert.FromBase64String(Lyric));
+                    lyricVo.SetLyric(Encoding.UTF8.GetString(Convert.FromBase64String(Lyric)));
                 }
 
                 if (Trans != null)
                 {
-                    Trans = Encoding.UTF8.GetString(Convert.FromBase64String(Trans));
+                    lyricVo.SetTranslateLyric(Encoding.UTF8.GetString(Convert.FromBase64String(Trans)));
                 }
 
-                return this;
+                return lyricVo;
             }
         }
 

@@ -123,23 +123,7 @@ namespace MusicLyricApp.Api
             // todo isVerbatim just not support
             var resp = _api.GetLyric(displayId);
 
-            if (resp.Code != 200)
-            {
-                return ResultVo<LyricVo>.Failure(ErrorMsg.LRC_NOT_EXIST);
-            }
-
-            var lyricVo = new LyricVo();
-            if (resp.Lrc != null)
-            {
-                lyricVo.SetLyric(resp.Lrc.Lyric);
-            }
-
-            if (resp.Tlyric != null)
-            {
-                lyricVo.SetTranslateLyric(resp.Tlyric.Lyric);
-            }
-
-            return new ResultVo<LyricVo>(lyricVo);
+            return resp.Code == 200 ? new ResultVo<LyricVo>(resp.ToVo()) : ResultVo<LyricVo>.Failure(ErrorMsg.LRC_NOT_EXIST);
         }
 
         protected override ResultVo<SearchResultVo> Search0(string keyword, SearchTypeEnum searchType)

@@ -94,16 +94,7 @@ namespace MusicLyricApp.Api
         {
             var resp = isVerbatim ? _api.GetVerbatimLyric(id) : _api.GetLyric(displayId);
 
-            if (resp.Code != 0)
-            {
-                return ResultVo<LyricVo>.Failure(ErrorMsg.LRC_NOT_EXIST);
-            }
-            
-            var lyricVo = new LyricVo();
-            lyricVo.SetLyric(resp.Lyric);
-            lyricVo.SetTranslateLyric(resp.Trans);
-           
-            return new ResultVo<LyricVo>(lyricVo);
+            return resp.Code == 0 ? new ResultVo<LyricVo>(resp.ToVo()) : ResultVo<LyricVo>.Failure(ErrorMsg.LRC_NOT_EXIST);
         }
 
         protected override ResultVo<SearchResultVo> Search0(string keyword, SearchTypeEnum searchType)

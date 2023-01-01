@@ -167,9 +167,7 @@ namespace MusicLyricApp.Api
 
             var resp = SendPost("https://c.y.qq.com/lyric/fcgi-bin/fcg_query_lyric_new.fcg", data);
 
-            var result = ResolveRespJson(callBack, resp).ToEntity<QQMusicBean.LyricResult>();
-
-            return result.Decode();
+            return ResolveRespJson(callBack, resp).ToEntity<QQMusicBean.LyricResult>();
         }
 
         public QQMusicBean.LyricResult GetVerbatimLyric(string songId)

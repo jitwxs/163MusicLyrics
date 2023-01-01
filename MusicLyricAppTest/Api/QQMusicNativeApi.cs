@@ -23,7 +23,19 @@ namespace MusicLyricAppTest.Api
         [Test]
         public void GetLyric()
         {
-            _api.GetLyric("003KDOb01SUyD5");
+            var lyricResult = _api.GetLyric("003KDOb01SUyD5");
+            Assert.NotNull(lyricResult);
+        }
+        
+        [Test]
+        public void TestPureGetLyric()
+        {
+            var lyricResult = _api.GetLyric("003CqWeL2ruZlS");
+            Assert.AreEqual(0, lyricResult.Code);
+
+            var lyricVo = lyricResult.ToVo();
+            Assert.False(lyricVo.IsEmpty());
+            Assert.True(lyricVo.IsPureMusic());
         }
         
         [Test]

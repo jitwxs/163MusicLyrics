@@ -79,7 +79,7 @@ namespace MusicLyricApp.Api
 
             var resultStr = obj["result"].ToString();
 
-            if (bool.Parse(obj["abroad"].ToString()))
+            if (obj["abroad"] != null && bool.Parse(obj["abroad"].ToString()))
             {
                 resultStr = NetEaseMusicSearchUtils.Decode(resultStr);
             }

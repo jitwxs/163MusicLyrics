@@ -335,6 +335,11 @@ namespace MusicLyricApp.Bean
     public class LyricVo
     {
         /// <summary>
+        /// 音乐提供商
+        /// </summary>
+        public SearchSourceEnum SearchSource;
+        
+        /// <summary>
         /// 歌词内容
         /// </summary>
         public string Lyric;
@@ -359,9 +364,37 @@ namespace MusicLyricApp.Bean
             TranslateLyric = HttpUtility.HtmlDecode(content);
         }
 
+        /// <summary>
+        /// 歌词不存在判断
+        /// </summary>
         public bool IsEmpty()
         {
             return string.IsNullOrEmpty(Lyric) && string.IsNullOrEmpty(TranslateLyric);
+        }
+
+        /// <summary>
+        /// 纯音乐判断
+        /// </summary>
+        /// <returns></returns>
+        public bool IsPureMusic()
+        {
+            // 译文歌词必须为空且原文歌词不为空
+            if (string.IsNullOrEmpty(Lyric) || !string.IsNullOrEmpty(TranslateLyric))
+            {
+                return true;
+            }
+
+            if (SearchSource == SearchSourceEnum.NET_EASE_MUSIC)
+            {
+                return Lyric.Contains("纯音乐，请欣赏");
+            }
+
+            if (SearchSource == SearchSourceEnum.QQ_MUSIC)
+            {
+                return Lyric.Contains("此歌曲为没有填词的纯音乐，请您欣赏");
+            }
+
+            return false;
         }
     }
 
