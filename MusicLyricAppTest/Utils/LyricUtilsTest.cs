@@ -35,19 +35,19 @@ namespace MusicLyricAppTest.Utils
             
             // scenario1: 未配置精度误差
             
-            var res = LyricUtils.DealTranslateLyric(originList, translateList, settingBean);
+            var res = LyricUtils.DealTranslateLyric(originList, translateList, settingBean).Result;
             
             Assert.AreEqual(1, res.Count);
-            Assert.AreEqual(100, res[0].Timestamp.TimeOffset);
+            Assert.AreEqual(100, res[0][0].Timestamp.TimeOffset);
             
             // scenario2: 配置精度误差
 
             settingBean.Config.TranslateMatchPrecisionDeviation = 20;
             
-            res = LyricUtils.DealTranslateLyric(originList, translateList, settingBean);
+            res = LyricUtils.DealTranslateLyric(originList, translateList, settingBean).Result;
             
             Assert.AreEqual(1, res.Count);
-            Assert.AreEqual(80, res[0].Timestamp.TimeOffset);
+            Assert.AreEqual(80, res[0][0].Timestamp.TimeOffset);
         }
     }
 }

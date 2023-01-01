@@ -13,13 +13,18 @@ namespace MusicLyricApp.Bean
     public enum ShowLrcTypeEnum
     {
         [Description("仅显示原文")] ONLY_ORIGIN = 0,
-        [Description("仅显示译文")] ONLY_TRANSLATE = 1,
-        [Description("优先原文（交错）")] ORIGIN_PRIOR_STAGGER = 2,
-        [Description("优先译文（交错）")] TRANSLATE_PRIOR_STAGGER = 3,
-        [Description("优先原文（独立）")] ORIGIN_PRIOR_ISOLATED = 4,
-        [Description("优先译文（独立）")] TRANSLATE_PRIOR_ISOLATED = 5,
+        
+        [Description("仅显示译文（交错）")] ONLY_TRANS_STAGGER = 1,
+        [Description("仅显示译文（独立）")] ONLY_TRANS_ISOLATED = 2,
+        [Description("仅显示译文（合并）")] ONLY_TRANS_MERGE = 3,
+        
+        [Description("优先原文（交错）")] ORIGIN_PRIOR_STAGGER = 4,
+        [Description("优先原文（独立）")] ORIGIN_PRIOR_ISOLATED = 5,
         [Description("优先原文（合并）")] ORIGIN_PRIOR_MERGE = 6,
-        [Description("优先译文（合并）")] TRANSLATE_PRIOR_MERGE = 7,
+        
+        [Description("优先译文（交错）")] TRANSLATE_PRIOR_STAGGER = 7,
+        [Description("优先译文（独立）")] TRANSLATE_PRIOR_ISOLATED = 8,
+        [Description("优先译文（合并）")] TRANSLATE_PRIOR_MERGE = 9,
     }
 
     // 搜索来源
