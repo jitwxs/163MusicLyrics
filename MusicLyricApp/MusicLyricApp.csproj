@@ -356,14 +356,8 @@
     <WCFMetadata Include="Connected Services\" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="AUTHORS" />
-    <Content Include="char.bin" />
-    <Content Include="COPYING" />
     <Content Include="Favicon2.ico" />
-    <Content Include="matrix.bin" />
     <Content Include="Properties\app.manifest" />
-    <Content Include="sys.dic" />
-    <Content Include="unk.dic" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

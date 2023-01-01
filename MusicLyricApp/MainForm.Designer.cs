@@ -66,8 +66,8 @@ namespace MusicLyricApp
             this.Wiki_MItem = new System.Windows.Forms.ToolStripMenuItem();
             this.Issue_MItem = new System.Windows.Forms.ToolStripMenuItem();
             this.CheckVersion_MItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.Setting_MItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ShortCut_MItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.Setting_MItem = new System.Windows.Forms.ToolStripMenuItem();
             this.OutputFormat_Label = new System.Windows.Forms.Label();
             this.OutputFormat_CombBox = new System.Windows.Forms.ComboBox();
             this.SearchSource_ComboBox = new System.Windows.Forms.ComboBox();
@@ -288,19 +288,19 @@ namespace MusicLyricApp
             this.CheckVersion_MItem.Text = "检查更新";
             this.CheckVersion_MItem.Click += new System.EventHandler(this.Top_MItem_Click);
             // 
-            // Setting_MItem
-            // 
-            this.Setting_MItem.Name = "Setting_MItem";
-            this.Setting_MItem.Size = new System.Drawing.Size(68, 21);
-            this.Setting_MItem.Text = "更多设置";
-            this.Setting_MItem.Click += new System.EventHandler(this.Top_MItem_Click);
-            // 
             // ShortCut_MItem
             // 
             this.ShortCut_MItem.Name = "ShortCut_MItem";
             this.ShortCut_MItem.Size = new System.Drawing.Size(56, 21);
             this.ShortCut_MItem.Text = "快捷键";
             this.ShortCut_MItem.Click += new System.EventHandler(this.Top_MItem_Click);
+            // 
+            // Setting_MItem
+            // 
+            this.Setting_MItem.Name = "Setting_MItem";
+            this.Setting_MItem.Size = new System.Drawing.Size(68, 21);
+            this.Setting_MItem.Text = "更多设置";
+            this.Setting_MItem.Click += new System.EventHandler(this.Top_MItem_Click);
             // 
             // OutputFormat_Label
             // 
