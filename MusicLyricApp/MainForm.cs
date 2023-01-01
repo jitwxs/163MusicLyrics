@@ -73,7 +73,6 @@ namespace MusicLyricApp
             // 2、配置应用
             var paramConfig = settingBean.Config.RememberParam ? settingBean.Param : new PersistParamBean();
             
-            OutputName_ComboBox.SelectedIndex = (int) paramConfig.OutputFileNameType;
             OutputEncoding_ComboBox.SelectedIndex = (int) paramConfig.Encoding;
             LrcType_ComboBox.SelectedIndex = (int) paramConfig.ShowLrcType;
             SearchSource_ComboBox.SelectedIndex = (int) paramConfig.SearchSource;
@@ -192,15 +191,27 @@ namespace MusicLyricApp
         /// <summary>
         /// 根据歌曲ID查询
         /// </summary>
-        /// <param name="songIds"></param>
-        /// <param name="isVerbatimLyric"></param>
         /// <returns>songId, result</returns>
-        private Dictionary<string, ResultVo<SaveVo>> SearchBySongId(Dictionary<string, SearchSourceEnum> songIds, bool isVerbatimLyric)
+        private Dictionary<string, ResultVo<SaveVo>> SearchBySongId(List<SearchInfo.InputSongId> inputSongIds, bool isVerbatimLyric)
         {
             var resultDict = new Dictionary<string, ResultVo<SaveVo>>();
 
-            var songDict = songIds.GroupBy(e => e.Value)
-                .ToDictionary(t=> t.Key, t=> t.Select(r=> r.Key).ToList());
+            var songDict = new Dictionary<SearchSourceEnum, List<string>>();
+            var songIndexDict = new Dictionary<string, int>();
+            
+            for (var i = 0; i < inputSongIds.Count; i++)
+            {
+                var searchSource = inputSongIds[i].SearchSource;
+                var songId = inputSongIds[i].SongId;
+
+                if (!songDict.ContainsKey(searchSource))
+                {
+                    songDict.Add(searchSource, new List<string>());
+                }
+                
+                songDict[searchSource].Add(songId);
+                songIndexDict[songId] = i + 1;
+            }
             
             foreach (var searchSourcePair in songDict)
             {
@@ -214,11 +225,13 @@ namespace MusicLyricApp
                     try
                     {
                         var songVo = pair.Value.Assert().Data;
+                        
                         var lyricVo = _api[searchSourcePair.Key].GetLyricVo(songVo.Id, songVo.DisplayId, isVerbatimLyric).Assert().Data;
-                    
                         lyricVo.Duration = songVo.Duration;
 
-                        songResult = new ResultVo<SaveVo>(new SaveVo(songId, songVo, lyricVo));
+                        var index = songIndexDict[songId];
+
+                        songResult = new ResultVo<SaveVo>(new SaveVo(index, songVo, lyricVo));
                     }
                     catch (WebException ex)
                     {
@@ -241,7 +254,7 @@ namespace MusicLyricApp
         /// <summary>
         /// 初始化输入的歌曲 ID 列表
         /// </summary>
-        private Dictionary<string, SearchSourceEnum> InitInputSongIds()
+        private List<SearchInfo.InputSongId> InitInputSongIds()
         {
             var inputs = _globalSearchInfo.InputIds;
             if (inputs.Length < 1)
@@ -261,17 +274,17 @@ namespace MusicLyricApp
                     case SearchTypeEnum.ALBUM_ID:
                         foreach (var simpleSongVo in _api[searchSource].GetAlbumVo(id).Assert().Data.SimpleSongVos)
                         {
-                            _globalSearchInfo.SongIds.Add(simpleSongVo.DisplayId, searchSource);
+                            _globalSearchInfo.SongIds.Add(new SearchInfo.InputSongId(simpleSongVo.DisplayId, searchSource));
                         }
                         break;
                     case SearchTypeEnum.PLAYLIST_ID:
                         foreach (var simpleSongVo in _api[searchSource].GetPlaylistVo(id).Assert().Data.SimpleSongVos)
                         {
-                            _globalSearchInfo.SongIds.Add(simpleSongVo.DisplayId, searchSource);
+                            _globalSearchInfo.SongIds.Add(new SearchInfo.InputSongId(simpleSongVo.DisplayId, searchSource));
                         }
                         break;
                     case SearchTypeEnum.SONG_ID:
-                        _globalSearchInfo.SongIds.Add(id, searchSource);
+                        _globalSearchInfo.SongIds.Add(new SearchInfo.InputSongId(id, searchSource));
                         break;
                     default:
                         throw new MusicLyricException(ErrorMsg.SYSTEM_ERROR);
@@ -285,12 +298,12 @@ namespace MusicLyricApp
         /// 单个歌曲搜索
         /// </summary>
         /// <param name="songIdDict">歌曲ID</param>
-        private void SingleSearch(Dictionary<string, SearchSourceEnum> songIdDict)
+        private void SingleSearch(List<SearchInfo.InputSongId> songIdDict)
         {
             var isVerbatimLyric = _globalSearchInfo.SettingBean.Param.EnableVerbatimLyric;
 
             var resDict = SearchBySongId(songIdDict, isVerbatimLyric);
-            var songId = songIdDict.First().Key;
+            var songId = songIdDict.First().SongId;
 
             var result = resDict[songId].Assert().Data;
             
@@ -307,7 +320,7 @@ namespace MusicLyricApp
         /// <summary>
         /// 批量歌曲搜索
         /// </summary>
-        private void BatchSearch(Dictionary<string, SearchSourceEnum> ids)
+        private void BatchSearch(List<SearchInfo.InputSongId> ids)
         {
             var isVerbatimLyric = _globalSearchInfo.SettingBean.Param.EnableVerbatimLyric;
             var resultMaps = SearchBySongId(ids, isVerbatimLyric);
@@ -434,12 +447,12 @@ namespace MusicLyricApp
     
                 foreach (var pair in _globalSearchInfo.SongIds)
                 {
-                    var songId = pair.Key;
+                    var songId = pair.SongId;
 
                     _globalSaveVoMap.TryGetValue(songId, out var saveVo);
 
                     csv.AddData(songId);
-                    csv.AddData(_api[pair.Value].GetSongLink(songId).Data);
+                    csv.AddData(_api[pair.SearchSource].GetSongLink(songId).Data);
                     csv.NextLine();
                 }
 
@@ -478,7 +491,7 @@ namespace MusicLyricApp
                 csv.AddColumn("id");
                 csv.AddColumn("picLink");
                 
-                foreach (var songId in _globalSearchInfo.SongIds.Keys)
+                foreach (var songId in _globalSearchInfo.SongIds.Select(inputSongId => inputSongId.SongId))
                 {
                     _globalSaveVoMap.TryGetValue(songId, out var saveVo);
 
@@ -510,14 +523,9 @@ namespace MusicLyricApp
         /**
          * 单个保存
          */
-        private async void SingleSave(string songId)
+        private async void SingleSave()
         {
-            // 没有搜索结果
-            if (!_globalSaveVoMap.TryGetValue(songId, out var saveVo))
-            {
-                MessageBox.Show(ErrorMsg.MUST_SEARCH_BEFORE_SAVE, "提示");
-                return;
-            }
+            var saveVo = _globalSaveVoMap.Values.First();
 
             // 没有歌词内容
             if (saveVo.LyricVo.IsEmpty())
@@ -534,7 +542,7 @@ namespace MusicLyricApp
             }
             
             var saveDialog = new SaveFileDialog();
-            saveDialog.FileName = GlobalUtils.GetOutputName(saveVo.SongVo, _globalSearchInfo.SettingBean.Param.OutputFileNameType);
+            saveDialog.FileName = GlobalUtils.GetOutputName(saveVo, _globalSearchInfo.SettingBean.Config.OutputFileNameFormat);
             saveDialog.Filter = _globalSearchInfo.SettingBean.Param.OutputFileFormat.ToDescription();
 
             if (saveDialog.ShowDialog() != DialogResult.OK)
@@ -581,9 +589,9 @@ namespace MusicLyricApp
             {
                 var localFilePath = saveDialog.FileName;
                 // 获取文件后缀
-                var fileSuffix = localFilePath.Substring(localFilePath.LastIndexOf("."));
+                var fileSuffix = localFilePath.Substring(localFilePath.LastIndexOf(".", StringComparison.Ordinal));
                 //获取文件路径，不带文件名 
-                var filePath = localFilePath.Substring(0, localFilePath.LastIndexOf("\\"));
+                var filePath = localFilePath.Substring(0, localFilePath.LastIndexOf("\\", StringComparison.Ordinal));
                     
                 foreach (var item in _globalSaveVoMap)
                 {
@@ -595,7 +603,7 @@ namespace MusicLyricApp
                         continue;
                     }
 
-                    var path = filePath + '/' + GlobalUtils.GetOutputName(saveVo.SongVo, _globalSearchInfo.SettingBean.Param.OutputFileNameType) + fileSuffix;
+                    var path = filePath + '/' + GlobalUtils.GetOutputName(saveVo, _globalSearchInfo.SettingBean.Config.OutputFileNameFormat) + fileSuffix;
                     using(var sw = new StreamWriter(path, false, GlobalUtils.GetEncoding(_globalSearchInfo.SettingBean.Param.Encoding)))
                     {
                         await sw.WriteAsync(await LyricUtils.GetOutputContent(lyricVo, _globalSearchInfo));
@@ -614,7 +622,7 @@ namespace MusicLyricApp
 
             // 输出日志
             var log = new StringBuilder();
-            foreach (var songId in _globalSearchInfo.SongIds.Keys)
+            foreach (var songId in _globalSearchInfo.SongIds.Select(inputSongId => inputSongId.SongId))
             {
                 log
                     .Append($"{songId} => {(success.Contains(songId) ? "成功" : "跳过")}")
@@ -640,11 +648,7 @@ namespace MusicLyricApp
             }
             else
             {
-                // only loop one times
-                foreach (var item in _globalSaveVoMap)
-                {
-                    SingleSave(item.Value.SongId);
-                }
+                SingleSave();
             }
         }
 
@@ -799,10 +803,6 @@ namespace MusicLyricApp
             else if (input == OutputFormat_CombBox)
             {
                 _globalSearchInfo.SettingBean.Param.OutputFileFormat = (OutputFormatEnum)input.SelectedIndex;
-            }
-            else if (input == OutputName_ComboBox)
-            {
-                _globalSearchInfo.SettingBean.Param.OutputFileNameType = (OutputFilenameTypeEnum)input.SelectedIndex;
             }
             
             ReloadConfig();

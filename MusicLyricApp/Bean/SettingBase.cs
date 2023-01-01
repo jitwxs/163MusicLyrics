@@ -42,6 +42,11 @@ namespace MusicLyricApp.Bean
         public int TranslateMatchPrecisionDeviation = 0;
 
         /// <summary>
+        /// 输出文件名格式
+        /// </summary>
+        public string OutputFileNameFormat = "${name} - ${singer}";
+
+        /// <summary>
         /// QQ 音乐 Cookie
         /// </summary>
         public string QQMusicCookie = "";
@@ -95,7 +100,7 @@ namespace MusicLyricApp.Bean
         /// <summary>
         /// 指定歌词合并的分隔符
         /// </summary>
-        public string LrcMergeSeparator = String.Empty;
+        public string LrcMergeSeparator = string.Empty;
         
         /// <summary>
         /// LRC 歌词时间戳格式
@@ -121,11 +126,6 @@ namespace MusicLyricApp.Bean
         /// 小数位处理策略
         /// </summary>
         public DotTypeEnum DotType = DotTypeEnum.DOWN;
-
-        /// <summary>
-        /// 输出文件名类型
-        /// </summary>
-        public OutputFilenameTypeEnum OutputFileNameType = OutputFilenameTypeEnum.NAME_SINGER;
 
         /// <summary>
         /// 输出文件格式

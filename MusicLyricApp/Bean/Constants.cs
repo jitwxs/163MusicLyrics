@@ -34,27 +34,46 @@ namespace MusicLyricApp.Bean
                 /// 时间戳设置
                 /// </summary>
                 TIME_STAMP_SETTING,
+                /// <summary>
+                /// 输出设置
+                /// </summary>
+                OUTPUT_SETTING,
+                /// <summary>
+                /// 默认实例
+                /// </summary>
+                DEFAULT,
             }
 
             public static string GetContent(TypeEnum typeEnum)
             {
-                var contentList = new List<string> { Prefix };
+                var list = new List<string> { Prefix };
 
                 switch (typeEnum)
                 {
                     case TypeEnum.TIME_STAMP_SETTING:
-                        contentList.Add("您可根据需要自行调整时间戳格式，系统定义了以下的『元变量』，您可直接使用");
-                        contentList.Add("HH -> 小时，采用 24 小时制，结果为 0 ~ 23");
-                        contentList.Add("mm -> 分钟，结果为 0 ~ 59");
-                        contentList.Add("ss -> 秒，结果为 0 ~ 59");
-                        contentList.Add("S -> 毫秒，仅保留一位，结果为 0 ~ 9");
-                        contentList.Add("SS -> 毫秒，仅保留两位，结果为 0 ~ 99");
-                        contentList.Add("SSS -> 毫秒，结果为 0 ~ 999");
-                        contentList.Add("当毫秒的占位符为 S 或 SS 时，『毫秒截位规则』配置生效");
+                        list.Add("您可自行调整『LRC/SRT 时间戳』配置，系统预设的元变量有：");
+                        list.Add("HH -> 小时，采用 24 小时制，结果为 0 ~ 23");
+                        list.Add("mm -> 分钟，输出区间 [0,59]");
+                        list.Add("ss -> 秒，输出区间 [0,59]");
+                        list.Add("S -> 毫秒，仅保留一位，输出区间 [0,9]");
+                        list.Add("SS -> 毫秒，仅保留两位，输出区间 [0,99]");
+                        list.Add("SSS -> 毫秒，输出区间 [0,999]");
+                        list.Add("当毫秒的占位符为 S 或 SS 时，『毫秒截位规则』配置生效");
+                        break;
+                    case TypeEnum.OUTPUT_SETTING:
+                        list.Add("您可自行调整『输出文件名』配置，系统预设的元变量有：");
+                        list.Add("${id} -> 歌曲ID");
+                        list.Add("${index} -> 结果索引，对于单曲表示搜索结果中的位置，对于专辑和歌单表示位于结果中的位置");
+                        list.Add("${name} -> 歌曲名");
+                        list.Add("${singer} -> 歌手名");
+                        list.Add("${album} -> 专辑名");
+                        break;
+                    case TypeEnum.DEFAULT:
+                        default:
                         break;
                 }
 
-                return string.Join(Environment.NewLine + Environment.NewLine, contentList);
+                return string.Join(Environment.NewLine + Environment.NewLine, list);
             }
         }
     }

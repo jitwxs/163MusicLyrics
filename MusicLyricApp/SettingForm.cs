@@ -44,6 +44,7 @@ namespace MusicLyricApp
             
             // 输出设置
             _settingBean.Config.IgnorePureMusicInSave = IgnorePureMusicInSave_CheckBox.Checked;
+            _settingBean.Config.OutputFileNameFormat = OutputName_TextBox.Text;
             
             // 应用设置
             _settingBean.Config.RememberParam = RememberParam_CheckBox.Checked;
@@ -62,11 +63,17 @@ namespace MusicLyricApp
                 throw new MusicLyricException(ErrorMsg.SYSTEM_ERROR);
             }
 
+            var typeEnum = Constants.HelpTips.TypeEnum.DEFAULT;
             if (input == TimestampHelp_Button)
             {
-                SettingTips_TextBox.Text =
-                    Constants.HelpTips.GetContent(Constants.HelpTips.TypeEnum.TIME_STAMP_SETTING);
+                typeEnum = Constants.HelpTips.TypeEnum.TIME_STAMP_SETTING;
+            } 
+            else if (input == OutputHelp_Button)
+            {
+                typeEnum = Constants.HelpTips.TypeEnum.OUTPUT_SETTING;
             }
+
+            SettingTips_TextBox.Text = Constants.HelpTips.GetContent(typeEnum);
         }
 
         private void ShowRomaji_CheckBox_CheckedChanged(object sender, EventArgs e)

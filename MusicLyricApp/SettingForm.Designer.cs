@@ -50,6 +50,7 @@ namespace MusicLyricApp
             
             // 输出设置
             IgnorePureMusicInSave_CheckBox.Checked = _settingBean.Config.IgnorePureMusicInSave;
+            OutputName_TextBox.Text = _settingBean.Config.OutputFileNameFormat;
             
             // 应用设置
             RememberParam_CheckBox.Checked = _settingBean.Config.RememberParam;
@@ -89,21 +90,23 @@ namespace MusicLyricApp
             this.TranLyricDefaultRule_ComboBox = new System.Windows.Forms.ComboBox();
             this.label9 = new System.Windows.Forms.Label();
             this.TranslateMatchPrecisionDeviation_TextBox = new System.Windows.Forms.TextBox();
-            this.label10 = new System.Windows.Forms.Label();
+            this.label5 = new System.Windows.Forms.Label();
             this.IgnoreEmptyLyric_CheckBox = new System.Windows.Forms.CheckBox();
             this.VerbatimLyric_CheckBox = new System.Windows.Forms.CheckBox();
             this.NetEase_Cookie_TextBox = new System.Windows.Forms.TextBox();
-            this.label11 = new System.Windows.Forms.Label();
-            this.label12 = new System.Windows.Forms.Label();
+            this.label2 = new System.Windows.Forms.Label();
+            this.label4 = new System.Windows.Forms.Label();
             this.QQMusic_Cookie_TextBox = new System.Windows.Forms.TextBox();
             this.Timestamp_GroupBox = new System.Windows.Forms.GroupBox();
             this.TimestampHelp_Button = new System.Windows.Forms.Button();
             this.SettingTips_TextBox = new System.Windows.Forms.TextBox();
-            this.button1 = new System.Windows.Forms.Button();
+            this.OutputHelp_Button = new System.Windows.Forms.Button();
             this.AppConfig_GroupBox = new System.Windows.Forms.GroupBox();
             this.OriginLyric_GroupBox = new System.Windows.Forms.GroupBox();
             this.TransLyric_GroupBox = new System.Windows.Forms.GroupBox();
             this.Output_GroupBox = new System.Windows.Forms.GroupBox();
+            this.OutputName_TextBox = new System.Windows.Forms.TextBox();
+            this.label10 = new System.Windows.Forms.Label();
             this.IgnorePureMusicInSave_CheckBox = new System.Windows.Forms.CheckBox();
             this.Timestamp_GroupBox.SuspendLayout();
             this.AppConfig_GroupBox.SuspendLayout();
@@ -114,11 +117,11 @@ namespace MusicLyricApp
             // 
             // Save_Btn
             // 
-            this.Save_Btn.Location = new System.Drawing.Point(292, 366);
+            this.Save_Btn.Location = new System.Drawing.Point(258, 163);
             this.Save_Btn.Name = "Save_Btn";
-            this.Save_Btn.Size = new System.Drawing.Size(98, 64);
+            this.Save_Btn.Size = new System.Drawing.Size(66, 50);
             this.Save_Btn.TabIndex = 0;
-            this.Save_Btn.Text = "保存";
+            this.Save_Btn.Text = "全部保存";
             this.Save_Btn.UseVisualStyleBackColor = true;
             this.Save_Btn.Click += new System.EventHandler(this.Save_Btn_Click);
             // 
@@ -170,9 +173,9 @@ namespace MusicLyricApp
             // 
             // label3
             // 
-            this.label3.Location = new System.Drawing.Point(228, 78);
+            this.label3.Location = new System.Drawing.Point(226, 78);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(60, 17);
+            this.label3.Size = new System.Drawing.Size(60, 12);
             this.label3.TabIndex = 8;
             this.label3.Text = "转换模式";
             // 
@@ -239,7 +242,7 @@ namespace MusicLyricApp
             // 
             this.label1.Location = new System.Drawing.Point(13, 36);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(82, 17);
+            this.label1.Size = new System.Drawing.Size(82, 12);
             this.label1.TabIndex = 19;
             this.label1.Text = "译文缺省规则";
             // 
@@ -256,7 +259,7 @@ namespace MusicLyricApp
             // 
             this.label9.Location = new System.Drawing.Point(226, 36);
             this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(82, 17);
+            this.label9.Size = new System.Drawing.Size(82, 12);
             this.label9.TabIndex = 21;
             this.label9.Text = "译文匹配精度";
             // 
@@ -268,14 +271,14 @@ namespace MusicLyricApp
             this.TranslateMatchPrecisionDeviation_TextBox.TabIndex = 22;
             this.TranslateMatchPrecisionDeviation_TextBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.LrcMatchDigit_TextBox_KeyPress);
             // 
-            // label10
+            // label5
             // 
-            this.label10.Font = new System.Drawing.Font("宋体", 10F);
-            this.label10.Location = new System.Drawing.Point(402, 36);
-            this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(24, 18);
-            this.label10.TabIndex = 23;
-            this.label10.Text = "MS";
+            this.label5.Font = new System.Drawing.Font("宋体", 10F);
+            this.label5.Location = new System.Drawing.Point(402, 36);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(24, 12);
+            this.label5.TabIndex = 23;
+            this.label5.Text = "MS";
             // 
             // IgnoreEmptyLyric_CheckBox
             // 
@@ -303,21 +306,21 @@ namespace MusicLyricApp
             this.NetEase_Cookie_TextBox.Size = new System.Drawing.Size(219, 21);
             this.NetEase_Cookie_TextBox.TabIndex = 26;
             // 
-            // label11
+            // label2
             // 
-            this.label11.Location = new System.Drawing.Point(6, 78);
-            this.label11.Name = "label11";
-            this.label11.Size = new System.Drawing.Size(80, 17);
-            this.label11.TabIndex = 27;
-            this.label11.Text = "网易云Cookie";
+            this.label2.Location = new System.Drawing.Point(6, 78);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(80, 12);
+            this.label2.TabIndex = 27;
+            this.label2.Text = "网易云Cookie";
             // 
-            // label12
+            // label4
             // 
-            this.label12.Location = new System.Drawing.Point(6, 122);
-            this.label12.Name = "label12";
-            this.label12.Size = new System.Drawing.Size(80, 17);
-            this.label12.TabIndex = 28;
-            this.label12.Text = "QQ音乐Cookie";
+            this.label4.Location = new System.Drawing.Point(6, 122);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(80, 12);
+            this.label4.TabIndex = 28;
+            this.label4.Text = "QQ音乐Cookie";
             // 
             // QQMusic_Cookie_TextBox
             // 
@@ -355,7 +358,7 @@ namespace MusicLyricApp
             // SettingTips_TextBox
             // 
             this.SettingTips_TextBox.BackColor = System.Drawing.SystemColors.Info;
-            this.SettingTips_TextBox.Location = new System.Drawing.Point(628, 201);
+            this.SettingTips_TextBox.Location = new System.Drawing.Point(733, 192);
             this.SettingTips_TextBox.Multiline = true;
             this.SettingTips_TextBox.Name = "SettingTips_TextBox";
             this.SettingTips_TextBox.ReadOnly = true;
@@ -363,15 +366,16 @@ namespace MusicLyricApp
             this.SettingTips_TextBox.Size = new System.Drawing.Size(210, 229);
             this.SettingTips_TextBox.TabIndex = 31;
             // 
-            // button1
+            // OutputHelp_Button
             // 
-            this.button1.ForeColor = System.Drawing.Color.Red;
-            this.button1.Location = new System.Drawing.Point(520, 409);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(21, 21);
-            this.button1.TabIndex = 20;
-            this.button1.Text = "?";
-            this.button1.UseVisualStyleBackColor = true;
+            this.OutputHelp_Button.ForeColor = System.Drawing.Color.Red;
+            this.OutputHelp_Button.Location = new System.Drawing.Point(297, -1);
+            this.OutputHelp_Button.Name = "OutputHelp_Button";
+            this.OutputHelp_Button.Size = new System.Drawing.Size(21, 21);
+            this.OutputHelp_Button.TabIndex = 20;
+            this.OutputHelp_Button.Text = "?";
+            this.OutputHelp_Button.UseVisualStyleBackColor = true;
+            this.OutputHelp_Button.Click += new System.EventHandler(this.Help_Btn_Click);
             // 
             // AppConfig_GroupBox
             // 
@@ -379,12 +383,13 @@ namespace MusicLyricApp
             this.AppConfig_GroupBox.Controls.Add(this.AutoReadClipboard_CheckBox);
             this.AppConfig_GroupBox.Controls.Add(this.RememberParam_CheckBox);
             this.AppConfig_GroupBox.Controls.Add(this.NetEase_Cookie_TextBox);
-            this.AppConfig_GroupBox.Controls.Add(this.label11);
+            this.AppConfig_GroupBox.Controls.Add(this.label2);
             this.AppConfig_GroupBox.Controls.Add(this.QQMusic_Cookie_TextBox);
-            this.AppConfig_GroupBox.Controls.Add(this.label12);
-            this.AppConfig_GroupBox.Location = new System.Drawing.Point(254, 192);
+            this.AppConfig_GroupBox.Controls.Add(this.label4);
+            this.AppConfig_GroupBox.Controls.Add(this.Save_Btn);
+            this.AppConfig_GroupBox.Location = new System.Drawing.Point(359, 192);
             this.AppConfig_GroupBox.Name = "AppConfig_GroupBox";
-            this.AppConfig_GroupBox.Size = new System.Drawing.Size(349, 152);
+            this.AppConfig_GroupBox.Size = new System.Drawing.Size(349, 229);
             this.AppConfig_GroupBox.TabIndex = 32;
             this.AppConfig_GroupBox.TabStop = false;
             this.AppConfig_GroupBox.Text = "应用设置";
@@ -406,7 +411,7 @@ namespace MusicLyricApp
             this.TransLyric_GroupBox.Controls.Add(this.label1);
             this.TransLyric_GroupBox.Controls.Add(this.TranslateMatchPrecisionDeviation_TextBox);
             this.TransLyric_GroupBox.Controls.Add(this.label9);
-            this.TransLyric_GroupBox.Controls.Add(this.label10);
+            this.TransLyric_GroupBox.Controls.Add(this.label5);
             this.TransLyric_GroupBox.Controls.Add(this.RomajiMode_ComboBox);
             this.TransLyric_GroupBox.Controls.Add(this.ShowRomaji_CheckBox);
             this.TransLyric_GroupBox.Controls.Add(this.label3);
@@ -420,17 +425,35 @@ namespace MusicLyricApp
             // 
             // Output_GroupBox
             // 
+            this.Output_GroupBox.Controls.Add(this.OutputName_TextBox);
+            this.Output_GroupBox.Controls.Add(this.label10);
             this.Output_GroupBox.Controls.Add(this.IgnorePureMusicInSave_CheckBox);
+            this.Output_GroupBox.Controls.Add(this.OutputHelp_Button);
             this.Output_GroupBox.Location = new System.Drawing.Point(12, 192);
             this.Output_GroupBox.Name = "Output_GroupBox";
-            this.Output_GroupBox.Size = new System.Drawing.Size(227, 152);
+            this.Output_GroupBox.Size = new System.Drawing.Size(324, 229);
             this.Output_GroupBox.TabIndex = 35;
             this.Output_GroupBox.TabStop = false;
             this.Output_GroupBox.Text = "输出设置";
             // 
+            // OutputName_TextBox
+            // 
+            this.OutputName_TextBox.Location = new System.Drawing.Point(103, 32);
+            this.OutputName_TextBox.Name = "OutputName_TextBox";
+            this.OutputName_TextBox.Size = new System.Drawing.Size(206, 21);
+            this.OutputName_TextBox.TabIndex = 38;
+            // 
+            // label10
+            // 
+            this.label10.Location = new System.Drawing.Point(8, 35);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(65, 12);
+            this.label10.TabIndex = 37;
+            this.label10.Text = "输出文件名";
+            // 
             // IgnorePureMusicInSave_CheckBox
             // 
-            this.IgnorePureMusicInSave_CheckBox.Location = new System.Drawing.Point(8, 31);
+            this.IgnorePureMusicInSave_CheckBox.Location = new System.Drawing.Point(8, 67);
             this.IgnorePureMusicInSave_CheckBox.Name = "IgnorePureMusicInSave_CheckBox";
             this.IgnorePureMusicInSave_CheckBox.Size = new System.Drawing.Size(93, 29);
             this.IgnorePureMusicInSave_CheckBox.TabIndex = 36;
@@ -441,16 +464,14 @@ namespace MusicLyricApp
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(996, 512);
+            this.ClientSize = new System.Drawing.Size(959, 441);
             this.Controls.Add(this.Output_GroupBox);
             this.Controls.Add(this.TransLyric_GroupBox);
             this.Controls.Add(this.OriginLyric_GroupBox);
             this.Controls.Add(this.AppConfig_GroupBox);
             this.Controls.Add(this.TimestampHelp_Button);
-            this.Controls.Add(this.button1);
             this.Controls.Add(this.SettingTips_TextBox);
             this.Controls.Add(this.Timestamp_GroupBox);
-            this.Controls.Add(this.Save_Btn);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
@@ -464,9 +485,14 @@ namespace MusicLyricApp
             this.TransLyric_GroupBox.ResumeLayout(false);
             this.TransLyric_GroupBox.PerformLayout();
             this.Output_GroupBox.ResumeLayout(false);
+            this.Output_GroupBox.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
         }
+
+        private System.Windows.Forms.TextBox OutputName_TextBox;
+
+        private System.Windows.Forms.Label label10;
 
         private System.Windows.Forms.GroupBox Output_GroupBox;
         private System.Windows.Forms.CheckBox IgnorePureMusicInSave_CheckBox;
@@ -477,24 +503,24 @@ namespace MusicLyricApp
 
         private System.Windows.Forms.GroupBox AppConfig_GroupBox;
 
-        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button OutputHelp_Button;
 
         private System.Windows.Forms.Button TimestampHelp_Button;
 
         private System.Windows.Forms.GroupBox Timestamp_GroupBox;
         private System.Windows.Forms.TextBox SettingTips_TextBox;
 
-        private System.Windows.Forms.Label label12;
+        private System.Windows.Forms.Label label4;
         private System.Windows.Forms.TextBox QQMusic_Cookie_TextBox;
 
         private System.Windows.Forms.TextBox NetEase_Cookie_TextBox;
-        private System.Windows.Forms.Label label11;
+        private System.Windows.Forms.Label label2;
 
         private System.Windows.Forms.CheckBox VerbatimLyric_CheckBox;
 
         private System.Windows.Forms.CheckBox IgnoreEmptyLyric_CheckBox;
 
-        private System.Windows.Forms.Label label10;
+        private System.Windows.Forms.Label label5;
 
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.TextBox TranslateMatchPrecisionDeviation_TextBox;

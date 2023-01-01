@@ -160,30 +160,26 @@ namespace MusicLyricApp.Utils
         /**
          * 获取输出文件名
          */
-        public static string GetOutputName(SongVo songVo, OutputFilenameTypeEnum typeEnum)
+        public static string GetOutputName(SaveVo saveVo, string format)
         {
-            if (songVo == null)
+            if (saveVo == null)
             {
-                var ex = new ArgumentNullException(nameof(songVo));
-                Logger.Error(ex);
-                throw ex;
+                throw new MusicLyricException("GetOutputName but saveVo is null");
             }
 
-            string outputName;
-            switch (typeEnum)
+            var songVo = saveVo.SongVo;
+
+            if (songVo == null)
             {
-                case OutputFilenameTypeEnum.NAME_SINGER:
-                    outputName = $"{songVo.Name} - {songVo.Singer}";
-                    break;
-                case OutputFilenameTypeEnum.SINGER_NAME:
-                    outputName = $"{songVo.Singer} - {songVo.Name}";
-                    break;
-                case OutputFilenameTypeEnum.NAME:
-                    outputName = songVo.Name;
-                    break;
-                default:
-                    throw new MusicLyricException(ErrorMsg.SYSTEM_ERROR);
+                throw new MusicLyricException("GetOutputName but songVo is null");
             }
+
+            var outputName = format
+                .Replace("${index}", saveVo.Index.ToString())
+                .Replace("${id}", songVo.DisplayId)
+                .Replace("${name}", songVo.Name)
+                .Replace("${singer}", songVo.Singer)
+                .Replace("${album}", songVo.Album);
 
             return GetSafeFilename(outputName);
         }

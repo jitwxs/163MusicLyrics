@@ -22,14 +22,6 @@ namespace MusicLyricApp.Bean
         [Description("优先译文（合并）")] TRANSLATE_PRIOR_MERGE = 7,
     }
 
-    // 输出文件名类型
-    public enum OutputFilenameTypeEnum
-    {
-        [Description("歌曲名 - 歌手")] NAME_SINGER = 0,
-        [Description("歌手 - 歌曲名")] SINGER_NAME = 1,
-        [Description("歌曲名")] NAME = 2
-    }
-
     // 搜索来源
     public enum SearchSourceEnum
     {
@@ -132,14 +124,14 @@ namespace MusicLyricApp.Bean
     /// </summary>
     public class SaveVo
     {
-        public SaveVo(string songId, SongVo songVo, LyricVo lyricVo)
+        public SaveVo(int index, SongVo songVo, LyricVo lyricVo)
         {
-            SongId = songId;
+            Index = index;
             SongVo = songVo;
             LyricVo = lyricVo;
         }
 
-        public string SongId { get; }
+        public int Index { get; }
 
         public SongVo SongVo { get; }
 
@@ -379,10 +371,10 @@ namespace MusicLyricApp.Bean
         /// <returns></returns>
         public bool IsPureMusic()
         {
-            // 译文歌词必须为空且原文歌词不为空
+            // 原文歌词不为空 && 译文歌词必须为空
             if (string.IsNullOrEmpty(Lyric) || !string.IsNullOrEmpty(TranslateLyric))
             {
-                return true;
+                return false;
             }
 
             if (SearchSource == SearchSourceEnum.NET_EASE_MUSIC)
@@ -700,11 +692,24 @@ namespace MusicLyricApp.Bean
         /// <summary>
         /// 实际处理的歌曲 ID 列表
         /// </summary>
-        public readonly Dictionary<string, SearchSourceEnum> SongIds = new Dictionary<string, SearchSourceEnum>();
+        public readonly List<InputSongId> SongIds = new List<InputSongId>();
 
         public SettingBean SettingBeanBackup { get; set; }
 
         public SettingBean SettingBean { get; set; }
+        
+        public class InputSongId
+        {
+            public string SongId { get; }
+            
+            public SearchSourceEnum SearchSource { get; }
+
+            public InputSongId(string songId, SearchSourceEnum searchSource)
+            {
+                SongId = songId;
+                SearchSource = searchSource;
+            }
+        }
     }
 
     public class ResultVo<T>
