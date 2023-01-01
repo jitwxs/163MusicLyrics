@@ -349,7 +349,7 @@ namespace MusicLyricApp
             this.Blur_Search_Btn.TabIndex = 32;
             this.Blur_Search_Btn.Text = "模糊搜索";
             this.Blur_Search_Btn.UseVisualStyleBackColor = true;
-            this.Blur_Search_Btn.Click += new System.EventHandler(this.Blur_Search_Btn_Click);
+            this.Blur_Search_Btn.Click += new System.EventHandler(this.Search_Btn_Click);
             // 
             // MainForm
             // 

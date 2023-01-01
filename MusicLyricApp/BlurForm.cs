@@ -123,7 +123,7 @@ namespace MusicLyricApp
             if (selectIds.Count > 0)
             {
                 _mainForm.Search_Text.Text = string.Join(",", selectIds);
-                _mainForm.Search_Btn_Click(sender, e);
+                _mainForm.Search_Btn_Click("Search_Btn", e);
                 Close();
             }
         }

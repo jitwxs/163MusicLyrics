@@ -345,81 +345,73 @@ namespace MusicLyricApp
         }
 
         /// <summary>
-        /// 精确搜索，点击事件
+        /// 搜索事件
         /// </summary>
         public async void Search_Btn_Click(object sender, EventArgs e)
         {
-            ReloadConfig();
-            CleanTextBox();
-            _globalSaveVoMap.Clear();
+            Button input;
+            if (sender is Button button)
+            {
+                input = button;
+            }
+            else
+            {
+                input = (Button) Controls.Find((string) sender, true)[0];
+            }
 
             try
             {
-                var songIds = InitInputSongIds();
-                if (songIds.Count > 1)
+                // 精确搜索
+                if (input == Search_Btn)
                 {
-                    BatchSearch(songIds);
-                }
-                else
-                { 
-                    SingleSearch(songIds);
-                }
-            }
-            catch (WebException ex)
-            {
-                _logger.Error(ex, "Search network error, param: {SearchParam}, delay: {Delay}", Search_Text.Text, 
-                    await NetworkUtils.GetWebRoundtripTimeAsync());
-                MessageBox.Show(ErrorMsg.NETWORK_ERROR, "错误");
-            }
-            catch (MusicLyricException ex)
-            {
-                _logger.Error("Search music lyric failed, param: {SearchParam}, type: {SearchType}, message: {ErrorMsg}",
-                    Search_Text.Text, _globalSearchInfo.SettingBean.Param.SearchType, ex.Message);
-                MessageBox.Show(ex.Message, "提示");
-            }
-            catch (System.Exception ex)
-            {
-                _logger.Error("Search music lyric exception, param: {SearchParam}, message: {Ex}", Search_Text.Text, ex);
-                MessageBox.Show(ErrorMsg.SYSTEM_ERROR, "错误");
-            }
-        }
+                    ReloadConfig();
+                    CleanTextBox();
+                    _globalSaveVoMap.Clear();
+                    
+                    var songIds = InitInputSongIds();
+                    if (songIds.Count > 1)
+                    {
+                        BatchSearch(songIds);
+                    }
+                    else
+                    { 
+                        SingleSearch(songIds);
+                    }
+                } 
+                // 模糊搜索
+                else if (input == Blur_Search_Btn)
+                {
+                    var keyword = Search_Text.Text.Trim();
+                    if (string.IsNullOrWhiteSpace(keyword))
+                    {
+                        throw new MusicLyricException(ErrorMsg.INPUT_CONENT_EMPLT);
+                    }
 
-        /// <summary>
-        /// 模糊搜索，点击事件
-        /// </summary>
-        private async void Blur_Search_Btn_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                var keyword = Search_Text.Text.Trim();
-                if (string.IsNullOrWhiteSpace(keyword))
-                {
-                    throw new MusicLyricException(ErrorMsg.INPUT_CONENT_EMPLT);
-                }
-
-                var resultVo = _api[_globalSearchInfo.SettingBean.Param.SearchSource].Search(keyword, _globalSearchInfo.SettingBean.Param.SearchType).Assert().Data;
-                if (resultVo.IsEmpty())
-                {
-                    throw new MusicLyricException(ErrorMsg.SEARCH_RESULT_EMPTY);
-                }
+                    var resultVo = _api[_globalSearchInfo.SettingBean.Param.SearchSource].Search(keyword, _globalSearchInfo.SettingBean.Param.SearchType).Assert().Data;
+                    if (resultVo.IsEmpty())
+                    {
+                        throw new MusicLyricException(ErrorMsg.SEARCH_RESULT_EMPTY);
+                    }
                 
-                FormUtils.OpenForm(_blurForm, () => _blurForm = new BlurForm(resultVo, this), this);
+                    FormUtils.OpenForm(_blurForm, () => _blurForm = new BlurForm(resultVo, this), this);
+                }
             }
             catch (WebException ex)
             {
-                _logger.Error(ex, "Blur Search Network error, delay: {Delay}", await NetworkUtils.GetWebRoundtripTimeAsync());
-                MessageBox.Show(ErrorMsg.NETWORK_ERROR, "错误");
+                _logger.Error(ex, "Search Network error, btn: {Btn}, delay: {Delay}", 
+                    input.Name, await NetworkUtils.GetWebRoundtripTimeAsync());
+                MessageBox.Show(ErrorMsg.NETWORK_ERROR, "网络错误");
             }
             catch (MusicLyricException ex)
             {
-                _logger.Error("Blur Search Business failed, param: {SearchParam}, type: {SearchType}, message: {ErrorMsg}",
-                    Search_Text.Text, _globalSearchInfo.SettingBean.Param.SearchType, ex.Message);
-                MessageBox.Show(ex.Message, "提示");
+                _logger.Error("Search Business failed, btn: {Btn}, param: {SearchParam}, type: {SearchType}, message: {ErrorMsg}",
+                    input.Name, Search_Text.Text, _globalSearchInfo.SettingBean.Param.SearchType, ex.Message);
+                MessageBox.Show(ex.Message, "搜索错误");
             }
             catch (System.Exception ex)
             {
                 _logger.Error(ex);
-                MessageBox.Show(ErrorMsg.SYSTEM_ERROR, "错误");
+                MessageBox.Show(ErrorMsg.SYSTEM_ERROR, "系统错误");
             }
         }
         
@@ -782,11 +774,11 @@ namespace MusicLyricApp
             } else if (e.Control && e.KeyCode == Keys.Enter)
             {
                 // 模糊搜索
-                Blur_Search_Btn_Click(sender, e);
+                Search_Btn_Click(Blur_Search_Btn, e);
             } else if (e.KeyCode == Keys.Enter)
             {
                 // 精确搜索
-                Search_Btn_Click(sender, e);
+                Search_Btn_Click(Search_Btn, e);
             }
         }
 
