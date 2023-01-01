@@ -338,14 +338,14 @@ namespace MusicLyricApp
 
             log
                 .Append(Environment.NewLine)
-                .Append($"Total {resultMaps.Count} Success {_globalSaveVoMap.Count} Failure {resultMaps.Count - _globalSaveVoMap.Count}")
+                .Append($"累计 {resultMaps.Count} 成功 {_globalSaveVoMap.Count} 失败 {resultMaps.Count - _globalSaveVoMap.Count}")
                 .Append(Environment.NewLine);
 
             UpdateLrcTextBox(log.ToString());
         }
 
         /// <summary>
-        /// 搜索按钮，点击事件
+        /// 精确搜索，点击事件
         /// </summary>
         public async void Search_Btn_Click(object sender, EventArgs e)
         {
@@ -364,10 +364,6 @@ namespace MusicLyricApp
                 { 
                     SingleSearch(songIds);
                 }
-                
-                // 更新 searchSource、searchType
-                
-                
             }
             catch (WebException ex)
             {
@@ -388,6 +384,9 @@ namespace MusicLyricApp
             }
         }
 
+        /// <summary>
+        /// 模糊搜索，点击事件
+        /// </summary>
         private async void Blur_Search_Btn_Click(object sender, EventArgs e)
         {
             try
@@ -537,6 +536,13 @@ namespace MusicLyricApp
                 return;
             }
             
+            // 纯音乐跳过
+            if (saveVo.LyricVo.IsPureMusic() && _globalSearchInfo.SettingBean.Config.IgnorePureMusicInSave)
+            {
+                MessageBox.Show(ErrorMsg.PURE_MUSIC_IGNORE_SAVE, "提示");
+                return;
+            }
+            
             var saveDialog = new SaveFileDialog();
             saveDialog.FileName = GlobalUtils.GetOutputName(saveVo.SongVo, _globalSearchInfo.SettingBean.Param.OutputFileNameType);
             saveDialog.Filter = _globalSearchInfo.SettingBean.Param.OutputFileFormat.ToDescription();
@@ -593,7 +599,7 @@ namespace MusicLyricApp
                 {
                     var saveVo = item.Value;
                     var lyricVo = saveVo.LyricVo;
-                    if (lyricVo.IsEmpty())
+                    if (lyricVo.IsEmpty() || (lyricVo.IsPureMusic() && _globalSearchInfo.SettingBean.Config.IgnorePureMusicInSave))
                     {
                         skipCount++;
                         continue;
@@ -621,7 +627,7 @@ namespace MusicLyricApp
             foreach (var songId in _globalSearchInfo.SongIds.Keys)
             {
                 log
-                    .Append($"{songId} => {(success.Contains(songId) ? "success" : "failure")}")
+                    .Append($"{songId} => {(success.Contains(songId) ? "成功" : "跳过")}")
                     .Append(Environment.NewLine);
             }
             UpdateLrcTextBox(log.ToString());
