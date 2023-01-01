@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 using MusicLyricApp.Bean;
 using MusicLyricApp.Exception;
+using MusicLyricApp.Utils;
 
 namespace MusicLyricApp
 {
@@ -48,10 +50,21 @@ namespace MusicLyricApp
                 // 译文歌词
                 _settingBean.Config.TranslateLyricDefaultRule = (TranslateLyricDefaultRuleEnum)TransLyricDefaultRule_ComboBox.SelectedIndex;
                 _settingBean.Config.TranslateMatchPrecisionDeviation = int.Parse(TranslateMatchPrecisionDeviation_TextBox.Text);
-                _settingBean.Config.RomajiConfig.Enable = Romaji_RadioBtn.Enabled;
-                _settingBean.Config.RomajiConfig.ModeEnum = (RomajiModeEnum)RomajiMode_ComboBox.SelectedIndex;
-                _settingBean.Config.RomajiConfig.SystemEnum = (RomajiSystemEnum)RomajiSystem_ComboBox.SelectedIndex;
-            
+                _settingBean.Config.RomajiModeEnum = (RomajiModeEnum)RomajiMode_ComboBox.SelectedIndex;
+                _settingBean.Config.RomajiSystemEnum = (RomajiSystemEnum)RomajiSystem_ComboBox.SelectedIndex;
+                
+                var selectTransType = new List<int>();
+                var transTypeDict = GlobalUtils.GetEnumDict<TransTypeEnum>();
+                foreach (DataGridViewRow row in TransType_DataGridView.Rows)
+                {
+                    if ((bool) row.Cells[0].Value)
+                    {
+                        var transType = transTypeDict[row.Cells[1].Value.ToString()];
+                        selectTransType.Add(Convert.ToInt32(transType));
+                    }
+                }
+                _settingBean.Config.TransType = string.Join(",", selectTransType);
+
                 // 输出设置
                 _settingBean.Config.IgnorePureMusicInSave = IgnorePureMusicInSave_CheckBox.Checked;
                 _settingBean.Config.OutputFileNameFormat = OutputName_TextBox.Text;
@@ -97,13 +110,14 @@ namespace MusicLyricApp
 
         private void ShowRomajiChangeListener()
         {
-            var isEnable = Romaji_RadioBtn.Checked;
+            var romajiCell = TransType_DataGridView.Rows[Convert.ToInt32(TransTypeEnum.ROMAJI)].Cells[0];
+            var isEnable = (bool) romajiCell.Value;
 
             // 检查依赖
             if (isEnable && Constants.IpaDicDependency.Any(e => !File.Exists(e)))
             {
                 MessageBox.Show(string.Format(ErrorMsg.DEPENDENCY_LOSS, "IpaDic"), "提示");
-                Romaji_RadioBtn.Checked = false;
+                romajiCell.Value = false;
 
                 isEnable = false;
             }
@@ -142,40 +156,85 @@ namespace MusicLyricApp
         }
 
         /// <summary>
-        /// 译文缺省规则，数值改变事件
+        /// 译文列表，控制移动时鼠标的图形
+        /// </summary>
+        private void TransList_DataGridView_DragEnter(object sender, DragEventArgs e)
+        {
+            e.Effect = DragDropEffects.Move;
+        }
+
+        /// <summary>
+        /// 译文列表，控制拖动的条件
+        /// </summary>
+        private void TransList_DataGridView_CellMouseMove(object sender, DataGridViewCellMouseEventArgs e)
+        {
+            if (e.Clicks < 2 && e.Button == MouseButtons.Left)
+
+            {
+                if (e.ColumnIndex == -1 && e.RowIndex > -1)
+                    TransType_DataGridView.DoDragDrop(TransType_DataGridView.Rows[e.RowIndex], DragDropEffects.Move);
+            }
+        }
+
+        private int _transListSelectionIdx;
+        
+        /// <summary>
+        /// 译文列表，拖动后实现行的删除和添加，实现行交换位置的错觉
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        /// <exception cref="NotImplementedException"></exception>
-        private void TransLyricDefaultRule_ComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        private void TransList_DataGridView_DragDrop(object sender, DragEventArgs e)
         {
-            var translateLyricDefaultRule = (TranslateLyricDefaultRuleEnum) TransLyricDefaultRule_ComboBox.SelectedIndex;
+            var idx = GetRowFromPoint(e.X, e.Y);
 
-            if (translateLyricDefaultRule == TranslateLyricDefaultRuleEnum.AUTO_TRANSLATE)
+            if (idx < 0) return;
+
+            if (e.Data.GetDataPresent(typeof(DataGridViewRow)))
             {
-                ChineseTanslate_RadioBtn.Enabled = true;
-                ChineseTanslate_RadioBtn.Checked = true;
-                English_RadioBtn.Enabled = true;
-                English_RadioBtn.Checked = true;
-                Romaji_RadioBtn.Enabled = true;
-                Romaji_RadioBtn.Checked = true;
-            }
-            else
-            {
-                ChineseTanslate_RadioBtn.Enabled = false;
-                ChineseTanslate_RadioBtn.Checked = false;
-                English_RadioBtn.Enabled = false;
-                English_RadioBtn.Checked = false;
-                Romaji_RadioBtn.Enabled = false;
-                Romaji_RadioBtn.Checked = false;
-                
-                ShowRomajiChangeListener();
+                var row = (DataGridViewRow)e.Data.GetData(typeof(DataGridViewRow));
+
+                TransType_DataGridView.Rows.Remove(row);
+
+                _transListSelectionIdx = idx;
+
+                TransType_DataGridView.Rows.Insert(idx, row);
             }
         }
         
-        private void AutoTranslate_RadioBox_CheckedChanged(object sender, EventArgs e)
+        private int GetRowFromPoint(int x, int y)
         {
-            ShowRomajiChangeListener();
+            for (var i = 0; i < TransType_DataGridView.RowCount; i++)
+            {
+                var rec = TransType_DataGridView.GetRowDisplayRectangle(i, false);
+                if (TransType_DataGridView.RectangleToScreen(rec).Contains(x, y))
+                    return i;
+            }
+            return -1;
+        }
+
+        /// <summary>
+        /// 控制被移动的行始终是选中行
+        /// </summary>
+        private void TransList_DataGridView_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
+        {
+            if (_transListSelectionIdx > -1)
+            {
+                TransType_DataGridView.Rows[_transListSelectionIdx].Selected = true;
+                TransType_DataGridView.CurrentCell = TransType_DataGridView.Rows[_transListSelectionIdx].Cells[0];
+            }
+        }
+
+        private void TransType_DataGridView_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+            TransType_DataGridView.CommitEdit(DataGridViewDataErrorContexts.Commit);
+        }
+
+        private void TransType_DataGridView_CellValueChanged(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex == Convert.ToInt32(TransTypeEnum.ROMAJI))
+            {
+                ShowRomajiChangeListener();
+            }
         }
     }
 }

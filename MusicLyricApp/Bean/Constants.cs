@@ -62,8 +62,8 @@ namespace MusicLyricApp.Bean
                         break;
                     case TypeEnum.OUTPUT_SETTING:
                         list.Add("您可自行调整『输出文件名』配置，系统预设的元变量有：");
-                        list.Add("${id} -> 歌曲ID");
-                        list.Add("${index} -> 结果索引，对于单曲表示搜索结果中的位置，对于专辑和歌单表示位于结果中的位置");
+                        list.Add("${id} -> 歌曲 ID");
+                        list.Add("${index} -> 歌曲位于搜索结果中的索引序号");
                         list.Add("${name} -> 歌曲名");
                         list.Add("${singer} -> 歌手名");
                         list.Add("${album} -> 专辑名");

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Linq;
 using MusicLyricApp.Bean;
 using MusicLyricApp.Utils;
 
@@ -42,11 +43,17 @@ namespace MusicLyricApp
             TransLyricDefaultRule_ComboBox.Items.AddRange(GlobalUtils.GetEnumDescArray<TranslateLyricDefaultRuleEnum>());
             TransLyricDefaultRule_ComboBox.SelectedIndex = (int)_settingBean.Config.TranslateLyricDefaultRule;
             TranslateMatchPrecisionDeviation_TextBox.Text = _settingBean.Config.TranslateMatchPrecisionDeviation.ToString();
-            Romaji_RadioBtn.Checked = _settingBean.Config.RomajiConfig.Enable;
+
+            var configTransType = _settingBean.Config.TransType.Split(',').Select(e => Convert.ToInt32(e)).ToHashSet();
+            foreach (var transType in GlobalUtils.GetEnumList<TransTypeEnum>())
+            {
+                TransType_DataGridView.Rows.Add(configTransType.Contains(Convert.ToInt32(transType)), transType.ToDescription());
+            }
+
             RomajiMode_ComboBox.Items.AddRange(GlobalUtils.GetEnumDescArray<RomajiModeEnum>());
-            RomajiMode_ComboBox.SelectedIndex = (int)_settingBean.Config.RomajiConfig.ModeEnum;
+            RomajiMode_ComboBox.SelectedIndex = (int)_settingBean.Config.RomajiModeEnum;
             RomajiSystem_ComboBox.Items.AddRange(GlobalUtils.GetEnumDescArray<RomajiSystemEnum>()); 
-            RomajiSystem_ComboBox.SelectedIndex = (int)_settingBean.Config.RomajiConfig.SystemEnum;
+            RomajiSystem_ComboBox.SelectedIndex = (int)_settingBean.Config.RomajiSystemEnum;
             
             // 输出设置
             IgnorePureMusicInSave_CheckBox.Checked = _settingBean.Config.IgnorePureMusicInSave;
@@ -112,12 +119,16 @@ namespace MusicLyricApp
             this.label10 = new System.Windows.Forms.Label();
             this.IgnorePureMusicInSave_CheckBox = new System.Windows.Forms.CheckBox();
             this.Reset_Btn = new System.Windows.Forms.Button();
+            this.TransType_DataGridView = new System.Windows.Forms.DataGridView();
+            this.Column1 = new System.Windows.Forms.DataGridViewCheckBoxColumn();
+            this.Column2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Timestamp_GroupBox.SuspendLayout();
             this.AppConfig_GroupBox.SuspendLayout();
             this.OriginLyric_GroupBox.SuspendLayout();
             this.TransLyric_GroupBox.SuspendLayout();
             this.TransTranslate_GroupBox.SuspendLayout();
             this.Output_GroupBox.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.TransType_DataGridView)).BeginInit();
             this.SuspendLayout();
             // 
             // Save_Btn
@@ -252,7 +263,6 @@ namespace MusicLyricApp
             this.TransLyricDefaultRule_ComboBox.Name = "TransLyricDefaultRule_ComboBox";
             this.TransLyricDefaultRule_ComboBox.Size = new System.Drawing.Size(98, 20);
             this.TransLyricDefaultRule_ComboBox.TabIndex = 20;
-            this.TransLyricDefaultRule_ComboBox.SelectedIndexChanged += new System.EventHandler(this.TransLyricDefaultRule_ComboBox_SelectedIndexChanged);
             // 
             // label9
             // 
@@ -442,7 +452,6 @@ namespace MusicLyricApp
             this.Romaji_RadioBtn.TabStop = true;
             this.Romaji_RadioBtn.Text = "罗马音";
             this.Romaji_RadioBtn.UseVisualStyleBackColor = true;
-            this.Romaji_RadioBtn.CheckedChanged += new System.EventHandler(this.AutoTranslate_RadioBox_CheckedChanged);
             // 
             // English_RadioBtn
             // 
@@ -453,7 +462,6 @@ namespace MusicLyricApp
             this.English_RadioBtn.TabStop = true;
             this.English_RadioBtn.Text = "英文";
             this.English_RadioBtn.UseVisualStyleBackColor = true;
-            this.English_RadioBtn.CheckedChanged += new System.EventHandler(this.AutoTranslate_RadioBox_CheckedChanged);
             // 
             // ChineseTanslate_RadioBtn
             // 
@@ -464,7 +472,6 @@ namespace MusicLyricApp
             this.ChineseTanslate_RadioBtn.TabStop = true;
             this.ChineseTanslate_RadioBtn.Text = "中文";
             this.ChineseTanslate_RadioBtn.UseVisualStyleBackColor = true;
-            this.ChineseTanslate_RadioBtn.CheckedChanged += new System.EventHandler(this.AutoTranslate_RadioBox_CheckedChanged);
             // 
             // Output_GroupBox
             // 
@@ -516,11 +523,43 @@ namespace MusicLyricApp
             this.Reset_Btn.UseVisualStyleBackColor = false;
             this.Reset_Btn.Click += new System.EventHandler(this.Close_Btn_Click);
             // 
+            // TransType_DataGridView
+            // 
+            this.TransType_DataGridView.AllowDrop = true;
+            this.TransType_DataGridView.AllowUserToAddRows = false;
+            this.TransType_DataGridView.AllowUserToDeleteRows = false;
+            this.TransType_DataGridView.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
+            this.TransType_DataGridView.AutoSizeRowsMode = System.Windows.Forms.DataGridViewAutoSizeRowsMode.DisplayedCells;
+            this.TransType_DataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.TransType_DataGridView.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { this.Column1, this.Column2 });
+            this.TransType_DataGridView.Location = new System.Drawing.Point(217, 577);
+            this.TransType_DataGridView.Name = "TransType_DataGridView";
+            this.TransType_DataGridView.RowTemplate.Height = 23;
+            this.TransType_DataGridView.Size = new System.Drawing.Size(247, 105);
+            this.TransType_DataGridView.TabIndex = 37;
+            this.TransType_DataGridView.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.TransType_DataGridView_CellContentClick);
+            this.TransType_DataGridView.CellMouseMove += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.TransList_DataGridView_CellMouseMove);
+            this.TransType_DataGridView.CellValueChanged += new System.Windows.Forms.DataGridViewCellEventHandler(this.TransType_DataGridView_CellValueChanged);
+            this.TransType_DataGridView.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.TransList_DataGridView_RowsAdded);
+            this.TransType_DataGridView.DragDrop += new System.Windows.Forms.DragEventHandler(this.TransList_DataGridView_DragDrop);
+            this.TransType_DataGridView.DragEnter += new System.Windows.Forms.DragEventHandler(this.TransList_DataGridView_DragEnter);
+            // 
+            // Column1
+            // 
+            this.Column1.HeaderText = "是否启用";
+            this.Column1.Name = "Column1";
+            // 
+            // Column2
+            // 
+            this.Column2.HeaderText = "译文类型";
+            this.Column2.Name = "Column2";
+            // 
             // SettingForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(959, 564);
+            this.ClientSize = new System.Drawing.Size(959, 738);
+            this.Controls.Add(this.TransType_DataGridView);
             this.Controls.Add(this.Reset_Btn);
             this.Controls.Add(this.Output_GroupBox);
             this.Controls.Add(this.TransLyric_GroupBox);
@@ -545,9 +584,15 @@ namespace MusicLyricApp
             this.TransTranslate_GroupBox.ResumeLayout(false);
             this.Output_GroupBox.ResumeLayout(false);
             this.Output_GroupBox.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.TransType_DataGridView)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
         }
+
+        private System.Windows.Forms.DataGridViewCheckBoxColumn Column1;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Column2;
+
+        private System.Windows.Forms.DataGridView TransType_DataGridView;
 
         private System.Windows.Forms.Button Reset_Btn;
 

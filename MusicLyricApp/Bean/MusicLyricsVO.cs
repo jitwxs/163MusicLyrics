@@ -84,7 +84,14 @@ namespace MusicLyricApp.Bean
         [Description("忽略展示")] IGNORE = 0,
         [Description("展示空行")] EMPTY_LINE = 1,
         [Description("填充原文")] FILL_ORIGIN = 2,
-        [Description("自动翻译")] AUTO_TRANSLATE = 3,
+    }
+
+    public enum TransTypeEnum
+    {
+        [Description("原始译文")] ORIGIN_TRANS = 0,
+        [Description("中文")] CHINESE = 1,
+        [Description("英文")] ENGLISH = 2,
+        [Description("罗马音")] ROMAJI = 3,
     }
 
     /**

@@ -10,14 +10,13 @@ namespace MusicLyricApp.Utils
 {
     public static class RomajiUtils
     {
-        public static async Task<List<LyricLineVo>> ToRomaji(List<LyricLineVo> inputList, List<LyricLineVo> faultList,
-            RomajiConfigBean romajiConfig)
+        public static async Task<List<LyricLineVo>> ToRomaji(List<LyricLineVo> inputList, List<LyricLineVo> faultList, RomajiModeEnum modeEnum, RomajiSystemEnum systemEnum)
         {
             if (inputList.Any(vo => Utilities.HasKana(vo.Content)))
             {
                 var converter = new KawazuConverter();
-                var mode = ConvertModeEnum(romajiConfig.ModeEnum);
-                var system = ConvertSystemEnum(romajiConfig.SystemEnum);
+                var mode = ConvertModeEnum(modeEnum);
+                var system = ConvertSystemEnum(systemEnum);
 
                 var resultList = new List<LyricLineVo>();
 

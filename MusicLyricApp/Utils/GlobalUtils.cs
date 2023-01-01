@@ -284,6 +284,11 @@ namespace MusicLyricApp.Utils
         {
             return Enum.GetValues(typeof(T)).OfType<T>().ToList();
         }
+        
+        public static Dictionary<string, T> GetEnumDict<T>() where T : Enum
+        {
+            return Enum.GetValues(typeof(T)).OfType<T>().ToDictionary(e => e.ToDescription(), e => e);
+        }
 
         public static string[] GetEnumDescArray<T>() where T : Enum
         {

@@ -41,6 +41,11 @@ namespace MusicLyricApp.Bean
         public int TranslateMatchPrecisionDeviation = 0;
 
         /// <summary>
+        /// 译文类型
+        /// </summary>
+        public string TransType = "0";
+
+        /// <summary>
         /// 输出文件名格式
         /// </summary>
         public string OutputFileNameFormat = "${name} - ${singer}";
@@ -56,27 +61,14 @@ namespace MusicLyricApp.Bean
         public string NetEaseCookie = "";
         
         /// <summary>
-        /// 罗马音相关配置
-        /// </summary>
-        public RomajiConfigBean RomajiConfig = new RomajiConfigBean();
-    }
-
-    public class RomajiConfigBean
-    {
-        /// <summary>
-        /// 译文显示罗马音
-        /// </summary>
-        public bool Enable = false;
-
-        /// <summary>
         /// 罗马音转换模式
         /// </summary>
-        public RomajiModeEnum ModeEnum = RomajiModeEnum.SPACED;
+        public RomajiModeEnum RomajiModeEnum = RomajiModeEnum.SPACED;
 
         /// <summary>
         /// 罗马音字体系
         /// </summary>
-        public RomajiSystemEnum SystemEnum = RomajiSystemEnum.HEPBURN;
+        public RomajiSystemEnum RomajiSystemEnum = RomajiSystemEnum.HEPBURN;
     }
 
     public class PersistParamBean

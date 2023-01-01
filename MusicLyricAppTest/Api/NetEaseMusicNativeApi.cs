@@ -32,6 +32,13 @@ namespace MusicLyricAppTest.Api
         }
 
         [Test]
+        public void TestGetLyric()
+        {
+            var lyricResult = _api.GetLyric("1987814537");
+            Assert.AreEqual(200L, lyricResult.Code);
+        }
+
+        [Test]
         public void TestPureGetLyric()
         {
             var lyricResult = _api.GetLyric("549702604");
