@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Text;
+using MusicLyricApp.Utils;
 
 namespace MusicLyricApp.Bean
 {
@@ -354,12 +355,12 @@ namespace MusicLyricApp.Bean
                 
                 if (Lyric != null)
                 {
-                    lyricVo.SetLyric(Encoding.UTF8.GetString(Convert.FromBase64String(Lyric)));
+                    lyricVo.SetLyric(Lyric.IsBase64() ? Encoding.UTF8.GetString(Convert.FromBase64String(Lyric)) : Lyric);
                 }
 
                 if (Trans != null)
                 {
-                    lyricVo.SetTranslateLyric(Encoding.UTF8.GetString(Convert.FromBase64String(Trans)));
+                    lyricVo.SetTranslateLyric(Trans.IsBase64() ? Encoding.UTF8.GetString(Convert.FromBase64String(Trans)) : Trans);
                 }
 
                 return lyricVo;
