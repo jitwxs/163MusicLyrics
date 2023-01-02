@@ -17,7 +17,21 @@ namespace MusicLyricAppTest.Utils
             
             Assert.AreEqual("[00:11.562]こ[00:11.918]こ[00:12.564]ろ[00:12.834]を[00:13.632] [00:13.642]隠[00:14.234]し[00:14.590]て[00:14.838]ひ[00:15.098]と[00:15.526]り[00:15.922]で" + Environment.NewLine, output);
         }
-        
+
+        /// <summary>
+        /// 处理译文歌词 | 不存在原文歌词
+        /// </summary>
+        [Test]
+        public void TestDealTranslateLyricWithEmptyOriginLyric()
+        {
+            var transConfig = new TransConfigBean();
+            var translateList = new List<LyricLineVo>();
+            
+            var res = LyricUtils.DealTranslateLyric(new List<LyricLineVo>(), translateList, transConfig).Result;
+            
+            Assert.AreEqual(0, res.Count);
+        }
+
         /// <summary>
         /// 译文匹配精度误差
         /// </summary>

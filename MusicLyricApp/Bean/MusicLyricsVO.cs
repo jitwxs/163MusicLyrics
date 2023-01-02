@@ -96,7 +96,43 @@ namespace MusicLyricApp.Bean
         [Description("原始译文")] ORIGIN_TRANS = 0,
         [Description("中文")] CHINESE = 1,
         [Description("英文")] ENGLISH = 2,
-        [Description("罗马音")] ROMAJI = 3,
+        [Description("罗马音(仅日文)")] ROMAJI = 3,
+    }
+
+    public enum LanguageEnum
+    {
+        /// <summary>
+        /// 其他
+        /// </summary>
+        [Description("Other")] OTHER = 0,
+        /// <summary>
+        /// 英语
+        /// </summary>
+        [Description("English")] ENGLISH = 1,
+        /// <summary>
+        /// 日语
+        /// </summary>
+        [Description("Japanese")] JAPANESE = 2,
+        /// <summary>
+        /// 韩语
+        /// </summary>
+        [Description("Korean")] KOREAN = 3,
+        /// <summary>
+        /// 俄语
+        /// </summary>
+        [Description("Russian")] RUSSIAN = 4,
+        /// <summary>
+        /// 法语
+        /// </summary>
+        [Description("French")] FRENCH = 5,
+        /// <summary>
+        /// 意大利语
+        /// </summary>
+        [Description("Italian")] ITALIAN = 6,
+        /// <summary>
+        /// 汉语
+        /// </summary>
+        [Description("Chinese")] CHINESE = 7,
     }
 
     /**

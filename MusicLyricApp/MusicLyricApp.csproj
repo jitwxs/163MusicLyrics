@@ -103,6 +103,9 @@
     <Reference Include="NLog, Version=5.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
       <HintPath>..\packages\NLog.5.1.1\lib\net46\NLog.dll</HintPath>
     </Reference>
+    <Reference Include="NTextCat, Version=0.3.65.0, Culture=neutral, PublicKeyToken=a61413de1d13f8fc, processorArchitecture=MSIL">
+      <HintPath>..\packages\NTextCat.0.3.65\lib\netstandard2.0\NTextCat.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.AppContext, Version=4.1.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <HintPath>..\packages\System.AppContext.4.3.0\lib\net463\System.AppContext.dll</HintPath>
@@ -351,6 +354,7 @@
     <WCFMetadata Include="Connected Services\" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Core14.profile.xml" />
     <Content Include="Favicon2.ico" />
     <Content Include="Properties\app.manifest" />
   </ItemGroup>

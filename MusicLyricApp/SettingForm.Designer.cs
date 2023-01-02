@@ -460,7 +460,7 @@ namespace MusicLyricApp
             this.TransConfig_TabControl.Location = new System.Drawing.Point(15, 144);
             this.TransConfig_TabControl.Name = "TransConfig_TabControl";
             this.TransConfig_TabControl.SelectedIndex = 0;
-            this.TransConfig_TabControl.Size = new System.Drawing.Size(414, 150);
+            this.TransConfig_TabControl.Size = new System.Drawing.Size(422, 150);
             this.TransConfig_TabControl.TabIndex = 0;
             // 
             // Romaji_TabPage
@@ -472,7 +472,7 @@ namespace MusicLyricApp
             this.Romaji_TabPage.Location = new System.Drawing.Point(4, 22);
             this.Romaji_TabPage.Name = "Romaji_TabPage";
             this.Romaji_TabPage.Padding = new System.Windows.Forms.Padding(3);
-            this.Romaji_TabPage.Size = new System.Drawing.Size(406, 124);
+            this.Romaji_TabPage.Size = new System.Drawing.Size(414, 124);
             this.Romaji_TabPage.TabIndex = 0;
             this.Romaji_TabPage.Text = "罗马音";
             this.Romaji_TabPage.UseVisualStyleBackColor = true;
@@ -491,7 +491,7 @@ namespace MusicLyricApp
             this.TranslateApi_TabPage.Location = new System.Drawing.Point(4, 22);
             this.TranslateApi_TabPage.Name = "TranslateApi_TabPage";
             this.TranslateApi_TabPage.Padding = new System.Windows.Forms.Padding(3);
-            this.TranslateApi_TabPage.Size = new System.Drawing.Size(406, 124);
+            this.TranslateApi_TabPage.Size = new System.Drawing.Size(414, 124);
             this.TranslateApi_TabPage.TabIndex = 1;
             this.TranslateApi_TabPage.Text = "翻译 API";
             this.TranslateApi_TabPage.UseVisualStyleBackColor = true;
@@ -582,14 +582,13 @@ namespace MusicLyricApp
             this.TransType_DataGridView.AllowDrop = true;
             this.TransType_DataGridView.AllowUserToAddRows = false;
             this.TransType_DataGridView.AllowUserToDeleteRows = false;
-            this.TransType_DataGridView.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
             this.TransType_DataGridView.AutoSizeRowsMode = System.Windows.Forms.DataGridViewAutoSizeRowsMode.DisplayedCells;
             this.TransType_DataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.TransType_DataGridView.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { this.Column1, this.Column2 });
             this.TransType_DataGridView.Location = new System.Drawing.Point(234, 33);
             this.TransType_DataGridView.Name = "TransType_DataGridView";
             this.TransType_DataGridView.RowTemplate.Height = 23;
-            this.TransType_DataGridView.Size = new System.Drawing.Size(195, 105);
+            this.TransType_DataGridView.Size = new System.Drawing.Size(203, 105);
             this.TransType_DataGridView.TabIndex = 37;
             this.TransType_DataGridView.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.TransType_DataGridView_CellContentClick);
             this.TransType_DataGridView.CellMouseMove += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.TransList_DataGridView_CellMouseMove);
@@ -602,6 +601,7 @@ namespace MusicLyricApp
             // 
             this.Column1.HeaderText = "是否启用";
             this.Column1.Name = "Column1";
+            this.Column1.Width = 60;
             // 
             // Column2
             // 
@@ -662,7 +662,7 @@ namespace MusicLyricApp
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(959, 560);
+            this.ClientSize = new System.Drawing.Size(952, 560);
             this.Controls.Add(this.Reset_Btn);
             this.Controls.Add(this.Output_GroupBox);
             this.Controls.Add(this.TransLyric_GroupBox);

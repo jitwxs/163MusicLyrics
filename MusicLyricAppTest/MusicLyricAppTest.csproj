@@ -34,6 +34,7 @@
         <PackageReference Include="Kawazu" Version="1.1.4" />
         <PackageReference Include="Markdig" Version="0.30.4" />
         <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
+        <PackageReference Include="NTextCat" Version="0.3.65" />
         <PackageReference Include="NUnit" Version="3.13.3" />
     </ItemGroup>
     <ItemGroup>
