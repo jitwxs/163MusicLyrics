@@ -144,7 +144,7 @@ namespace MusicLyricApp.Utils
 
             // 原始译文歌词的空行没有意义，指定 true 不走配置
             var basicTransLyrics = SplitLrc(translateLrc, searchSource, true);
-            var transLyricsList = await DealTranslateLyric(originLyrics, basicTransLyrics, searchInfo.SettingBean);
+            var transLyricsList = await DealTranslateLyric(originLyrics, basicTransLyrics, searchInfo.SettingBean.Config.TransConfig);
 
             var res = new List<LyricLineVo>();
 
@@ -336,7 +336,7 @@ namespace MusicLyricApp.Utils
          * 1. 译文精度误差
          * 2. 译文缺省规则
          */
-        public static async Task<List<List<LyricLineVo>>> DealTranslateLyric(List<LyricLineVo> originList, List<LyricLineVo> translateList, SettingBean settingBean)
+        public static async Task<List<List<LyricLineVo>>> DealTranslateLyric(List<LyricLineVo> originList, List<LyricLineVo> translateList, TransConfigBean transConfig)
         {
             var originTimeOffsetDict = ConvertLyricLineVoListToMapByTimeOffset(originList);
             var notMatchTranslateDict = new Dictionary<int, LyricLineVo>();
@@ -354,7 +354,7 @@ namespace MusicLyricApp.Utils
             }
             
             // 译文匹配精度误差
-            var precisionDigitDeviation = settingBean.Config.TranslateMatchPrecisionDeviation;
+            var precisionDigitDeviation = transConfig.MatchPrecisionDeviation;
             if (precisionDigitDeviation != 0)
             {
                 foreach (var pair in notMatchTranslateDict)
@@ -390,12 +390,12 @@ namespace MusicLyricApp.Utils
             }
 
             // 处理译文缺失规则
-            var rule = settingBean.Config.TranslateLyricDefaultRule;
-            if (rule != TranslateLyricDefaultRuleEnum.IGNORE)
+            var rule = transConfig.LostRule;
+            if (rule != TransLyricLostRuleEnum.IGNORE)
             {
                 foreach (var pair in originTimeOffsetDict)
                 {
-                    var content = rule == TranslateLyricDefaultRuleEnum.FILL_ORIGIN ? pair.Value.Content : "";
+                    var content = rule == TransLyricLostRuleEnum.FILL_ORIGIN ? pair.Value.Content : "";
 
                     translateList.Add(new LyricLineVo(content, pair.Value.Timestamp));
                 }
@@ -407,7 +407,7 @@ namespace MusicLyricApp.Utils
             var result = new List<List<LyricLineVo>>();
             
             // 译文处理
-            foreach (var transTypeEnum in settingBean.Config.TransType.Split(',').Select(e => (TransTypeEnum) Convert.ToInt32(e)))
+            foreach (var transTypeEnum in transConfig.TransType.Split(',').Select(e => (TransTypeEnum) Convert.ToInt32(e)))
             {
                 switch (transTypeEnum)
                 {
@@ -415,8 +415,7 @@ namespace MusicLyricApp.Utils
                         result.Add(originTransList);
                         break;
                     case TransTypeEnum.ROMAJI:
-                        result.Add(await RomajiUtils.ToRomaji(originList, originTransList, 
-                            settingBean.Config.RomajiModeEnum, settingBean.Config.RomajiSystemEnum));
+                        result.Add(await RomajiUtils.ToRomaji(originList, originTransList, transConfig.RomajiModeEnum, transConfig.RomajiSystemEnum));
                         break;
                 }
             }

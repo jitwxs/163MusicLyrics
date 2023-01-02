@@ -29,21 +29,6 @@ namespace MusicLyricApp.Bean
         /// 保存时跳过纯音乐
         /// </summary>
         public bool IgnorePureMusicInSave = true;
-        
-        /// <summary>
-        /// 译文缺省规则
-        /// </summary>
-        public TranslateLyricDefaultRuleEnum TranslateLyricDefaultRule = TranslateLyricDefaultRuleEnum.IGNORE;
-        
-        /// <summary>
-        /// 译文歌词匹配精度
-        /// </summary>
-        public int TranslateMatchPrecisionDeviation = 0;
-
-        /// <summary>
-        /// 译文类型
-        /// </summary>
-        public string TransType = "0";
 
         /// <summary>
         /// 输出文件名格式
@@ -59,6 +44,26 @@ namespace MusicLyricApp.Bean
         /// 网易云音乐 Cookie
         /// </summary>
         public string NetEaseCookie = "";
+
+        public TransConfigBean TransConfig = new TransConfigBean();
+    }
+
+    public class TransConfigBean
+    {
+        /// <summary>
+        /// 译文缺省规则
+        /// </summary>
+        public TransLyricLostRuleEnum LostRule = TransLyricLostRuleEnum.IGNORE;
+        
+        /// <summary>
+        /// 译文歌词匹配精度
+        /// </summary>
+        public int MatchPrecisionDeviation = 0;
+        
+        /// <summary>
+        /// 译文类型
+        /// </summary>
+        public string TransType = "0";
         
         /// <summary>
         /// 罗马音转换模式
@@ -69,6 +74,21 @@ namespace MusicLyricApp.Bean
         /// 罗马音字体系
         /// </summary>
         public RomajiSystemEnum RomajiSystemEnum = RomajiSystemEnum.HEPBURN;
+
+        /// <summary>
+        /// 百度翻译 APP ID
+        /// </summary>
+        public string BaiduTranslateAppId = "";
+        
+        /// <summary>
+        /// 百度翻译密钥
+        /// </summary>
+        public string BaiduTranslateSecret = "";
+
+        /// <summary>
+        /// 彩云小译 Token
+        /// </summary>
+        public string CaiYunToken = "";
     }
 
     public class PersistParamBean

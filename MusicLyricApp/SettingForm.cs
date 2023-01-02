@@ -46,10 +46,13 @@ namespace MusicLyricApp
                 _settingBean.Param.EnableVerbatimLyric = VerbatimLyric_CheckBox.Checked;
             
                 // 译文歌词
-                _settingBean.Config.TranslateLyricDefaultRule = (TranslateLyricDefaultRuleEnum)TransLyricDefaultRule_ComboBox.SelectedIndex;
-                _settingBean.Config.TranslateMatchPrecisionDeviation = int.Parse(TranslateMatchPrecisionDeviation_TextBox.Text);
-                _settingBean.Config.RomajiModeEnum = (RomajiModeEnum)RomajiMode_ComboBox.SelectedIndex;
-                _settingBean.Config.RomajiSystemEnum = (RomajiSystemEnum)RomajiSystem_ComboBox.SelectedIndex;
+                _settingBean.Config.TransConfig.LostRule = (TransLyricLostRuleEnum)TransLostRule_ComboBox.SelectedIndex;
+                _settingBean.Config.TransConfig.MatchPrecisionDeviation = int.Parse(TranslateMatchPrecisionDeviation_TextBox.Text);
+                _settingBean.Config.TransConfig.RomajiModeEnum = (RomajiModeEnum)RomajiMode_ComboBox.SelectedIndex;
+                _settingBean.Config.TransConfig.RomajiSystemEnum = (RomajiSystemEnum)RomajiSystem_ComboBox.SelectedIndex;
+                _settingBean.Config.TransConfig.BaiduTranslateAppId = BaiduTranslateAppId_TextBox.Text;
+                _settingBean.Config.TransConfig.BaiduTranslateSecret = BaiduTranslateSecret_TextBox.Text;
+                _settingBean.Config.TransConfig.CaiYunToken = CaiYunTranslateToken_TextBox.Text;
                 
                 var selectTransType = new List<int>();
                 var transTypeDict = GlobalUtils.GetEnumDict<TransTypeEnum>();
@@ -61,7 +64,7 @@ namespace MusicLyricApp
                         selectTransType.Add(Convert.ToInt32(transType));
                     }
                 }
-                _settingBean.Config.TransType = string.Join(",", selectTransType);
+                _settingBean.Config.TransConfig.TransType = string.Join(",", selectTransType);
 
                 // 输出设置
                 _settingBean.Config.IgnorePureMusicInSave = IgnorePureMusicInSave_CheckBox.Checked;

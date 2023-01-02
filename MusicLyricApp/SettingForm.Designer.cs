@@ -40,12 +40,19 @@ namespace MusicLyricApp
             VerbatimLyric_CheckBox.Checked = _settingBean.Param.EnableVerbatimLyric;
             
             // 译文歌词
-            TransLyricDefaultRule_ComboBox.Items.AddRange(GlobalUtils.GetEnumDescArray<TranslateLyricDefaultRuleEnum>());
-            TransLyricDefaultRule_ComboBox.SelectedIndex = (int)_settingBean.Config.TranslateLyricDefaultRule;
-            TranslateMatchPrecisionDeviation_TextBox.Text = _settingBean.Config.TranslateMatchPrecisionDeviation.ToString();
+            TransLostRule_ComboBox.Items.AddRange(GlobalUtils.GetEnumDescArray<TransLyricLostRuleEnum>());
+            TransLostRule_ComboBox.SelectedIndex = (int)_settingBean.Config.TransConfig.LostRule;
+            TranslateMatchPrecisionDeviation_TextBox.Text = _settingBean.Config.TransConfig.MatchPrecisionDeviation.ToString();
+            BaiduTranslateAppId_TextBox.Text = _settingBean.Config.TransConfig.BaiduTranslateAppId;
+            BaiduTranslateSecret_TextBox.Text = _settingBean.Config.TransConfig.BaiduTranslateSecret;
+            CaiYunTranslateToken_TextBox.Text = _settingBean.Config.TransConfig.CaiYunToken;
+            RomajiMode_ComboBox.Items.AddRange(GlobalUtils.GetEnumDescArray<RomajiModeEnum>());
+            RomajiMode_ComboBox.SelectedIndex = (int)_settingBean.Config.TransConfig.RomajiModeEnum;
+            RomajiSystem_ComboBox.Items.AddRange(GlobalUtils.GetEnumDescArray<RomajiSystemEnum>()); 
+            RomajiSystem_ComboBox.SelectedIndex = (int)_settingBean.Config.TransConfig.RomajiSystemEnum;
 
             var allTransType = GlobalUtils.GetEnumList<TransTypeEnum>();
-            var configTransType = _settingBean.Config.TransType.Split(',').Select(e => Convert.ToInt32(e)).ToHashSet();
+            var configTransType = _settingBean.Config.TransConfig.TransType.Split(',').Select(e => Convert.ToInt32(e)).ToHashSet();
             foreach (var index in configTransType)
             {
                 var one = (TransTypeEnum) index;
@@ -58,11 +65,6 @@ namespace MusicLyricApp
                 TransType_DataGridView.Rows.Add(false, one.ToDescription());
             }
 
-            RomajiMode_ComboBox.Items.AddRange(GlobalUtils.GetEnumDescArray<RomajiModeEnum>());
-            RomajiMode_ComboBox.SelectedIndex = (int)_settingBean.Config.RomajiModeEnum;
-            RomajiSystem_ComboBox.Items.AddRange(GlobalUtils.GetEnumDescArray<RomajiSystemEnum>()); 
-            RomajiSystem_ComboBox.SelectedIndex = (int)_settingBean.Config.RomajiSystemEnum;
-            
             // 输出设置
             IgnorePureMusicInSave_CheckBox.Checked = _settingBean.Config.IgnorePureMusicInSave;
             OutputName_TextBox.Text = _settingBean.Config.OutputFileNameFormat;
@@ -101,7 +103,7 @@ namespace MusicLyricApp
             this.label8 = new System.Windows.Forms.Label();
             this.Dot_ComboBox = new System.Windows.Forms.ComboBox();
             this.label1 = new System.Windows.Forms.Label();
-            this.TransLyricDefaultRule_ComboBox = new System.Windows.Forms.ComboBox();
+            this.TransLostRule_ComboBox = new System.Windows.Forms.ComboBox();
             this.label9 = new System.Windows.Forms.Label();
             this.TranslateMatchPrecisionDeviation_TextBox = new System.Windows.Forms.TextBox();
             this.label5 = new System.Windows.Forms.Label();
@@ -277,14 +279,14 @@ namespace MusicLyricApp
             this.label1.TabIndex = 19;
             this.label1.Text = "译文缺省规则";
             // 
-            // TransLyricDefaultRule_ComboBox
+            // TransLostRule_ComboBox
             // 
-            this.TransLyricDefaultRule_ComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.TransLyricDefaultRule_ComboBox.FormattingEnabled = true;
-            this.TransLyricDefaultRule_ComboBox.Location = new System.Drawing.Point(115, 33);
-            this.TransLyricDefaultRule_ComboBox.Name = "TransLyricDefaultRule_ComboBox";
-            this.TransLyricDefaultRule_ComboBox.Size = new System.Drawing.Size(98, 20);
-            this.TransLyricDefaultRule_ComboBox.TabIndex = 20;
+            this.TransLostRule_ComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.TransLostRule_ComboBox.FormattingEnabled = true;
+            this.TransLostRule_ComboBox.Location = new System.Drawing.Point(115, 33);
+            this.TransLostRule_ComboBox.Name = "TransLostRule_ComboBox";
+            this.TransLostRule_ComboBox.Size = new System.Drawing.Size(98, 20);
+            this.TransLostRule_ComboBox.TabIndex = 20;
             // 
             // label9
             // 
@@ -438,7 +440,7 @@ namespace MusicLyricApp
             // TransLyric_GroupBox
             // 
             this.TransLyric_GroupBox.Controls.Add(this.TransConfig_TabControl);
-            this.TransLyric_GroupBox.Controls.Add(this.TransLyricDefaultRule_ComboBox);
+            this.TransLyric_GroupBox.Controls.Add(this.TransLostRule_ComboBox);
             this.TransLyric_GroupBox.Controls.Add(this.label1);
             this.TransLyric_GroupBox.Controls.Add(this.TransType_DataGridView);
             this.TransLyric_GroupBox.Controls.Add(this.TranslateMatchPrecisionDeviation_TextBox);
@@ -760,7 +762,7 @@ namespace MusicLyricApp
         private System.Windows.Forms.TextBox TranslateMatchPrecisionDeviation_TextBox;
 
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.ComboBox TransLyricDefaultRule_ComboBox;
+        private System.Windows.Forms.ComboBox TransLostRule_ComboBox;
 
         private System.Windows.Forms.ComboBox RomajiSystem_ComboBox;
 

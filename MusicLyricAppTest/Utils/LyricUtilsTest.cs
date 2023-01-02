@@ -24,7 +24,7 @@ namespace MusicLyricAppTest.Utils
         [Test]
         public void TestTranslateMatchPrecisionDeviation()
         {
-            var settingBean = new SettingBean();
+            var transConfig = new TransConfigBean();
  
             var translateList = new List<LyricLineVo>();
             var originList = new List<LyricLineVo>();
@@ -35,16 +35,16 @@ namespace MusicLyricAppTest.Utils
             
             // scenario1: 未配置精度误差
             
-            var res = LyricUtils.DealTranslateLyric(originList, translateList, settingBean).Result;
+            var res = LyricUtils.DealTranslateLyric(originList, translateList, transConfig).Result;
             
             Assert.AreEqual(1, res.Count);
             Assert.AreEqual(100, res[0][0].Timestamp.TimeOffset);
             
             // scenario2: 配置精度误差
 
-            settingBean.Config.TranslateMatchPrecisionDeviation = 20;
+            transConfig.MatchPrecisionDeviation = 20;
             
-            res = LyricUtils.DealTranslateLyric(originList, translateList, settingBean).Result;
+            res = LyricUtils.DealTranslateLyric(originList, translateList, transConfig).Result;
             
             Assert.AreEqual(1, res.Count);
             Assert.AreEqual(80, res[0][0].Timestamp.TimeOffset);

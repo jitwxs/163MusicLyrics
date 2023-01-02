@@ -84,7 +84,7 @@ namespace MusicLyricApp.Bean
     }
 
     // 译文缺省规则
-    public enum TranslateLyricDefaultRuleEnum
+    public enum TransLyricLostRuleEnum
     {
         [Description("忽略展示")] IGNORE = 0,
         [Description("展示空行")] EMPTY_LINE = 1,
