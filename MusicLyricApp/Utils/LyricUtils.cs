@@ -1,10 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using MusicLyricApp.Api.Translate;
 using MusicLyricApp.Bean;
+using MusicLyricApp.Exception;
+using NTextCat;
 
 namespace MusicLyricApp.Utils
 {
@@ -30,7 +34,7 @@ namespace MusicLyricApp.Utils
             
             var voList = await FormatLyric(lyricVo.Lyric, lyricVo.TranslateLyric, searchInfo);
 
-            if (searchInfo.SettingBean.Config.EnableVerbatimLyric)
+            if (searchInfo.SettingBean.Param.EnableVerbatimLyric)
             {
                 voList = FormatSubLineLyric(voList, timestampFormat, dotType);
             }
@@ -134,63 +138,81 @@ namespace MusicLyricApp.Utils
         {
             var showLrcType = searchInfo.SettingBean.Param.ShowLrcType;
             var searchSource = searchInfo.SettingBean.Param.SearchSource;
+            var ignoreEmptyLyric = searchInfo.SettingBean.Param.IgnoreEmptyLyric;
 
-            var originLyrics = SplitLrc(originLrc, searchSource, searchInfo.SettingBean.Param.IgnoreEmptyLyric);
-
-            /*
-             * 1、原文歌词不存在
-             * 2、不存在翻译歌词
-             * 3、选择仅原歌词
-             */
-            if (originLyrics.Count == 0 || string.IsNullOrEmpty(translateLrc) ||
-                showLrcType == ShowLrcTypeEnum.ONLY_ORIGIN)
+            var originLyrics = SplitLrc(originLrc, searchSource, ignoreEmptyLyric);
+            if (showLrcType == ShowLrcTypeEnum.ONLY_ORIGIN)
             {
                 return originLyrics;
             }
 
-            // 译文处理，启用罗马音进行转换，否则使用原始的译文
-            var romajiConfig = searchInfo.SettingBean.Config.RomajiConfig;
-            
-            var translateLyrics = SplitLrc(translateLrc, searchSource, true);
+            // 原始译文歌词的空行没有意义，指定 true 不走配置
+            var basicTransLyrics = SplitLrc(translateLrc, searchSource, true);
+            var transLyricsList = await DealTranslateLyric(originLyrics, basicTransLyrics, searchInfo.SettingBean.Config.TransConfig);
 
-            translateLyrics = DealTranslateLyric(originLyrics, translateLyrics, searchInfo.SettingBean);
-            
-            if (romajiConfig.Enable)
-            {
-                translateLyrics = await RomajiUtils.ToRomaji(originLyrics, translateLyrics, romajiConfig);
-            }
+            var res = new List<LyricLineVo>();
 
-            /*
-             * 1、译文歌词不存在
-             * 2、选择仅译文歌词
-             */
-            if (translateLyrics.Count == 0 || showLrcType == ShowLrcTypeEnum.ONLY_TRANSLATE)
-            {
-                return translateLyrics;
-            }
-
-            List<LyricLineVo> res;
             switch (showLrcType)
             {
-                case ShowLrcTypeEnum.ORIGIN_PRIOR_ISOLATED:
-                    res = originLyrics;
-                    res.AddRange(translateLyrics);
+                case ShowLrcTypeEnum.ONLY_TRANS_STAGGER:
+                    foreach (var each in transLyricsList)
+                    {
+                        res = SortLrc(res, each, true);
+                    }
                     break;
-                case ShowLrcTypeEnum.TRANSLATE_PRIOR_ISOLATED:
-                    res = translateLyrics;
-                    res.AddRange(originLyrics);
+                case ShowLrcTypeEnum.ONLY_TRANS_ISOLATED:
+                    foreach (var each in transLyricsList)
+                    {
+                        res.AddRange(each);
+                    }
+                    break;
+                case ShowLrcTypeEnum.ONLY_TRANS_MERGE:
+                    foreach (var each in transLyricsList)
+                    {
+                        res = MergeLrc(res, each, searchInfo.SettingBean.Param.LrcMergeSeparator, true);
+                    }
                     break;
                 case ShowLrcTypeEnum.ORIGIN_PRIOR_STAGGER:
-                    res = SortLrc(originLyrics, translateLyrics, true);
+                    res.AddRange(originLyrics);
+                    for (var i = 0; i < transLyricsList.Count; i++)
+                    {
+                        res = SortLrc(res, transLyricsList[i], true);
+                    }
                     break;
-                case ShowLrcTypeEnum.TRANSLATE_PRIOR_STAGGER:
-                    res = SortLrc(originLyrics, translateLyrics, false);
+                case ShowLrcTypeEnum.ORIGIN_PRIOR_ISOLATED:
+                    res.AddRange(originLyrics);
+                    foreach (var each in transLyricsList)
+                    {
+                        res.AddRange(each);
+                    }
                     break;
                 case ShowLrcTypeEnum.ORIGIN_PRIOR_MERGE:
-                    res = MergeLrc(originLyrics, translateLyrics, searchInfo.SettingBean.Param.LrcMergeSeparator, true);
+                    res.AddRange(originLyrics);
+                    foreach (var each in transLyricsList)
+                    {
+                        res = MergeLrc(res, each, searchInfo.SettingBean.Param.LrcMergeSeparator, true);
+                    }
+                    break;
+                case ShowLrcTypeEnum.TRANSLATE_PRIOR_STAGGER:
+                    foreach (var each in transLyricsList)
+                    {
+                        res = SortLrc(res, each, true);
+                    }
+                    res = SortLrc(res, originLyrics, true);
+                    break;
+                case ShowLrcTypeEnum.TRANSLATE_PRIOR_ISOLATED:
+                    foreach (var each in transLyricsList)
+                    {
+                        res.AddRange(each);
+                    }
+                    res.AddRange(originLyrics);
                     break;
                 case ShowLrcTypeEnum.TRANSLATE_PRIOR_MERGE:
-                    res = MergeLrc(originLyrics, translateLyrics, searchInfo.SettingBean.Param.LrcMergeSeparator, false);
+                    foreach (var each in transLyricsList)
+                    {
+                        res = MergeLrc(res, each, searchInfo.SettingBean.Param.LrcMergeSeparator, true);
+                    }
+                    res = MergeLrc(res, originLyrics, searchInfo.SettingBean.Param.LrcMergeSeparator, true);
                     break;
                 default:
                     throw new NotSupportedException("not support showLrcType: " + showLrcType);
@@ -247,47 +269,48 @@ namespace MusicLyricApp.Utils
             return resultList;
         }
 
-        /**
-         * 双语歌词排序
-         */
-        private static List<LyricLineVo> SortLrc(List<LyricLineVo> originLyrics, List<LyricLineVo> translateLyrics, bool hasOriginLrcPrior)
+
+        /// <summary>
+        /// 歌词排序
+        /// </summary>
+        private static List<LyricLineVo> SortLrc(List<LyricLineVo> listA, List<LyricLineVo> listB, bool aFirst)
         {
-            int lenA = originLyrics.Count, lenB = translateLyrics.Count;
+            int lenA = listA.Count, lenB = listB.Count;
             var c = new List<LyricLineVo>();
 
             int i = 0, j = 0;
 
             while (i < lenA && j < lenB)
             {
-                var compare = Compare(originLyrics[i], translateLyrics[j], hasOriginLrcPrior);
+                var compare = Compare(listA[i], listB[j], aFirst);
                 
                 if (compare > 0)
                 {
-                    c.Add(translateLyrics[j++]);
+                    c.Add(listB[j++]);
                 }
                 else if (compare < 0)
                 {
-                    c.Add(originLyrics[i++]);
+                    c.Add(listA[i++]);
                 }
                 else
                 {
-                    c.Add(hasOriginLrcPrior ? originLyrics[i++] : translateLyrics[j++]);
+                    c.Add(aFirst ? listA[i++] : listB[j++]);
                 }
             }
 
             while (i < lenA)
-                c.Add(originLyrics[i++]);
+                c.Add(listA[i++]);
             while (j < lenB)
-                c.Add(translateLyrics[j++]);
+                c.Add(listB[j++]);
             return c;
         }
 
-        /**
-         * 双语歌词合并
-         */
-        private static List<LyricLineVo> MergeLrc(List<LyricLineVo> originList, List<LyricLineVo> translateList, string splitStr, bool hasOriginLrcPrior)
+        /// <summary>
+        /// 歌词合并
+        /// </summary>
+        private static List<LyricLineVo> MergeLrc(List<LyricLineVo> listA, List<LyricLineVo> listB, string splitStr, bool aFirst)
         {
-            var c = SortLrc(originList, translateList, hasOriginLrcPrior);
+            var c = SortLrc(listA, listB, aFirst);
             
             var list = new List<LyricLineVo>
             {
@@ -311,80 +334,189 @@ namespace MusicLyricApp.Utils
             return list;
         }
 
-        /**
-         * 译文逻辑处理
-         *
-         * 1. 译文精度误差
-         * 2. 译文缺省规则
-         */
-        public static List<LyricLineVo> DealTranslateLyric(List<LyricLineVo> originList, List<LyricLineVo> translateList, SettingBean settingBean)
+        /// <summary>
+        /// 译文逻辑处理: 译文精度误差, 译文缺省规则, 译文类型填充
+        /// </summary>
+        /// <param name="originList">原文歌词</param>
+        /// <param name="baseTransList">初始的译文歌词</param>
+        /// <param name="transConfig">译文配置</param>
+        /// <returns></returns>
+        public static async Task<List<List<LyricLineVo>>> DealTranslateLyric(List<LyricLineVo> originList, List<LyricLineVo> baseTransList, TransConfigBean transConfig)
         {
-            var rule = settingBean.Config.TranslateLyricDefaultRule;
-            var translatePrecisionDigitDeviation = settingBean.Param.TranslateMatchPrecisionDeviation;
-            var originTimeOffsetMap = ConvertLyricLineVoListToMapByTimeOffset(originList);
-
-            var notMatchTranslateMap = new Dictionary<int, LyricLineVo>();
+            var result = new List<List<LyricLineVo>>();
             
-            // 误差 == 0
-            for (var i = 0; i < translateList.Count; i++)
+            // 不存在原文歌词
+            if (originList == null || originList.Count == 0)
             {
-                var translate = translateList[i];
-                var timestamp = translate.Timestamp.TimeOffset;
-                
-                if (!originTimeOffsetMap.Remove(timestamp))
+                return result;
+            }
+
+            // 处理译文精度误差, 译文缺省规则
+            var transList = ResolveTransLyricDigitDeviationAndLost(originList, baseTransList, transConfig.MatchPrecisionDeviation, transConfig.LostRule);
+
+            // 处理译文类型填充
+            LanguageEnum originLanguage = CertainLanguage(originList), baseTransLanguage = CertainLanguage(transList);
+            
+            var configTransTypes = transConfig.TransType.Split(',')
+                .Select(e => (TransTypeEnum) Convert.ToInt32(e)).ToHashSet();
+            
+            foreach (var transTypeEnum in configTransTypes)
+            {
+                switch (transTypeEnum)
                 {
-                    notMatchTranslateMap.Add(i, translate);
+                    case TransTypeEnum.ORIGIN_TRANS:
+                        result.Add(transList);
+                        break;
+                    case TransTypeEnum.ROMAJI:
+                        if (originLanguage == LanguageEnum.JAPANESE)
+                        {
+                            result.Add(await RomajiUtils.ToRomaji(originList, transConfig.RomajiModeEnum, transConfig.RomajiSystemEnum));
+                        }
+                        break;
+                    case TransTypeEnum.CHINESE:
+                    case TransTypeEnum.ENGLISH:
+                        // 输出语言和原始歌词语言只有不同时，才翻译
+                        if (CastTransType(originLanguage) != transTypeEnum)
+                        {
+                            // 输出语言和已有译文语言相同
+                            if (CastTransType(baseTransLanguage) == transTypeEnum)
+                            {
+                                // 仅当已有译文未输出时，才输出
+                                if (!configTransTypes.Contains(TransTypeEnum.ORIGIN_TRANS))
+                                {
+                                    result.Add(transList);
+                                }
+                            }
+                            else
+                            {
+                                // 调用翻译 API
+                                var translateApi = GetTranslateApi(transConfig);
+                                if (translateApi != null)
+                                {
+                                    var inputs = originList.Select(e => e.Content).ToArray();
+                                    var outputs = translateApi.Translate(inputs, originLanguage, CastLanguageEnum(transTypeEnum));
+
+                                    var outputList = new List<LyricLineVo>();
+                                    for (var i = 0; i < inputs.Length; i++)
+                                    {
+                                        outputList.Add(new LyricLineVo(outputs[i], originList[i].Timestamp));
+                                    }
+
+                                    result.Add(outputList);
+                                }
+                            }
+                        }
+                        break;
                 }
             }
 
-            // 尝试使用译文匹配精度误差
-            if (translatePrecisionDigitDeviation != 0)
+            return result;
+        }
+        
+        public static ITranslateApi GetTranslateApi(TransConfigBean transConfig)
+        {
+            try
             {
-                foreach (var pair in notMatchTranslateMap)
+                return new CaiYunTranslateApi(transConfig.CaiYunToken);
+            }
+            catch (MusicLyricException caiYunEx)
+            {
+                if (ErrorMsg.CAIYUN_TRANSLATE_AUTH_FAILED.Equals(caiYunEx.Message))
+                {
+                    try
+                    {
+                        return new BaiduTranslateApi(transConfig.BaiduTranslateAppId, transConfig.BaiduTranslateSecret);
+                    }
+                    catch (MusicLyricException baiduEx)
+                    {
+                        
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// 解决译文歌词的精度误差和丢失问题
+        /// </summary>
+        /// <param name="originList">原文歌词</param>
+        /// <param name="baseTransList">初始译文歌词</param>
+        /// <param name="precisionDigitDeviation">译文匹配精度误差</param>
+        /// <param name="lostRule">译文缺失规则</param>
+        /// <returns></returns>
+        private static List<LyricLineVo> ResolveTransLyricDigitDeviationAndLost(List<LyricLineVo> originList, List<LyricLineVo> baseTransList, 
+            int precisionDigitDeviation, TransLyricLostRuleEnum lostRule)
+        {
+            var originTimeOffsetDict = new Dictionary<long, LyricLineVo>();
+            foreach (var one in originList)
+            {
+                originTimeOffsetDict[one.Timestamp.TimeOffset] = one;
+            }
+
+            var notMatchTranslateDict = new Dictionary<int, LyricLineVo>();
+            
+            // 误差 == 0
+            for (var i = 0; i < baseTransList.Count; i++)
+            {
+                var translate = baseTransList[i];
+                var timestamp = translate.Timestamp.TimeOffset;
+                
+                if (!originTimeOffsetDict.Remove(timestamp))
+                {
+                    notMatchTranslateDict.Add(i, translate);
+                }
+            }
+            
+            if (precisionDigitDeviation != 0)
+            {
+                foreach (var pair in notMatchTranslateDict)
                 {
                     var index = pair.Key;
                     var translate = pair.Value;
                     var timestamp = translate.Timestamp.TimeOffset;
 
-                    var tsStart = Math.Max(index == 0 ? 0 : translateList[index - 1].Timestamp.TimeOffset + 1, timestamp - translatePrecisionDigitDeviation);
+                    var tsStart = Math.Max(index == 0 ? 0 : baseTransList[index - 1].Timestamp.TimeOffset + 1, timestamp - precisionDigitDeviation);
                     
                     long tsEnd;
-                    if (index == translateList.Count - 1)
+                    if (index == baseTransList.Count - 1)
                     {
                         tsEnd = Math.Max(timestamp, originList[originList.Count - 1].Timestamp.TimeOffset);
                     }
                     else
                     {
-                        tsEnd = translateList[index + 1].Timestamp.TimeOffset - 1;
+                        tsEnd = baseTransList[index + 1].Timestamp.TimeOffset - 1;
                     }
-                    tsEnd = Math.Min(tsEnd, timestamp + translatePrecisionDigitDeviation);
+                    tsEnd = Math.Min(tsEnd, timestamp + precisionDigitDeviation);
                     
                     for (var ts = tsStart; ts <= tsEnd; ts++)
                     {
-                        if (originTimeOffsetMap.Remove(ts))
+                        if (originTimeOffsetDict.Remove(ts))
                         {
                             // 将译文时间调整为误差后的译文
                             var newTranslate = new LyricLineVo(translate.Content, new LyricTimestamp(ts));
 
-                            translateList[pair.Key] = newTranslate;
+                            baseTransList[pair.Key] = newTranslate;
                         }
                     }
                 }
             }
 
-            if (rule != TranslateLyricDefaultRuleEnum.IGNORE)
+            // 处理译文缺失规则
+            if (lostRule != TransLyricLostRuleEnum.IGNORE)
             {
-                foreach (var pair in originTimeOffsetMap)
+                foreach (var pair in originTimeOffsetDict)
                 {
-                    var content = rule == TranslateLyricDefaultRuleEnum.FILL_ORIGIN ? pair.Value.Content : "";
+                    var content = lostRule == TransLyricLostRuleEnum.FILL_ORIGIN ? pair.Value.Content : "";
 
-                    translateList.Add(new LyricLineVo(content, pair.Value.Timestamp));
+                    baseTransList.Add(new LyricLineVo(content, pair.Value.Timestamp));
                 }
             }
 
-            var res = new List<LyricLineVo>(translateList);
-            res.Sort();
-            return res;
+            var transList = new List<LyricLineVo>(baseTransList);
+            transList.Sort();
+
+            return transList;
         }
         
         /**
@@ -402,16 +534,104 @@ namespace MusicLyricApp.Utils
             return compareTo;
         }
 
-        private static Dictionary<long, LyricLineVo> ConvertLyricLineVoListToMapByTimeOffset(List<LyricLineVo> lyricLineVos)
+        /// <summary>
+        /// 推断歌词语言
+        /// </summary>
+        private static LanguageEnum CertainLanguage(List<LyricLineVo> lineVos)
         {
-            var map = new Dictionary<long, LyricLineVo>();
-            
-            foreach (var one in lyricLineVos)
+            var assembly = Assembly.GetExecutingAssembly();
+            using (var stream = assembly.GetManifestResourceStream(assembly.GetManifestResourceNames()
+                       .Single(str => str.EndsWith("Core14.profile.xml"))))
             {
-                map[one.Timestamp.TimeOffset] = one;
-            }
+                var factory = new RankedLanguageIdentifierFactory();
+                var identifier = factory.Load(stream);
+                
+                var certainDict = new Dictionary<LanguageEnum, int>();
+                foreach (var one in lineVos)
+                {
+                    var languages = identifier.Identify(one.Content);
 
-            return map;
+                    var tuple = languages?.First();
+                    if (tuple == null)
+                    { 
+                        continue;
+                    }
+            
+                    var languageEnum = CastLanguage(tuple.Item1.Iso639_3);
+
+                    if (certainDict.ContainsKey(languageEnum))
+                    {
+                        certainDict[languageEnum]++;
+                    }
+                    else
+                    {
+                        certainDict[languageEnum] = 1;
+                    }
+                }
+            
+                var result = LanguageEnum.OTHER;
+                var resultCount = 0;
+
+                foreach (var pair in certainDict)
+                {
+                    if (pair.Value > resultCount)
+                    {
+                        result = pair.Key;
+                        resultCount = pair.Value;
+                    }
+                }
+                
+                return result;
+            }
+        }
+        
+        private static LanguageEnum CastLanguage(string str)
+        {
+            switch (str.ToUpper())
+            {
+                case "FRA":
+                    return LanguageEnum.FRENCH;
+                case "KOR":
+                    return LanguageEnum.KOREAN;
+                case "ZHO":
+                    return LanguageEnum.CHINESE;
+                case "ENG":
+                    return LanguageEnum.ENGLISH;
+                case "ITA":
+                    return LanguageEnum.ITALIAN;
+                case "RUS":
+                    return LanguageEnum.RUSSIAN;
+                case "JPN":
+                    return LanguageEnum.JAPANESE;
+                default:
+                    return LanguageEnum.OTHER;
+            }
+        }
+        
+        public static LanguageEnum CastLanguageEnum(TransTypeEnum transTypeEnum)
+        {
+            switch (transTypeEnum)
+            {
+                case TransTypeEnum.CHINESE:
+                    return LanguageEnum.CHINESE;
+                case TransTypeEnum.ENGLISH:
+                    return LanguageEnum.ENGLISH;
+                default:
+                    return LanguageEnum.OTHER;
+            }
+        }
+
+        private static TransTypeEnum CastTransType(LanguageEnum languageEnum)
+        {
+            switch (languageEnum)
+            {
+                case LanguageEnum.CHINESE:
+                    return TransTypeEnum.CHINESE;
+                case LanguageEnum.ENGLISH:
+                    return TransTypeEnum.ENGLISH;
+                default:
+                    return TransTypeEnum.ORIGIN_TRANS;
+            }
         }
     }
 }

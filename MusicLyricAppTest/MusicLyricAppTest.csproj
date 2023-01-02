@@ -32,17 +32,18 @@
     </ItemGroup>
     <ItemGroup>
         <PackageReference Include="Kawazu" Version="1.1.4" />
-        <PackageReference Include="Markdig" Version="0.28.1" />
-        <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-        <PackageReference Include="NLog.Config" Version="4.7.15" />
-        <PackageReference Include="NUnit" Version="2.6.4" />
-        <PackageReference Include="Xamarin.UITest" Version="2.2.4" />
+        <PackageReference Include="Markdig" Version="0.30.4" />
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
+        <PackageReference Include="NTextCat" Version="0.3.65" />
+        <PackageReference Include="NUnit" Version="3.13.3" />
     </ItemGroup>
     <ItemGroup>
-      <Compile Include="Api\NetEaseMusicApiV2.cs" />
-      <Compile Include="Api\NetEaseMusicNativeApi.cs" />
-      <Compile Include="Api\QQMusicApiV2.cs" />
-      <Compile Include="Api\QQMusicNativeApi.cs" />
+      <Compile Include="Api\Music\NetEaseMusicApi.cs" />
+      <Compile Include="Api\Music\NetEaseMusicNativeApi.cs" />
+      <Compile Include="Api\Music\QQMusicApi.cs" />
+      <Compile Include="Api\Music\QQMusicNativeApi.cs" />
+      <Compile Include="Api\Translate\BaiduTranslateApi.cs" />
+      <Compile Include="Api\Translate\CaiYunTranslateApi.cs" />
       <Compile Include="Bean\CsvBeanTest.cs" />
       <Compile Include="Bean\LyricTimestampTest.cs" />
       <Compile Include="Bean\MusicLyricsVOTest.cs" />

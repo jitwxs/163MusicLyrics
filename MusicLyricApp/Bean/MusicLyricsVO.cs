@@ -13,21 +13,18 @@ namespace MusicLyricApp.Bean
     public enum ShowLrcTypeEnum
     {
         [Description("仅显示原文")] ONLY_ORIGIN = 0,
-        [Description("仅显示译文")] ONLY_TRANSLATE = 1,
-        [Description("优先原文（交错）")] ORIGIN_PRIOR_STAGGER = 2,
-        [Description("优先译文（交错）")] TRANSLATE_PRIOR_STAGGER = 3,
-        [Description("优先原文（独立）")] ORIGIN_PRIOR_ISOLATED = 4,
-        [Description("优先译文（独立）")] TRANSLATE_PRIOR_ISOLATED = 5,
+        
+        [Description("仅显示译文（交错）")] ONLY_TRANS_STAGGER = 1,
+        [Description("仅显示译文（独立）")] ONLY_TRANS_ISOLATED = 2,
+        [Description("仅显示译文（合并）")] ONLY_TRANS_MERGE = 3,
+        
+        [Description("优先原文（交错）")] ORIGIN_PRIOR_STAGGER = 4,
+        [Description("优先原文（独立）")] ORIGIN_PRIOR_ISOLATED = 5,
         [Description("优先原文（合并）")] ORIGIN_PRIOR_MERGE = 6,
-        [Description("优先译文（合并）")] TRANSLATE_PRIOR_MERGE = 7,
-    }
-
-    // 输出文件名类型
-    public enum OutputFilenameTypeEnum
-    {
-        [Description("歌曲名 - 歌手")] NAME_SINGER = 0,
-        [Description("歌手 - 歌曲名")] SINGER_NAME = 1,
-        [Description("歌曲名")] NAME = 2
+        
+        [Description("优先译文（交错）")] TRANSLATE_PRIOR_STAGGER = 7,
+        [Description("优先译文（独立）")] TRANSLATE_PRIOR_ISOLATED = 8,
+        [Description("优先译文（合并）")] TRANSLATE_PRIOR_MERGE = 9,
     }
 
     // 搜索来源
@@ -87,11 +84,61 @@ namespace MusicLyricApp.Bean
     }
 
     // 译文缺省规则
-    public enum TranslateLyricDefaultRuleEnum
+    public enum TransLyricLostRuleEnum
     {
         [Description("忽略展示")] IGNORE = 0,
         [Description("展示空行")] EMPTY_LINE = 1,
         [Description("填充原文")] FILL_ORIGIN = 2,
+    }
+
+    public enum TransTypeEnum
+    {
+        [Description("原始译文")] ORIGIN_TRANS = 0,
+        [Description("中文")] CHINESE = 1,
+        [Description("英文")] ENGLISH = 2,
+        [Description("罗马音")] ROMAJI = 3,
+    }
+
+    public enum LanguageEnum
+    {
+        /// <summary>
+        /// 其他
+        /// </summary>
+        [Description("Other")] OTHER = 0,
+        /// <summary>
+        /// 英语
+        /// </summary>
+        [Description("English")] ENGLISH = 1,
+        /// <summary>
+        /// 日语
+        /// </summary>
+        [Description("Japanese")] JAPANESE = 2,
+        /// <summary>
+        /// 韩语
+        /// </summary>
+        [Description("Korean")] KOREAN = 3,
+        /// <summary>
+        /// 俄语
+        /// </summary>
+        [Description("Russian")] RUSSIAN = 4,
+        /// <summary>
+        /// 法语
+        /// </summary>
+        [Description("French")] FRENCH = 5,
+        /// <summary>
+        /// 意大利语
+        /// </summary>
+        [Description("Italian")] ITALIAN = 6,
+        /// <summary>
+        /// 汉语
+        /// </summary>
+        [Description("Chinese")] CHINESE = 7,
+    }
+
+    public static class CaptionMsg
+    {
+        public const string LOST_DENPENDCY = "缺失依赖";
+        public const string SAVE_FAILED = "保存失败";
     }
 
     /**
@@ -118,6 +165,12 @@ namespace MusicLyricApp.Bean
         public const string DEPENDENCY_LOSS = "缺少必须依赖，请前往项目主页下载 {0} 插件";
         public const string SAVE_COMPLETE = "保存完毕，成功 {0} 跳过 {1}";
         public const string NEED_LOGIN = "该搜索请求需要登陆，请填写 Cookie 后重试";
+        public const string PURE_MUSIC_IGNORE_SAVE = "该首歌曲是纯音乐，根据设置跳过保存";
+        
+        public const string TRANSLATE_LANGUAGE_NOT_SUPPORT = "翻译 API 语言暂不支持，请更换其他语言";
+        public const string NOT_EXIST_TRANSLATE_API = "未配置任何的翻译 API，请关闭自定义语言的翻译类型，或配置 API";
+        public const string CAIYUN_TRANSLATE_AUTH_FAILED = "彩云小译调用失败，请检查相关鉴权配置";
+        public const string BAIDU_TRANSLATE_AUTH_FAILED = "百度翻译调用失败，请检查相关鉴权配置";
 
         public const string GET_LATEST_VERSION_FAILED = "获取最新版本失败";
         public const string THIS_IS_LATEST_VERSION = "当前版本已经是最新版本";
@@ -131,14 +184,14 @@ namespace MusicLyricApp.Bean
     /// </summary>
     public class SaveVo
     {
-        public SaveVo(string songId, SongVo songVo, LyricVo lyricVo)
+        public SaveVo(int index, SongVo songVo, LyricVo lyricVo)
         {
-            SongId = songId;
+            Index = index;
             SongVo = songVo;
             LyricVo = lyricVo;
         }
 
-        public string SongId { get; }
+        public int Index { get; }
 
         public SongVo SongVo { get; }
 
@@ -335,6 +388,11 @@ namespace MusicLyricApp.Bean
     public class LyricVo
     {
         /// <summary>
+        /// 音乐提供商
+        /// </summary>
+        public SearchSourceEnum SearchSource;
+        
+        /// <summary>
         /// 歌词内容
         /// </summary>
         public string Lyric;
@@ -359,9 +417,37 @@ namespace MusicLyricApp.Bean
             TranslateLyric = HttpUtility.HtmlDecode(content);
         }
 
+        /// <summary>
+        /// 歌词不存在判断
+        /// </summary>
         public bool IsEmpty()
         {
             return string.IsNullOrEmpty(Lyric) && string.IsNullOrEmpty(TranslateLyric);
+        }
+
+        /// <summary>
+        /// 纯音乐判断
+        /// </summary>
+        /// <returns></returns>
+        public bool IsPureMusic()
+        {
+            // 原文歌词不为空 && 译文歌词必须为空
+            if (string.IsNullOrEmpty(Lyric) || !string.IsNullOrEmpty(TranslateLyric))
+            {
+                return false;
+            }
+
+            if (SearchSource == SearchSourceEnum.NET_EASE_MUSIC)
+            {
+                return Lyric.Contains("纯音乐，请欣赏");
+            }
+
+            if (SearchSource == SearchSourceEnum.QQ_MUSIC)
+            {
+                return Lyric.Contains("此歌曲为没有填词的纯音乐，请您欣赏");
+            }
+
+            return false;
         }
     }
 
@@ -666,11 +752,24 @@ namespace MusicLyricApp.Bean
         /// <summary>
         /// 实际处理的歌曲 ID 列表
         /// </summary>
-        public readonly Dictionary<string, SearchSourceEnum> SongIds = new Dictionary<string, SearchSourceEnum>();
+        public readonly List<InputSongId> SongIds = new List<InputSongId>();
 
         public SettingBean SettingBeanBackup { get; set; }
 
         public SettingBean SettingBean { get; set; }
+        
+        public class InputSongId
+        {
+            public string SongId { get; }
+            
+            public SearchSourceEnum SearchSource { get; }
+
+            public InputSongId(string songId, SearchSourceEnum searchSource)
+            {
+                SongId = songId;
+                SearchSource = searchSource;
+            }
+        }
     }
 
     public class ResultVo<T>

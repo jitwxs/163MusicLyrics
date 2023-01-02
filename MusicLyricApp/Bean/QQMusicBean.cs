@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Text;
+using MusicLyricApp.Utils;
 
 namespace MusicLyricApp.Bean
 {
@@ -345,19 +346,24 @@ namespace MusicLyricApp.Bean
 
             public string Trans { get; set; }
 
-            public LyricResult Decode()
+            public LyricVo ToVo()
             {
+                var lyricVo = new LyricVo
+                {
+                    SearchSource = SearchSourceEnum.QQ_MUSIC
+                };
+                
                 if (Lyric != null)
                 {
-                    Lyric = Encoding.UTF8.GetString(Convert.FromBase64String(Lyric));
+                    lyricVo.SetLyric(Lyric.IsBase64() ? Encoding.UTF8.GetString(Convert.FromBase64String(Lyric)) : Lyric);
                 }
 
                 if (Trans != null)
                 {
-                    Trans = Encoding.UTF8.GetString(Convert.FromBase64String(Trans));
+                    lyricVo.SetTranslateLyric(Trans.IsBase64() ? Encoding.UTF8.GetString(Convert.FromBase64String(Trans)) : Trans);
                 }
 
-                return this;
+                return lyricVo;
             }
         }
 

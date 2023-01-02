@@ -17,14 +17,28 @@ namespace MusicLyricAppTest.Utils
             
             Assert.AreEqual("[00:11.562]こ[00:11.918]こ[00:12.564]ろ[00:12.834]を[00:13.632] [00:13.642]隠[00:14.234]し[00:14.590]て[00:14.838]ひ[00:15.098]と[00:15.526]り[00:15.922]で" + Environment.NewLine, output);
         }
-        
+
+        /// <summary>
+        /// 处理译文歌词 | 不存在原文歌词
+        /// </summary>
+        [Test]
+        public void TestDealTranslateLyricWithEmptyOriginLyric()
+        {
+            var transConfig = new TransConfigBean();
+            var translateList = new List<LyricLineVo>();
+            
+            var res = LyricUtils.DealTranslateLyric(new List<LyricLineVo>(), translateList, transConfig).Result;
+            
+            Assert.AreEqual(0, res.Count);
+        }
+
         /// <summary>
         /// 译文匹配精度误差
         /// </summary>
         [Test]
         public void TestTranslateMatchPrecisionDeviation()
         {
-            var settingBean = new SettingBean();
+            var transConfig = new TransConfigBean();
  
             var translateList = new List<LyricLineVo>();
             var originList = new List<LyricLineVo>();
@@ -35,19 +49,19 @@ namespace MusicLyricAppTest.Utils
             
             // scenario1: 未配置精度误差
             
-            var res = LyricUtils.DealTranslateLyric(originList, translateList, settingBean);
+            var res = LyricUtils.DealTranslateLyric(originList, translateList, transConfig).Result;
             
             Assert.AreEqual(1, res.Count);
-            Assert.AreEqual(100, res[0].Timestamp.TimeOffset);
+            Assert.AreEqual(100, res[0][0].Timestamp.TimeOffset);
             
             // scenario2: 配置精度误差
 
-            settingBean.Param.TranslateMatchPrecisionDeviation = 20;
+            transConfig.MatchPrecisionDeviation = 20;
             
-            res = LyricUtils.DealTranslateLyric(originList, translateList, settingBean);
+            res = LyricUtils.DealTranslateLyric(originList, translateList, transConfig).Result;
             
             Assert.AreEqual(1, res.Count);
-            Assert.AreEqual(80, res[0].Timestamp.TimeOffset);
+            Assert.AreEqual(80, res[0][0].Timestamp.TimeOffset);
         }
     }
 }

@@ -68,8 +68,8 @@ namespace MusicLyricApp
                         var albumVo = albumVos[i];
 
                         _ids[i] = albumVo.DisplayId;
-                        table.Rows.Add(source, albumVo.AlbumName, string.Join(",", albumVo.AuthorName), 
-                            albumVo.SongCount, albumVo.PublishTime, source);
+                        table.Rows.Add(albumVo.AlbumName, string.Join(",", albumVo.AuthorName), albumVo.SongCount, 
+                            albumVo.PublishTime, source);
                     }
                     break;
                 case SearchTypeEnum.PLAYLIST_ID:
@@ -123,7 +123,7 @@ namespace MusicLyricApp
             if (selectIds.Count > 0)
             {
                 _mainForm.Search_Text.Text = string.Join(",", selectIds);
-                _mainForm.Search_Btn_Click(sender, e);
+                _mainForm.Search_Btn_Click("Search_Btn", e);
                 Close();
             }
         }

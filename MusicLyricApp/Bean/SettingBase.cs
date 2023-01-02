@@ -1,10 +1,9 @@
-﻿using System;
-
+﻿
 namespace MusicLyricApp.Bean
 {
     public class SettingBean
     {
-        public readonly ConfigBean Config = new ConfigBean();
+        public ConfigBean Config = new ConfigBean();
 
         public PersistParamBean Param = new PersistParamBean();
     }
@@ -25,16 +24,16 @@ namespace MusicLyricApp.Bean
         /// 自动检查更新
         /// </summary>
         public bool AutoCheckUpdate = true;
-        
+
         /// <summary>
-        /// 启用逐字歌词模式
+        /// 保存时跳过纯音乐
         /// </summary>
-        public bool EnableVerbatimLyric = false;
-        
+        public bool IgnorePureMusicInSave = true;
+
         /// <summary>
-        /// 译文缺省规则
+        /// 输出文件名格式
         /// </summary>
-        public TranslateLyricDefaultRuleEnum TranslateLyricDefaultRule = TranslateLyricDefaultRuleEnum.IGNORE;
+        public string OutputFileNameFormat = "${name} - ${singer}";
 
         /// <summary>
         /// QQ 音乐 Cookie
@@ -45,29 +44,51 @@ namespace MusicLyricApp.Bean
         /// 网易云音乐 Cookie
         /// </summary>
         public string NetEaseCookie = "";
-        
-        /// <summary>
-        /// 罗马音相关配置
-        /// </summary>
-        public RomajiConfigBean RomajiConfig = new RomajiConfigBean();
+
+        public TransConfigBean TransConfig = new TransConfigBean();
     }
 
-    public class RomajiConfigBean
+    public class TransConfigBean
     {
         /// <summary>
-        /// 译文显示罗马音
+        /// 译文缺省规则
         /// </summary>
-        public bool Enable = false;
-
+        public TransLyricLostRuleEnum LostRule = TransLyricLostRuleEnum.IGNORE;
+        
+        /// <summary>
+        /// 译文歌词匹配精度
+        /// </summary>
+        public int MatchPrecisionDeviation = 0;
+        
+        /// <summary>
+        /// 译文类型
+        /// </summary>
+        public string TransType = "0";
+        
         /// <summary>
         /// 罗马音转换模式
         /// </summary>
-        public RomajiModeEnum ModeEnum = RomajiModeEnum.SPACED;
+        public RomajiModeEnum RomajiModeEnum = RomajiModeEnum.SPACED;
 
         /// <summary>
         /// 罗马音字体系
         /// </summary>
-        public RomajiSystemEnum SystemEnum = RomajiSystemEnum.HEPBURN;
+        public RomajiSystemEnum RomajiSystemEnum = RomajiSystemEnum.HEPBURN;
+
+        /// <summary>
+        /// 百度翻译 APP ID
+        /// </summary>
+        public string BaiduTranslateAppId = "";
+        
+        /// <summary>
+        /// 百度翻译密钥
+        /// </summary>
+        public string BaiduTranslateSecret = "";
+
+        /// <summary>
+        /// 彩云小译 Token
+        /// </summary>
+        public string CaiYunToken = "";
     }
 
     public class PersistParamBean
@@ -90,7 +111,7 @@ namespace MusicLyricApp.Bean
         /// <summary>
         /// 指定歌词合并的分隔符
         /// </summary>
-        public string LrcMergeSeparator = String.Empty;
+        public string LrcMergeSeparator = string.Empty;
         
         /// <summary>
         /// LRC 歌词时间戳格式
@@ -101,11 +122,11 @@ namespace MusicLyricApp.Bean
         /// SRT 歌词时间戳格式
         /// </summary>
         public string SrtTimestampFormat = "HH:mm:ss,SSS";
-
+        
         /// <summary>
-        /// 译文歌词匹配精度
+        /// 启用逐字歌词模式
         /// </summary>
-        public int TranslateMatchPrecisionDeviation = 0;
+        public bool EnableVerbatimLyric = false;
 
         /// <summary>
         /// 忽略空的歌词行
@@ -116,11 +137,6 @@ namespace MusicLyricApp.Bean
         /// 小数位处理策略
         /// </summary>
         public DotTypeEnum DotType = DotTypeEnum.DOWN;
-
-        /// <summary>
-        /// 输出文件名类型
-        /// </summary>
-        public OutputFilenameTypeEnum OutputFileNameType = OutputFilenameTypeEnum.NAME_SINGER;
 
         /// <summary>
         /// 输出文件格式

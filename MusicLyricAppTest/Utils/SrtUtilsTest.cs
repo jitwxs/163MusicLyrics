@@ -21,10 +21,15 @@ namespace MusicLyricAppTest.Utils
         private static void DoTest(string content)
         {
             var converter = new KawazuConverter();
+            
+            Console.WriteLine(converter.Convert(content, To.Hiragana, Mode.Normal, RomajiSystem.Hepburn).Result);
+            Console.WriteLine(converter.Convert(content, To.Hiragana, Mode.Okurigana, RomajiSystem.Hepburn).Result);
+            
+            Console.WriteLine(converter.Convert(content, To.Katakana, Mode.Normal, RomajiSystem.Hepburn).Result);
+            Console.WriteLine(converter.Convert(content, To.Katakana, Mode.Okurigana, RomajiSystem.Hepburn).Result);
 
-            var task = converter.Convert(content, To.Romaji, Mode.Spaced, RomajiSystem.Hepburn, "(", ")");
-
-            Console.WriteLine(task.Result);
+            Console.WriteLine(converter.Convert(content, To.Romaji, Mode.Normal, RomajiSystem.Hepburn).Result);
+            Console.WriteLine(converter.Convert(content, To.Romaji, Mode.Okurigana, RomajiSystem.Hepburn).Result);
         }
     }
 }
