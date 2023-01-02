@@ -216,7 +216,7 @@ namespace MusicLyricApp
             this.SongLink_Btn.Name = "SongLink_Btn";
             this.SongLink_Btn.Size = new System.Drawing.Size(38, 22);
             this.SongLink_Btn.TabIndex = 21;
-            this.SongLink_Btn.Text = "歌曲";
+            this.SongLink_Btn.Text = "直链";
             this.SongLink_Btn.UseVisualStyleBackColor = true;
             this.SongLink_Btn.Click += new System.EventHandler(this.SongLink_Btn_Click);
             // 

@@ -31,6 +31,7 @@ namespace MusicLyricApp.Api.Translate
         
         /// <summary>
         /// 初始化 API
+        /// https://fanyi-api.baidu.com/manage/developer
         /// </summary>
         /// <param name="appId">APP ID</param>
         /// <param name="secret">密钥</param>
