@@ -110,20 +110,27 @@ namespace MusicLyricApp
 
         private void ShowRomajiChangeListener()
         {
-            var romajiCell = TransType_DataGridView.Rows[Convert.ToInt32(TransTypeEnum.ROMAJI)].Cells[0];
-            var isEnable = (bool) romajiCell.Value;
+            var transTypeDict = GlobalUtils.GetEnumDict<TransTypeEnum>();
 
-            // 检查依赖
-            if (isEnable && Constants.IpaDicDependency.Any(e => !File.Exists(e)))
+            foreach (DataGridViewRow row in TransType_DataGridView.Rows)
             {
-                MessageBox.Show(string.Format(ErrorMsg.DEPENDENCY_LOSS, "IpaDic"), "提示");
-                romajiCell.Value = false;
+                if (transTypeDict[row.Cells[1].Value.ToString()] == TransTypeEnum.ROMAJI)
+                {
+                    var isEnable = (bool)row.Cells[0].Value;
+                    
+                    // 检查依赖
+                    if (isEnable && Constants.IpaDicDependency.Any(e => !File.Exists(e)))
+                    {
+                        MessageBox.Show(string.Format(ErrorMsg.DEPENDENCY_LOSS, "IpaDic"), "提示");
+                        row.Cells[1].Value = false;
 
-                isEnable = false;
-            }
+                        isEnable = false;
+                    }
             
-            RomajiMode_ComboBox.Enabled = isEnable;
-            RomajiSystem_ComboBox.Enabled = isEnable;
+                    RomajiMode_ComboBox.Enabled = isEnable;
+                    RomajiSystem_ComboBox.Enabled = isEnable;
+                }
+            }
         }
 
         /// <summary>
@@ -231,10 +238,12 @@ namespace MusicLyricApp
 
         private void TransType_DataGridView_CellValueChanged(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.RowIndex == Convert.ToInt32(TransTypeEnum.ROMAJI))
+            if (e.RowIndex < 0)
             {
-                ShowRomajiChangeListener();
+                return;
             }
+            
+            ShowRomajiChangeListener();
         }
     }
 }
