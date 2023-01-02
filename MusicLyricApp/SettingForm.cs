@@ -57,15 +57,15 @@ namespace MusicLyricApp
                 var notExistTranslateApi = LyricUtils.GetAvailableTranslateApi(_settingBean.Config.TransConfig).Count == 0;
 
                 var selectTransType = new List<int>();
-                var transTypeDict = GlobalUtils.GetEnumDict<TransTypeEnum>();
-                foreach (DataGridViewRow row in TransType_DataGridView.Rows)
+                var transTypeDict = GlobalUtils.GetEnumDict<LyricsTypeEnum>();
+                foreach (DataGridViewRow row in LyricShow_DataGridView.Rows)
                 {
                     if ((bool) row.Cells[0].Value)
                     {
                         var transType = transTypeDict[row.Cells[1].Value.ToString()];
 
                         // 翻译 API 配置检查
-                        if (LyricUtils.CastLanguageEnum(transType) != LanguageEnum.OTHER && notExistTranslateApi)
+                        if (LyricUtils.CastToLanguageEnum(transType) != LanguageEnum.OTHER && notExistTranslateApi)
                         {
                             MessageBox.Show(string.Format(ErrorMsg.NOT_EXIST_TRANSLATE_API), CaptionMsg.SAVE_FAILED);
                             return;
@@ -74,7 +74,7 @@ namespace MusicLyricApp
                         selectTransType.Add(Convert.ToInt32(transType));
                     }
                 }
-                _settingBean.Config.TransConfig.TransType = string.Join(",", selectTransType);
+                _settingBean.Config.OutputLyricTypes = string.Join(",", selectTransType);
 
                 // 输出设置
                 _settingBean.Config.IgnorePureMusicInSave = IgnorePureMusicInSave_CheckBox.Checked;
@@ -165,7 +165,7 @@ namespace MusicLyricApp
 
             {
                 if (e.ColumnIndex == -1 && e.RowIndex > -1)
-                    TransType_DataGridView.DoDragDrop(TransType_DataGridView.Rows[e.RowIndex], DragDropEffects.Move);
+                    LyricShow_DataGridView.DoDragDrop(LyricShow_DataGridView.Rows[e.RowIndex], DragDropEffects.Move);
             }
         }
 
@@ -186,20 +186,20 @@ namespace MusicLyricApp
             {
                 var row = (DataGridViewRow)e.Data.GetData(typeof(DataGridViewRow));
 
-                TransType_DataGridView.Rows.Remove(row);
+                LyricShow_DataGridView.Rows.Remove(row);
 
                 _transListSelectionIdx = idx;
 
-                TransType_DataGridView.Rows.Insert(idx, row);
+                LyricShow_DataGridView.Rows.Insert(idx, row);
             }
         }
         
         private int GetRowFromPoint(int x, int y)
         {
-            for (var i = 0; i < TransType_DataGridView.RowCount; i++)
+            for (var i = 0; i < LyricShow_DataGridView.RowCount; i++)
             {
-                var rec = TransType_DataGridView.GetRowDisplayRectangle(i, false);
-                if (TransType_DataGridView.RectangleToScreen(rec).Contains(x, y))
+                var rec = LyricShow_DataGridView.GetRowDisplayRectangle(i, false);
+                if (LyricShow_DataGridView.RectangleToScreen(rec).Contains(x, y))
                     return i;
             }
             return -1;
@@ -212,14 +212,14 @@ namespace MusicLyricApp
         {
             if (_transListSelectionIdx > -1)
             {
-                TransType_DataGridView.Rows[_transListSelectionIdx].Selected = true;
-                TransType_DataGridView.CurrentCell = TransType_DataGridView.Rows[_transListSelectionIdx].Cells[0];
+                LyricShow_DataGridView.Rows[_transListSelectionIdx].Selected = true;
+                LyricShow_DataGridView.CurrentCell = LyricShow_DataGridView.Rows[_transListSelectionIdx].Cells[0];
             }
         }
 
         private void TransType_DataGridView_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-            TransType_DataGridView.CommitEdit(DataGridViewDataErrorContexts.Commit);
+            LyricShow_DataGridView.CommitEdit(DataGridViewDataErrorContexts.Commit);
         }
 
         private void TransType_DataGridView_CellValueChanged(object sender, DataGridViewCellEventArgs e)
@@ -229,10 +229,10 @@ namespace MusicLyricApp
         
         private void TransTypeEventListener(int index)
         {
-            var transTypeDict = GlobalUtils.GetEnumDict<TransTypeEnum>();
+            var transTypeDict = GlobalUtils.GetEnumDict<LyricsTypeEnum>();
             if (index < 0)
             {
-                foreach (DataGridViewRow row in TransType_DataGridView.Rows)
+                foreach (DataGridViewRow row in LyricShow_DataGridView.Rows)
                 {
                     SingleTransTypeEventListener(transTypeDict, row);
                 }
@@ -240,18 +240,18 @@ namespace MusicLyricApp
             else
             {
                 // 状态改变
-                var row = TransType_DataGridView.Rows[index];
+                var row = LyricShow_DataGridView.Rows[index];
                 SingleTransTypeEventListener(transTypeDict, row);
             }
         }
         
-        private void SingleTransTypeEventListener(Dictionary<string, TransTypeEnum> transTypeDict, DataGridViewRow row)
+        private void SingleTransTypeEventListener(Dictionary<string, LyricsTypeEnum> transTypeDict, DataGridViewRow row)
         {
             var isEnable = (bool)row.Cells[0].Value;
 
             switch (transTypeDict[row.Cells[1].Value.ToString()])
             {
-                case TransTypeEnum.ROMAJI:
+                case LyricsTypeEnum.ROMAJI:
                     // 检查依赖
                     if (isEnable && Constants.IpaDicDependency.Any(e => !File.Exists(e)))
                     {
@@ -266,8 +266,8 @@ namespace MusicLyricApp
                         TransConfig_TabControl.SelectedTab = Romaji_TabPage;
                     }
                     break;
-                case TransTypeEnum.CHINESE:
-                case TransTypeEnum.ENGLISH:
+                case LyricsTypeEnum.CHINESE:
+                case LyricsTypeEnum.ENGLISH:
                     if (isEnable)
                     {
                         TransConfig_TabControl.SelectedTab = TranslateApi_TabPage;

@@ -9,6 +9,8 @@ namespace MusicLyricAppTest.Utils
     [TestFixture]
     public class LyricUtilsTest
     {
+        private readonly List<LyricsTypeEnum> _outputLyricsTypes = new List<LyricsTypeEnum> { LyricsTypeEnum.ORIGIN_TRANS };
+        
         [Test]
         public void TestDealVerbatimLyric()
         {
@@ -27,7 +29,8 @@ namespace MusicLyricAppTest.Utils
             var transConfig = new TransConfigBean();
             var translateList = new List<LyricLineVo>();
             
-            var res = LyricUtils.DealTranslateLyric(new List<LyricLineVo>(), translateList, transConfig).Result;
+            var res = LyricUtils.DealTranslateLyric(new List<LyricLineVo>(), translateList, 
+                transConfig, _outputLyricsTypes).Result;
             
             Assert.AreEqual(0, res.Count);
         }
@@ -43,13 +46,14 @@ namespace MusicLyricAppTest.Utils
             var translateList = new List<LyricLineVo>();
             var originList = new List<LyricLineVo>();
             
+
             originList.Add(new LyricLineVo("내가 말하는 것까지 Babe", new LyricTimestamp(80)));
             
             translateList.Add(new LyricLineVo("包括我在说的东西", new LyricTimestamp(100)));
             
             // scenario1: 未配置精度误差
             
-            var res = LyricUtils.DealTranslateLyric(originList, translateList, transConfig).Result;
+            var res = LyricUtils.DealTranslateLyric(originList, translateList, transConfig, _outputLyricsTypes).Result;
             
             Assert.AreEqual(1, res.Count);
             Assert.AreEqual(100, res[0][0].Timestamp.TimeOffset);
@@ -58,7 +62,7 @@ namespace MusicLyricAppTest.Utils
 
             transConfig.MatchPrecisionDeviation = 20;
             
-            res = LyricUtils.DealTranslateLyric(originList, translateList, transConfig).Result;
+            res = LyricUtils.DealTranslateLyric(originList, translateList, transConfig, _outputLyricsTypes).Result;
             
             Assert.AreEqual(1, res.Count);
             Assert.AreEqual(80, res[0][0].Timestamp.TimeOffset);

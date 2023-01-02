@@ -136,24 +136,23 @@ namespace MusicLyricApp.Utils
         /// <returns></returns>
         private static async Task<List<LyricLineVo>> FormatLyric(string originLrc, string translateLrc, SearchInfo searchInfo)
         {
-            var transConfig = searchInfo.SettingBean.Config.TransConfig;
-            var configTransTypes = transConfig.DeserializationTransTypeEnum();
+            var outputLyricsTypes = searchInfo.SettingBean.Config.DeserializationOutputLyricsTypes();
             var showLrcType = searchInfo.SettingBean.Param.ShowLrcType;
             var searchSource = searchInfo.SettingBean.Param.SearchSource;
             var ignoreEmptyLyric = searchInfo.SettingBean.Param.IgnoreEmptyLyric;
 
             // 未配置任何输出
-            if (configTransTypes.Count == 0)
+            if (outputLyricsTypes.Count == 0)
             {
                 return new List<LyricLineVo>();
             }
             
             var originLyrics = SplitLrc(originLrc, searchSource, ignoreEmptyLyric);
 
-            var originLyricsOutputSortInConfig = configTransTypes.IndexOf(TransTypeEnum.ORIGIN);
+            var originLyricsOutputSortInConfig = outputLyricsTypes.IndexOf(LyricsTypeEnum.ORIGIN);
             
             // 仅输出原文            
-            if (configTransTypes.Count == 1 && originLyricsOutputSortInConfig != -1)
+            if (outputLyricsTypes.Count == 1 && originLyricsOutputSortInConfig != -1)
             {
                 return originLyrics;
             }
@@ -161,7 +160,7 @@ namespace MusicLyricApp.Utils
             // 原始译文歌词的空行没有意义，指定 true 不走配置
             var basicTransLyrics = SplitLrc(translateLrc, searchSource, true);
             
-            var lyricsComplexList = await DealTranslateLyric(originLyrics, basicTransLyrics, transConfig);
+            var lyricsComplexList = await DealTranslateLyric(originLyrics, basicTransLyrics, searchInfo.SettingBean.Config.TransConfig, outputLyricsTypes);
 
             // 原文歌词插入到结果集的指定位置
             if (originLyricsOutputSortInConfig != -1)
@@ -317,8 +316,10 @@ namespace MusicLyricApp.Utils
         /// <param name="originList">原文歌词</param>
         /// <param name="baseTransList">初始的译文歌词</param>
         /// <param name="transConfig">译文配置</param>
+        /// <param name="outputLyricsTypes">输出歌词类型列表</param>
         /// <returns></returns>
-        public static async Task<List<List<LyricLineVo>>> DealTranslateLyric(List<LyricLineVo> originList, List<LyricLineVo> baseTransList, TransConfigBean transConfig)
+        public static async Task<List<List<LyricLineVo>>> DealTranslateLyric(List<LyricLineVo> originList, 
+            List<LyricLineVo> baseTransList, TransConfigBean transConfig, List<LyricsTypeEnum> outputLyricsTypes)
         {
             var result = new List<List<LyricLineVo>>();
             
@@ -334,39 +335,36 @@ namespace MusicLyricApp.Utils
             // 处理译文类型填充
             LanguageEnum originLanguage = CertainLanguage(originList), baseTransLanguage = CertainLanguage(transList);
             
-            var configTransTypes = transConfig.TransType.Split(',')
-                .Select(e => (TransTypeEnum) Convert.ToInt32(e)).ToList();
-            
-            foreach (var transTypeEnum in configTransTypes)
+            foreach (var transTypeEnum in outputLyricsTypes)
             {
                 switch (transTypeEnum)
                 {
-                    case TransTypeEnum.ORIGIN_TRANS:
+                    case LyricsTypeEnum.ORIGIN_TRANS:
                         result.Add(transList);
                         break;
-                    case TransTypeEnum.ROMAJI:
+                    case LyricsTypeEnum.ROMAJI:
                         if (originLanguage == LanguageEnum.JAPANESE)
                         {
                             result.Add(await RomajiUtils.ToRomaji(originList, transConfig.RomajiModeEnum, transConfig.RomajiSystemEnum));
                         }
                         break;
-                    case TransTypeEnum.CHINESE:
-                    case TransTypeEnum.ENGLISH:
+                    case LyricsTypeEnum.CHINESE:
+                    case LyricsTypeEnum.ENGLISH:
                         // 输出语言和原始歌词语言只有不同时，才翻译
-                        if (CastTransType(originLanguage) != transTypeEnum)
+                        if (CastToLyricsTypeEnum(originLanguage) != transTypeEnum)
                         {
                             // 输出语言和已有译文语言相同
-                            if (CastTransType(baseTransLanguage) == transTypeEnum)
+                            if (CastToLyricsTypeEnum(baseTransLanguage) == transTypeEnum)
                             {
                                 // 仅当已有译文未输出时，才输出
-                                if (!configTransTypes.Contains(TransTypeEnum.ORIGIN_TRANS))
+                                if (!outputLyricsTypes.Contains(LyricsTypeEnum.ORIGIN_TRANS))
                                 {
                                     result.Add(transList);
                                 }
                             }
                             else
                             {
-                                var outputLanguage = CastLanguageEnum(transTypeEnum);
+                                var outputLanguage = CastToLanguageEnum(transTypeEnum);
 
                                 // 调用合适的翻译 API
                                 foreach (var translateApi in GetAvailableTranslateApi(transConfig))
@@ -600,29 +598,29 @@ namespace MusicLyricApp.Utils
             }
         }
         
-        public static LanguageEnum CastLanguageEnum(TransTypeEnum transTypeEnum)
+        public static LanguageEnum CastToLanguageEnum(LyricsTypeEnum lyricsTypeEnum)
         {
-            switch (transTypeEnum)
+            switch (lyricsTypeEnum)
             {
-                case TransTypeEnum.CHINESE:
+                case LyricsTypeEnum.CHINESE:
                     return LanguageEnum.CHINESE;
-                case TransTypeEnum.ENGLISH:
+                case LyricsTypeEnum.ENGLISH:
                     return LanguageEnum.ENGLISH;
                 default:
                     return LanguageEnum.OTHER;
             }
         }
 
-        private static TransTypeEnum CastTransType(LanguageEnum languageEnum)
+        private static LyricsTypeEnum CastToLyricsTypeEnum(LanguageEnum languageEnum)
         {
             switch (languageEnum)
             {
                 case LanguageEnum.CHINESE:
-                    return TransTypeEnum.CHINESE;
+                    return LyricsTypeEnum.CHINESE;
                 case LanguageEnum.ENGLISH:
-                    return TransTypeEnum.ENGLISH;
+                    return LyricsTypeEnum.ENGLISH;
                 default:
-                    return TransTypeEnum.ORIGIN_TRANS;
+                    return LyricsTypeEnum.ORIGIN_TRANS;
             }
         }
     }

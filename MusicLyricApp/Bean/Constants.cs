@@ -67,6 +67,10 @@ namespace MusicLyricApp.Bean
                         list.Add("${name} -> 歌曲名");
                         list.Add("${singer} -> 歌手名");
                         list.Add("${album} -> 专辑名");
+                        list.Add("-----");
+                        list.Add("您可自行决定输出哪些歌词类型，通过勾选复选框进行启用和关闭");
+                        list.Add("拖拽最左侧的箭头可以调整输出的顺序");
+                        list.Add("罗马音功能需要安装罗马音插件，非原始译文类型需要指定翻译 API");
                         break;
                     case TypeEnum.DEFAULT:
                         default:

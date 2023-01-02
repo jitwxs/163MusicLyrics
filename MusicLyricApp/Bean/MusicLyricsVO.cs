@@ -81,7 +81,7 @@ namespace MusicLyricApp.Bean
         [Description("填充原文")] FILL_ORIGIN = 2,
     }
 
-    public enum TransTypeEnum
+    public enum LyricsTypeEnum
     {
         [Description("原文")] ORIGIN = 0,
         [Description("原始译文")] ORIGIN_TRANS = 1,

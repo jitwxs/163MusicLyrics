@@ -38,6 +38,11 @@ namespace MusicLyricApp.Bean
         /// 输出文件名格式
         /// </summary>
         public string OutputFileNameFormat = "${name} - ${singer}";
+        
+        /// <summary>
+        /// 输出的歌词类型列表
+        /// </summary>
+        public string OutputLyricTypes = string.Join(",", new [] { (int) LyricsTypeEnum.ORIGIN, (int) LyricsTypeEnum.ORIGIN_TRANS });
 
         /// <summary>
         /// QQ 音乐 Cookie
@@ -50,6 +55,12 @@ namespace MusicLyricApp.Bean
         public string NetEaseCookie = "";
 
         public TransConfigBean TransConfig = new TransConfigBean();
+        
+        public List<LyricsTypeEnum> DeserializationOutputLyricsTypes()
+        {
+            return string.IsNullOrWhiteSpace(OutputLyricTypes) ? new List<LyricsTypeEnum>() : 
+                OutputLyricTypes.Split(',').Select(e => (LyricsTypeEnum) Convert.ToInt32(e)).ToList();
+        }
     }
 
     public class TransConfigBean
@@ -63,12 +74,7 @@ namespace MusicLyricApp.Bean
         /// 译文歌词匹配精度
         /// </summary>
         public int MatchPrecisionDeviation = 0;
-        
-        /// <summary>
-        /// 译文类型
-        /// </summary>
-        public string TransType = string.Join(",", new [] { (int) TransTypeEnum.ORIGIN, (int) TransTypeEnum.ORIGIN_TRANS });
-        
+
         /// <summary>
         /// 罗马音转换模式
         /// </summary>
@@ -93,12 +99,6 @@ namespace MusicLyricApp.Bean
         /// 彩云小译 Token
         /// </summary>
         public string CaiYunToken = "";
-        
-        public List<TransTypeEnum> DeserializationTransTypeEnum()
-        {
-            return string.IsNullOrWhiteSpace(TransType) ? new List<TransTypeEnum>() : 
-                TransType.Split(',').Select(e => (TransTypeEnum) Convert.ToInt32(e)).ToList();
-        }
     }
 
     public class PersistParamBean
