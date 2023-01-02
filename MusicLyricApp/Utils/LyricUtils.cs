@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -538,46 +539,50 @@ namespace MusicLyricApp.Utils
         /// </summary>
         private static LanguageEnum CertainLanguage(List<LyricLineVo> lineVos)
         {
-            var certainDict = new Dictionary<LanguageEnum, int>();
-            
-            var factory = new RankedLanguageIdentifierFactory();
-            var identifier = factory.Load("Core14.profile.xml");
-            
-            foreach (var one in lineVos)
+            var assembly = Assembly.GetExecutingAssembly();
+            using (var stream = assembly.GetManifestResourceStream(assembly.GetManifestResourceNames()
+                       .Single(str => str.EndsWith("Core14.profile.xml"))))
             {
-                var languages = identifier.Identify(one.Content);
+                var factory = new RankedLanguageIdentifierFactory();
+                var identifier = factory.Load(stream);
+                
+                var certainDict = new Dictionary<LanguageEnum, int>();
+                foreach (var one in lineVos)
+                {
+                    var languages = identifier.Identify(one.Content);
 
-                var tuple = languages?.First();
-                if (tuple == null)
-                { 
-                    continue;
+                    var tuple = languages?.First();
+                    if (tuple == null)
+                    { 
+                        continue;
+                    }
+            
+                    var languageEnum = CastLanguage(tuple.Item1.Iso639_3);
+
+                    if (certainDict.ContainsKey(languageEnum))
+                    {
+                        certainDict[languageEnum]++;
+                    }
+                    else
+                    {
+                        certainDict[languageEnum] = 1;
+                    }
                 }
             
-                var languageEnum = CastLanguage(tuple.Item1.Iso639_3);
+                var result = LanguageEnum.OTHER;
+                var resultCount = 0;
 
-                if (certainDict.ContainsKey(languageEnum))
+                foreach (var pair in certainDict)
                 {
-                    certainDict[languageEnum]++;
+                    if (pair.Value > resultCount)
+                    {
+                        result = pair.Key;
+                        resultCount = pair.Value;
+                    }
                 }
-                else
-                {
-                    certainDict[languageEnum] = 1;
-                }
+                
+                return result;
             }
-            
-            var result = LanguageEnum.OTHER;
-            var resultCount = 0;
-
-            foreach (var pair in certainDict)
-            {
-                if (pair.Value > resultCount)
-                {
-                    result = pair.Key;
-                    resultCount = pair.Value;
-                }
-            }
-
-            return result;
         }
         
         private static LanguageEnum CastLanguage(string str)

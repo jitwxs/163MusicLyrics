@@ -359,7 +359,7 @@
     <WCFMetadata Include="Connected Services\" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Core14.profile.xml" />
+    <EmbeddedResource Include="Core14.profile.xml" />
     <Content Include="Favicon2.ico" />
     <Content Include="Properties\app.manifest" />
   </ItemGroup>
