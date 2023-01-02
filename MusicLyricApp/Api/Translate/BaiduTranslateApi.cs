@@ -118,7 +118,13 @@ namespace MusicLyricApp.Api.Translate
             return new ResultVo<string[]>(outputs);
         }
 
-        private string CastLanguageEnum(LanguageEnum languageEnum)
+        protected override bool IsSupport0(LanguageEnum inputLanguage, LanguageEnum outputLanguage)
+        {
+            // all support
+            return true;
+        }
+
+        private static string CastLanguageEnum(LanguageEnum languageEnum)
         {
             switch (languageEnum)
             {

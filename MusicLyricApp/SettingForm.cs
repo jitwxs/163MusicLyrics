@@ -54,7 +54,7 @@ namespace MusicLyricApp
                 _settingBean.Config.TransConfig.BaiduTranslateSecret = BaiduTranslateSecret_TextBox.Text;
                 _settingBean.Config.TransConfig.CaiYunToken = CaiYunTranslateToken_TextBox.Text;
 
-                var notExistTranslateApi = LyricUtils.GetTranslateApi(_settingBean.Config.TransConfig) == null;
+                var notExistTranslateApi = LyricUtils.GetAvailableTranslateApi(_settingBean.Config.TransConfig).Count == 0;
 
                 var selectTransType = new List<int>();
                 var transTypeDict = GlobalUtils.GetEnumDict<TransTypeEnum>();

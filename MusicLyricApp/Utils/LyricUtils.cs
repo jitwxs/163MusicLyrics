@@ -389,20 +389,36 @@ namespace MusicLyricApp.Utils
                             }
                             else
                             {
-                                // 调用翻译 API
-                                var translateApi = GetTranslateApi(transConfig);
-                                if (translateApi != null)
-                                {
-                                    var inputs = originList.Select(e => e.Content).ToArray();
-                                    var outputs = translateApi.Translate(inputs, originLanguage, CastLanguageEnum(transTypeEnum));
+                                var outputLanguage = CastLanguageEnum(transTypeEnum);
 
-                                    var outputList = new List<LyricLineVo>();
-                                    for (var i = 0; i < inputs.Length; i++)
+                                // 调用合适的翻译 API
+                                foreach (var translateApi in GetAvailableTranslateApi(transConfig))
+                                {
+                                    string[] inputs = null, outputs = null;
+                                    
+                                    if (translateApi.IsSupport(originLanguage, outputLanguage))
                                     {
-                                        outputList.Add(new LyricLineVo(outputs[i], originList[i].Timestamp));
+                                        // 使用原文尝试进行翻译
+                                        inputs = originList.Select(e => e.Content).ToArray();
+                                        outputs = translateApi.Translate(inputs, originLanguage, outputLanguage);
+                                    }
+                                    else if (transList.Count != 0 && translateApi.IsSupport(baseTransLanguage, outputLanguage))
+                                    {
+                                        // 使用译文尝试翻译
+                                        inputs = transList.Select(e => e.Content).ToArray();
+                                        outputs = translateApi.Translate(inputs, baseTransLanguage, outputLanguage);
                                     }
 
-                                    result.Add(outputList);
+                                    if (inputs != null && outputs != null)
+                                    {
+                                        var outputList = new List<LyricLineVo>();
+                                        for (var i = 0; i < inputs.Length; i++)
+                                        {
+                                            outputList.Add(new LyricLineVo(outputs[i], originList[i].Timestamp));
+                                        }
+                                        result.Add(outputList);
+                                        break;
+                                    }
                                 }
                             }
                         }
@@ -413,28 +429,27 @@ namespace MusicLyricApp.Utils
             return result;
         }
         
-        public static ITranslateApi GetTranslateApi(TransConfigBean transConfig)
+        public static List<ITranslateApi> GetAvailableTranslateApi(TransConfigBean transConfig)
         {
+            var res = new List<ITranslateApi>();
+            
             try
             {
-                return new CaiYunTranslateApi(transConfig.CaiYunToken);
+                res.Add(new CaiYunTranslateApi(transConfig.CaiYunToken));
             }
-            catch (MusicLyricException caiYunEx)
+            catch (MusicLyricException)
             {
-                if (ErrorMsg.CAIYUN_TRANSLATE_AUTH_FAILED.Equals(caiYunEx.Message))
+                try
                 {
-                    try
-                    {
-                        return new BaiduTranslateApi(transConfig.BaiduTranslateAppId, transConfig.BaiduTranslateSecret);
-                    }
-                    catch (MusicLyricException baiduEx)
-                    {
+                    res.Add(new BaiduTranslateApi(transConfig.BaiduTranslateAppId, transConfig.BaiduTranslateSecret));
+                }
+                catch (MusicLyricException)
+                {
                         
-                    }
                 }
             }
 
-            return null;
+            return res;
         }
 
         /// <summary>
