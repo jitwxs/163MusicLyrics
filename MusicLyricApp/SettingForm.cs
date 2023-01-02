@@ -256,7 +256,7 @@ namespace MusicLyricApp
                     if (isEnable && Constants.IpaDicDependency.Any(e => !File.Exists(e)))
                     {
                         MessageBox.Show(string.Format(ErrorMsg.DEPENDENCY_LOSS, "IpaDic"), CaptionMsg.LOST_DENPENDCY);
-                        row.Cells[1].Value = false;
+                        row.Cells[0].Value = false;
 
                         isEnable = false;
                     }

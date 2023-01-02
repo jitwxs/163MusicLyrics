@@ -393,13 +393,13 @@ namespace MusicLyricApp.Utils
                                 var translateApi = GetTranslateApi(transConfig);
                                 if (translateApi != null)
                                 {
-                                    var inputs = transList.Select(e => e.Content).ToArray();
-                                    var outputs = translateApi.Translate(inputs, baseTransLanguage, CastLanguageEnum(transTypeEnum));
+                                    var inputs = originList.Select(e => e.Content).ToArray();
+                                    var outputs = translateApi.Translate(inputs, originLanguage, CastLanguageEnum(transTypeEnum));
 
                                     var outputList = new List<LyricLineVo>();
                                     for (var i = 0; i < inputs.Length; i++)
                                     {
-                                        outputList.Add(new LyricLineVo(outputs[i], transList[i].Timestamp));
+                                        outputList.Add(new LyricLineVo(outputs[i], originList[i].Timestamp));
                                     }
 
                                     result.Add(outputList);
