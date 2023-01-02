@@ -32,9 +32,9 @@
     </ItemGroup>
     <ItemGroup>
         <PackageReference Include="Kawazu" Version="1.1.4" />
-        <PackageReference Include="Markdig" Version="0.28.1" />
-        <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-        <PackageReference Include="NUnit" Version="2.6.4" />
+        <PackageReference Include="Markdig" Version="0.30.4" />
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
+        <PackageReference Include="NUnit" Version="3.13.3" />
     </ItemGroup>
     <ItemGroup>
       <Compile Include="Api\NetEaseMusicApiV2.cs" />
