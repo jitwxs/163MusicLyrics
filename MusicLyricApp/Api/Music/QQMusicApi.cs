@@ -4,13 +4,13 @@ using System.Linq;
 using MusicLyricApp.Bean;
 using MusicLyricApp.Cache;
 
-namespace MusicLyricApp.Api
+namespace MusicLyricApp.Api.Music
 {
-    public class QQMusicApiV2 : MusicApiV2Cacheable
+    public class QQMusicApi : MusicCacheableApi
     {
         private readonly QQMusicNativeApi _api;
         
-        public QQMusicApiV2(Func<string> cookieAction)
+        public QQMusicApi(Func<string> cookieAction)
         {
             _api = new QQMusicNativeApi(cookieAction);
         }

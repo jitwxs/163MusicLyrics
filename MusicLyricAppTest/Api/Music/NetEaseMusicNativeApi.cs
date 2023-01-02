@@ -2,12 +2,12 @@
 using MusicLyricApp.Bean;
 using NUnit.Framework;
 
-namespace MusicLyricAppTest.Api
+namespace MusicLyricAppTest.Api.Music
 {
     [TestFixture]
     public class NetEaseMusicNativeApi
     {
-        private MusicLyricApp.Api.NetEaseMusicNativeApi _api = new MusicLyricApp.Api.NetEaseMusicNativeApi(() => "");
+        private MusicLyricApp.Api.Music.NetEaseMusicNativeApi _api = new MusicLyricApp.Api.Music.NetEaseMusicNativeApi(() => "");
         
         [Test]
         public void TestGetAlbum()

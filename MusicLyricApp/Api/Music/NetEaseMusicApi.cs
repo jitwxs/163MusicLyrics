@@ -6,15 +6,15 @@ using MusicLyricApp.Cache;
 using MusicLyricApp.Utils;
 using NLog;
 
-namespace MusicLyricApp.Api
+namespace MusicLyricApp.Api.Music
 {
-    public class NetEaseMusicApiV2 : MusicApiV2Cacheable
+    public class NetEaseMusicApi : MusicCacheableApi
     {
         private readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
         private readonly NetEaseMusicNativeApi _api;
 
-        public NetEaseMusicApiV2(Func<string> cookieFunc)
+        public NetEaseMusicApi(Func<string> cookieFunc)
         {
             _api = new NetEaseMusicNativeApi(cookieFunc);
         }

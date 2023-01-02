@@ -9,7 +9,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Windows.Forms;
-using MusicLyricApp.Api;
+using MusicLyricApp.Api.Music;
 using MusicLyricApp.Bean;
 using MusicLyricApp.Exception;
 using MusicLyricApp.Utils;
@@ -26,7 +26,7 @@ namespace MusicLyricApp
 
         private readonly SearchInfo _globalSearchInfo = new SearchInfo();
 
-        private Dictionary<SearchSourceEnum, IMusicApiV2> _api;
+        private Dictionary<SearchSourceEnum, IMusicApi> _api;
 
         private SettingForm _settingForm;
 
@@ -87,10 +87,10 @@ namespace MusicLyricApp
             }
             
             // 4、初始化 _api
-            _api = new Dictionary<SearchSourceEnum, IMusicApiV2>
+            _api = new Dictionary<SearchSourceEnum, IMusicApi>
             {
-                { SearchSourceEnum.QQ_MUSIC, new QQMusicApiV2(() => _globalSearchInfo.SettingBean.Config.QQMusicCookie) },
-                { SearchSourceEnum.NET_EASE_MUSIC, new NetEaseMusicApiV2(() => _globalSearchInfo.SettingBean.Config.NetEaseCookie) }
+                { SearchSourceEnum.QQ_MUSIC, new QQMusicApi(() => _globalSearchInfo.SettingBean.Config.QQMusicCookie) },
+                { SearchSourceEnum.NET_EASE_MUSIC, new NetEaseMusicApi(() => _globalSearchInfo.SettingBean.Config.NetEaseCookie) }
             };
         }
 
@@ -549,10 +549,10 @@ namespace MusicLyricApp
             {
                 return;
             }
-            
+
             try
             {
-                using (var sw = new StreamWriter(saveDialog.FileName, false, GlobalUtils.GetEncoding(_globalSearchInfo.SettingBean.Param.Encoding))) 
+                using (var sw = new StreamWriter(saveDialog.FileName, false, GlobalUtils.GetEncoding(_globalSearchInfo.SettingBean.Param.Encoding)))
                 {
                     await sw.WriteAsync(await LyricUtils.GetOutputContent(saveVo.LyricVo, _globalSearchInfo));
                     await sw.FlushAsync();

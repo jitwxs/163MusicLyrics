@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using MusicLyricApp.Bean;
 
-namespace MusicLyricApp.Api
+namespace MusicLyricApp.Api.Music
 {
-    public interface IMusicApiV2
+    public interface IMusicApi
     {
         SearchSourceEnum Source();
 

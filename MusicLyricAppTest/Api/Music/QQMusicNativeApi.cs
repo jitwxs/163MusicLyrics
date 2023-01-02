@@ -2,12 +2,12 @@
 using MusicLyricApp.Bean;
 using NUnit.Framework;
 
-namespace MusicLyricAppTest.Api
+namespace MusicLyricAppTest.Api.Music
 {
     [TestFixture]
     public class QQMusicNativeApi
     {
-        private MusicLyricApp.Api.QQMusicNativeApi _api = new MusicLyricApp.Api.QQMusicNativeApi(() => "");
+        private MusicLyricApp.Api.Music.QQMusicNativeApi _api = new MusicLyricApp.Api.Music.QQMusicNativeApi(() => "");
         
         [Test]
         public void GetSong()

@@ -41,7 +41,7 @@ namespace MusicLyricApp.Cache
                 }
                 else
                 {
-                    result.Add(key, value);
+                    result[key] = value;
                 }
             }
 
@@ -129,6 +129,11 @@ namespace MusicLyricApp.Cache
         /// <summary>
         /// 查询结果
         /// </summary>
-        SEARCH_RESULT_VO
+        SEARCH_RESULT_VO,
+        
+        /// <summary>
+        /// 翻译
+        /// </summary>
+        TRANSLATE,
     }
 }

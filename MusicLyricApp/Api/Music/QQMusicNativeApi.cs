@@ -7,7 +7,7 @@ using MusicLyricApp.Bean;
 using MusicLyricApp.Exception;
 using MusicLyricApp.Utils;
 
-namespace MusicLyricApp.Api
+namespace MusicLyricApp.Api.Music
 {
     public class QQMusicNativeApi : BaseNativeApi
     {

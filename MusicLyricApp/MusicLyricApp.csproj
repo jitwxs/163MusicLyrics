@@ -235,13 +235,17 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Api\BaseNativeApi.cs" />
-    <Compile Include="Api\IMusicApiV2.cs" />
-    <Compile Include="Api\MusicApiV2Cacheable.cs" />
-    <Compile Include="Api\NetEaseMusicNativeApi.cs" />
-    <Compile Include="Api\NetEaseMusicApiV2.cs" />
-    <Compile Include="Api\QQMusicApiV2.cs" />
-    <Compile Include="Api\QQMusicNativeApi.cs" />
+    <Compile Include="Api\Music\BaseNativeApi.cs" />
+    <Compile Include="Api\Music\IMusicApi.cs" />
+    <Compile Include="Api\Music\MusicCacheableApi.cs" />
+    <Compile Include="Api\Music\NetEaseMusicApi.cs" />
+    <Compile Include="Api\Music\NetEaseMusicNativeApi.cs" />
+    <Compile Include="Api\Music\QQMusicApi.cs" />
+    <Compile Include="Api\Music\QQMusicNativeApi.cs" />
+    <Compile Include="Api\Translate\BaiduTranslateApi.cs" />
+    <Compile Include="Api\Translate\CaiYunTranslateApi.cs" />
+    <Compile Include="Api\Translate\ITranslateApi.cs" />
+    <Compile Include="Api\Translate\TranslateCacheableApi.cs" />
     <Compile Include="Bean\Constants.cs" />
     <Compile Include="Bean\CsvBean.cs" />
     <Compile Include="Bean\GitHubBase.cs" />
@@ -249,6 +253,7 @@
     <Compile Include="Bean\MusicLyricsVO.cs" />
     <Compile Include="Bean\QQMusicBean.cs" />
     <Compile Include="Bean\SettingBase.cs" />
+    <Compile Include="Bean\TranslateBean.cs" />
     <Compile Include="BlurForm.cs">
       <SubType>Form</SubType>
     </Compile>

@@ -53,7 +53,9 @@ namespace MusicLyricApp
                 _settingBean.Config.TransConfig.BaiduTranslateAppId = BaiduTranslateAppId_TextBox.Text;
                 _settingBean.Config.TransConfig.BaiduTranslateSecret = BaiduTranslateSecret_TextBox.Text;
                 _settingBean.Config.TransConfig.CaiYunToken = CaiYunTranslateToken_TextBox.Text;
-                
+
+                var notExistTranslateApi = LyricUtils.GetTranslateApi(_settingBean.Config.TransConfig) == null;
+
                 var selectTransType = new List<int>();
                 var transTypeDict = GlobalUtils.GetEnumDict<TransTypeEnum>();
                 foreach (DataGridViewRow row in TransType_DataGridView.Rows)
@@ -61,6 +63,14 @@ namespace MusicLyricApp
                     if ((bool) row.Cells[0].Value)
                     {
                         var transType = transTypeDict[row.Cells[1].Value.ToString()];
+
+                        // 翻译 API 配置检查
+                        if (LyricUtils.CastLanguageEnum(transType) != LanguageEnum.OTHER && notExistTranslateApi)
+                        {
+                            MessageBox.Show(string.Format(ErrorMsg.NOT_EXIST_TRANSLATE_API), CaptionMsg.SAVE_FAILED);
+                            return;
+                        }
+
                         selectTransType.Add(Convert.ToInt32(transType));
                     }
                 }
@@ -133,7 +143,7 @@ namespace MusicLyricApp
             // 检查依赖
             if (isEnable && Constants.VerbatimLyricDependency.Any(e => !File.Exists(e)))
             {
-                MessageBox.Show(string.Format(ErrorMsg.DEPENDENCY_LOSS, "Verbatim"), "提示");
+                MessageBox.Show(string.Format(ErrorMsg.DEPENDENCY_LOSS, "Verbatim"), CaptionMsg.LOST_DENPENDCY);
                 VerbatimLyric_CheckBox.Checked = false;
             }
         }
@@ -245,7 +255,7 @@ namespace MusicLyricApp
                     // 检查依赖
                     if (isEnable && Constants.IpaDicDependency.Any(e => !File.Exists(e)))
                     {
-                        MessageBox.Show(string.Format(ErrorMsg.DEPENDENCY_LOSS, "IpaDic"), "提示");
+                        MessageBox.Show(string.Format(ErrorMsg.DEPENDENCY_LOSS, "IpaDic"), CaptionMsg.LOST_DENPENDCY);
                         row.Cells[1].Value = false;
 
                         isEnable = false;

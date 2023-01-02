@@ -4,9 +4,9 @@ using MusicLyricApp.Bean;
 using MusicLyricApp.Cache;
 using MusicLyricApp.Utils;
 
-namespace MusicLyricApp.Api
+namespace MusicLyricApp.Api.Music
 {
-    public abstract class MusicApiV2Cacheable : IMusicApiV2
+    public abstract class MusicCacheableApi : IMusicApi
     {
         protected abstract SearchSourceEnum Source0();
         

@@ -38,10 +38,11 @@
         <PackageReference Include="NUnit" Version="3.13.3" />
     </ItemGroup>
     <ItemGroup>
-      <Compile Include="Api\NetEaseMusicApiV2.cs" />
-      <Compile Include="Api\NetEaseMusicNativeApi.cs" />
-      <Compile Include="Api\QQMusicApiV2.cs" />
-      <Compile Include="Api\QQMusicNativeApi.cs" />
+      <Compile Include="Api\Music\NetEaseMusicApi.cs" />
+      <Compile Include="Api\Music\NetEaseMusicNativeApi.cs" />
+      <Compile Include="Api\Music\QQMusicApi.cs" />
+      <Compile Include="Api\Music\QQMusicNativeApi.cs" />
+      <Compile Include="Api\Translate\CaiYunTranslateApi.cs" />
       <Compile Include="Bean\CsvBeanTest.cs" />
       <Compile Include="Bean\LyricTimestampTest.cs" />
       <Compile Include="Bean\MusicLyricsVOTest.cs" />

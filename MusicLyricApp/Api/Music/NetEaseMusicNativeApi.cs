@@ -12,7 +12,7 @@ using MusicLyricApp.Utils;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace MusicLyricApp.Api
+namespace MusicLyricApp.Api.Music
 {
     public class NetEaseMusicNativeApi : BaseNativeApi
     {

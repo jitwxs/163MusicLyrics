@@ -96,7 +96,7 @@ namespace MusicLyricApp.Bean
         [Description("原始译文")] ORIGIN_TRANS = 0,
         [Description("中文")] CHINESE = 1,
         [Description("英文")] ENGLISH = 2,
-        [Description("罗马音(仅日文)")] ROMAJI = 3,
+        [Description("罗马音")] ROMAJI = 3,
     }
 
     public enum LanguageEnum
@@ -135,6 +135,12 @@ namespace MusicLyricApp.Bean
         [Description("Chinese")] CHINESE = 7,
     }
 
+    public static class CaptionMsg
+    {
+        public const string LOST_DENPENDCY = "缺失依赖";
+        public const string SAVE_FAILED = "保存失败";
+    }
+
     /**
      * 错误码
      */
@@ -160,6 +166,10 @@ namespace MusicLyricApp.Bean
         public const string SAVE_COMPLETE = "保存完毕，成功 {0} 跳过 {1}";
         public const string NEED_LOGIN = "该搜索请求需要登陆，请填写 Cookie 后重试";
         public const string PURE_MUSIC_IGNORE_SAVE = "该首歌曲是纯音乐，根据设置跳过保存";
+        
+        public const string NOT_EXIST_TRANSLATE_API = "未配置任何的翻译 API，请关闭自定义语言的翻译类型，或配置 API";
+        public const string CAIYUN_TRANSLATE_AUTH_FAILED = "彩云小译调用失败，请检查相关鉴权配置";
+        public const string BAIDU_TRANSLATE_AUTH_FAILED = "百度翻译调用失败，请检查相关鉴权配置";
 
         public const string GET_LATEST_VERSION_FAILED = "获取最新版本失败";
         public const string THIS_IS_LATEST_VERSION = "当前版本已经是最新版本";

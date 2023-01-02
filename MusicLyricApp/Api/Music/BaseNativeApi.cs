@@ -5,7 +5,7 @@ using System.Net;
 using System.Text;
 using MusicLyricApp.Utils;
 
-namespace MusicLyricApp.Api
+namespace MusicLyricApp.Api.Music
 {
     public abstract class BaseNativeApi
     {

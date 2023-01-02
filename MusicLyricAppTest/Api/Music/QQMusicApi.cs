@@ -2,12 +2,12 @@
 using MusicLyricApp.Cache;
 using NUnit.Framework;
 
-namespace MusicLyricAppTest.Api
+namespace MusicLyricAppTest.Api.Music
 {
     [TestFixture]
     public class QQMusicApiV2
     {
-        private MusicLyricApp.Api.QQMusicApiV2 _api = new MusicLyricApp.Api.QQMusicApiV2(() => "");
+        private MusicLyricApp.Api.Music.QQMusicApi _api = new MusicLyricApp.Api.Music.QQMusicApi(() => "");
         
         [Test]
         public void Test()

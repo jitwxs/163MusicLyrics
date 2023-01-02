@@ -5,12 +5,12 @@ using MusicLyricApp.Cache;
 using MusicLyricApp.Utils;
 using NUnit.Framework;
 
-namespace MusicLyricAppTest.Api
+namespace MusicLyricAppTest.Api.Music
 {
     [TestFixture]
     public class NetEaseMusicApiV2
     {
-        private MusicLyricApp.Api.NetEaseMusicApiV2 _api = new MusicLyricApp.Api.NetEaseMusicApiV2(() => "");
+        private MusicLyricApp.Api.Music.NetEaseMusicApi _api = new MusicLyricApp.Api.Music.NetEaseMusicApi(() => "");
         
         private const string DETAILS_TEST_DATA =
             "{\"Songs\":[{\"Name\":\"如果星星能记得(Vocaloid)\",\"Id\":447309968,\"Pst\":0,\"T\":0," +
