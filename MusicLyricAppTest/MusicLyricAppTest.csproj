@@ -42,6 +42,7 @@
       <Compile Include="Api\Music\NetEaseMusicNativeApi.cs" />
       <Compile Include="Api\Music\QQMusicApi.cs" />
       <Compile Include="Api\Music\QQMusicNativeApi.cs" />
+      <Compile Include="Api\Translate\BaiduTranslateApi.cs" />
       <Compile Include="Api\Translate\CaiYunTranslateApi.cs" />
       <Compile Include="Bean\CsvBeanTest.cs" />
       <Compile Include="Bean\LyricTimestampTest.cs" />

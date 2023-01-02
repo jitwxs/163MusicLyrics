@@ -33,7 +33,7 @@ namespace MusicLyricApp.Api.Translate
             _token = token;
         }
 
-        protected override string[] Translate0(string[] inputs, LanguageEnum inputLanguage, LanguageEnum outputLanguage)
+        protected override ResultVo<string[]> Translate0(string[] inputs, LanguageEnum inputLanguage, LanguageEnum outputLanguage)
         {
             string transType;
 
@@ -47,7 +47,7 @@ namespace MusicLyricApp.Api.Translate
                     break;
                 default:
                     // not support
-                    return inputs;
+                    return ResultVo<string[]>.Failure(ErrorMsg.TRANSLATE_LANGUAGE_NOT_SUPPORT);
             }
 
             var res = new string[inputs.Length];
@@ -74,7 +74,7 @@ namespace MusicLyricApp.Api.Translate
 
                 if (result.Target == null)
                 {
-                    throw new MusicLyricException(ErrorMsg.CAIYUN_TRANSLATE_AUTH_FAILED);
+                    return ResultVo<string[]>.Failure(ErrorMsg.CAIYUN_TRANSLATE_AUTH_FAILED);
                 }
                 
                 foreach (var one in result.Target)
@@ -83,7 +83,7 @@ namespace MusicLyricApp.Api.Translate
                 }
             }
 
-            return res;
+            return new ResultVo<string[]>(res);
         }
     }
 }

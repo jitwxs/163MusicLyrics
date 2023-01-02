@@ -6,7 +6,7 @@ namespace MusicLyricApp.Api.Translate
 {
     public abstract class TranslateCacheableApi : ITranslateApi
     {
-        protected abstract string[] Translate0(string[] inputs, LanguageEnum inputLanguage, LanguageEnum outputLanguage);
+        protected abstract ResultVo<string[]> Translate0(string[] inputs, LanguageEnum inputLanguage, LanguageEnum outputLanguage);
         
         public string[] Translate(string[] inputs, LanguageEnum inputLanguage, LanguageEnum outputLanguage)
         {
@@ -20,7 +20,7 @@ namespace MusicLyricApp.Api.Translate
             var httpRes = new string[] { };
             if (notHitInputs.Length > 0)
             {
-                httpRes = Translate0(notHitInputs, inputLanguage, outputLanguage);
+                httpRes = Translate0(notHitInputs, inputLanguage, outputLanguage).Assert().Data;
             }
             
             var res = new string[inputs.Length];

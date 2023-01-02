@@ -8,7 +8,7 @@ namespace MusicLyricAppTest.Api.Translate
     public class CaiYunTranslateApi
     {
         private MusicLyricApp.Api.Translate.CaiYunTranslateApi _api =
-            new MusicLyricApp.Api.Translate.CaiYunTranslateApi("");
+            new MusicLyricApp.Api.Translate.CaiYunTranslateApi("please replace your caiYun token");
         
         [Test]
         public void TestTranslate()
