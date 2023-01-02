@@ -136,16 +136,12 @@ namespace MusicLyricApp.Utils
             var searchSource = searchInfo.SettingBean.Param.SearchSource;
             var ignoreEmptyLyric = searchInfo.SettingBean.Param.IgnoreEmptyLyric;
 
-            /************************************************ 原文处理区 ************************************************/
-
             var originLyrics = SplitLrc(originLrc, searchSource, ignoreEmptyLyric);
             if (showLrcType == ShowLrcTypeEnum.ONLY_ORIGIN)
             {
                 return originLyrics;
             }
 
-            /************************************************ 合并处理区 ************************************************/
-            
             // 原始译文歌词的空行没有意义，指定 true 不走配置
             var basicTransLyrics = SplitLrc(translateLrc, searchSource, true);
             var transLyricsList = await DealTranslateLyric(originLyrics, basicTransLyrics, searchInfo.SettingBean);
@@ -194,9 +190,9 @@ namespace MusicLyricApp.Utils
                     }
                     break;
                 case ShowLrcTypeEnum.TRANSLATE_PRIOR_STAGGER:
-                    for (var i = 0; i < transLyricsList.Count; i++)
+                    foreach (var each in transLyricsList)
                     {
-                        res = SortLrc(res, transLyricsList[i], true);
+                        res = SortLrc(res, each, true);
                     }
                     res = SortLrc(res, originLyrics, true);
                     break;

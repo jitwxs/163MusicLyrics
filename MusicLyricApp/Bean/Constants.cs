@@ -31,17 +31,17 @@ namespace MusicLyricApp.Bean
             public enum TypeEnum
             {
                 /// <summary>
+                /// 默认实例
+                /// </summary>
+                DEFAULT,
+                /// <summary>
                 /// 时间戳设置
                 /// </summary>
                 TIME_STAMP_SETTING,
                 /// <summary>
                 /// 输出设置
                 /// </summary>
-                OUTPUT_SETTING,
-                /// <summary>
-                /// 默认实例
-                /// </summary>
-                DEFAULT,
+                OUTPUT_SETTING
             }
 
             public static string GetContent(TypeEnum typeEnum)

@@ -21,8 +21,6 @@ namespace MusicLyricApp
 
             AfterInitializeComponent();
             
-            ShowRomajiChangeListener();
-            
             VerbatimLyricChangeListener(VerbatimLyric_CheckBox.Checked);
         }
 
@@ -96,41 +94,16 @@ namespace MusicLyricApp
             }
 
             var typeEnum = Constants.HelpTips.TypeEnum.DEFAULT;
-            if (input == TimestampHelp_Button)
+            if (input == TimestampHelp_Btn)
             {
                 typeEnum = Constants.HelpTips.TypeEnum.TIME_STAMP_SETTING;
             } 
-            else if (input == OutputHelp_Button)
+            else if (input == OutputHelp_Btn)
             {
                 typeEnum = Constants.HelpTips.TypeEnum.OUTPUT_SETTING;
             }
 
             SettingTips_TextBox.Text = Constants.HelpTips.GetContent(typeEnum);
-        }
-
-        private void ShowRomajiChangeListener()
-        {
-            var transTypeDict = GlobalUtils.GetEnumDict<TransTypeEnum>();
-
-            foreach (DataGridViewRow row in TransType_DataGridView.Rows)
-            {
-                if (transTypeDict[row.Cells[1].Value.ToString()] == TransTypeEnum.ROMAJI)
-                {
-                    var isEnable = (bool)row.Cells[0].Value;
-                    
-                    // 检查依赖
-                    if (isEnable && Constants.IpaDicDependency.Any(e => !File.Exists(e)))
-                    {
-                        MessageBox.Show(string.Format(ErrorMsg.DEPENDENCY_LOSS, "IpaDic"), "提示");
-                        row.Cells[1].Value = false;
-
-                        isEnable = false;
-                    }
-            
-                    RomajiMode_ComboBox.Enabled = isEnable;
-                    RomajiSystem_ComboBox.Enabled = isEnable;
-                }
-            }
         }
 
         /// <summary>
@@ -238,12 +211,56 @@ namespace MusicLyricApp
 
         private void TransType_DataGridView_CellValueChanged(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.RowIndex < 0)
+            TransTypeEventListener(e.RowIndex);
+        }
+        
+        private void TransTypeEventListener(int index)
+        {
+            var transTypeDict = GlobalUtils.GetEnumDict<TransTypeEnum>();
+            if (index < 0)
             {
-                return;
+                foreach (DataGridViewRow row in TransType_DataGridView.Rows)
+                {
+                    SingleTransTypeEventListener(transTypeDict, row);
+                }
             }
-            
-            ShowRomajiChangeListener();
+            else
+            {
+                // 状态改变
+                var row = TransType_DataGridView.Rows[index];
+                SingleTransTypeEventListener(transTypeDict, row);
+            }
+        }
+        
+        private void SingleTransTypeEventListener(Dictionary<string, TransTypeEnum> transTypeDict, DataGridViewRow row)
+        {
+            var isEnable = (bool)row.Cells[0].Value;
+
+            switch (transTypeDict[row.Cells[1].Value.ToString()])
+            {
+                case TransTypeEnum.ROMAJI:
+                    // 检查依赖
+                    if (isEnable && Constants.IpaDicDependency.Any(e => !File.Exists(e)))
+                    {
+                        MessageBox.Show(string.Format(ErrorMsg.DEPENDENCY_LOSS, "IpaDic"), "提示");
+                        row.Cells[1].Value = false;
+
+                        isEnable = false;
+                    }
+
+                    if (isEnable)
+                    {
+                        TransConfig_TabControl.SelectedTab = Romaji_TabPage;
+                    }
+                    break;
+                case TransTypeEnum.CHINESE:
+                case TransTypeEnum.ENGLISH:
+                    if (isEnable)
+                    {
+                        TransConfig_TabControl.SelectedTab = TranslateApi_TabPage;
+                    }
+                    break;
+            }
         }
     }
 }
