@@ -44,10 +44,19 @@ namespace MusicLyricApp
             TransLyricDefaultRule_ComboBox.SelectedIndex = (int)_settingBean.Config.TranslateLyricDefaultRule;
             TranslateMatchPrecisionDeviation_TextBox.Text = _settingBean.Config.TranslateMatchPrecisionDeviation.ToString();
 
+            var allTransType = GlobalUtils.GetEnumList<TransTypeEnum>();
             var configTransType = _settingBean.Config.TransType.Split(',').Select(e => Convert.ToInt32(e)).ToHashSet();
-            foreach (var transType in GlobalUtils.GetEnumList<TransTypeEnum>())
+            foreach (var index in configTransType)
             {
-                TransType_DataGridView.Rows.Add(configTransType.Contains(Convert.ToInt32(transType)), transType.ToDescription());
+                var one = (TransTypeEnum) index;
+                allTransType.Remove(one);
+
+                TransType_DataGridView.Rows.Add(true, one.ToDescription());
+            }
+            
+            foreach (var one in allTransType)
+            {
+                TransType_DataGridView.Rows.Add(false, one.ToDescription());
             }
 
             RomajiMode_ComboBox.Items.AddRange(GlobalUtils.GetEnumDescArray<RomajiModeEnum>());
