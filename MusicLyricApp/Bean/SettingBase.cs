@@ -1,4 +1,8 @@
 ﻿
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
 namespace MusicLyricApp.Bean
 {
     public class SettingBean
@@ -63,7 +67,7 @@ namespace MusicLyricApp.Bean
         /// <summary>
         /// 译文类型
         /// </summary>
-        public string TransType = "0";
+        public string TransType = string.Join(",", new [] { (int) TransTypeEnum.ORIGIN, (int) TransTypeEnum.ORIGIN_TRANS });
         
         /// <summary>
         /// 罗马音转换模式
@@ -89,6 +93,12 @@ namespace MusicLyricApp.Bean
         /// 彩云小译 Token
         /// </summary>
         public string CaiYunToken = "";
+        
+        public List<TransTypeEnum> DeserializationTransTypeEnum()
+        {
+            return string.IsNullOrWhiteSpace(TransType) ? new List<TransTypeEnum>() : 
+                TransType.Split(',').Select(e => (TransTypeEnum) Convert.ToInt32(e)).ToList();
+        }
     }
 
     public class PersistParamBean
@@ -106,7 +116,7 @@ namespace MusicLyricApp.Bean
         /// <summary>
         /// 歌词展示格式
         /// </summary>
-        public ShowLrcTypeEnum ShowLrcType = ShowLrcTypeEnum.ONLY_ORIGIN;
+        public ShowLrcTypeEnum ShowLrcType = ShowLrcTypeEnum.STAGGER;
         
         /// <summary>
         /// 指定歌词合并的分隔符

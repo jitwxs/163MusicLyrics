@@ -739,9 +739,7 @@ namespace MusicLyricApp
         {
             switch (_globalSearchInfo.SettingBean.Param.ShowLrcType = (ShowLrcTypeEnum)LrcType_ComboBox.SelectedIndex)
             {
-                case ShowLrcTypeEnum.ONLY_TRANS_MERGE:
-                case ShowLrcTypeEnum.ORIGIN_PRIOR_MERGE:
-                case ShowLrcTypeEnum.TRANSLATE_PRIOR_MERGE: 
+                case ShowLrcTypeEnum.MERGE:
                     LrcMergeSeparator_TextBox.ReadOnly = false;
                     LrcMergeSeparator_TextBox.BackColor = Color.White;
                     break;

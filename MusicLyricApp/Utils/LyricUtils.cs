@@ -136,83 +136,60 @@ namespace MusicLyricApp.Utils
         /// <returns></returns>
         private static async Task<List<LyricLineVo>> FormatLyric(string originLrc, string translateLrc, SearchInfo searchInfo)
         {
+            var transConfig = searchInfo.SettingBean.Config.TransConfig;
+            var configTransTypes = transConfig.DeserializationTransTypeEnum();
             var showLrcType = searchInfo.SettingBean.Param.ShowLrcType;
             var searchSource = searchInfo.SettingBean.Param.SearchSource;
             var ignoreEmptyLyric = searchInfo.SettingBean.Param.IgnoreEmptyLyric;
 
+            // 未配置任何输出
+            if (configTransTypes.Count == 0)
+            {
+                return new List<LyricLineVo>();
+            }
+            
             var originLyrics = SplitLrc(originLrc, searchSource, ignoreEmptyLyric);
-            if (showLrcType == ShowLrcTypeEnum.ONLY_ORIGIN)
+
+            var originLyricsOutputSortInConfig = configTransTypes.IndexOf(TransTypeEnum.ORIGIN);
+            
+            // 仅输出原文            
+            if (configTransTypes.Count == 1 && originLyricsOutputSortInConfig != -1)
             {
                 return originLyrics;
             }
 
             // 原始译文歌词的空行没有意义，指定 true 不走配置
             var basicTransLyrics = SplitLrc(translateLrc, searchSource, true);
-            var transLyricsList = await DealTranslateLyric(originLyrics, basicTransLyrics, searchInfo.SettingBean.Config.TransConfig);
+            
+            var lyricsComplexList = await DealTranslateLyric(originLyrics, basicTransLyrics, transConfig);
 
+            // 原文歌词插入到结果集的指定位置
+            if (originLyricsOutputSortInConfig != -1)
+            {
+                lyricsComplexList.Insert(originLyricsOutputSortInConfig, originLyrics);
+            }
+            
             var res = new List<LyricLineVo>();
 
             switch (showLrcType)
             {
-                case ShowLrcTypeEnum.ONLY_TRANS_STAGGER:
-                    foreach (var each in transLyricsList)
+                case ShowLrcTypeEnum.STAGGER:
+                    foreach (var each in lyricsComplexList)
                     {
                         res = SortLrc(res, each, true);
                     }
                     break;
-                case ShowLrcTypeEnum.ONLY_TRANS_ISOLATED:
-                    foreach (var each in transLyricsList)
+                case ShowLrcTypeEnum.ISOLATED:
+                    foreach (var each in lyricsComplexList)
                     {
                         res.AddRange(each);
                     }
                     break;
-                case ShowLrcTypeEnum.ONLY_TRANS_MERGE:
-                    foreach (var each in transLyricsList)
+                case ShowLrcTypeEnum.MERGE:
+                    foreach (var each in lyricsComplexList)
                     {
                         res = MergeLrc(res, each, searchInfo.SettingBean.Param.LrcMergeSeparator, true);
                     }
-                    break;
-                case ShowLrcTypeEnum.ORIGIN_PRIOR_STAGGER:
-                    res.AddRange(originLyrics);
-                    for (var i = 0; i < transLyricsList.Count; i++)
-                    {
-                        res = SortLrc(res, transLyricsList[i], true);
-                    }
-                    break;
-                case ShowLrcTypeEnum.ORIGIN_PRIOR_ISOLATED:
-                    res.AddRange(originLyrics);
-                    foreach (var each in transLyricsList)
-                    {
-                        res.AddRange(each);
-                    }
-                    break;
-                case ShowLrcTypeEnum.ORIGIN_PRIOR_MERGE:
-                    res.AddRange(originLyrics);
-                    foreach (var each in transLyricsList)
-                    {
-                        res = MergeLrc(res, each, searchInfo.SettingBean.Param.LrcMergeSeparator, true);
-                    }
-                    break;
-                case ShowLrcTypeEnum.TRANSLATE_PRIOR_STAGGER:
-                    foreach (var each in transLyricsList)
-                    {
-                        res = SortLrc(res, each, true);
-                    }
-                    res = SortLrc(res, originLyrics, true);
-                    break;
-                case ShowLrcTypeEnum.TRANSLATE_PRIOR_ISOLATED:
-                    foreach (var each in transLyricsList)
-                    {
-                        res.AddRange(each);
-                    }
-                    res.AddRange(originLyrics);
-                    break;
-                case ShowLrcTypeEnum.TRANSLATE_PRIOR_MERGE:
-                    foreach (var each in transLyricsList)
-                    {
-                        res = MergeLrc(res, each, searchInfo.SettingBean.Param.LrcMergeSeparator, true);
-                    }
-                    res = MergeLrc(res, originLyrics, searchInfo.SettingBean.Param.LrcMergeSeparator, true);
                     break;
                 default:
                     throw new NotSupportedException("not support showLrcType: " + showLrcType);
@@ -358,7 +335,7 @@ namespace MusicLyricApp.Utils
             LanguageEnum originLanguage = CertainLanguage(originList), baseTransLanguage = CertainLanguage(transList);
             
             var configTransTypes = transConfig.TransType.Split(',')
-                .Select(e => (TransTypeEnum) Convert.ToInt32(e)).ToHashSet();
+                .Select(e => (TransTypeEnum) Convert.ToInt32(e)).ToList();
             
             foreach (var transTypeEnum in configTransTypes)
             {

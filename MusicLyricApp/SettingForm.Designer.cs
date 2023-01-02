@@ -52,8 +52,7 @@ namespace MusicLyricApp
             RomajiSystem_ComboBox.SelectedIndex = (int)_settingBean.Config.TransConfig.RomajiSystemEnum;
 
             var allTransType = GlobalUtils.GetEnumList<TransTypeEnum>();
-            var configTransType = _settingBean.Config.TransConfig.TransType.Split(',').Select(e => Convert.ToInt32(e)).ToHashSet();
-            foreach (var index in configTransType)
+            foreach (var index in _settingBean.Config.TransConfig.DeserializationTransTypeEnum())
             {
                 var one = (TransTypeEnum) index;
                 allTransType.Remove(one);
@@ -391,12 +390,12 @@ namespace MusicLyricApp
             // SettingTips_TextBox
             // 
             this.SettingTips_TextBox.BackColor = System.Drawing.SystemColors.Info;
-            this.SettingTips_TextBox.Location = new System.Drawing.Point(483, 335);
+            this.SettingTips_TextBox.Location = new System.Drawing.Point(483, 362);
             this.SettingTips_TextBox.Multiline = true;
             this.SettingTips_TextBox.Name = "SettingTips_TextBox";
             this.SettingTips_TextBox.ReadOnly = true;
             this.SettingTips_TextBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.SettingTips_TextBox.Size = new System.Drawing.Size(452, 208);
+            this.SettingTips_TextBox.Size = new System.Drawing.Size(452, 181);
             this.SettingTips_TextBox.TabIndex = 31;
             // 
             // OutputHelp_Btn
@@ -448,7 +447,7 @@ namespace MusicLyricApp
             this.TransLyric_GroupBox.Controls.Add(this.label5);
             this.TransLyric_GroupBox.Location = new System.Drawing.Point(483, 12);
             this.TransLyric_GroupBox.Name = "TransLyric_GroupBox";
-            this.TransLyric_GroupBox.Size = new System.Drawing.Size(452, 305);
+            this.TransLyric_GroupBox.Size = new System.Drawing.Size(452, 335);
             this.TransLyric_GroupBox.TabIndex = 34;
             this.TransLyric_GroupBox.TabStop = false;
             this.TransLyric_GroupBox.Text = "译文歌词";
@@ -457,7 +456,7 @@ namespace MusicLyricApp
             // 
             this.TransConfig_TabControl.Controls.Add(this.Romaji_TabPage);
             this.TransConfig_TabControl.Controls.Add(this.TranslateApi_TabPage);
-            this.TransConfig_TabControl.Location = new System.Drawing.Point(15, 144);
+            this.TransConfig_TabControl.Location = new System.Drawing.Point(15, 171);
             this.TransConfig_TabControl.Name = "TransConfig_TabControl";
             this.TransConfig_TabControl.SelectedIndex = 0;
             this.TransConfig_TabControl.Size = new System.Drawing.Size(422, 150);
@@ -588,7 +587,7 @@ namespace MusicLyricApp
             this.TransType_DataGridView.Location = new System.Drawing.Point(234, 33);
             this.TransType_DataGridView.Name = "TransType_DataGridView";
             this.TransType_DataGridView.RowTemplate.Height = 23;
-            this.TransType_DataGridView.Size = new System.Drawing.Size(203, 105);
+            this.TransType_DataGridView.Size = new System.Drawing.Size(203, 123);
             this.TransType_DataGridView.TabIndex = 37;
             this.TransType_DataGridView.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.TransType_DataGridView_CellContentClick);
             this.TransType_DataGridView.CellMouseMove += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.TransList_DataGridView_CellMouseMove);
