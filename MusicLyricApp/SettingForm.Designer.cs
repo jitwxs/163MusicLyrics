@@ -51,18 +51,17 @@ namespace MusicLyricApp
             RomajiSystem_ComboBox.Items.AddRange(GlobalUtils.GetEnumDescArray<RomajiSystemEnum>()); 
             RomajiSystem_ComboBox.SelectedIndex = (int)_settingBean.Config.TransConfig.RomajiSystemEnum;
 
-            var allTransType = GlobalUtils.GetEnumList<TransTypeEnum>();
-            var configTransType = _settingBean.Config.TransConfig.TransType.Split(',').Select(e => Convert.ToInt32(e)).ToHashSet();
-            foreach (var index in configTransType)
+            var allTransType = GlobalUtils.GetEnumList<LyricsTypeEnum>();
+            foreach (var index in _settingBean.Config.DeserializationOutputLyricsTypes())
             {
-                var one = (TransTypeEnum) index;
+                var one = (LyricsTypeEnum) index;
                 allTransType.Remove(one);
 
-                TransType_DataGridView.Rows.Add(true, one.ToDescription());
+                LyricShow_DataGridView.Rows.Add(true, one.ToDescription());
             }
             foreach (var one in allTransType)
             {
-                TransType_DataGridView.Rows.Add(false, one.ToDescription());
+                LyricShow_DataGridView.Rows.Add(false, one.ToDescription());
             }
 
             // 输出设置
@@ -133,14 +132,14 @@ namespace MusicLyricApp
             this.CaiYunTranslate_TabPage = new System.Windows.Forms.TabPage();
             this.CaiYunTranslateToken_TextBox = new System.Windows.Forms.TextBox();
             this.label14 = new System.Windows.Forms.Label();
-            this.TransType_DataGridView = new System.Windows.Forms.DataGridView();
-            this.Column1 = new System.Windows.Forms.DataGridViewCheckBoxColumn();
-            this.Column2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.LyricShow_DataGridView = new System.Windows.Forms.DataGridView();
             this.Output_GroupBox = new System.Windows.Forms.GroupBox();
             this.OutputName_TextBox = new System.Windows.Forms.TextBox();
             this.label10 = new System.Windows.Forms.Label();
             this.IgnorePureMusicInSave_CheckBox = new System.Windows.Forms.CheckBox();
             this.Reset_Btn = new System.Windows.Forms.Button();
+            this.Column1 = new System.Windows.Forms.DataGridViewCheckBoxColumn();
+            this.Column2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Timestamp_GroupBox.SuspendLayout();
             this.AppConfig_GroupBox.SuspendLayout();
             this.OriginLyric_GroupBox.SuspendLayout();
@@ -151,7 +150,7 @@ namespace MusicLyricApp
             this.tabControl1.SuspendLayout();
             this.BaiduTranslate_TabPage.SuspendLayout();
             this.CaiYunTranslate_TabPage.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.TransType_DataGridView)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.LyricShow_DataGridView)).BeginInit();
             this.Output_GroupBox.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -160,7 +159,7 @@ namespace MusicLyricApp
             this.Save_Btn.BackColor = System.Drawing.Color.Honeydew;
             this.Save_Btn.FlatAppearance.BorderColor = System.Drawing.Color.Silver;
             this.Save_Btn.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.Save_Btn.Location = new System.Drawing.Point(367, 493);
+            this.Save_Btn.Location = new System.Drawing.Point(613, 639);
             this.Save_Btn.Name = "Save_Btn";
             this.Save_Btn.Size = new System.Drawing.Size(97, 50);
             this.Save_Btn.TabIndex = 0;
@@ -391,12 +390,12 @@ namespace MusicLyricApp
             // SettingTips_TextBox
             // 
             this.SettingTips_TextBox.BackColor = System.Drawing.SystemColors.Info;
-            this.SettingTips_TextBox.Location = new System.Drawing.Point(483, 335);
+            this.SettingTips_TextBox.Location = new System.Drawing.Point(483, 183);
             this.SettingTips_TextBox.Multiline = true;
             this.SettingTips_TextBox.Name = "SettingTips_TextBox";
             this.SettingTips_TextBox.ReadOnly = true;
             this.SettingTips_TextBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.SettingTips_TextBox.Size = new System.Drawing.Size(452, 208);
+            this.SettingTips_TextBox.Size = new System.Drawing.Size(227, 437);
             this.SettingTips_TextBox.TabIndex = 31;
             // 
             // OutputHelp_Btn
@@ -439,16 +438,14 @@ namespace MusicLyricApp
             // 
             // TransLyric_GroupBox
             // 
-            this.TransLyric_GroupBox.Controls.Add(this.TransConfig_TabControl);
             this.TransLyric_GroupBox.Controls.Add(this.TransLostRule_ComboBox);
             this.TransLyric_GroupBox.Controls.Add(this.label1);
-            this.TransLyric_GroupBox.Controls.Add(this.TransType_DataGridView);
             this.TransLyric_GroupBox.Controls.Add(this.TranslateMatchPrecisionDeviation_TextBox);
             this.TransLyric_GroupBox.Controls.Add(this.label9);
             this.TransLyric_GroupBox.Controls.Add(this.label5);
             this.TransLyric_GroupBox.Location = new System.Drawing.Point(483, 12);
             this.TransLyric_GroupBox.Name = "TransLyric_GroupBox";
-            this.TransLyric_GroupBox.Size = new System.Drawing.Size(452, 305);
+            this.TransLyric_GroupBox.Size = new System.Drawing.Size(227, 155);
             this.TransLyric_GroupBox.TabIndex = 34;
             this.TransLyric_GroupBox.TabStop = false;
             this.TransLyric_GroupBox.Text = "译文歌词";
@@ -457,7 +454,7 @@ namespace MusicLyricApp
             // 
             this.TransConfig_TabControl.Controls.Add(this.Romaji_TabPage);
             this.TransConfig_TabControl.Controls.Add(this.TranslateApi_TabPage);
-            this.TransConfig_TabControl.Location = new System.Drawing.Point(15, 144);
+            this.TransConfig_TabControl.Location = new System.Drawing.Point(12, 163);
             this.TransConfig_TabControl.Name = "TransConfig_TabControl";
             this.TransConfig_TabControl.SelectedIndex = 0;
             this.TransConfig_TabControl.Size = new System.Drawing.Size(422, 150);
@@ -577,36 +574,25 @@ namespace MusicLyricApp
             this.label14.TabIndex = 41;
             this.label14.Text = "Token";
             // 
-            // TransType_DataGridView
+            // LyricShow_DataGridView
             // 
-            this.TransType_DataGridView.AllowDrop = true;
-            this.TransType_DataGridView.AllowUserToAddRows = false;
-            this.TransType_DataGridView.AllowUserToDeleteRows = false;
-            this.TransType_DataGridView.AutoSizeRowsMode = System.Windows.Forms.DataGridViewAutoSizeRowsMode.DisplayedCells;
-            this.TransType_DataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.TransType_DataGridView.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { this.Column1, this.Column2 });
-            this.TransType_DataGridView.Location = new System.Drawing.Point(234, 33);
-            this.TransType_DataGridView.Name = "TransType_DataGridView";
-            this.TransType_DataGridView.RowTemplate.Height = 23;
-            this.TransType_DataGridView.Size = new System.Drawing.Size(203, 105);
-            this.TransType_DataGridView.TabIndex = 37;
-            this.TransType_DataGridView.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.TransType_DataGridView_CellContentClick);
-            this.TransType_DataGridView.CellMouseMove += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.TransList_DataGridView_CellMouseMove);
-            this.TransType_DataGridView.CellValueChanged += new System.Windows.Forms.DataGridViewCellEventHandler(this.TransType_DataGridView_CellValueChanged);
-            this.TransType_DataGridView.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.TransList_DataGridView_RowsAdded);
-            this.TransType_DataGridView.DragDrop += new System.Windows.Forms.DragEventHandler(this.TransList_DataGridView_DragDrop);
-            this.TransType_DataGridView.DragEnter += new System.Windows.Forms.DragEventHandler(this.TransList_DataGridView_DragEnter);
-            // 
-            // Column1
-            // 
-            this.Column1.HeaderText = "是否启用";
-            this.Column1.Name = "Column1";
-            this.Column1.Width = 60;
-            // 
-            // Column2
-            // 
-            this.Column2.HeaderText = "译文类型";
-            this.Column2.Name = "Column2";
+            this.LyricShow_DataGridView.AllowDrop = true;
+            this.LyricShow_DataGridView.AllowUserToAddRows = false;
+            this.LyricShow_DataGridView.AllowUserToDeleteRows = false;
+            this.LyricShow_DataGridView.AutoSizeRowsMode = System.Windows.Forms.DataGridViewAutoSizeRowsMode.DisplayedCells;
+            this.LyricShow_DataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.LyricShow_DataGridView.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { this.Column1, this.Column2 });
+            this.LyricShow_DataGridView.Location = new System.Drawing.Point(12, 23);
+            this.LyricShow_DataGridView.Name = "LyricShow_DataGridView";
+            this.LyricShow_DataGridView.RowTemplate.Height = 23;
+            this.LyricShow_DataGridView.Size = new System.Drawing.Size(203, 123);
+            this.LyricShow_DataGridView.TabIndex = 37;
+            this.LyricShow_DataGridView.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.TransType_DataGridView_CellContentClick);
+            this.LyricShow_DataGridView.CellMouseMove += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.TransList_DataGridView_CellMouseMove);
+            this.LyricShow_DataGridView.CellValueChanged += new System.Windows.Forms.DataGridViewCellEventHandler(this.TransType_DataGridView_CellValueChanged);
+            this.LyricShow_DataGridView.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.TransList_DataGridView_RowsAdded);
+            this.LyricShow_DataGridView.DragDrop += new System.Windows.Forms.DragEventHandler(this.TransList_DataGridView_DragDrop);
+            this.LyricShow_DataGridView.DragEnter += new System.Windows.Forms.DragEventHandler(this.TransList_DataGridView_DragEnter);
             // 
             // Output_GroupBox
             // 
@@ -614,23 +600,25 @@ namespace MusicLyricApp
             this.Output_GroupBox.Controls.Add(this.label10);
             this.Output_GroupBox.Controls.Add(this.IgnorePureMusicInSave_CheckBox);
             this.Output_GroupBox.Controls.Add(this.OutputHelp_Btn);
+            this.Output_GroupBox.Controls.Add(this.LyricShow_DataGridView);
+            this.Output_GroupBox.Controls.Add(this.TransConfig_TabControl);
             this.Output_GroupBox.Location = new System.Drawing.Point(12, 362);
             this.Output_GroupBox.Name = "Output_GroupBox";
-            this.Output_GroupBox.Size = new System.Drawing.Size(452, 112);
+            this.Output_GroupBox.Size = new System.Drawing.Size(452, 327);
             this.Output_GroupBox.TabIndex = 35;
             this.Output_GroupBox.TabStop = false;
             this.Output_GroupBox.Text = "输出设置";
             // 
             // OutputName_TextBox
             // 
-            this.OutputName_TextBox.Location = new System.Drawing.Point(110, 70);
+            this.OutputName_TextBox.Location = new System.Drawing.Point(222, 125);
             this.OutputName_TextBox.Name = "OutputName_TextBox";
-            this.OutputName_TextBox.Size = new System.Drawing.Size(323, 21);
+            this.OutputName_TextBox.Size = new System.Drawing.Size(208, 21);
             this.OutputName_TextBox.TabIndex = 38;
             // 
             // label10
             // 
-            this.label10.Location = new System.Drawing.Point(15, 73);
+            this.label10.Location = new System.Drawing.Point(222, 98);
             this.label10.Name = "label10";
             this.label10.Size = new System.Drawing.Size(65, 12);
             this.label10.TabIndex = 37;
@@ -638,7 +626,7 @@ namespace MusicLyricApp
             // 
             // IgnorePureMusicInSave_CheckBox
             // 
-            this.IgnorePureMusicInSave_CheckBox.Location = new System.Drawing.Point(13, 19);
+            this.IgnorePureMusicInSave_CheckBox.Location = new System.Drawing.Point(226, 23);
             this.IgnorePureMusicInSave_CheckBox.Name = "IgnorePureMusicInSave_CheckBox";
             this.IgnorePureMusicInSave_CheckBox.Size = new System.Drawing.Size(93, 29);
             this.IgnorePureMusicInSave_CheckBox.TabIndex = 36;
@@ -650,7 +638,7 @@ namespace MusicLyricApp
             this.Reset_Btn.BackColor = System.Drawing.Color.OldLace;
             this.Reset_Btn.FlatAppearance.BorderColor = System.Drawing.Color.Silver;
             this.Reset_Btn.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.Reset_Btn.Location = new System.Drawing.Point(12, 493);
+            this.Reset_Btn.Location = new System.Drawing.Point(483, 639);
             this.Reset_Btn.Name = "Reset_Btn";
             this.Reset_Btn.Size = new System.Drawing.Size(97, 50);
             this.Reset_Btn.TabIndex = 36;
@@ -658,11 +646,22 @@ namespace MusicLyricApp
             this.Reset_Btn.UseVisualStyleBackColor = false;
             this.Reset_Btn.Click += new System.EventHandler(this.Close_Btn_Click);
             // 
+            // Column1
+            // 
+            this.Column1.HeaderText = "是否启用";
+            this.Column1.Name = "Column1";
+            this.Column1.Width = 60;
+            // 
+            // Column2
+            // 
+            this.Column2.HeaderText = "歌词类型";
+            this.Column2.Name = "Column2";
+            // 
             // SettingForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(952, 560);
+            this.ClientSize = new System.Drawing.Size(724, 701);
             this.Controls.Add(this.Reset_Btn);
             this.Controls.Add(this.Output_GroupBox);
             this.Controls.Add(this.TransLyric_GroupBox);
@@ -692,7 +691,7 @@ namespace MusicLyricApp
             this.BaiduTranslate_TabPage.PerformLayout();
             this.CaiYunTranslate_TabPage.ResumeLayout(false);
             this.CaiYunTranslate_TabPage.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.TransType_DataGridView)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.LyricShow_DataGridView)).EndInit();
             this.Output_GroupBox.ResumeLayout(false);
             this.Output_GroupBox.PerformLayout();
             this.ResumeLayout(false);
@@ -722,7 +721,7 @@ namespace MusicLyricApp
         private System.Windows.Forms.DataGridViewCheckBoxColumn Column1;
         private System.Windows.Forms.DataGridViewTextBoxColumn Column2;
 
-        private System.Windows.Forms.DataGridView TransType_DataGridView;
+        private System.Windows.Forms.DataGridView LyricShow_DataGridView;
 
         private System.Windows.Forms.Button Reset_Btn;
 

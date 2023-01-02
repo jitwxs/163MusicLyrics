@@ -31,6 +31,7 @@ namespace MusicLyricApp.Api.Translate
         
         /// <summary>
         /// 初始化 API
+        /// https://fanyi-api.baidu.com/manage/developer
         /// </summary>
         /// <param name="appId">APP ID</param>
         /// <param name="secret">密钥</param>
@@ -118,7 +119,13 @@ namespace MusicLyricApp.Api.Translate
             return new ResultVo<string[]>(outputs);
         }
 
-        private string CastLanguageEnum(LanguageEnum languageEnum)
+        protected override bool IsSupport0(LanguageEnum inputLanguage, LanguageEnum outputLanguage)
+        {
+            // all support
+            return true;
+        }
+
+        private static string CastLanguageEnum(LanguageEnum languageEnum)
         {
             switch (languageEnum)
             {

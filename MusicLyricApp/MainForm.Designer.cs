@@ -70,6 +70,7 @@ namespace MusicLyricApp
             this.SearchSource_ComboBox = new System.Windows.Forms.ComboBox();
             this.SongPic_Btn = new System.Windows.Forms.Button();
             this.Blur_Search_Btn = new System.Windows.Forms.Button();
+            this.label1 = new System.Windows.Forms.Label();
             this.Top_MenuStrip.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -133,9 +134,9 @@ namespace MusicLyricApp
             // 
             this.LrcType_ComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.LrcType_ComboBox.FormattingEnabled = true;
-            this.LrcType_ComboBox.Location = new System.Drawing.Point(89, 42);
+            this.LrcType_ComboBox.Location = new System.Drawing.Point(147, 42);
             this.LrcType_ComboBox.Name = "LrcType_ComboBox";
-            this.LrcType_ComboBox.Size = new System.Drawing.Size(120, 20);
+            this.LrcType_ComboBox.Size = new System.Drawing.Size(62, 20);
             this.LrcType_ComboBox.TabIndex = 13;
             this.LrcType_ComboBox.SelectedIndexChanged += new System.EventHandler(this.LrcType_ComboBox_SelectedIndexChanged);
             // 
@@ -151,9 +152,9 @@ namespace MusicLyricApp
             this.LrcMergeSeparator_Label.AutoSize = true;
             this.LrcMergeSeparator_Label.Location = new System.Drawing.Point(222, 45);
             this.LrcMergeSeparator_Label.Name = "LrcMergeSeparator_Label";
-            this.LrcMergeSeparator_Label.Size = new System.Drawing.Size(77, 12);
+            this.LrcMergeSeparator_Label.Size = new System.Drawing.Size(65, 12);
             this.LrcMergeSeparator_Label.TabIndex = 14;
-            this.LrcMergeSeparator_Label.Text = "歌词合并符：";
+            this.LrcMergeSeparator_Label.Text = "歌词合并符";
             // 
             // LrcMergeSeparator_TextBox
             // 
@@ -215,7 +216,7 @@ namespace MusicLyricApp
             this.SongLink_Btn.Name = "SongLink_Btn";
             this.SongLink_Btn.Size = new System.Drawing.Size(38, 22);
             this.SongLink_Btn.TabIndex = 21;
-            this.SongLink_Btn.Text = "歌曲";
+            this.SongLink_Btn.Text = "直链";
             this.SongLink_Btn.UseVisualStyleBackColor = true;
             this.SongLink_Btn.Click += new System.EventHandler(this.SongLink_Btn_Click);
             // 
@@ -329,12 +330,22 @@ namespace MusicLyricApp
             this.Blur_Search_Btn.UseVisualStyleBackColor = true;
             this.Blur_Search_Btn.Click += new System.EventHandler(this.Search_Btn_Click);
             // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(89, 45);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(53, 12);
+            this.label1.TabIndex = 33;
+            this.label1.Text = "歌词格式";
+            // 
             // MainForm
             // 
             this.AcceptButton = this.Search_Btn;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(492, 443);
+            this.Controls.Add(this.label1);
             this.Controls.Add(this.Blur_Search_Btn);
             this.Controls.Add(this.SongPic_Btn);
             this.Controls.Add(this.SearchSource_ComboBox);
@@ -373,6 +384,8 @@ namespace MusicLyricApp
             this.ResumeLayout(false);
             this.PerformLayout();
         }
+
+        private System.Windows.Forms.Label label1;
 
         private System.Windows.Forms.ToolStripMenuItem ShortCut_MItem;
 

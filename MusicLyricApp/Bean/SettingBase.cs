@@ -1,4 +1,8 @@
 ﻿
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
 namespace MusicLyricApp.Bean
 {
     public class SettingBean
@@ -34,6 +38,11 @@ namespace MusicLyricApp.Bean
         /// 输出文件名格式
         /// </summary>
         public string OutputFileNameFormat = "${name} - ${singer}";
+        
+        /// <summary>
+        /// 输出的歌词类型列表
+        /// </summary>
+        public string OutputLyricTypes = string.Join(",", new [] { (int) LyricsTypeEnum.ORIGIN, (int) LyricsTypeEnum.ORIGIN_TRANS });
 
         /// <summary>
         /// QQ 音乐 Cookie
@@ -46,6 +55,12 @@ namespace MusicLyricApp.Bean
         public string NetEaseCookie = "";
 
         public TransConfigBean TransConfig = new TransConfigBean();
+        
+        public List<LyricsTypeEnum> DeserializationOutputLyricsTypes()
+        {
+            return string.IsNullOrWhiteSpace(OutputLyricTypes) ? new List<LyricsTypeEnum>() : 
+                OutputLyricTypes.Split(',').Select(e => (LyricsTypeEnum) Convert.ToInt32(e)).ToList();
+        }
     }
 
     public class TransConfigBean
@@ -59,12 +74,7 @@ namespace MusicLyricApp.Bean
         /// 译文歌词匹配精度
         /// </summary>
         public int MatchPrecisionDeviation = 0;
-        
-        /// <summary>
-        /// 译文类型
-        /// </summary>
-        public string TransType = "0";
-        
+
         /// <summary>
         /// 罗马音转换模式
         /// </summary>
@@ -106,7 +116,7 @@ namespace MusicLyricApp.Bean
         /// <summary>
         /// 歌词展示格式
         /// </summary>
-        public ShowLrcTypeEnum ShowLrcType = ShowLrcTypeEnum.ONLY_ORIGIN;
+        public ShowLrcTypeEnum ShowLrcType = ShowLrcTypeEnum.STAGGER;
         
         /// <summary>
         /// 指定歌词合并的分隔符

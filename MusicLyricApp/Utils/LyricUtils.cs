@@ -136,83 +136,59 @@ namespace MusicLyricApp.Utils
         /// <returns></returns>
         private static async Task<List<LyricLineVo>> FormatLyric(string originLrc, string translateLrc, SearchInfo searchInfo)
         {
+            var outputLyricsTypes = searchInfo.SettingBean.Config.DeserializationOutputLyricsTypes();
             var showLrcType = searchInfo.SettingBean.Param.ShowLrcType;
             var searchSource = searchInfo.SettingBean.Param.SearchSource;
             var ignoreEmptyLyric = searchInfo.SettingBean.Param.IgnoreEmptyLyric;
 
+            // 未配置任何输出
+            if (outputLyricsTypes.Count == 0)
+            {
+                return new List<LyricLineVo>();
+            }
+            
             var originLyrics = SplitLrc(originLrc, searchSource, ignoreEmptyLyric);
-            if (showLrcType == ShowLrcTypeEnum.ONLY_ORIGIN)
+
+            var originLyricsOutputSortInConfig = outputLyricsTypes.IndexOf(LyricsTypeEnum.ORIGIN);
+            
+            // 仅输出原文            
+            if (outputLyricsTypes.Count == 1 && originLyricsOutputSortInConfig != -1)
             {
                 return originLyrics;
             }
 
             // 原始译文歌词的空行没有意义，指定 true 不走配置
             var basicTransLyrics = SplitLrc(translateLrc, searchSource, true);
-            var transLyricsList = await DealTranslateLyric(originLyrics, basicTransLyrics, searchInfo.SettingBean.Config.TransConfig);
+            
+            var lyricsComplexList = await DealTranslateLyric(originLyrics, basicTransLyrics, searchInfo.SettingBean.Config.TransConfig, outputLyricsTypes);
 
+            // 原文歌词插入到结果集的指定位置
+            if (originLyricsOutputSortInConfig != -1)
+            {
+                lyricsComplexList.Insert(originLyricsOutputSortInConfig, originLyrics);
+            }
+            
             var res = new List<LyricLineVo>();
 
             switch (showLrcType)
             {
-                case ShowLrcTypeEnum.ONLY_TRANS_STAGGER:
-                    foreach (var each in transLyricsList)
+                case ShowLrcTypeEnum.STAGGER:
+                    foreach (var each in lyricsComplexList)
                     {
                         res = SortLrc(res, each, true);
                     }
                     break;
-                case ShowLrcTypeEnum.ONLY_TRANS_ISOLATED:
-                    foreach (var each in transLyricsList)
+                case ShowLrcTypeEnum.ISOLATED:
+                    foreach (var each in lyricsComplexList)
                     {
                         res.AddRange(each);
                     }
                     break;
-                case ShowLrcTypeEnum.ONLY_TRANS_MERGE:
-                    foreach (var each in transLyricsList)
+                case ShowLrcTypeEnum.MERGE:
+                    foreach (var each in lyricsComplexList)
                     {
                         res = MergeLrc(res, each, searchInfo.SettingBean.Param.LrcMergeSeparator, true);
                     }
-                    break;
-                case ShowLrcTypeEnum.ORIGIN_PRIOR_STAGGER:
-                    res.AddRange(originLyrics);
-                    for (var i = 0; i < transLyricsList.Count; i++)
-                    {
-                        res = SortLrc(res, transLyricsList[i], true);
-                    }
-                    break;
-                case ShowLrcTypeEnum.ORIGIN_PRIOR_ISOLATED:
-                    res.AddRange(originLyrics);
-                    foreach (var each in transLyricsList)
-                    {
-                        res.AddRange(each);
-                    }
-                    break;
-                case ShowLrcTypeEnum.ORIGIN_PRIOR_MERGE:
-                    res.AddRange(originLyrics);
-                    foreach (var each in transLyricsList)
-                    {
-                        res = MergeLrc(res, each, searchInfo.SettingBean.Param.LrcMergeSeparator, true);
-                    }
-                    break;
-                case ShowLrcTypeEnum.TRANSLATE_PRIOR_STAGGER:
-                    foreach (var each in transLyricsList)
-                    {
-                        res = SortLrc(res, each, true);
-                    }
-                    res = SortLrc(res, originLyrics, true);
-                    break;
-                case ShowLrcTypeEnum.TRANSLATE_PRIOR_ISOLATED:
-                    foreach (var each in transLyricsList)
-                    {
-                        res.AddRange(each);
-                    }
-                    res.AddRange(originLyrics);
-                    break;
-                case ShowLrcTypeEnum.TRANSLATE_PRIOR_MERGE:
-                    foreach (var each in transLyricsList)
-                    {
-                        res = MergeLrc(res, each, searchInfo.SettingBean.Param.LrcMergeSeparator, true);
-                    }
-                    res = MergeLrc(res, originLyrics, searchInfo.SettingBean.Param.LrcMergeSeparator, true);
                     break;
                 default:
                     throw new NotSupportedException("not support showLrcType: " + showLrcType);
@@ -340,8 +316,10 @@ namespace MusicLyricApp.Utils
         /// <param name="originList">原文歌词</param>
         /// <param name="baseTransList">初始的译文歌词</param>
         /// <param name="transConfig">译文配置</param>
+        /// <param name="outputLyricsTypes">输出歌词类型列表</param>
         /// <returns></returns>
-        public static async Task<List<List<LyricLineVo>>> DealTranslateLyric(List<LyricLineVo> originList, List<LyricLineVo> baseTransList, TransConfigBean transConfig)
+        public static async Task<List<List<LyricLineVo>>> DealTranslateLyric(List<LyricLineVo> originList, 
+            List<LyricLineVo> baseTransList, TransConfigBean transConfig, List<LyricsTypeEnum> outputLyricsTypes)
         {
             var result = new List<List<LyricLineVo>>();
             
@@ -357,52 +335,65 @@ namespace MusicLyricApp.Utils
             // 处理译文类型填充
             LanguageEnum originLanguage = CertainLanguage(originList), baseTransLanguage = CertainLanguage(transList);
             
-            var configTransTypes = transConfig.TransType.Split(',')
-                .Select(e => (TransTypeEnum) Convert.ToInt32(e)).ToHashSet();
-            
-            foreach (var transTypeEnum in configTransTypes)
+            foreach (var transTypeEnum in outputLyricsTypes)
             {
                 switch (transTypeEnum)
                 {
-                    case TransTypeEnum.ORIGIN_TRANS:
+                    case LyricsTypeEnum.ORIGIN_TRANS:
                         result.Add(transList);
                         break;
-                    case TransTypeEnum.ROMAJI:
+                    case LyricsTypeEnum.ROMAJI:
                         if (originLanguage == LanguageEnum.JAPANESE)
                         {
                             result.Add(await RomajiUtils.ToRomaji(originList, transConfig.RomajiModeEnum, transConfig.RomajiSystemEnum));
                         }
                         break;
-                    case TransTypeEnum.CHINESE:
-                    case TransTypeEnum.ENGLISH:
+                    case LyricsTypeEnum.CHINESE:
+                    case LyricsTypeEnum.ENGLISH:
                         // 输出语言和原始歌词语言只有不同时，才翻译
-                        if (CastTransType(originLanguage) != transTypeEnum)
+                        if (CastToLyricsTypeEnum(originLanguage) != transTypeEnum)
                         {
                             // 输出语言和已有译文语言相同
-                            if (CastTransType(baseTransLanguage) == transTypeEnum)
+                            if (CastToLyricsTypeEnum(baseTransLanguage) == transTypeEnum)
                             {
                                 // 仅当已有译文未输出时，才输出
-                                if (!configTransTypes.Contains(TransTypeEnum.ORIGIN_TRANS))
+                                if (!outputLyricsTypes.Contains(LyricsTypeEnum.ORIGIN_TRANS))
                                 {
                                     result.Add(transList);
                                 }
                             }
                             else
                             {
-                                // 调用翻译 API
-                                var translateApi = GetTranslateApi(transConfig);
-                                if (translateApi != null)
-                                {
-                                    var inputs = originList.Select(e => e.Content).ToArray();
-                                    var outputs = translateApi.Translate(inputs, originLanguage, CastLanguageEnum(transTypeEnum));
+                                var outputLanguage = CastToLanguageEnum(transTypeEnum);
 
-                                    var outputList = new List<LyricLineVo>();
-                                    for (var i = 0; i < inputs.Length; i++)
+                                // 调用合适的翻译 API
+                                foreach (var translateApi in GetAvailableTranslateApi(transConfig))
+                                {
+                                    string[] inputs = null, outputs = null;
+                                    
+                                    if (translateApi.IsSupport(originLanguage, outputLanguage))
                                     {
-                                        outputList.Add(new LyricLineVo(outputs[i], originList[i].Timestamp));
+                                        // 使用原文尝试进行翻译
+                                        inputs = originList.Select(e => e.Content).ToArray();
+                                        outputs = translateApi.Translate(inputs, originLanguage, outputLanguage);
+                                    }
+                                    else if (transList.Count != 0 && translateApi.IsSupport(baseTransLanguage, outputLanguage))
+                                    {
+                                        // 使用译文尝试翻译
+                                        inputs = transList.Select(e => e.Content).ToArray();
+                                        outputs = translateApi.Translate(inputs, baseTransLanguage, outputLanguage);
                                     }
 
-                                    result.Add(outputList);
+                                    if (inputs != null && outputs != null)
+                                    {
+                                        var outputList = new List<LyricLineVo>();
+                                        for (var i = 0; i < inputs.Length; i++)
+                                        {
+                                            outputList.Add(new LyricLineVo(outputs[i], originList[i].Timestamp));
+                                        }
+                                        result.Add(outputList);
+                                        break;
+                                    }
                                 }
                             }
                         }
@@ -413,28 +404,27 @@ namespace MusicLyricApp.Utils
             return result;
         }
         
-        public static ITranslateApi GetTranslateApi(TransConfigBean transConfig)
+        public static List<ITranslateApi> GetAvailableTranslateApi(TransConfigBean transConfig)
         {
+            var res = new List<ITranslateApi>();
+            
             try
             {
-                return new CaiYunTranslateApi(transConfig.CaiYunToken);
+                res.Add(new CaiYunTranslateApi(transConfig.CaiYunToken));
             }
-            catch (MusicLyricException caiYunEx)
+            catch (MusicLyricException)
             {
-                if (ErrorMsg.CAIYUN_TRANSLATE_AUTH_FAILED.Equals(caiYunEx.Message))
+                try
                 {
-                    try
-                    {
-                        return new BaiduTranslateApi(transConfig.BaiduTranslateAppId, transConfig.BaiduTranslateSecret);
-                    }
-                    catch (MusicLyricException baiduEx)
-                    {
+                    res.Add(new BaiduTranslateApi(transConfig.BaiduTranslateAppId, transConfig.BaiduTranslateSecret));
+                }
+                catch (MusicLyricException)
+                {
                         
-                    }
                 }
             }
 
-            return null;
+            return res;
         }
 
         /// <summary>
@@ -608,29 +598,29 @@ namespace MusicLyricApp.Utils
             }
         }
         
-        public static LanguageEnum CastLanguageEnum(TransTypeEnum transTypeEnum)
+        public static LanguageEnum CastToLanguageEnum(LyricsTypeEnum lyricsTypeEnum)
         {
-            switch (transTypeEnum)
+            switch (lyricsTypeEnum)
             {
-                case TransTypeEnum.CHINESE:
+                case LyricsTypeEnum.CHINESE:
                     return LanguageEnum.CHINESE;
-                case TransTypeEnum.ENGLISH:
+                case LyricsTypeEnum.ENGLISH:
                     return LanguageEnum.ENGLISH;
                 default:
                     return LanguageEnum.OTHER;
             }
         }
 
-        private static TransTypeEnum CastTransType(LanguageEnum languageEnum)
+        private static LyricsTypeEnum CastToLyricsTypeEnum(LanguageEnum languageEnum)
         {
             switch (languageEnum)
             {
                 case LanguageEnum.CHINESE:
-                    return TransTypeEnum.CHINESE;
+                    return LyricsTypeEnum.CHINESE;
                 case LanguageEnum.ENGLISH:
-                    return TransTypeEnum.ENGLISH;
+                    return LyricsTypeEnum.ENGLISH;
                 default:
-                    return TransTypeEnum.ORIGIN_TRANS;
+                    return LyricsTypeEnum.ORIGIN_TRANS;
             }
         }
     }

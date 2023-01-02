@@ -12,19 +12,9 @@ namespace MusicLyricApp.Bean
     // 双语歌词类型
     public enum ShowLrcTypeEnum
     {
-        [Description("仅显示原文")] ONLY_ORIGIN = 0,
-        
-        [Description("仅显示译文（交错）")] ONLY_TRANS_STAGGER = 1,
-        [Description("仅显示译文（独立）")] ONLY_TRANS_ISOLATED = 2,
-        [Description("仅显示译文（合并）")] ONLY_TRANS_MERGE = 3,
-        
-        [Description("优先原文（交错）")] ORIGIN_PRIOR_STAGGER = 4,
-        [Description("优先原文（独立）")] ORIGIN_PRIOR_ISOLATED = 5,
-        [Description("优先原文（合并）")] ORIGIN_PRIOR_MERGE = 6,
-        
-        [Description("优先译文（交错）")] TRANSLATE_PRIOR_STAGGER = 7,
-        [Description("优先译文（独立）")] TRANSLATE_PRIOR_ISOLATED = 8,
-        [Description("优先译文（合并）")] TRANSLATE_PRIOR_MERGE = 9,
+        [Description("交错")] STAGGER = 0,
+        [Description("独立")] ISOLATED = 1,
+        [Description("合并")] MERGE = 2,
     }
 
     // 搜索来源
@@ -91,12 +81,13 @@ namespace MusicLyricApp.Bean
         [Description("填充原文")] FILL_ORIGIN = 2,
     }
 
-    public enum TransTypeEnum
+    public enum LyricsTypeEnum
     {
-        [Description("原始译文")] ORIGIN_TRANS = 0,
-        [Description("中文")] CHINESE = 1,
-        [Description("英文")] ENGLISH = 2,
-        [Description("罗马音")] ROMAJI = 3,
+        [Description("原文")] ORIGIN = 0,
+        [Description("原始译文")] ORIGIN_TRANS = 1,
+        [Description("中文译文")] CHINESE = 2,
+        [Description("英文译文")] ENGLISH = 3,
+        [Description("罗马音译文")] ROMAJI = 4,
     }
 
     public enum LanguageEnum

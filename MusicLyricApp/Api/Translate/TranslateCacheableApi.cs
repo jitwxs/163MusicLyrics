@@ -7,6 +7,8 @@ namespace MusicLyricApp.Api.Translate
     public abstract class TranslateCacheableApi : ITranslateApi
     {
         protected abstract ResultVo<string[]> Translate0(string[] inputs, LanguageEnum inputLanguage, LanguageEnum outputLanguage);
+
+        protected abstract bool IsSupport0(LanguageEnum inputLanguage, LanguageEnum outputLanguage);
         
         public string[] Translate(string[] inputs, LanguageEnum inputLanguage, LanguageEnum outputLanguage)
         {
@@ -42,7 +44,12 @@ namespace MusicLyricApp.Api.Translate
 
             return res;
         }
-        
+
+        public bool IsSupport(LanguageEnum inputLanguage, LanguageEnum outputLanguage)
+        {
+            return IsSupport0(inputLanguage, outputLanguage);
+        }
+
         protected static string[][] ChunkArray(string[] inputs, int chunkSize)
         {
             var i = 0;

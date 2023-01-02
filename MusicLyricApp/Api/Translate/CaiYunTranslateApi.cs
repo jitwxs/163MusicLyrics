@@ -35,21 +35,6 @@ namespace MusicLyricApp.Api.Translate
 
         protected override ResultVo<string[]> Translate0(string[] inputs, LanguageEnum inputLanguage, LanguageEnum outputLanguage)
         {
-            string transType;
-
-            switch (outputLanguage)
-            {
-                case LanguageEnum.CHINESE:
-                    transType = "auto2zh";
-                    break;
-                case LanguageEnum.ENGLISH:
-                    transType = "auto2en";
-                    break;
-                default:
-                    // not support
-                    return ResultVo<string[]>.Failure(ErrorMsg.TRANSLATE_LANGUAGE_NOT_SUPPORT);
-            }
-
             var res = new string[inputs.Length];
             
             var headers = new Dictionary<string, string>
@@ -63,7 +48,7 @@ namespace MusicLyricApp.Api.Translate
                 var param = new Dictionary<string, object>
                 {
                     { "source", input },
-                    { "trans_type", transType },
+                    { "trans_type", Cast(inputLanguage) + "2" + Cast(outputLanguage) },
                     { "request_id", "demo" },
                     { "detect", true },
                 };
@@ -84,6 +69,44 @@ namespace MusicLyricApp.Api.Translate
             }
 
             return new ResultVo<string[]>(res);
+        }
+
+        protected override bool IsSupport0(LanguageEnum inputLanguage, LanguageEnum outputLanguage)
+        {
+            if (inputLanguage == LanguageEnum.CHINESE)
+            {
+                // 中文仅支持转英文和日文
+                return outputLanguage == LanguageEnum.ENGLISH || outputLanguage == LanguageEnum.JAPANESE;
+            }
+
+            if (inputLanguage == LanguageEnum.ENGLISH)
+            {
+                // 英文仅支持转中文
+                return outputLanguage == LanguageEnum.CHINESE;
+            }
+
+            if (inputLanguage == LanguageEnum.JAPANESE)
+            {
+                // 日文仅支持转中文
+                return outputLanguage == LanguageEnum.CHINESE;
+            }
+
+            return false;
+        }
+
+        private static string Cast(LanguageEnum language)
+        {
+            switch (language)
+            {
+                case LanguageEnum.CHINESE:
+                    return "zh";
+                case LanguageEnum.ENGLISH:
+                    return "en";
+                case LanguageEnum.JAPANESE:
+                    return "ja";
+                default:
+                    return "";
+            }
         }
     }
 }
