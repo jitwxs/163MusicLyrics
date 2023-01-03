@@ -386,12 +386,12 @@ namespace MusicLyricApp.Bean
         /// <summary>
         /// 歌词内容
         /// </summary>
-        public string Lyric;
+        public string Lyric = "";
 
         /// <summary>
         /// 译文歌词内容
         /// </summary>
-        public string TranslateLyric;
+        public string TranslateLyric = "";
 
         /// <summary>
         /// 歌曲时长 ms
