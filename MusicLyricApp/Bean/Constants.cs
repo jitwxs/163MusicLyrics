@@ -5,7 +5,7 @@ namespace MusicLyricApp.Bean
 {
     public static class Constants
     {
-        public const string Version = "v5.7";
+        public const string Version = "v5.8";
         
         public static readonly string SettingPath = Environment.CurrentDirectory + "\\MusicLyricAppSetting.json";
         
@@ -67,6 +67,12 @@ namespace MusicLyricApp.Bean
                         list.Add("${name} -> 歌曲名");
                         list.Add("${singer} -> 歌手名");
                         list.Add("${album} -> 专辑名");
+                        list.Add("-----");
+                        list.Add("系统预设函数：");
+                        list.Add("$fillLength(content,symbol,length)");
+                        list.Add("长度填充，其中 content 表示操作的内容，symbol 表示填充的内容，length 表示填充的长度。" +
+                                 "例如 $fillLength(${index},0,3) 表示对于 ${index} 的结果，长度填充到 3 位，使用 0 填充" +
+                                 "【即 1 -> 001, 12 -> 012, 123 -> 123, 1234 -> 1234】");
                         list.Add("-----");
                         list.Add("您可自行决定输出哪些歌词类型，通过勾选复选框进行启用和关闭");
                         list.Add("拖拽最左侧的箭头可以调整输出的顺序");

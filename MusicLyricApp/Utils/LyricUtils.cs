@@ -200,7 +200,7 @@ namespace MusicLyricApp.Utils
         private static string[] SplitLrc(string lrc)
         {
             // 换行符统一
-            return lrc
+            return (lrc ?? "")
                 .Replace("\r\n", "\n")
                 .Replace("\r", "")
                 .Split('\n');

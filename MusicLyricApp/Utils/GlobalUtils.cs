@@ -181,7 +181,56 @@ namespace MusicLyricApp.Utils
                 .Replace("${singer}", songVo.Singer)
                 .Replace("${album}", songVo.Album);
 
+            outputName = ResolveCustomFunction(outputName);
+
             return GetSafeFilename(outputName);
+        }
+
+        public static string ResolveCustomFunction(string content)
+        {
+            var sourceContent = content;
+            
+            try
+            {
+                foreach (Match match in new Regex(@"\$fillLength\([^\)]*\)").Matches(content))
+                {
+                    var raw = match.Value;
+
+                    var leftQuote = raw.IndexOf("(", StringComparison.Ordinal) + 1;
+                    var rightQuote = raw.IndexOf(")", StringComparison.Ordinal);
+
+                    var split = raw.Substring(leftQuote, rightQuote - leftQuote).Split(',');
+                    // 三个参数
+                    if (split.Length != 3)
+                    {
+                        continue;
+                    }
+
+                    string res = split[0], keyword = split[1];
+
+                    // 重复长度
+                    if (!int.TryParse(split[2], out var targetLength))
+                    {
+                        continue;
+                    }
+
+                    while (res.Length < targetLength)
+                    {
+                        var diff = targetLength - res.Length;
+
+                        res = (diff < keyword.Length ? keyword.Substring(0, diff) : keyword) + res;
+                    }
+
+                    content = content.Replace(raw, res);
+                }
+                
+                return content;
+            }
+            catch (System.Exception e)
+            {
+                Logger.Error("ResolveCustomFunction error, content: " + sourceContent + ", stack: " + e);
+                return sourceContent;
+            }
         }
 
         private static string GetSafeFilename(string arbitraryString)
