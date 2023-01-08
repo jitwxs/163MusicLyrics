@@ -78,9 +78,13 @@ the project, such as you are willing to contribute power, you can:
 If this project brings you convenience, welcome to star to let more people discover and use it. This project is a
 personal maintenance project. If you are willing to ask the author to drink a bottle of cola, welcome to donate.
 
-| username | donate |
-|:---------|:-------|
-| DJKill   | 3 CNY  |
+| username | donate | platform | date |
+|:---------|:-------|:-------|:-------|
+| *刚 | 3 CNY | wechat | 2023-01-04 |
+| **俊 | 1.11 CNY | alipay | 2022-12-27 |
+| DJKill | 3 CNY | wechat | 2022-12-20 |
+| **远 | 5 CNY | alipay | 2022-12-05 |
+| **暄 | 3.5 CNY | alipay | 2022-11-05 |
 
 > 如您选择打赏，记得备注您的昵称，我将为您登记到本页面中。
 >
@@ -89,4 +93,10 @@ personal maintenance project. If you are willing to ask the author to drink a bo
 <div align="center">
     <img src="https://cdn.jsdelivr.net/gh/jitwxs/cdn/blog/configuration/alipay_donate_full.jpg" height="200" style="float:left;margin-right:20px;margin-left: 310px">
     <img src="https://cdn.jsdelivr.net/gh/jitwxs/cdn/blog/configuration/wechat_donate_full.jpg" height="200" style="float:left">
-</div> 
+</div>
+
+最后，感谢 JetBrains 为本项目提供 IDE 赞助。
+
+Finally, thanks to JetBrains for sponsoring the IDE for this project.
+
+![Rider logo](https://resources.jetbrains.com/storage/products/company/brand/logos/Rider_icon.svg)
