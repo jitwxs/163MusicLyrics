@@ -100,6 +100,21 @@ namespace MusicLyricAppTest.Utils
         }
 
         [Test]
+        public void ResolveCustomFunctionTest()
+        {
+            // 方法未找到
+            Assert.AreEqual("2$fillLength(${index},0,322", ResolveCustomFunction("2$fillLength(${index},0,322"));
+            // 参数数量不匹配
+            Assert.AreEqual("2$fillLength(${index},32)2", ResolveCustomFunction("2$fillLength(${index},32)2"));
+            // 不需要补齐
+            Assert.AreEqual("2${index}2", ResolveCustomFunction("2$fillLength(${index},0,2)2"));
+            // 补齐成功
+            Assert.AreEqual("20${index}2", ResolveCustomFunction("2$fillLength(${index},0,9)2"));
+            // 截位补齐
+            Assert.AreEqual("22${index}2", ResolveCustomFunction("2$fillLength(${index},20,9)2"));
+        }
+        
+        [Test]
         public void GetOutputNameTest()
         {
             var songVo = new SongVo
