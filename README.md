@@ -80,6 +80,7 @@ personal maintenance project. If you are willing to ask the author to drink a bo
 
 | username | donate | platform | date |
 |:---------|:-------|:-------|:-------|
+| 橘橘橘哈 | 3 CNY | wechat | 2023-02-11 |
 | p*g | 5 CNY | wechat | 2023-01-26 |
 | Draco_Falcon | 5 CNY | wechat | 2023-01-13 |
 | *刚 | 3 CNY | wechat | 2023-01-04 |
