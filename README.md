@@ -78,6 +78,8 @@ maintained personally. If you would like to treat the creator with a bottle of c
 
 | username | donate | platform | date |
 |:---------|:-------|:-------|:-------|
+| DAOXI | 100 CNY | wechat | 2023-02-21 |
+| E*4 | 3 CNY | wechat | 2023-02-12 |
 | 橘橘橘哈 | 3 CNY | wechat | 2023-02-11 |
 | p*g | 5 CNY | wechat | 2023-01-26 |
 | Draco_Falcon | 5 CNY | wechat | 2023-01-13 |
