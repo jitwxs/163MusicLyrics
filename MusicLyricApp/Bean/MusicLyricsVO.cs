@@ -451,6 +451,11 @@ namespace MusicLyricApp.Bean
             TimeOffset = millisecond;
         }
 
+        public LyricTimestamp Add(long millisecond)
+        {
+            return new LyricTimestamp(TimeOffset + millisecond);
+        }
+
         /// <summary>
         /// 初始化 LyricTimestamp
         /// </summary>

@@ -77,15 +77,13 @@ namespace MusicLyricApp.Utils
                         int leftParenthesesIndex = group.Index, parenthesesLength = group.Length;
 
                         // (404,202)
-                        var timestamp = line.Substring(leftParenthesesIndex, parenthesesLength);
+                        var timeStr = line.Substring(leftParenthesesIndex, parenthesesLength);
                         // 404
-                        timestamp = timestamp.Split(',')[0].Trim().Substring(1);
-                        // format
-                        timestamp = new LyricTimestamp(long.Parse(timestamp))
-                            .PrintTimestamp(defaultParam.LrcTimestampFormat, defaultParam.DotType);
+                        var timestamp = long.Parse(timeStr.Split(',')[0].Trim().Substring(1));
+                        var lyricTimestamp = new LyricTimestamp(timestamp);
                         
                         var content = line.Substring(contentStartIndex, leftParenthesesIndex - contentStartIndex);
-                        // 去除全行时间戳
+                        // 首次执行，去除全行时间戳
                         if (i == 0)
                         {
                             content = new LyricLineVo(content).Content;
@@ -93,7 +91,18 @@ namespace MusicLyricApp.Utils
                         
                         contentStartIndex = leftParenthesesIndex + parenthesesLength;
 
-                        sb.Append(timestamp).Append(content);
+                        sb.Append(lyricTimestamp.PrintTimestamp(defaultParam.LrcTimestampFormat, defaultParam.DotType)).Append(content);
+                        
+                        // 最后一次执行，增加行结束时间戳
+                        if (i == matches.Count - 1)
+                        {
+                            // 202
+                            var timeCostStr = timeStr.Split(',')[1].Trim();
+                            var timeCost = long.Parse(timeCostStr.Substring(0, timeCostStr.Length - 1));
+
+                            sb.Append(lyricTimestamp.Add(timeCost)
+                                .PrintTimestamp(defaultParam.LrcTimestampFormat, defaultParam.DotType));
+                        }
                     } while (++i < matches.Count);
                 }
                 else
