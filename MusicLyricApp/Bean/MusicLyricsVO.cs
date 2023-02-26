@@ -758,7 +758,7 @@ namespace MusicLyricApp.Bean
         {
             public string QueryId { get; }
             
-            public string SongId { get; set; }
+            public string SongId { get; }
             
             public SearchSourceEnum SearchSource { get; }
             
@@ -769,6 +769,11 @@ namespace MusicLyricApp.Bean
                 QueryId = queryId;
                 SearchSource = searchSource;
                 SearchType = searchType;
+            }
+
+            public InputSongId (string songId, InputSongId other) : this(other.QueryId, other.SearchSource, other.SearchType)
+            {
+                SongId = songId;
             }
         }
     }

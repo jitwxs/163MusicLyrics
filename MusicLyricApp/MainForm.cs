@@ -267,29 +267,28 @@ namespace MusicLyricApp
                 var searchSource = _globalSearchInfo.SettingBean.Param.SearchSource;
                 var searchType = _globalSearchInfo.SettingBean.Param.SearchType;
                 
-                var inputSongId = GlobalUtils.CheckInputId(input, searchSource, searchType);
+                var baseInputSongId = GlobalUtils.CheckInputId(input, searchSource, searchType);
                 
                 switch (searchType)
                 {
                     case SearchTypeEnum.ALBUM_ID:
-                        foreach (var simpleSongVo in _api[searchSource].GetAlbumVo(inputSongId.QueryId).Assert().Data.SimpleSongVos)
+                        foreach (var simpleSongVo in _api[searchSource].GetAlbumVo(baseInputSongId.QueryId).Assert().Data.SimpleSongVos)
                         {
-                            inputSongId.SongId = simpleSongVo.DisplayId;
+                            _globalSearchInfo.SongIds.Add(new SearchInfo.InputSongId(simpleSongVo.DisplayId, baseInputSongId));
                         }
                         break;
                     case SearchTypeEnum.PLAYLIST_ID:
-                        foreach (var simpleSongVo in _api[searchSource].GetPlaylistVo(inputSongId.QueryId).Assert().Data.SimpleSongVos)
+                        foreach (var simpleSongVo in _api[searchSource].GetPlaylistVo(baseInputSongId.QueryId).Assert().Data.SimpleSongVos)
                         {
-                            inputSongId.SongId = simpleSongVo.DisplayId;
+                            _globalSearchInfo.SongIds.Add(new SearchInfo.InputSongId(simpleSongVo.DisplayId, baseInputSongId));
                         }
                         break;
                     case SearchTypeEnum.SONG_ID:
-                        inputSongId.SongId = inputSongId.QueryId;
+                        _globalSearchInfo.SongIds.Add(new SearchInfo.InputSongId(baseInputSongId.QueryId, baseInputSongId));
                         break;
                     default:
                         throw new MusicLyricException(ErrorMsg.SYSTEM_ERROR);
                 }
-                _globalSearchInfo.SongIds.Add(inputSongId);
             }
             
             return _globalSearchInfo.SongIds;
