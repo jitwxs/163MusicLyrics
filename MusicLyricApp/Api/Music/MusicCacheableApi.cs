@@ -29,18 +29,18 @@ namespace MusicLyricApp.Api.Music
 
         public ResultVo<PlaylistVo> GetPlaylistVo(string playlistId)
         {
-            return GlobalCache.Process(CacheType.PLAYLIST_VO, playlistId, () => GetPlaylistVo0(playlistId));
+            return GlobalCache.Process(Source(), CacheType.PLAYLIST_VO, playlistId, () => GetPlaylistVo0(playlistId));
         }
 
         public ResultVo<AlbumVo> GetAlbumVo(string albumId)
         {
-            return GlobalCache.Process(CacheType.ALBUM_VO, albumId, () => GetAlbumVo0(albumId));
+            return GlobalCache.Process(Source(), CacheType.ALBUM_VO, albumId, () => GetAlbumVo0(albumId));
         }
 
         public Dictionary<string, ResultVo<SongVo>> GetSongVo(string[] songIds)
         {
-            var result = GlobalCache.BatchQuery<string, SongVo>(CacheType.SONG_VO, songIds, out var notHitKeys)
-                .ToDictionary(pair => pair.Key, pair => new ResultVo<SongVo>(pair.Value));
+            var result = GlobalCache.BatchQuery<SongVo>(Source(), CacheType.SONG_VO, songIds, 
+                    out var notHitKeys).ToDictionary(pair => pair.Key, pair => new ResultVo<SongVo>(pair.Value));
 
             foreach(var pair in GetSongVo0(notHitKeys))
             {
@@ -49,7 +49,7 @@ namespace MusicLyricApp.Api.Music
                 
                 if (resultVo.IsSuccess())
                 {
-                    GlobalCache.DoCache(CacheType.SONG_VO, songId, resultVo.Data);
+                    GlobalCache.DoCache(Source(), CacheType.SONG_VO, songId, resultVo.Data);
                 }
                 
                 result[songId] = pair.Value;
@@ -60,14 +60,14 @@ namespace MusicLyricApp.Api.Music
 
         public ResultVo<string> GetSongLink(string songId)
         {
-            return GlobalCache.Process(CacheType.SONG_LINK, songId, () => GetSongLink0(songId));
+            return GlobalCache.Process(Source(), CacheType.SONG_LINK, songId, () => GetSongLink0(songId));
         }
 
         public ResultVo<LyricVo> GetLyricVo(string id, string displayId, bool isVerbatim)
         {
             ResultVo<LyricVo> CacheFunc() => GetLyricVo0(id, displayId, isVerbatim);
 
-            return GlobalCache.Process(CacheType.LYRIC_VO, GlobalUtils.GetSongKey(displayId, isVerbatim), CacheFunc);
+            return GlobalCache.Process(Source(), CacheType.LYRIC_VO, GlobalUtils.GetSongKey(displayId, isVerbatim), CacheFunc);
         }
 
         public ResultVo<SearchResultVo> Search(string keyword, SearchTypeEnum searchType)
@@ -76,7 +76,7 @@ namespace MusicLyricApp.Api.Music
 
             ResultVo<SearchResultVo> CacheFunc() => Search0(keyword, searchType);
 
-            return GlobalCache.Process(CacheType.SEARCH_RESULT_VO, cacheKey, CacheFunc);
+            return GlobalCache.Process(Source(), CacheType.SEARCH_RESULT_VO, cacheKey, CacheFunc);
         }
     }
 }

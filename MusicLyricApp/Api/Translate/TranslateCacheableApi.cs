@@ -6,6 +6,8 @@ namespace MusicLyricApp.Api.Translate
 {
     public abstract class TranslateCacheableApi : ITranslateApi
     {
+        private const string PREFIX = "";
+        
         protected abstract ResultVo<string[]> Translate0(string[] inputs, LanguageEnum inputLanguage, LanguageEnum outputLanguage);
 
         protected abstract bool IsSupport0(LanguageEnum inputLanguage, LanguageEnum outputLanguage);
@@ -17,7 +19,7 @@ namespace MusicLyricApp.Api.Translate
                 return new string[] {};
             }
 
-            var cacheDict = GlobalCache.BatchQuery<string, string>(CacheType.TRANSLATE, inputs, out var notHitInputs);
+            var cacheDict = GlobalCache.BatchQuery<string>(PREFIX, CacheType.TRANSLATE, inputs, out var notHitInputs);
             
             var httpRes = new string[] { };
             if (notHitInputs.Length > 0)
@@ -36,7 +38,7 @@ namespace MusicLyricApp.Api.Translate
 
                     if (output != null)
                     {
-                        GlobalCache.DoCache(CacheType.TRANSLATE, input, output);
+                        GlobalCache.DoCache(PREFIX, CacheType.TRANSLATE, input, output);
                     }
                 }
                 res[index++] = output;

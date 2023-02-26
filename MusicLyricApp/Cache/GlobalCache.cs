@@ -9,9 +9,9 @@ namespace MusicLyricApp.Cache
         private static readonly Dictionary<CacheType, Dictionary<object, object>> Cache =
             new Dictionary<CacheType, Dictionary<object, object>>();
 
-        public static ResultVo<T> Process<T>(CacheType cacheType, object key, Func<ResultVo<T>> cacheFunc)
+        public static ResultVo<T> Process<T>(object keyPrefix, CacheType cacheType, string key, Func<ResultVo<T>> cacheFunc)
         {
-            var cache = Query<T>(cacheType, key);
+            var cache = Query<T>(keyPrefix, cacheType, key);
             if (cache != null)
             {
                 return new ResultVo<T>(cache);
@@ -20,21 +20,20 @@ namespace MusicLyricApp.Cache
             var res = cacheFunc.Invoke();
             if (res.IsSuccess())
             {
-                DoCache(cacheType, key, res.Data);
+                DoCache(keyPrefix, cacheType, key, res.Data);
             }
 
             return res;
         }
 
-        public static Dictionary<TKey, TValue> BatchQuery<TKey, TValue>(CacheType cacheType, IEnumerable<TKey> keys,
-            out TKey[] notHitKeys0)
+        public static Dictionary<string, TValue> BatchQuery<TValue>(object keyPrefix, CacheType cacheType, IEnumerable<string> keys, out string[] notHitKeys0)
         {
-            var result = new Dictionary<TKey, TValue>();
-            var notHitKeys = new List<TKey>();
+            var result = new Dictionary<string, TValue>();
+            var notHitKeys = new List<string>();
 
             foreach (var key in keys)
             {
-                var value = Query<TValue>(cacheType, key);
+                var value = Query<TValue>(keyPrefix, cacheType, key);
                 if (value == null)
                 {
                     notHitKeys.Add(key);
@@ -50,8 +49,10 @@ namespace MusicLyricApp.Cache
             return result;
         }
 
-        public static T Query<T>(CacheType cacheType, object key)
+        public static T Query<T>(object keyPrefix, CacheType cacheType, string originKey)
         {
+            var key = AddPrefix(keyPrefix, originKey);
+
             if (Cache.ContainsKey(cacheType) && Cache[cacheType].ContainsKey(key))
             {
                 return (T)Cache[cacheType][key];
@@ -62,17 +63,16 @@ namespace MusicLyricApp.Cache
             }
         }
 
-        public static void DoCache<TValue>(CacheType cacheType, Func<TValue, object> keyFunc,
-            IEnumerable<TValue> values)
+        public static void DoCache<TValue>(object keyPrefix, CacheType cacheType, Func<TValue, string> keyFunc, IEnumerable<TValue> values)
         {
             foreach (var value in values)
             {
                 var key = keyFunc.Invoke(value);
-                DoCache(cacheType, key, value);
+                DoCache(keyPrefix, cacheType, key, value);
             }
         }
 
-        public static void DoCache(CacheType cacheType, object key, object value)
+        public static void DoCache(object keyPrefix, CacheType cacheType, string originKey, object value)
         {
             if (!Cache.ContainsKey(cacheType))
             {
@@ -80,7 +80,17 @@ namespace MusicLyricApp.Cache
             }
 
             // add the key if it's non-existent.
-            Cache[cacheType][key] = value;
+            Cache[cacheType][AddPrefix(keyPrefix, originKey)] = value;
+        }
+
+        private static string AddPrefix(object prefix, string key)
+        {
+            return prefix + "^" + key;
+        }
+        
+        private static string DelPrefix(string key)
+        {
+            return key.Split('^')[1];
         }
     }
 

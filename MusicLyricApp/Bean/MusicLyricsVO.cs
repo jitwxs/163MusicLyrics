@@ -756,14 +756,19 @@ namespace MusicLyricApp.Bean
         
         public class InputSongId
         {
-            public string SongId { get; }
+            public string QueryId { get; }
+            
+            public string SongId { get; set; }
             
             public SearchSourceEnum SearchSource { get; }
+            
+            public SearchTypeEnum SearchType { get; }
 
-            public InputSongId(string songId, SearchSourceEnum searchSource)
+            public InputSongId(string queryId, SearchSourceEnum searchSource, SearchTypeEnum searchType)
             {
-                SongId = songId;
+                QueryId = queryId;
                 SearchSource = searchSource;
+                SearchType = searchType;
             }
         }
     }

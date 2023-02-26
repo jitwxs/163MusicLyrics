@@ -82,6 +82,7 @@ namespace MusicLyricApp
             
                 // 应用设置
                 _settingBean.Config.RememberParam = RememberParam_CheckBox.Checked;
+                _settingBean.Config.AggregatedBlurSearch = AggregatedBlurSearchCheckBox.Checked;
                 _settingBean.Config.AutoReadClipboard = AutoReadClipboard_CheckBox.Checked;
                 _settingBean.Config.AutoCheckUpdate = AutoCheckUpdate_CheckBox.Checked;
                 _settingBean.Config.QQMusicCookie = QQMusic_Cookie_TextBox.Text;

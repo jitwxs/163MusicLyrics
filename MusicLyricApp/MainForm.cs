@@ -264,31 +264,32 @@ namespace MusicLyricApp
 
             foreach (var input in inputs)
             {
-                var param = _globalSearchInfo.SettingBean.Param;
+                var searchSource = _globalSearchInfo.SettingBean.Param.SearchSource;
+                var searchType = _globalSearchInfo.SettingBean.Param.SearchType;
                 
-                var id = GlobalUtils.CheckInputId(input, _globalSearchInfo.SettingBean.Param);
-                var searchSource = param.SearchSource;
-
-                switch (param.SearchType)
+                var inputSongId = GlobalUtils.CheckInputId(input, searchSource, searchType);
+                
+                switch (searchType)
                 {
                     case SearchTypeEnum.ALBUM_ID:
-                        foreach (var simpleSongVo in _api[searchSource].GetAlbumVo(id).Assert().Data.SimpleSongVos)
+                        foreach (var simpleSongVo in _api[searchSource].GetAlbumVo(inputSongId.QueryId).Assert().Data.SimpleSongVos)
                         {
-                            _globalSearchInfo.SongIds.Add(new SearchInfo.InputSongId(simpleSongVo.DisplayId, searchSource));
+                            inputSongId.SongId = simpleSongVo.DisplayId;
                         }
                         break;
                     case SearchTypeEnum.PLAYLIST_ID:
-                        foreach (var simpleSongVo in _api[searchSource].GetPlaylistVo(id).Assert().Data.SimpleSongVos)
+                        foreach (var simpleSongVo in _api[searchSource].GetPlaylistVo(inputSongId.QueryId).Assert().Data.SimpleSongVos)
                         {
-                            _globalSearchInfo.SongIds.Add(new SearchInfo.InputSongId(simpleSongVo.DisplayId, searchSource));
+                            inputSongId.SongId = simpleSongVo.DisplayId;
                         }
                         break;
                     case SearchTypeEnum.SONG_ID:
-                        _globalSearchInfo.SongIds.Add(new SearchInfo.InputSongId(id, searchSource));
+                        inputSongId.SongId = inputSongId.QueryId;
                         break;
                     default:
                         throw new MusicLyricException(ErrorMsg.SYSTEM_ERROR);
                 }
+                _globalSearchInfo.SongIds.Add(inputSongId);
             }
             
             return _globalSearchInfo.SongIds;
@@ -399,13 +400,35 @@ namespace MusicLyricApp
                         throw new MusicLyricException(ErrorMsg.INPUT_CONENT_EMPLT);
                     }
 
-                    var resultVo = _api[_globalSearchInfo.SettingBean.Param.SearchSource].Search(keyword, _globalSearchInfo.SettingBean.Param.SearchType).Assert().Data;
-                    if (resultVo.IsEmpty())
+                    var resultVoList = new List<SearchResultVo>();
+
+                    var searchType = _globalSearchInfo.SettingBean.Param.SearchType;
+                    if (_globalSearchInfo.SettingBean.Config.AggregatedBlurSearch)
+                    {
+                        foreach (SearchSourceEnum searchSource in Enum.GetValues(typeof(SearchSourceEnum)))
+                        {
+                            var one = _api[searchSource].Search(keyword, searchType);
+                            if (one.IsSuccess())
+                            {
+                                resultVoList.Add(one.Data);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        resultVoList.Add(_api[_globalSearchInfo.SettingBean.Param.SearchSource].Search(keyword, searchType).Assert().Data);
+                    }
+
+                    resultVoList.RemoveAll(one => one.IsEmpty());
+                    
+                    if (resultVoList.Count == 0)
                     {
                         throw new MusicLyricException(ErrorMsg.SEARCH_RESULT_EMPTY);
                     }
-                
-                    FormUtils.OpenForm(_blurForm, () => _blurForm = new BlurForm(resultVo, this), this);
+                    else
+                    {
+                        FormUtils.OpenForm(_blurForm, () => _blurForm = new BlurForm(resultVoList, this), this);
+                    }
                 }
             }
             catch (WebException ex)

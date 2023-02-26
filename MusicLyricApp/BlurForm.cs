@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Windows.Forms;
 using MusicLyricApp.Bean;
+using MusicLyricApp.Utils;
 
 namespace MusicLyricApp
 {
@@ -12,22 +13,21 @@ namespace MusicLyricApp
 
         private string[] _ids;
 
-        public BlurForm(SearchResultVo searchResultVo, MainForm mainForm)
+        public BlurForm(List<SearchResultVo> searchResList, MainForm mainForm)
         {
             _mainForm = mainForm;
 
             InitializeComponent();
 
-            InitialDataGridView(searchResultVo);
+            InitialDataGridView(searchResList);
         }
 
-        private void InitialDataGridView(SearchResultVo searchResultVo)
+        private void InitialDataGridView(List<SearchResultVo> searchResList)
         {
             var table = new DataTable();
 
-            var source = searchResultVo.SearchSource.ToDescription();
-
-            switch (searchResultVo.SearchType)
+            var searchType = searchResList[0].SearchType;
+            switch (searchType)
             {
                 case SearchTypeEnum.SONG_ID:
                     // Add columns.
@@ -36,20 +36,6 @@ namespace MusicLyricApp
                     table.Columns.Add("专辑", typeof(string));
                     table.Columns.Add("时长", typeof(string));
                     table.Columns.Add("平台", typeof(string));
-
-                    // Add rows.
-                    var songVos = searchResultVo.SongVos;
-                    _ids = new string[songVos.Count];
-
-                    for (var i = 0; i < songVos.Count; i++)
-                    {
-                        var songVo = songVos[i];
-                        var duration = new LyricTimestamp(songVo.Duration).PrintTimestamp("mm:ss", DotTypeEnum.DOWN);
-
-                        _ids[i] = songVo.DisplayId;
-                        table.Rows.Add(songVo.Title, string.Join(",", songVo.AuthorName), songVo.AlbumName, 
-                            duration, source);
-                    }
                     break;
                 case SearchTypeEnum.ALBUM_ID:
                     // Add columns.
@@ -58,19 +44,6 @@ namespace MusicLyricApp
                     table.Columns.Add("歌曲数量", typeof(string));
                     table.Columns.Add("发行时间", typeof(string));
                     table.Columns.Add("平台", typeof(string));
-
-                    // Add rows.
-                    var albumVos = searchResultVo.AlbumVos;
-                    _ids = new string[albumVos.Count];
-
-                    for (var i = 0; i < albumVos.Count; i++)
-                    {
-                        var albumVo = albumVos[i];
-
-                        _ids[i] = albumVo.DisplayId;
-                        table.Rows.Add(albumVo.AlbumName, string.Join(",", albumVo.AuthorName), albumVo.SongCount, 
-                            albumVo.PublishTime, source);
-                    }
                     break;
                 case SearchTypeEnum.PLAYLIST_ID:
                     // Add columns.
@@ -80,23 +53,52 @@ namespace MusicLyricApp
                     table.Columns.Add("歌曲数量", typeof(string));
                     table.Columns.Add("播放量", typeof(string));
                     table.Columns.Add("平台", typeof(string));
-                    
-                    // Add rows.
-                    var playlistVos = searchResultVo.PlaylistVos;
-                    _ids = new string[playlistVos.Count];
-
-                    for (var i = 0; i < playlistVos.Count; i++)
-                    {
-                        var playlistVo = playlistVos[i];
-
-                        _ids[i] = playlistVo.DisplayId;
-                        table.Rows.Add(playlistVo.PlaylistName, playlistVo.AuthorName, playlistVo.Description, 
-                            playlistVo.SongCount, playlistVo.PlayCount, source);
-                    }
                     break;
+            }
+            
+            var idList = new List<string>();
+
+            foreach (var searchResultVo in searchResList)
+            {
+                var searchSource = searchResultVo.SearchSource;
+                var idPrefix = GlobalUtils.SearchSourceKeywordDict[searchSource] + "/" + GlobalUtils.SearchTypeKeywordDict[searchSource][searchType];
+                
+                switch (searchType)
+                {
+                    case SearchTypeEnum.SONG_ID:
+                        // Add rows.
+                        foreach (var songVo in searchResultVo.SongVos)
+                        {
+                            var duration = new LyricTimestamp(songVo.Duration).PrintTimestamp("mm:ss", DotTypeEnum.DOWN);
+
+                            idList.Add(idPrefix + songVo.DisplayId);
+                            table.Rows.Add(songVo.Title, string.Join(",", songVo.AuthorName), songVo.AlbumName, 
+                                duration, searchSource.ToDescription());
+                        }
+                        break;
+                    case SearchTypeEnum.ALBUM_ID:
+                        // Add rows.
+                        foreach (var albumVo in searchResultVo.AlbumVos)
+                        {
+                            idList.Add(idPrefix + albumVo.DisplayId);
+                            table.Rows.Add(albumVo.AlbumName, string.Join(",", albumVo.AuthorName), albumVo.SongCount, 
+                                albumVo.PublishTime, searchSource.ToDescription());
+                        }
+                        break;
+                    case SearchTypeEnum.PLAYLIST_ID:
+                        // Add rows.
+                        foreach (var playlistVo in searchResultVo.PlaylistVos)
+                        {
+                            idList.Add(idPrefix + playlistVo.DisplayId);
+                            table.Rows.Add(playlistVo.PlaylistName, playlistVo.AuthorName, playlistVo.Description, 
+                                playlistVo.SongCount, playlistVo.PlayCount, searchSource.ToDescription());
+                        }
+                        break;
+                }
             }
 
             Blur_DataGridView.DataSource = table;
+            _ids = idList.ToArray();
         }
 
         private void BlurSearch_DataGridView_CellMouseDown(object sender, DataGridViewCellMouseEventArgs e)
