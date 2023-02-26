@@ -179,9 +179,9 @@ namespace MusicLyricApp.Utils
             var outputName = format
                 .Replace("${index}", saveVo.Index.ToString())
                 .Replace("${id}", songVo.DisplayId)
-                .Replace("${name}", songVo.Name)
-                .Replace("${singer}", songVo.Singer)
-                .Replace("${album}", songVo.Album);
+                .Replace("${name}", ControlLength(songVo.Name))
+                .Replace("${singer}", ControlLength(songVo.Singer))
+                .Replace("${album}", ControlLength(songVo.Album));
 
             outputName = ResolveCustomFunction(outputName);
 
@@ -352,6 +352,18 @@ namespace MusicLyricApp.Utils
             }
 
             return result;
+        }
+
+        private static string ControlLength(string str)
+        {
+            if (str.Length > 128)
+            {
+                return str.Substring(0, 125) + "...";
+            }
+            else
+            {
+                return str;
+            }
         }
     }
 }
