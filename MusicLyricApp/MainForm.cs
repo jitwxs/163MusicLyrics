@@ -8,6 +8,7 @@ using System.Net;
 using System.Reflection;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using MusicLyricApp.Api.Music;
 using MusicLyricApp.Bean;
@@ -574,11 +575,7 @@ namespace MusicLyricApp
 
             try
             {
-                using (var sw = new StreamWriter(saveDialog.FileName, false, GlobalUtils.GetEncoding(_globalSearchInfo.SettingBean.Param.Encoding)))
-                {
-                    await sw.WriteAsync(await LyricUtils.GetOutputContent(saveVo.LyricVo, _globalSearchInfo));
-                    await sw.FlushAsync();
-                }
+                await WriteToFile(saveDialog.FileName, saveVo.LyricVo);
 
                 MessageBox.Show(string.Format(ErrorMsg.SAVE_COMPLETE, 1, 0), "提示");
             }
@@ -626,12 +623,9 @@ namespace MusicLyricApp
                     }
 
                     var path = filePath + '/' + GlobalUtils.GetOutputName(saveVo, _globalSearchInfo.SettingBean.Config.OutputFileNameFormat) + fileSuffix;
-                    using(var sw = new StreamWriter(path, false, GlobalUtils.GetEncoding(_globalSearchInfo.SettingBean.Param.Encoding)))
-                    {
-                        await sw.WriteAsync(await LyricUtils.GetOutputContent(lyricVo, _globalSearchInfo));
-                        await sw.FlushAsync();
-                        success.Add(item.Key);
-                    }
+
+                    await WriteToFile(path, lyricVo);
+                    success.Add(item.Key);
                 }
                 
                 MessageBox.Show(string.Format(ErrorMsg.SAVE_COMPLETE, success.Count, skipCount), "提示");
@@ -653,6 +647,37 @@ namespace MusicLyricApp
             UpdateLrcTextBox(log.ToString());
         }
 
+        private async Task WriteToFile(string path, LyricVo lyricVo)
+        {
+            var encoding = GlobalUtils.GetEncoding(_globalSearchInfo.SettingBean.Param.Encoding);
+
+            var res = await LyricUtils.GetOutputContent(lyricVo, _globalSearchInfo);
+
+            if (res.Count == 1)
+            {
+                using (var sw = new StreamWriter(path, false, encoding))
+                {
+                    await sw.WriteAsync(res[0]);
+                    await sw.FlushAsync();
+                }
+            }
+            else
+            {
+                var doxIndex = path.LastIndexOf(".", StringComparison.Ordinal);
+                var suffix = path.Substring(doxIndex);
+                path = path.Substring(0, doxIndex);
+                
+                for (var i = 0; i < res.Count; i++)
+                {
+                    using (var sw = new StreamWriter(path + " - " + i + suffix, false, encoding))
+                    {
+                        await sw.WriteAsync(res[i]);
+                        await sw.FlushAsync();
+                    }
+                }
+            }
+        }
+        
         /**
          * 保存按钮点击事件
          */
@@ -695,7 +720,7 @@ namespace MusicLyricApp
                     }
                     else
                     {
-                        Console_TextBox.Text = await LyricUtils.GetOutputContent(lyricVo, _globalSearchInfo);
+                        Console_TextBox.Text = GlobalUtils.MergeStr(await LyricUtils.GetOutputContent(lyricVo, _globalSearchInfo));
                     }
                 }
             }

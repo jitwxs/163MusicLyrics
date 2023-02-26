@@ -331,6 +331,11 @@ namespace MusicLyricApp.Utils
             return result;
         }
 
+        public static string MergeStr(IEnumerable<string> strList)
+        {
+            return string.Join(Environment.NewLine, strList);
+        }
+
         public static List<T> GetEnumList<T>() where T : Enum
         {
             return Enum.GetValues(typeof(T)).OfType<T>().ToList();

@@ -40,6 +40,11 @@ namespace MusicLyricApp.Bean
         public bool IgnorePureMusicInSave = true;
 
         /// <summary>
+        /// 对于 "独立" 歌词格式，保存在不同的文件中
+        /// </summary>
+        public bool SeparateFileForIsolated = false;
+
+        /// <summary>
         /// 输出文件名格式
         /// </summary>
         public string OutputFileNameFormat = "${name} - ${singer}";

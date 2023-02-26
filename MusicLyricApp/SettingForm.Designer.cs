@@ -66,6 +66,7 @@ namespace MusicLyricApp
 
             // 输出设置
             IgnorePureMusicInSave_CheckBox.Checked = _settingBean.Config.IgnorePureMusicInSave;
+            SeparateFileForIsolated_CheckBox.Checked = _settingBean.Config.SeparateFileForIsolated;
             OutputName_TextBox.Text = _settingBean.Config.OutputFileNameFormat;
             
             // 应用设置
@@ -138,6 +139,7 @@ namespace MusicLyricApp
             this.Column1 = new System.Windows.Forms.DataGridViewCheckBoxColumn();
             this.Column2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Output_GroupBox = new System.Windows.Forms.GroupBox();
+            this.SeparateFileForIsolated_CheckBox = new System.Windows.Forms.CheckBox();
             this.OutputName_TextBox = new System.Windows.Forms.TextBox();
             this.label10 = new System.Windows.Forms.Label();
             this.IgnorePureMusicInSave_CheckBox = new System.Windows.Forms.CheckBox();
@@ -619,6 +621,7 @@ namespace MusicLyricApp
             // 
             // Output_GroupBox
             // 
+            this.Output_GroupBox.Controls.Add(this.SeparateFileForIsolated_CheckBox);
             this.Output_GroupBox.Controls.Add(this.OutputName_TextBox);
             this.Output_GroupBox.Controls.Add(this.label10);
             this.Output_GroupBox.Controls.Add(this.IgnorePureMusicInSave_CheckBox);
@@ -631,6 +634,15 @@ namespace MusicLyricApp
             this.Output_GroupBox.TabIndex = 35;
             this.Output_GroupBox.TabStop = false;
             this.Output_GroupBox.Text = "输出设置";
+            // 
+            // SeparateFileForIsolated_CheckBox
+            // 
+            this.SeparateFileForIsolated_CheckBox.Location = new System.Drawing.Point(226, 61);
+            this.SeparateFileForIsolated_CheckBox.Name = "SeparateFileForIsolated_CheckBox";
+            this.SeparateFileForIsolated_CheckBox.Size = new System.Drawing.Size(202, 17);
+            this.SeparateFileForIsolated_CheckBox.TabIndex = 39;
+            this.SeparateFileForIsolated_CheckBox.Text = "“独立”歌词格式分文件保存";
+            this.SeparateFileForIsolated_CheckBox.UseVisualStyleBackColor = true;
             // 
             // OutputName_TextBox
             // 
@@ -645,13 +657,13 @@ namespace MusicLyricApp
             this.label10.Name = "label10";
             this.label10.Size = new System.Drawing.Size(65, 12);
             this.label10.TabIndex = 37;
-            this.label10.Text = "输出文件名";
+            this.label10.Text = "保存文件名";
             // 
             // IgnorePureMusicInSave_CheckBox
             // 
             this.IgnorePureMusicInSave_CheckBox.Location = new System.Drawing.Point(226, 23);
             this.IgnorePureMusicInSave_CheckBox.Name = "IgnorePureMusicInSave_CheckBox";
-            this.IgnorePureMusicInSave_CheckBox.Size = new System.Drawing.Size(93, 29);
+            this.IgnorePureMusicInSave_CheckBox.Size = new System.Drawing.Size(93, 17);
             this.IgnorePureMusicInSave_CheckBox.TabIndex = 36;
             this.IgnorePureMusicInSave_CheckBox.Text = "跳过纯音乐";
             this.IgnorePureMusicInSave_CheckBox.UseVisualStyleBackColor = true;
@@ -709,6 +721,8 @@ namespace MusicLyricApp
             this.ResumeLayout(false);
             this.PerformLayout();
         }
+
+        private System.Windows.Forms.CheckBox SeparateFileForIsolated_CheckBox;
 
         private System.Windows.Forms.CheckBox AggregatedBlurSearchCheckBox;
 

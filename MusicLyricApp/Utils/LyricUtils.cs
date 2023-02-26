@@ -25,28 +25,38 @@ namespace MusicLyricApp.Utils
         /// <param name="lyricVo"></param>
         /// <param name="searchInfo"></param>
         /// <returns></returns>
-        public static async Task<string> GetOutputContent(LyricVo lyricVo, SearchInfo searchInfo)
+        public static async Task<List<string>> GetOutputContent(LyricVo lyricVo, SearchInfo searchInfo)
         {
             var param = searchInfo.SettingBean.Param;
             
             var dotType = param.DotType;
             var timestampFormat = param.OutputFileFormat == OutputFormatEnum.SRT ? param.SrtTimestampFormat : param.LrcTimestampFormat;
             
-            var voList = await FormatLyric(lyricVo.Lyric, lyricVo.TranslateLyric, searchInfo);
+            var voListList = await FormatLyric(lyricVo.Lyric, lyricVo.TranslateLyric, searchInfo);
 
             if (searchInfo.SettingBean.Param.EnableVerbatimLyric)
             {
-                voList = FormatSubLineLyric(voList, timestampFormat, dotType);
+                for (var i = 0; i < voListList.Count; i++)
+                {
+                    voListList[i] = FormatSubLineLyric(voListList[i], timestampFormat, dotType);
+                }
             }
+
+            var res = new List<string>();
             
-            if (param.OutputFileFormat == OutputFormatEnum.SRT)
+            foreach (var voList in voListList)
             {
-                return SrtUtils.LrcToSrt(voList, timestampFormat, dotType, lyricVo.Duration);
+                if (param.OutputFileFormat == OutputFormatEnum.SRT)
+                {
+                    res.Add(SrtUtils.LrcToSrt(voList, timestampFormat, dotType, lyricVo.Duration));
+                }
+                else
+                {
+                    res.Add(string.Join(Environment.NewLine,  from o in voList select o.Print(timestampFormat, dotType)));
+                }
             }
-            else
-            {
-                return string.Join(Environment.NewLine,  from o in voList select o.Print(timestampFormat, dotType));
-            }
+
+            return res;
         }
 
         /// <summary>
@@ -143,17 +153,19 @@ namespace MusicLyricApp.Utils
         /// <param name="translateLrc">原始的译文内容</param>
         /// <param name="searchInfo">处理参数</param>
         /// <returns></returns>
-        private static async Task<List<LyricLineVo>> FormatLyric(string originLrc, string translateLrc, SearchInfo searchInfo)
+        private static async Task<List<List<LyricLineVo>>> FormatLyric(string originLrc, string translateLrc, SearchInfo searchInfo)
         {
             var outputLyricsTypes = searchInfo.SettingBean.Config.DeserializationOutputLyricsTypes();
             var showLrcType = searchInfo.SettingBean.Param.ShowLrcType;
             var searchSource = searchInfo.SettingBean.Param.SearchSource;
             var ignoreEmptyLyric = searchInfo.SettingBean.Param.IgnoreEmptyLyric;
 
+            var res = new List<List<LyricLineVo>>();
+            
             // 未配置任何输出
             if (outputLyricsTypes.Count == 0)
             {
-                return new List<LyricLineVo>();
+                return res;
             }
             
             var originLyrics = SplitLrc(originLrc, searchSource, ignoreEmptyLyric);
@@ -163,7 +175,8 @@ namespace MusicLyricApp.Utils
             // 仅输出原文            
             if (outputLyricsTypes.Count == 1 && originLyricsOutputSortInConfig != -1)
             {
-                return originLyrics;
+                res.Add(originLyrics);
+                return res;
             }
 
             // 原始译文歌词的空行没有意义，指定 true 不走配置
@@ -176,31 +189,42 @@ namespace MusicLyricApp.Utils
             {
                 lyricsComplexList.Insert(originLyricsOutputSortInConfig, originLyrics);
             }
-            
-            var res = new List<LyricLineVo>();
 
+            var single = new List<LyricLineVo>();
             switch (showLrcType)
             {
                 case ShowLrcTypeEnum.STAGGER:
                     foreach (var each in lyricsComplexList)
                     {
-                        res = SortLrc(res, each, true);
+                        single = SortLrc(single, each, true);
                     }
                     break;
                 case ShowLrcTypeEnum.ISOLATED:
-                    foreach (var each in lyricsComplexList)
+                    if (searchInfo.SettingBean.Config.SeparateFileForIsolated)
                     {
-                        res.AddRange(each);
+                        res.AddRange(lyricsComplexList);
+                    }
+                    else
+                    {
+                        foreach (var each in lyricsComplexList)
+                        {
+                            single.AddRange(each);
+                        }
                     }
                     break;
                 case ShowLrcTypeEnum.MERGE:
                     foreach (var each in lyricsComplexList)
                     {
-                        res = MergeLrc(res, each, searchInfo.SettingBean.Param.LrcMergeSeparator, true);
+                        single = MergeLrc(single, each, searchInfo.SettingBean.Param.LrcMergeSeparator, true);
                     }
                     break;
                 default:
                     throw new NotSupportedException("not support showLrcType: " + showLrcType);
+            }
+
+            if (single.Count > 0)
+            {
+                res.Add(single);
             }
 
             return res;
