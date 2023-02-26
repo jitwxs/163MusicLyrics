@@ -31,7 +31,7 @@ namespace MusicLyricApp.Api.Music
             if (resp.Code == 200)
             {
                 // cache song
-                GlobalCache.DoCache(CacheType.NET_EASE_SONG, value => value.Id, resp.Playlist.Tracks);
+                GlobalCache.DoCache(Source(), CacheType.NET_EASE_SONG, value => value.Id, resp.Playlist.Tracks);
 
                 return new ResultVo<PlaylistVo>(resp.Convert());
             } 
@@ -51,7 +51,7 @@ namespace MusicLyricApp.Api.Music
             if (resp.Code == 200)
             {
                 // cache song
-                GlobalCache.DoCache(CacheType.NET_EASE_SONG, value => value.Id, resp.Songs);
+                GlobalCache.DoCache(Source(), CacheType.NET_EASE_SONG, value => value.Id, resp.Songs);
                 return new ResultVo<AlbumVo>(resp.Convert());
             }
             else
@@ -64,14 +64,14 @@ namespace MusicLyricApp.Api.Music
         {
             // 从缓存中查询 Song，并将非命中的数据查询后加入缓存
             var cacheSongDict = GlobalCache
-                .BatchQuery<string, Song>(CacheType.NET_EASE_SONG, songIds, out var notHitKeys)
+                .BatchQuery<Song>(Source(), CacheType.NET_EASE_SONG, songIds, out var notHitKeys)
                 .ToDictionary(pair => pair.Key, pair => pair.Value);
 
             foreach (var pair in _api.GetSongs(notHitKeys))
             {
                 cacheSongDict.Add(pair.Key, pair.Value);
                 // add cache
-                GlobalCache.DoCache(CacheType.NET_EASE_SONG, pair.Key, pair.Value);
+                GlobalCache.DoCache(Source(), CacheType.NET_EASE_SONG, pair.Key, pair.Value);
             }
 
             var result = new Dictionary<string, ResultVo<SongVo>>();

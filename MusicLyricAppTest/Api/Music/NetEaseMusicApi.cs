@@ -51,6 +51,7 @@ namespace MusicLyricAppTest.Api.Music
         public void TestGetPlaylist()
         {
             const string playlistId = "7050074027";
+            const SearchSourceEnum searchSource = SearchSourceEnum.NET_EASE_MUSIC;
             
             var res = _api.GetPlaylistVo(playlistId);
             
@@ -58,7 +59,7 @@ namespace MusicLyricAppTest.Api.Music
 
             var resData = res.Data;
 
-            var cacheData = GlobalCache.Query<PlaylistVo>(CacheType.PLAYLIST_VO, playlistId);
+            var cacheData = GlobalCache.Query<PlaylistVo>(searchSource, CacheType.PLAYLIST_VO, playlistId);
             
             // playlistVo 正确缓存
             Assert.AreEqual(resData, cacheData);
@@ -66,8 +67,8 @@ namespace MusicLyricAppTest.Api.Music
             foreach (var simpleSongVo in resData.SimpleSongVos)
             {
                 // song 正确缓存
-                Assert.NotNull(GlobalCache.Query<Song>(CacheType.NET_EASE_SONG, simpleSongVo.Id));
-                Assert.NotNull(GlobalCache.Query<Song>(CacheType.NET_EASE_SONG, simpleSongVo.DisplayId));
+                Assert.NotNull(GlobalCache.Query<Song>(searchSource, CacheType.NET_EASE_SONG, simpleSongVo.Id));
+                Assert.NotNull(GlobalCache.Query<Song>(searchSource, CacheType.NET_EASE_SONG, simpleSongVo.DisplayId));
             }
         }
     }

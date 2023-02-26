@@ -451,6 +451,11 @@ namespace MusicLyricApp.Bean
             TimeOffset = millisecond;
         }
 
+        public LyricTimestamp Add(long millisecond)
+        {
+            return new LyricTimestamp(TimeOffset + millisecond);
+        }
+
         /// <summary>
         /// 初始化 LyricTimestamp
         /// </summary>
@@ -751,14 +756,24 @@ namespace MusicLyricApp.Bean
         
         public class InputSongId
         {
+            public string QueryId { get; }
+            
             public string SongId { get; }
             
             public SearchSourceEnum SearchSource { get; }
+            
+            public SearchTypeEnum SearchType { get; }
 
-            public InputSongId(string songId, SearchSourceEnum searchSource)
+            public InputSongId(string queryId, SearchSourceEnum searchSource, SearchTypeEnum searchType)
+            {
+                QueryId = queryId;
+                SearchSource = searchSource;
+                SearchType = searchType;
+            }
+
+            public InputSongId (string songId, InputSongId other) : this(other.QueryId, other.SearchSource, other.SearchType)
             {
                 SongId = songId;
-                SearchSource = searchSource;
             }
         }
     }

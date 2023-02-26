@@ -30,14 +30,14 @@ namespace MusicLyricApp.Utils
             return date.ToString("yyyy-MM-dd HH:mm:ss");
         }
 
-        private static readonly Dictionary<SearchSourceEnum, string> SearchSourceKeywordDict =
+        public static readonly Dictionary<SearchSourceEnum, string> SearchSourceKeywordDict =
             new Dictionary<SearchSourceEnum, string>
             {
                 { SearchSourceEnum.NET_EASE_MUSIC, "163.com" },
                 { SearchSourceEnum.QQ_MUSIC, "qq.com" },
             };
 
-        private static readonly Dictionary<SearchSourceEnum, Dictionary<SearchTypeEnum, string>> SearchTypeKeywordDict =
+        public static readonly Dictionary<SearchSourceEnum, Dictionary<SearchTypeEnum, string>> SearchTypeKeywordDict =
             new Dictionary<SearchSourceEnum, Dictionary<SearchTypeEnum, string>>
             {
                 {
@@ -62,8 +62,11 @@ namespace MusicLyricApp.Utils
         /// 输入参数校验
         /// </summary>
         /// <param name="input">输入参数</param>
+        /// <param name="searchSource"></param>
+        /// <param name="searchType"></param>
         /// <returns></returns>
-        public static string CheckInputId(string input, PersistParamBean paramBean)
+        /// <exception cref="MusicLyricException"></exception>
+        public static SearchInfo.InputSongId CheckInputId(string input, SearchSourceEnum searchSource, SearchTypeEnum searchType)
         {
             // 输入参数为空
             if (string.IsNullOrEmpty(input))
@@ -74,30 +77,29 @@ namespace MusicLyricApp.Utils
             // 自动识别音乐提供商
             foreach (var pair in SearchSourceKeywordDict.Where(pair => input.Contains(pair.Value)))
             {
-                paramBean.SearchSource = pair.Key;
+                searchSource = pair.Key;
             }
 
             // 自动识别搜索类型
-            foreach (var pair in SearchTypeKeywordDict[paramBean.SearchSource]
-                         .Where(pair => input.Contains(pair.Value)))
+            foreach (var pair in SearchTypeKeywordDict[searchSource].Where(pair => input.Contains(pair.Value)))
             {
-                paramBean.SearchType = pair.Key;
+                searchType = pair.Key;
             }
 
             // 网易云，纯数字，直接通过
-            if (paramBean.SearchSource == SearchSourceEnum.NET_EASE_MUSIC && CheckNum(input))
+            if (searchSource == SearchSourceEnum.NET_EASE_MUSIC && CheckNum(input))
             {
-                return input;
+                return new SearchInfo.InputSongId(input, searchSource, searchType);
             }
 
             // QQ 音乐，数字+字母，直接通过
-            if (paramBean.SearchSource == SearchSourceEnum.QQ_MUSIC && Regex.IsMatch(input, @"^[a-zA-Z0-9]*$"))
+            if (searchSource == SearchSourceEnum.QQ_MUSIC && Regex.IsMatch(input, @"^[a-zA-Z0-9]*$"))
             {
-                return input;
+                return new SearchInfo.InputSongId(input, searchSource, searchType);
             }
 
             // URL 关键字提取
-            var urlKeyword = SearchTypeKeywordDict[paramBean.SearchSource][paramBean.SearchType];
+            var urlKeyword = SearchTypeKeywordDict[searchSource][searchType];
             var index = input.IndexOf(urlKeyword, StringComparison.Ordinal);
             if (index != -1)
             {
@@ -114,11 +116,11 @@ namespace MusicLyricApp.Utils
                     }
                 }
 
-                return sb.ToString();
+                return new SearchInfo.InputSongId(sb.ToString(), searchSource, searchType);
             }
 
             // QQ 音乐，歌曲短链接
-            if (paramBean.SearchSource == SearchSourceEnum.QQ_MUSIC && input.Contains("fcgi-bin/u"))
+            if (searchSource == SearchSourceEnum.QQ_MUSIC && input.Contains("fcgi-bin/u"))
             {
                 const string keyword = "window.__ssrFirstPageData__";
                 var html = HttpUtils.HttpGet(input);
@@ -140,7 +142,7 @@ namespace MusicLyricApp.Utils
 
                         if (songs.Length > 0)
                         {
-                            return songs[0].Id;
+                            return new SearchInfo.InputSongId(songs[0].Id, searchSource, searchType);
                         }
                     }
                 }
@@ -177,9 +179,9 @@ namespace MusicLyricApp.Utils
             var outputName = format
                 .Replace("${index}", saveVo.Index.ToString())
                 .Replace("${id}", songVo.DisplayId)
-                .Replace("${name}", songVo.Name)
-                .Replace("${singer}", songVo.Singer)
-                .Replace("${album}", songVo.Album);
+                .Replace("${name}", ControlLength(songVo.Name))
+                .Replace("${singer}", ControlLength(songVo.Singer))
+                .Replace("${album}", ControlLength(songVo.Album));
 
             outputName = ResolveCustomFunction(outputName);
 
@@ -329,6 +331,11 @@ namespace MusicLyricApp.Utils
             return result;
         }
 
+        public static string MergeStr(IEnumerable<string> strList)
+        {
+            return string.Join(Environment.NewLine, strList);
+        }
+
         public static List<T> GetEnumList<T>() where T : Enum
         {
             return Enum.GetValues(typeof(T)).OfType<T>().ToList();
@@ -350,6 +357,18 @@ namespace MusicLyricApp.Utils
             }
 
             return result;
+        }
+
+        private static string ControlLength(string str)
+        {
+            if (str.Length > 128)
+            {
+                return str.Substring(0, 125) + "...";
+            }
+            else
+            {
+                return str;
+            }
         }
     }
 }

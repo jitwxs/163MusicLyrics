@@ -26,7 +26,7 @@ namespace MusicLyricAppTest.Api.Music
 
             var resData = res.Data;
 
-            var cacheData = GlobalCache.Query<PlaylistVo>(CacheType.PLAYLIST_VO, playlistId);
+            var cacheData = GlobalCache.Query<PlaylistVo>(SearchSourceEnum.QQ_MUSIC, CacheType.PLAYLIST_VO, playlistId);
             
             // playlistVo 正确缓存
             Assert.AreEqual(resData, cacheData);
@@ -34,8 +34,8 @@ namespace MusicLyricAppTest.Api.Music
             foreach (var simpleSongVo in resData.SimpleSongVos)
             {
                 // song 正确缓存
-                Assert.NotNull(GlobalCache.Query<QQMusicBean.Song>(CacheType.QQ_MUSIC_SONG, simpleSongVo.Id));
-                Assert.NotNull(GlobalCache.Query<QQMusicBean.Song>(CacheType.QQ_MUSIC_SONG, simpleSongVo.DisplayId));
+                Assert.NotNull(GlobalCache.Query<QQMusicBean.Song>(SearchSourceEnum.QQ_MUSIC, CacheType.QQ_MUSIC_SONG, simpleSongVo.Id));
+                Assert.NotNull(GlobalCache.Query<QQMusicBean.Song>(SearchSourceEnum.QQ_MUSIC, CacheType.QQ_MUSIC_SONG, simpleSongVo.DisplayId));
             }
         }
     }

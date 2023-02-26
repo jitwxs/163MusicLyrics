@@ -26,8 +26,8 @@ namespace MusicLyricApp.Api.Music
             if (resp.Code == 0)
             {
                 // cache song
-                GlobalCache.DoCache(CacheType.QQ_MUSIC_SONG, value => value.Id, resp.Cdlist[0].SongList);
-                GlobalCache.DoCache(CacheType.QQ_MUSIC_SONG, value => value.Mid, resp.Cdlist[0].SongList);
+                GlobalCache.DoCache(Source(), CacheType.QQ_MUSIC_SONG, value => value.Id, resp.Cdlist[0].SongList);
+                GlobalCache.DoCache(Source(), CacheType.QQ_MUSIC_SONG, value => value.Mid, resp.Cdlist[0].SongList);
                 
                 return new ResultVo<PlaylistVo>(resp.Convert());
             }
@@ -62,7 +62,7 @@ namespace MusicLyricApp.Api.Music
                     return resp.IsIllegal() ? ResultVo<QQMusicBean.Song>.Failure(ErrorMsg.SONG_NOT_EXIST) : new ResultVo<QQMusicBean.Song>(resp.Data[0]);
                 }
                 
-                var songRes = GlobalCache.Process(CacheType.QQ_MUSIC_SONG, songId, SongCacheFunc);
+                var songRes = GlobalCache.Process(Source(), CacheType.QQ_MUSIC_SONG, songId, SongCacheFunc);
                 if (songRes.IsSuccess())
                 {
                     result[songId] = new ResultVo<SongVo>(new SongVo

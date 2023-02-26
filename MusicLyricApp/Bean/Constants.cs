@@ -5,7 +5,7 @@ namespace MusicLyricApp.Bean
 {
     public static class Constants
     {
-        public const string Version = "v5.8";
+        public const string Version = "v5.9";
         
         public static readonly string SettingPath = Environment.CurrentDirectory + "\\MusicLyricAppSetting.json";
         
@@ -61,7 +61,7 @@ namespace MusicLyricApp.Bean
                         list.Add("当毫秒的占位符为 S 或 SS 时，『毫秒截位规则』配置生效");
                         break;
                     case TypeEnum.OUTPUT_SETTING:
-                        list.Add("您可自行调整『输出文件名』配置，系统预设的元变量有：");
+                        list.Add("您可自行调整『保存文件名』配置，系统预设的元变量有：");
                         list.Add("${id} -> 歌曲 ID");
                         list.Add("${index} -> 歌曲位于搜索结果中的索引序号");
                         list.Add("${name} -> 歌曲名");
@@ -76,7 +76,7 @@ namespace MusicLyricApp.Bean
                         list.Add("-----");
                         list.Add("您可自行决定输出哪些歌词类型，通过勾选复选框进行启用和关闭");
                         list.Add("拖拽最左侧的箭头可以调整输出的顺序");
-                        list.Add("罗马音功能需要安装罗马音插件，非原始译文类型需要指定翻译 API");
+                        list.Add("罗马音功能需要安装罗马音插件；非原始译文类型需要指定翻译 API");
                         break;
                     case TypeEnum.DEFAULT:
                         default:

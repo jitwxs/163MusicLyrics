@@ -20,6 +20,11 @@ namespace MusicLyricApp.Bean
         public bool RememberParam = false;
 
         /// <summary>
+        /// 聚合模糊搜索
+        /// </summary>
+        public bool AggregatedBlurSearch = false;
+
+        /// <summary>
         /// 自读读取剪切板
         /// </summary>
         public bool AutoReadClipboard = false;
@@ -33,6 +38,11 @@ namespace MusicLyricApp.Bean
         /// 保存时跳过纯音乐
         /// </summary>
         public bool IgnorePureMusicInSave = true;
+
+        /// <summary>
+        /// 对于 "独立" 歌词格式，保存在不同的文件中
+        /// </summary>
+        public bool SeparateFileForIsolated = false;
 
         /// <summary>
         /// 输出文件名格式

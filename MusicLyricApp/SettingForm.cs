@@ -78,10 +78,12 @@ namespace MusicLyricApp
 
                 // 输出设置
                 _settingBean.Config.IgnorePureMusicInSave = IgnorePureMusicInSave_CheckBox.Checked;
+                _settingBean.Config.SeparateFileForIsolated = SeparateFileForIsolated_CheckBox.Checked;
                 _settingBean.Config.OutputFileNameFormat = OutputName_TextBox.Text;
             
                 // 应用设置
                 _settingBean.Config.RememberParam = RememberParam_CheckBox.Checked;
+                _settingBean.Config.AggregatedBlurSearch = AggregatedBlurSearchCheckBox.Checked;
                 _settingBean.Config.AutoReadClipboard = AutoReadClipboard_CheckBox.Checked;
                 _settingBean.Config.AutoCheckUpdate = AutoCheckUpdate_CheckBox.Checked;
                 _settingBean.Config.QQMusicCookie = QQMusic_Cookie_TextBox.Text;

@@ -66,10 +66,12 @@ namespace MusicLyricApp
 
             // 输出设置
             IgnorePureMusicInSave_CheckBox.Checked = _settingBean.Config.IgnorePureMusicInSave;
+            SeparateFileForIsolated_CheckBox.Checked = _settingBean.Config.SeparateFileForIsolated;
             OutputName_TextBox.Text = _settingBean.Config.OutputFileNameFormat;
             
             // 应用设置
             RememberParam_CheckBox.Checked = _settingBean.Config.RememberParam;
+            AggregatedBlurSearchCheckBox.Checked = _settingBean.Config.AggregatedBlurSearch;
             AutoReadClipboard_CheckBox.Checked = _settingBean.Config.AutoReadClipboard;
             AutoCheckUpdate_CheckBox.Checked = _settingBean.Config.AutoCheckUpdate;
             QQMusic_Cookie_TextBox.Text = _settingBean.Config.QQMusicCookie;
@@ -117,6 +119,7 @@ namespace MusicLyricApp
             this.SettingTips_TextBox = new System.Windows.Forms.TextBox();
             this.OutputHelp_Btn = new System.Windows.Forms.Button();
             this.AppConfig_GroupBox = new System.Windows.Forms.GroupBox();
+            this.AggregatedBlurSearchCheckBox = new System.Windows.Forms.CheckBox();
             this.OriginLyric_GroupBox = new System.Windows.Forms.GroupBox();
             this.TransLyric_GroupBox = new System.Windows.Forms.GroupBox();
             this.TransConfig_TabControl = new System.Windows.Forms.TabControl();
@@ -133,13 +136,14 @@ namespace MusicLyricApp
             this.CaiYunTranslateToken_TextBox = new System.Windows.Forms.TextBox();
             this.label14 = new System.Windows.Forms.Label();
             this.LyricShow_DataGridView = new System.Windows.Forms.DataGridView();
+            this.Column1 = new System.Windows.Forms.DataGridViewCheckBoxColumn();
+            this.Column2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Output_GroupBox = new System.Windows.Forms.GroupBox();
+            this.SeparateFileForIsolated_CheckBox = new System.Windows.Forms.CheckBox();
             this.OutputName_TextBox = new System.Windows.Forms.TextBox();
             this.label10 = new System.Windows.Forms.Label();
             this.IgnorePureMusicInSave_CheckBox = new System.Windows.Forms.CheckBox();
             this.Reset_Btn = new System.Windows.Forms.Button();
-            this.Column1 = new System.Windows.Forms.DataGridViewCheckBoxColumn();
-            this.Column2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Timestamp_GroupBox.SuspendLayout();
             this.AppConfig_GroupBox.SuspendLayout();
             this.OriginLyric_GroupBox.SuspendLayout();
@@ -169,25 +173,25 @@ namespace MusicLyricApp
             // 
             // RememberParam_CheckBox
             // 
-            this.RememberParam_CheckBox.Location = new System.Drawing.Point(6, 33);
+            this.RememberParam_CheckBox.Location = new System.Drawing.Point(6, 37);
             this.RememberParam_CheckBox.Name = "RememberParam_CheckBox";
-            this.RememberParam_CheckBox.Size = new System.Drawing.Size(78, 24);
+            this.RememberParam_CheckBox.Size = new System.Drawing.Size(78, 17);
             this.RememberParam_CheckBox.TabIndex = 1;
             this.RememberParam_CheckBox.Text = "参数记忆";
             this.RememberParam_CheckBox.UseVisualStyleBackColor = true;
             // 
             // AutoReadClipboard_CheckBox
             // 
-            this.AutoReadClipboard_CheckBox.Location = new System.Drawing.Point(98, 31);
+            this.AutoReadClipboard_CheckBox.Location = new System.Drawing.Point(207, 37);
             this.AutoReadClipboard_CheckBox.Name = "AutoReadClipboard_CheckBox";
-            this.AutoReadClipboard_CheckBox.Size = new System.Drawing.Size(112, 26);
+            this.AutoReadClipboard_CheckBox.Size = new System.Drawing.Size(112, 17);
             this.AutoReadClipboard_CheckBox.TabIndex = 2;
             this.AutoReadClipboard_CheckBox.Text = "自动读取剪贴板";
             this.AutoReadClipboard_CheckBox.UseVisualStyleBackColor = true;
             // 
             // AutoCheckUpdate_CheckBox
             // 
-            this.AutoCheckUpdate_CheckBox.Location = new System.Drawing.Point(226, 37);
+            this.AutoCheckUpdate_CheckBox.Location = new System.Drawing.Point(336, 37);
             this.AutoCheckUpdate_CheckBox.Name = "AutoCheckUpdate_CheckBox";
             this.AutoCheckUpdate_CheckBox.Size = new System.Drawing.Size(98, 17);
             this.AutoCheckUpdate_CheckBox.TabIndex = 3;
@@ -411,6 +415,7 @@ namespace MusicLyricApp
             // 
             // AppConfig_GroupBox
             // 
+            this.AppConfig_GroupBox.Controls.Add(this.AggregatedBlurSearchCheckBox);
             this.AppConfig_GroupBox.Controls.Add(this.AutoCheckUpdate_CheckBox);
             this.AppConfig_GroupBox.Controls.Add(this.AutoReadClipboard_CheckBox);
             this.AppConfig_GroupBox.Controls.Add(this.RememberParam_CheckBox);
@@ -424,6 +429,15 @@ namespace MusicLyricApp
             this.AppConfig_GroupBox.TabIndex = 32;
             this.AppConfig_GroupBox.TabStop = false;
             this.AppConfig_GroupBox.Text = "应用设置";
+            // 
+            // AggregatedBlurSearchCheckBox
+            // 
+            this.AggregatedBlurSearchCheckBox.Location = new System.Drawing.Point(103, 37);
+            this.AggregatedBlurSearchCheckBox.Name = "AggregatedBlurSearchCheckBox";
+            this.AggregatedBlurSearchCheckBox.Size = new System.Drawing.Size(98, 17);
+            this.AggregatedBlurSearchCheckBox.TabIndex = 30;
+            this.AggregatedBlurSearchCheckBox.Text = "聚合模糊搜索";
+            this.AggregatedBlurSearchCheckBox.UseVisualStyleBackColor = true;
             // 
             // OriginLyric_GroupBox
             // 
@@ -594,8 +608,20 @@ namespace MusicLyricApp
             this.LyricShow_DataGridView.DragDrop += new System.Windows.Forms.DragEventHandler(this.TransList_DataGridView_DragDrop);
             this.LyricShow_DataGridView.DragEnter += new System.Windows.Forms.DragEventHandler(this.TransList_DataGridView_DragEnter);
             // 
+            // Column1
+            // 
+            this.Column1.HeaderText = "是否启用";
+            this.Column1.Name = "Column1";
+            this.Column1.Width = 60;
+            // 
+            // Column2
+            // 
+            this.Column2.HeaderText = "歌词类型";
+            this.Column2.Name = "Column2";
+            // 
             // Output_GroupBox
             // 
+            this.Output_GroupBox.Controls.Add(this.SeparateFileForIsolated_CheckBox);
             this.Output_GroupBox.Controls.Add(this.OutputName_TextBox);
             this.Output_GroupBox.Controls.Add(this.label10);
             this.Output_GroupBox.Controls.Add(this.IgnorePureMusicInSave_CheckBox);
@@ -608,6 +634,15 @@ namespace MusicLyricApp
             this.Output_GroupBox.TabIndex = 35;
             this.Output_GroupBox.TabStop = false;
             this.Output_GroupBox.Text = "输出设置";
+            // 
+            // SeparateFileForIsolated_CheckBox
+            // 
+            this.SeparateFileForIsolated_CheckBox.Location = new System.Drawing.Point(226, 61);
+            this.SeparateFileForIsolated_CheckBox.Name = "SeparateFileForIsolated_CheckBox";
+            this.SeparateFileForIsolated_CheckBox.Size = new System.Drawing.Size(202, 17);
+            this.SeparateFileForIsolated_CheckBox.TabIndex = 39;
+            this.SeparateFileForIsolated_CheckBox.Text = "“独立”歌词格式分文件保存";
+            this.SeparateFileForIsolated_CheckBox.UseVisualStyleBackColor = true;
             // 
             // OutputName_TextBox
             // 
@@ -622,13 +657,13 @@ namespace MusicLyricApp
             this.label10.Name = "label10";
             this.label10.Size = new System.Drawing.Size(65, 12);
             this.label10.TabIndex = 37;
-            this.label10.Text = "输出文件名";
+            this.label10.Text = "保存文件名";
             // 
             // IgnorePureMusicInSave_CheckBox
             // 
             this.IgnorePureMusicInSave_CheckBox.Location = new System.Drawing.Point(226, 23);
             this.IgnorePureMusicInSave_CheckBox.Name = "IgnorePureMusicInSave_CheckBox";
-            this.IgnorePureMusicInSave_CheckBox.Size = new System.Drawing.Size(93, 29);
+            this.IgnorePureMusicInSave_CheckBox.Size = new System.Drawing.Size(93, 17);
             this.IgnorePureMusicInSave_CheckBox.TabIndex = 36;
             this.IgnorePureMusicInSave_CheckBox.Text = "跳过纯音乐";
             this.IgnorePureMusicInSave_CheckBox.UseVisualStyleBackColor = true;
@@ -645,17 +680,6 @@ namespace MusicLyricApp
             this.Reset_Btn.Text = "重置";
             this.Reset_Btn.UseVisualStyleBackColor = false;
             this.Reset_Btn.Click += new System.EventHandler(this.Close_Btn_Click);
-            // 
-            // Column1
-            // 
-            this.Column1.HeaderText = "是否启用";
-            this.Column1.Name = "Column1";
-            this.Column1.Width = 60;
-            // 
-            // Column2
-            // 
-            this.Column2.HeaderText = "歌词类型";
-            this.Column2.Name = "Column2";
             // 
             // SettingForm
             // 
@@ -697,6 +721,10 @@ namespace MusicLyricApp
             this.ResumeLayout(false);
             this.PerformLayout();
         }
+
+        private System.Windows.Forms.CheckBox SeparateFileForIsolated_CheckBox;
+
+        private System.Windows.Forms.CheckBox AggregatedBlurSearchCheckBox;
 
         private System.Windows.Forms.TextBox BaiduTranslateAppId_TextBox;
         private System.Windows.Forms.Label label14;
