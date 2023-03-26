@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
@@ -169,6 +170,14 @@ namespace MusicLyricApp.Utils
         {
             var res = await HttpGetAsync(url, contentType, headers);
             return res.ToEntity<T>();
+        }
+
+        public static async void DownloadFile(string url, string path)
+        {
+            var client = new HttpClient();
+            var s = await client.GetStreamAsync(url);
+            var fs = new FileStream(path, FileMode.OpenOrCreate);
+            await s.CopyToAsync(fs);
         }
     }
 }
