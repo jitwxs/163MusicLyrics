@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -36,6 +37,9 @@ namespace MusicLyricApp
         private ShortcutForm _shortcutForm;
 
         private BlurForm _blurForm;
+        
+        [DllImport("user32.dll")]
+        private static extern IntPtr GetActiveWindow();
 
         public MainForm()
         {
@@ -749,11 +753,14 @@ namespace MusicLyricApp
             File.WriteAllText(Constants.SettingPath, _globalSearchInfo.SettingBean.ToJson(), Encoding.UTF8);
         }
 
-        private void MainForm_MouseEnter(object sender, EventArgs e)
+        private void Search_Text_MouseEnter(object sender, EventArgs e)
         {
-            if (_globalSearchInfo.SettingBean.Config.AutoReadClipboard)
+            if (GetActiveWindow() == Handle)
             {
-                Search_Text.Text = Clipboard.GetText();
+                if (_globalSearchInfo.SettingBean.Config.AutoReadClipboard)
+                {
+                    Search_Text.Text = Clipboard.GetText();
+                }
             }
         }
 
