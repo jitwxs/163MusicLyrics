@@ -172,12 +172,25 @@ namespace MusicLyricApp.Utils
             return res.ToEntity<T>();
         }
 
-        public static async void DownloadFile(string url, string path)
+        public static async Task<bool> DownloadFile(string url, string path)
         {
-            var client = new HttpClient();
-            var s = await client.GetStreamAsync(url);
-            var fs = new FileStream(path, FileMode.OpenOrCreate);
-            await s.CopyToAsync(fs);
+            try
+            {
+                var client = new HttpClient();
+
+                using (var s = await client.GetStreamAsync(url))
+                using(var fs = new FileStream(path, FileMode.OpenOrCreate))
+                {
+                    await s.CopyToAsync(fs);
+                }
+
+                return true;
+            }
+            catch (System.Exception)
+            {
+                // ignore exception
+                return false;
+            }
         }
     }
 }

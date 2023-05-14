@@ -654,7 +654,7 @@ namespace MusicLyricApp
             UpdateLrcTextBox(log.ToString());
         }
         
-        private Task<bool> BatchSaveForUrl(string filePath, ISet<string> success)
+        private async Task<bool> BatchSaveForUrl(string filePath, ISet<string> success)
         {
             var csvBean = CsvBean.Deserialization(Console_TextBox.Text);
 
@@ -674,7 +674,7 @@ namespace MusicLyricApp
 
             if (idIndex == -1 || urlIndex == -1)
             {
-                return Task.FromResult(false);
+                return false;
             }
 
             foreach (var line in csvBean.Lines)
@@ -692,19 +692,14 @@ namespace MusicLyricApp
                 }
                 
                 var path = filePath + '/' + GlobalUtils.GetOutputName(saveVo, _globalSearchInfo.SettingBean.Config.OutputFileNameFormat) + GlobalUtils.GetSuffix(url);
-                
-                try
+
+                if (await HttpUtils.DownloadFile(url, path))
                 {
-                    HttpUtils.DownloadFile(url, path);
                     success.Add(id);
-                }
-                catch (System.Exception)
-                {
-                    // ignored
                 }
             }
 
-            return Task.FromResult(true);
+            return true;
         }
 
         private async Task WriteToFile(string path, LyricVo lyricVo)

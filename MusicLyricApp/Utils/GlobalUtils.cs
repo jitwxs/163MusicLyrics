@@ -324,7 +324,27 @@ namespace MusicLyricApp.Utils
 
         public static string GetSuffix(string str)
         {
-            return str.Substring(str.LastIndexOf(".", StringComparison.Ordinal));
+            var a = str.LastIndexOf("/", StringComparison.Ordinal);
+            if (a != -1)
+            {
+                str = str.Substring(a + 1);
+            }
+
+            var b = str.IndexOf("?", StringComparison.Ordinal);
+            if (b != -1)
+            {
+                str = str.Substring(0, b);
+            }
+
+            var c = str.LastIndexOf(".", StringComparison.Ordinal);
+            if (c == -1)
+            {
+                return "";
+            }
+            else
+            {
+                return str.Substring(c);
+            }
         }
 
         public static int toInt(string str, int defaultValue)
