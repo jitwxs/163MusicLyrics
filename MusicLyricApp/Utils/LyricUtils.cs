@@ -320,6 +320,11 @@ namespace MusicLyricApp.Utils
         private static List<LyricLineVo> MergeLrc(List<LyricLineVo> listA, List<LyricLineVo> listB, string splitStr, bool aFirst)
         {
             var c = SortLrc(listA, listB, aFirst);
+
+            if (c.Count == 0)
+            {
+                return c;
+            }
             
             var list = new List<LyricLineVo>
             {
