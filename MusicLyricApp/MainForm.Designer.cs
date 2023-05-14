@@ -146,6 +146,7 @@ namespace MusicLyricApp
             this.Search_Text.Name = "Search_Text";
             this.Search_Text.Size = new System.Drawing.Size(196, 21);
             this.Search_Text.TabIndex = 1;
+            this.Search_Text.MouseEnter += new System.EventHandler(this.Search_Text_MouseEnter);
             // 
             // LrcMergeSeparator_Label
             // 
@@ -378,7 +379,6 @@ namespace MusicLyricApp
             this.Text = "云音乐歌词提取 " + Constants.Version;
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.MainForm_KeyDown);
-            this.MouseEnter += new System.EventHandler(this.MainForm_MouseEnter);
             this.Top_MenuStrip.ResumeLayout(false);
             this.Top_MenuStrip.PerformLayout();
             this.ResumeLayout(false);

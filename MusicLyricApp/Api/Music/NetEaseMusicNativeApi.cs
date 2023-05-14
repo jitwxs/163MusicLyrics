@@ -155,8 +155,23 @@ namespace MusicLyricApp.Api.Music
             };
 
             var raw = SendPost(url, Prepare(JsonConvert.SerializeObject(data)));
+
+            var albumResult = JsonConvert.DeserializeObject<AlbumResult>(raw);
+
+            if (albumResult.Code == 200)
+            {
+                var blurPicUrl = albumResult.Album.BlurPicUrl;
+                foreach (var song in albumResult.Songs)
+                {
+                    // use blur to fault song pic url
+                    if (song.Al != null && string.IsNullOrEmpty(song.Al.PicUrl))
+                    {
+                        song.Al.PicUrl = blurPicUrl;
+                    }
+                }
+            }
             
-            return JsonConvert.DeserializeObject<AlbumResult>(raw);
+            return albumResult;
         }
 
         public PlaylistResult GetPlaylist(string playlistId)

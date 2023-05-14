@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -36,6 +37,9 @@ namespace MusicLyricApp
         private ShortcutForm _shortcutForm;
 
         private BlurForm _blurForm;
+        
+        [DllImport("user32.dll")]
+        private static extern IntPtr GetActiveWindow();
 
         public MainForm()
         {
@@ -608,24 +612,27 @@ namespace MusicLyricApp
             {
                 var localFilePath = saveDialog.FileName;
                 // 获取文件后缀
-                var fileSuffix = localFilePath.Substring(localFilePath.LastIndexOf(".", StringComparison.Ordinal));
+                var fileSuffix = GlobalUtils.GetSuffix(localFilePath);
                 //获取文件路径，不带文件名 
                 var filePath = localFilePath.Substring(0, localFilePath.LastIndexOf("\\", StringComparison.Ordinal));
-                    
-                foreach (var item in _globalSaveVoMap)
+
+                if (!await BatchSaveForUrl(filePath, success))
                 {
-                    var saveVo = item.Value;
-                    var lyricVo = saveVo.LyricVo;
-                    if (lyricVo.IsEmpty() || (lyricVo.IsPureMusic() && _globalSearchInfo.SettingBean.Config.IgnorePureMusicInSave))
+                    foreach (var item in _globalSaveVoMap)
                     {
-                        skipCount++;
-                        continue;
+                        var saveVo = item.Value;
+                        var lyricVo = saveVo.LyricVo;
+                        if (lyricVo.IsEmpty() || (lyricVo.IsPureMusic() && _globalSearchInfo.SettingBean.Config.IgnorePureMusicInSave))
+                        {
+                            skipCount++;
+                            continue;
+                        }
+
+                        var path = filePath + '/' + GlobalUtils.GetOutputName(saveVo, _globalSearchInfo.SettingBean.Config.OutputFileNameFormat) + fileSuffix;
+
+                        await WriteToFile(path, lyricVo);
+                        success.Add(item.Key);
                     }
-
-                    var path = filePath + '/' + GlobalUtils.GetOutputName(saveVo, _globalSearchInfo.SettingBean.Config.OutputFileNameFormat) + fileSuffix;
-
-                    await WriteToFile(path, lyricVo);
-                    success.Add(item.Key);
                 }
                 
                 MessageBox.Show(string.Format(ErrorMsg.SAVE_COMPLETE, success.Count, skipCount), "提示");
@@ -645,6 +652,59 @@ namespace MusicLyricApp
                     .Append(Environment.NewLine);
             }
             UpdateLrcTextBox(log.ToString());
+        }
+        
+        private Task<bool> BatchSaveForUrl(string filePath, ISet<string> success)
+        {
+            var csvBean = CsvBean.Deserialization(Console_TextBox.Text);
+
+            int idIndex = -1, urlIndex = -1;
+            
+            for (var i = 0; i < csvBean.Title.Count; i++)
+            {
+                if (csvBean.Title[i].Contains("Link"))
+                {
+                    urlIndex = i;
+                }
+                else if (csvBean.Title[i].Equals("id"))
+                {
+                    idIndex = i;
+                }
+            }
+
+            if (idIndex == -1 || urlIndex == -1)
+            {
+                return Task.FromResult(false);
+            }
+
+            foreach (var line in csvBean.Lines)
+            {
+                var url = line[urlIndex];
+                if (string.IsNullOrWhiteSpace(url))
+                {
+                    continue;
+                }
+                
+                var id = line[idIndex];
+                if (!_globalSaveVoMap.TryGetValue(id, out var saveVo))
+                {
+                    continue;
+                }
+                
+                var path = filePath + '/' + GlobalUtils.GetOutputName(saveVo, _globalSearchInfo.SettingBean.Config.OutputFileNameFormat) + GlobalUtils.GetSuffix(url);
+                
+                try
+                {
+                    HttpUtils.DownloadFile(url, path);
+                    success.Add(id);
+                }
+                catch (System.Exception)
+                {
+                    // ignored
+                }
+            }
+
+            return Task.FromResult(true);
         }
 
         private async Task WriteToFile(string path, LyricVo lyricVo)
@@ -749,11 +809,14 @@ namespace MusicLyricApp
             File.WriteAllText(Constants.SettingPath, _globalSearchInfo.SettingBean.ToJson(), Encoding.UTF8);
         }
 
-        private void MainForm_MouseEnter(object sender, EventArgs e)
+        private void Search_Text_MouseEnter(object sender, EventArgs e)
         {
-            if (_globalSearchInfo.SettingBean.Config.AutoReadClipboard)
+            if (GetActiveWindow() == Handle)
             {
-                Search_Text.Text = Clipboard.GetText();
+                if (_globalSearchInfo.SettingBean.Config.AutoReadClipboard)
+                {
+                    Search_Text.Text = Clipboard.GetText();
+                }
             }
         }
 
