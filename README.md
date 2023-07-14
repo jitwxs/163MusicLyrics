@@ -78,6 +78,9 @@ maintained personally. If you would like to treat the creator with a bottle of c
 
 | username | donate | platform | date |
 |:---------|:-------|:-------|:-------|
+| *昊 | 5 CNY | alipay | 2023-07-13 |
+| adreamz | 5 CNY | wechat | 2023-07-03 |
+| 潇筱 | 5 CNY | wechat | 2023-05-22 |
 | L*\a | 5 CNY | wechat | 2023-04-26 |
 | 降世临凡 | 5 CNY | wechat | 2023-03-30 |
 | 克雷维格 | 5 CNY | wechat | 2023-03-14 |
