@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using MusicLyricApp.Bean;
 using MusicLyricApp.Cache;
 
@@ -16,12 +17,12 @@ namespace MusicLyricApp.Api.Translate
         {
             if (inputs == null || inputs.Length == 0)
             {
-                return new string[] {};
+                return Array.Empty<string>();
             }
 
             var cacheDict = GlobalCache.BatchQuery<string>(PREFIX, CacheType.TRANSLATE, inputs, out var notHitInputs);
             
-            var httpRes = new string[] { };
+            var httpRes = Array.Empty<string>();
             if (notHitInputs.Length > 0)
             {
                 httpRes = Translate0(notHitInputs, inputLanguage, outputLanguage).Assert().Data;
