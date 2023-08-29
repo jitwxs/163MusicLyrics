@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using EnumsNET;
 using MusicLyricApp.Bean;
 using MusicLyricApp.Exception;
 using Newtonsoft.Json;
@@ -339,7 +340,7 @@ namespace MusicLyricApp.Utils
             var c = str.LastIndexOf(".", StringComparison.Ordinal);
             if (c == -1)
             {
-                return "";
+                return string.Empty;
             }
             else
             {
@@ -363,12 +364,12 @@ namespace MusicLyricApp.Utils
 
         public static List<T> GetEnumList<T>() where T : Enum
         {
-            return Enum.GetValues(typeof(T)).OfType<T>().ToList();
+            return Enums.GetValuesUnsafe<T>().ToList();
         }
         
         public static Dictionary<string, T> GetEnumDict<T>() where T : Enum
         {
-            return Enum.GetValues(typeof(T)).OfType<T>().ToDictionary(e => e.ToDescription(), e => e);
+            return Enums.GetValuesUnsafe<T>().ToDictionary(e => e.ToDescription(), e => e);
         }
 
         public static string[] GetEnumDescArray<T>() where T : Enum

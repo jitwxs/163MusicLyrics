@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Web;
+using EnumsNET;
 using MusicLyricApp.Exception;
 using MusicLyricApp.Utils;
 
@@ -824,10 +825,10 @@ namespace MusicLyricApp.Bean
         public static string ToDescription(this Enum val)
         {
             var type = val.GetType();
-            var memberInfo = type.GetMember(val.ToString());
+            var memberInfo = type.GetMember(Enums.GetName(type, val) ?? throw new ArgumentException());
             var attributes = memberInfo[0].GetCustomAttributes(typeof(DescriptionAttribute), false);
             //如果没有定义描述，就把当前枚举值的对应名称返回
-            if (attributes == null || attributes.Length != 1) return val.ToString();
+            if (attributes == null || attributes.Length != 1) return Enums.GetName(type, val);
 
             return (attributes.Single() as DescriptionAttribute)?.Description;
         }

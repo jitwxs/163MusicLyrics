@@ -11,6 +11,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using EnumsNET;
 using MusicLyricApp.Api.Music;
 using MusicLyricApp.Bean;
 using MusicLyricApp.Exception;
@@ -409,7 +410,7 @@ namespace MusicLyricApp
                     var searchType = _globalSearchInfo.SettingBean.Param.SearchType;
                     if (_globalSearchInfo.SettingBean.Config.AggregatedBlurSearch)
                     {
-                        foreach (SearchSourceEnum searchSource in Enum.GetValues(typeof(SearchSourceEnum)))
+                        foreach (SearchSourceEnum searchSource in Enums.GetValues<SearchSourceEnum>())
                         {
                             var one = _api[searchSource].Search(keyword, searchType);
                             if (one.IsSuccess())
