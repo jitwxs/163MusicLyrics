@@ -262,7 +262,7 @@ namespace MusicLyricApp.Api.Music
             {
                 {
                     "c",
-                    "[" + songRequests.Remove(songRequests.Length - 1, 1) + "]"
+                    $"[{songRequests.Remove(songRequests.Length - 1, 1)}]"
                 },
                 { "csrf_token", string.Empty },
             };
