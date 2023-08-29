@@ -19,7 +19,7 @@ namespace MusicLyricApp.Utils
         {
             if (inputList.Count == 0)
             {
-                return "";
+                return string.Empty;
             }
             
             var index = 1;

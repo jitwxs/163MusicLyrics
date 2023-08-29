@@ -386,12 +386,12 @@ namespace MusicLyricApp.Bean
         /// <summary>
         /// 歌词内容
         /// </summary>
-        public string Lyric = "";
+        public string Lyric = string.Empty;
 
         /// <summary>
         /// 译文歌词内容
         /// </summary>
-        public string TranslateLyric = "";
+        public string TranslateLyric = string.Empty;
 
         /// <summary>
         /// 歌曲时长 ms
@@ -633,7 +633,7 @@ namespace MusicLyricApp.Bean
             var index = lyricLine.IndexOf("]");
             if (index == -1)
             {
-                Timestamp = new LyricTimestamp("");
+                Timestamp = new LyricTimestamp(string.Empty);
                 Content = lyricLine;
             }
             else
@@ -660,7 +660,7 @@ namespace MusicLyricApp.Bean
 
             var index = 0;
 
-            string timestamp = "", nextTimestamp = "";
+            string timestamp = string.Empty, nextTimestamp = string.Empty;
             int timestampIndex = 0, nextTimestampIndex = 0;
             while (index < mc.Count)
             {

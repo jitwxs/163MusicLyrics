@@ -586,7 +586,7 @@ namespace MusicLyricApp
             catch (System.Exception ew)
             {
                 _logger.Error(ew, "单独保存歌词失败");
-                MessageBox.Show("保存失败！错误信息：\n" + ew.Message);
+                MessageBox.Show($"保存失败！错误信息：\n{ew.Message}");
             }
         }
 
@@ -628,7 +628,7 @@ namespace MusicLyricApp
                             continue;
                         }
 
-                        var path = filePath + '/' + GlobalUtils.GetOutputName(saveVo, _globalSearchInfo.SettingBean.Config.OutputFileNameFormat) + fileSuffix;
+                        var path = $"{filePath}/{GlobalUtils.GetOutputName(saveVo, _globalSearchInfo.SettingBean.Config.OutputFileNameFormat)}{fileSuffix}";
 
                         await WriteToFile(path, lyricVo);
                         success.Add(item.Key);
@@ -640,7 +640,7 @@ namespace MusicLyricApp
             catch (System.Exception ew)
             {
                 _logger.Error(ew, "批量保存失败");
-                MessageBox.Show("批量保存失败，错误信息：\n" + ew.Message);
+                MessageBox.Show($"批量保存失败，错误信息：\n{ew.Message}");
             }
 
             // 输出日志
@@ -724,7 +724,7 @@ namespace MusicLyricApp
                 
                 for (var i = 0; i < res.Count; i++)
                 {
-                    using (var sw = new StreamWriter(path + " - " + i + suffix, false, encoding))
+                    using (var sw = new StreamWriter($"{path} - {i}{suffix}", false, encoding))
                     {
                         await sw.WriteAsync(res[i]);
                         await sw.FlushAsync();

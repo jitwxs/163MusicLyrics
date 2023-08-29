@@ -57,12 +57,12 @@ namespace MusicLyricApp.Bean
         /// <summary>
         /// QQ 音乐 Cookie
         /// </summary>
-        public string QQMusicCookie = "";
+        public string QQMusicCookie = string.Empty;
 
         /// <summary>
         /// 网易云音乐 Cookie
         /// </summary>
-        public string NetEaseCookie = "";
+        public string NetEaseCookie = string.Empty;
 
         public TransConfigBean TransConfig = new TransConfigBean();
         
@@ -98,17 +98,17 @@ namespace MusicLyricApp.Bean
         /// <summary>
         /// 百度翻译 APP ID
         /// </summary>
-        public string BaiduTranslateAppId = "";
+        public string BaiduTranslateAppId = string.Empty;
         
         /// <summary>
         /// 百度翻译密钥
         /// </summary>
-        public string BaiduTranslateSecret = "";
+        public string BaiduTranslateSecret = string.Empty;
 
         /// <summary>
         /// 彩云小译 Token
         /// </summary>
-        public string CaiYunToken = "";
+        public string CaiYunToken = string.Empty;
     }
 
     public class PersistParamBean

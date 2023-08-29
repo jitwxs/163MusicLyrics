@@ -233,9 +233,9 @@ namespace MusicLyricApp.Utils
         private static string[] SplitLrc(string lrc)
         {
             // 换行符统一
-            return (lrc ?? "")
+            return (lrc ?? string.Empty)
                 .Replace("\r\n", "\n")
-                .Replace("\r", "")
+                .Replace("\r", string.Empty)
                 .Split('\n');
         }
 
@@ -535,7 +535,7 @@ namespace MusicLyricApp.Utils
             {
                 foreach (var pair in originTimeOffsetDict)
                 {
-                    var content = lostRule == TransLyricLostRuleEnum.FILL_ORIGIN ? pair.Value.Content : "";
+                    var content = lostRule == TransLyricLostRuleEnum.FILL_ORIGIN ? pair.Value.Content : string.Empty;
 
                     baseTransList.Add(new LyricLineVo(content, pair.Value.Timestamp));
                 }

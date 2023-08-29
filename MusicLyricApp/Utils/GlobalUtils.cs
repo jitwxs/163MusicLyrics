@@ -17,7 +17,7 @@ namespace MusicLyricApp.Utils
 
         public static string GetSongKey(string displayId, bool verbatimLyric)
         {
-            return displayId + "_" + verbatimLyric;
+            return $"{displayId}_{verbatimLyric}";
         }
 
         public static string FormatDate(long millisecond)
@@ -339,7 +339,7 @@ namespace MusicLyricApp.Utils
             var c = str.LastIndexOf(".", StringComparison.Ordinal);
             if (c == -1)
             {
-                return "";
+                return string.Empty;
             }
             else
             {

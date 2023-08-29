@@ -176,7 +176,7 @@ namespace MusicLyricApp.Api.Music
 
         public PlaylistResult GetPlaylist(string playlistId)
         {
-            var url = $"https://music.163.com/weapi/v6/playlist/detail?csrf_token=";
+            var url = "https://music.163.com/weapi/v6/playlist/detail?csrf_token=";
             
             var data = new Dictionary<string, string>
             {
