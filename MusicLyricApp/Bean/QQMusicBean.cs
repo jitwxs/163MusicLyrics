@@ -329,10 +329,7 @@ namespace MusicLyricApp.Bean
 
             public Song[] Data { get; set; }
 
-            public bool IsIllegal()
-            {
-                return Code != 0 || Data.Length == 0;
-            }
+            public bool IsIllegal => Code != 0 || Data.Length == 0;
         }
 
         /// <summary>
