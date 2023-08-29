@@ -47,7 +47,7 @@ namespace MusicLyricApp.Api.Music
                 var songId = pair.Key;
                 var resultVo = pair.Value;
                 
-                if (resultVo.IsSuccess())
+                if (resultVo.IsSuccess)
                 {
                     GlobalCache.DoCache(Source(), CacheType.SONG_VO, songId, resultVo.Data);
                 }

@@ -784,6 +784,8 @@ namespace MusicLyricApp.Bean
 
         public string ErrorMsg { get; set; }
 
+        public bool IsSuccess => ErrorMsg == Bean.ErrorMsg.SUCCESS;
+
         private ResultVo()
         {
         }
@@ -803,14 +805,9 @@ namespace MusicLyricApp.Bean
             ErrorMsg = Bean.ErrorMsg.SUCCESS;
         }
 
-        public bool IsSuccess()
-        {
-            return ErrorMsg == Bean.ErrorMsg.SUCCESS;
-        }
-
         public ResultVo<T> Assert()
         {
-            if (!IsSuccess())
+            if (!IsSuccess)
             {
                 throw new MusicLyricException(ErrorMsg);
             }

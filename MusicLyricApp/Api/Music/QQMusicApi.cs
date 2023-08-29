@@ -63,7 +63,7 @@ namespace MusicLyricApp.Api.Music
                 }
                 
                 var songRes = GlobalCache.Process(Source(), CacheType.QQ_MUSIC_SONG, songId, SongCacheFunc);
-                if (songRes.IsSuccess())
+                if (songRes.IsSuccess)
                 {
                     result[songId] = new ResultVo<SongVo>(new SongVo
                     {

@@ -340,7 +340,7 @@ namespace MusicLyricApp
 
                 log.Append($"{songId}");
                 
-                if (resultVo.IsSuccess())
+                if (resultVo.IsSuccess)
                 {
                     var saveVo = resultVo.Data;
                     _globalSaveVoMap.Add(songId, saveVo);
@@ -412,7 +412,7 @@ namespace MusicLyricApp
                         foreach (SearchSourceEnum searchSource in Enum.GetValues(typeof(SearchSourceEnum)))
                         {
                             var one = _api[searchSource].Search(keyword, searchType);
-                            if (one.IsSuccess())
+                            if (one.IsSuccess)
                             {
                                 resultVoList.Add(one.Data);
                             }
@@ -488,7 +488,7 @@ namespace MusicLyricApp
             else
             {
                 var link = _api[_globalSearchInfo.SettingBean.Param.SearchSource].GetSongLink(_globalSaveVoMap.Keys.First());
-                if (link.IsSuccess())
+                if (link.IsSuccess)
                 {
                     Clipboard.SetDataObject(link.Data);
                     MessageBox.Show(ErrorMsg.SONG_URL_GET_SUCCESS, "提示");

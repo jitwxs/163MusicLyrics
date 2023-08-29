@@ -18,7 +18,7 @@ namespace MusicLyricApp.Cache
             }
 
             var res = cacheFunc.Invoke();
-            if (res.IsSuccess())
+            if (res.IsSuccess)
             {
                 DoCache(keyPrefix, cacheType, key, res.Data);
             }
