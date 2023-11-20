@@ -78,6 +78,18 @@ maintained personally. If you would like to treat the creator with a bottle of c
 
 | username | donate | platform | date |
 |:---------|:-------|:-------|:-------|
+| **帆 | 30 CNY | alipay | 2023-11-29 |
+| *离 | 5 CNY | wechat | 2023-11-04 |
+| *萍 | 1 CNY | alipay | 2023-11-01 |
+| **轩 | 10.88 CNY | alipay | 2023-10-15 |
+| 吃瓜群众 | 5 CNY | wechat | 2023-10-13 |
+| *缘 | 3 CNY | wechat | 2023-09-16 |
+| *n | 5 CNY | wechat | 2023-09-01 |
+| *坤 | 3 CNY | alipay | 2023-09-08 |
+| **植 | 3 CNY | alipay | 2023-08-25 |
+| *🍊 | 102 CNY | wechat | 2023-08-12 |
+| *👑 | 95 CNY | wechat | 2023-08-09 |
+| *俊 | 14.1 CNY | wechat | 2023-07-16 |
 | *昊 | 5 CNY | alipay | 2023-07-13 |
 | adreamz | 5 CNY | wechat | 2023-07-03 |
 | 潇筱 | 5 CNY | wechat | 2023-05-22 |
