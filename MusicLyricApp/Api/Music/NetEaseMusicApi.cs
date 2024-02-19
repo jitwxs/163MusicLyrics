@@ -128,11 +128,16 @@ namespace MusicLyricApp.Api.Music
 
         protected override ResultVo<SearchResultVo> Search0(string keyword, SearchTypeEnum searchType)
         {
-            var resp = _api.Search(keyword, searchType);
+            var resp = _api.Search(keyword, searchType, out var code);
 
-            if (resp == null)
+            if (code == "50000005")
             {
-                _logger.Error("NetEaseMusicApiV2 Search0 failed, resp: {Resp}", resp.ToJson());
+                return ResultVo<SearchResultVo>.Failure(ErrorMsg.NEED_LOGIN);
+            }
+
+            if (code != "200")
+            {
+                _logger.Error("NetEaseMusicApiV2 Search0 failed, code: {Code}, resp: {Resp}", code, resp.ToJson());
                 return ResultVo<SearchResultVo>.Failure(ErrorMsg.NETWORK_ERROR);
             }
 
