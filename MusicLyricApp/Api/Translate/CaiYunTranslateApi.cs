@@ -39,7 +39,7 @@ namespace MusicLyricApp.Api.Translate
             
             var headers = new Dictionary<string, string>
             {
-                { "x-authorization", "token " + _token },
+                { "x-authorization", $"token {_token}"},
             };
 
             var index = 0;
@@ -48,7 +48,7 @@ namespace MusicLyricApp.Api.Translate
                 var param = new Dictionary<string, object>
                 {
                     { "source", input },
-                    { "trans_type", Cast(inputLanguage) + "2" + Cast(outputLanguage) },
+                    { "trans_type", $"{Cast(inputLanguage)}2{Cast(outputLanguage)}" },
                     { "request_id", "demo" },
                     { "detect", true },
                 };
@@ -105,7 +105,7 @@ namespace MusicLyricApp.Api.Translate
                 case LanguageEnum.JAPANESE:
                     return "ja";
                 default:
-                    return "";
+                    return string.Empty;
             }
         }
     }

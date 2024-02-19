@@ -180,7 +180,7 @@ namespace MusicLyricApp.Api.Music
                 { "musicid", songId },
             });
             // qq music 返回的内容需要去除注释
-            resp = resp.Replace("<!--", "").Replace("-->", "");
+            resp = resp.Replace("<!--", string.Empty).Replace("-->", string.Empty);
 
             var dict = new Dictionary<string, XmlNode>();
 
@@ -189,8 +189,8 @@ namespace MusicLyricApp.Api.Music
             var result = new QQMusicBean.LyricResult
             {
                 Code = 0,
-                Lyric = "",
-                Trans = ""
+                Lyric = string.Empty,
+                Trans = string.Empty
             };
 
             foreach (var pair in dict)
@@ -211,7 +211,7 @@ namespace MusicLyricApp.Api.Music
                 var decompressBytes = MathUtils.SharpZipLibDecompress(MathUtils.SbytesToBytes(sbytes, sz));
                 var decompressText = Encoding.UTF8.GetString(decompressBytes);
 
-                var s = "";
+                var s = string.Empty;
                 if (decompressText.Contains("<?xml"))
                 {
                     var doc = XmlUtils.Create(decompressText);
@@ -263,7 +263,7 @@ namespace MusicLyricApp.Api.Music
                             {
                                 { "guid", guid },
                                 { "calltype", "0" },
-                                { "userip", "" },
+                                { "userip", string.Empty },
                             }
                         }
                     }
@@ -301,7 +301,7 @@ namespace MusicLyricApp.Api.Music
             
             var res = resp.ToEntity<QQMusicBean.MusicFcgApiResult>();
 
-            var link = "";
+            var link = string.Empty;
             if (res.Code == 0 && res.Req.Code == 0 && res.Req_0.Code == 0)
             {
                 link = res.Req.Data.Sip[0] + res.Req_0.Data.Midurlinfo[0].Purl;
