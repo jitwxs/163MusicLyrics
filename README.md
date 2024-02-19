@@ -78,7 +78,10 @@ maintained personally. If you would like to treat the creator with a bottle of c
 
 | username | donate | platform | date |
 |:---------|:-------|:-------|:-------|
-| **帆 | 30 CNY | alipay | 2023-11-29 |
+| **明 | 6 CNY | alipay | 2024-01-10 |
+| Chalotte | 10 CNY | wechat | 2024-01-03 |
+| **娟 | 2.22 CNY | alipay | 2023-12-07 |
+| **帆 | 30 CNY | alipay | 2023-11-19 |
 | *离 | 5 CNY | wechat | 2023-11-04 |
 | *萍 | 1 CNY | alipay | 2023-11-01 |
 | **轩 | 10.88 CNY | alipay | 2023-10-15 |
