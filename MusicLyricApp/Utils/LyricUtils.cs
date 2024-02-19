@@ -34,7 +34,7 @@ namespace MusicLyricApp.Utils
             
             var voListList = await FormatLyric(lyricVo.Lyric, lyricVo.TranslateLyric, searchInfo);
 
-            if (searchInfo.SettingBean.Param.EnableVerbatimLyric)
+            if (lyricVo.SearchSource == SearchSourceEnum.QQ_MUSIC && searchInfo.SettingBean.Param.EnableVerbatimLyric)
             {
                 for (var i = 0; i < voListList.Count; i++)
                 {
