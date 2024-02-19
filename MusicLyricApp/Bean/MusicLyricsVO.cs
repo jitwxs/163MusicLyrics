@@ -473,19 +473,19 @@ namespace MusicLyricApp.Bean
 
                 var split = timestamp.Split(':');
 
-                var minute = GlobalUtils.toInt(split[0], 0);
+                var minute = GlobalUtils.ToInt(split[0], 0);
 
                 int second = 0, millisecond = 0;
                 if (split.Length > 1)
                 {
                     split = split[1].Split('.');
 
-                    second = GlobalUtils.toInt(split[0], 0);
+                    second = GlobalUtils.ToInt(split[0], 0);
 
                     if (split.Length > 1)
                     {
                         // 三位毫秒，右填充 0
-                        millisecond = GlobalUtils.toInt(split[1].PadRight(3, '0'), 0);
+                        millisecond = GlobalUtils.ToInt(split[1].PadRight(3, '0'), 0);
                     }
                 }
 

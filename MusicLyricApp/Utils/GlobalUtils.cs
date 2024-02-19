@@ -347,13 +347,9 @@ namespace MusicLyricApp.Utils
             }
         }
 
-        public static int toInt(string str, int defaultValue)
+        public static int ToInt(string str, int defaultValue)
         {
-            var result = defaultValue;
-
-            int.TryParse(str, out result);
-
-            return result;
+            return int.TryParse(str, out var result) ? result : defaultValue;
         }
 
         public static string MergeStr(IEnumerable<string> strList)
