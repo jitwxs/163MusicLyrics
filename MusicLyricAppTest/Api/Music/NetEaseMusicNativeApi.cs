@@ -18,10 +18,10 @@ namespace MusicLyricAppTest.Api.Music
         [Test]
         public void TestSearch()
         {
-            var res = _api.Search("慰问", SearchTypeEnum.PLAYLIST_ID, out var code);
+            var res = _api.Search("慰问", SearchTypeEnum.PLAYLIST_ID);
             
-            Assert.AreEqual("50000005", code);
-            Assert.IsNull(res);
+            Assert.AreEqual(ErrorMsg.NEED_LOGIN, res.ErrorMsg);
+            Assert.IsNull(res.Data);
         }
 
         [Test]

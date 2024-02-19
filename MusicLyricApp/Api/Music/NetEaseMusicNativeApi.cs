@@ -38,7 +38,7 @@ namespace MusicLyricApp.Api.Music
             return "https://music.163.com/";
         }
 
-        public SearchResult Search(string keyword, SearchTypeEnum searchType, out string code)
+        public ResultVo<SearchResult> Search(string keyword, SearchTypeEnum searchType)
         {
             const string url = "https://music.163.com/weapi/cloudsearch/get/web";
 
@@ -71,21 +71,32 @@ namespace MusicLyricApp.Api.Music
             var res = SendPost(url, Prepare(JsonConvert.SerializeObject(data)));
 
             var obj = (JObject)JsonConvert.DeserializeObject(res);
-
-            code = obj["code"].ToString();
-            if (code != "200")
+            if (obj == null)
             {
-                return null;
+                return ResultVo<SearchResult>.Failure(ErrorMsg.SONG_NOT_EXIST);
             }
 
-            var resultStr = obj["result"].ToString();
+            var code = obj["code"].ToString();
+            var result = obj["result"];
+
+            if (code == "50000005")
+            {
+                return ResultVo<SearchResult>.Failure(ErrorMsg.NEED_LOGIN);
+            }
+
+            if (result == null || code != "200")
+            {
+                return ResultVo<SearchResult>.Failure(ErrorMsg.SONG_NOT_EXIST);
+            }
+
+            var resultStr = result.ToString();
 
             if (obj["abroad"] != null && bool.Parse(obj["abroad"].ToString()))
             {
                 resultStr = NetEaseMusicSearchUtils.Decode(resultStr);
             }
             
-            return JsonConvert.DeserializeObject<SearchResult>(resultStr);
+            return new ResultVo<SearchResult>(JsonConvert.DeserializeObject<SearchResult>(resultStr));
         }
 
        /// <summary>
