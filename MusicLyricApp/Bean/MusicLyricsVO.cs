@@ -155,7 +155,7 @@ namespace MusicLyricApp.Bean
         public const string SONG_PIC_GET_FAILED = "歌曲封面，获取失败";
         public const string DEPENDENCY_LOSS = "缺少必须依赖，请前往项目主页下载 {0} 插件";
         public const string SAVE_COMPLETE = "保存完毕，成功 {0} 跳过 {1}";
-        public const string NEED_LOGIN = "该搜索请求需要登陆，请填写 Cookie 后重试";
+        public const string NEED_LOGIN = "本请求需要登陆信息才可使用，请填写 Cookie 后重试";
         public const string PURE_MUSIC_IGNORE_SAVE = "该首歌曲是纯音乐，根据设置跳过保存";
         
         public const string TRANSLATE_LANGUAGE_NOT_SUPPORT = "翻译 API 语言暂不支持，请更换其他语言";
@@ -473,19 +473,19 @@ namespace MusicLyricApp.Bean
 
                 var split = timestamp.Split(':');
 
-                var minute = GlobalUtils.toInt(split[0], 0);
+                var minute = GlobalUtils.ToInt(split[0], 0);
 
                 int second = 0, millisecond = 0;
                 if (split.Length > 1)
                 {
                     split = split[1].Split('.');
 
-                    second = GlobalUtils.toInt(split[0], 0);
+                    second = GlobalUtils.ToInt(split[0], 0);
 
                     if (split.Length > 1)
                     {
                         // 三位毫秒，右填充 0
-                        millisecond = GlobalUtils.toInt(split[1].PadRight(3, '0'), 0);
+                        millisecond = GlobalUtils.ToInt(split[1].PadRight(3, '0'), 0);
                     }
                 }
 

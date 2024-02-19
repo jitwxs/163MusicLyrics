@@ -38,7 +38,7 @@ namespace MusicLyricApp.Api.Music
             return "https://music.163.com/";
         }
 
-        public SearchResult Search(string keyword, SearchTypeEnum searchType)
+        public SearchResult Search(string keyword, SearchTypeEnum searchType, out string code)
         {
             const string url = "https://music.163.com/weapi/cloudsearch/get/web";
 
@@ -72,7 +72,8 @@ namespace MusicLyricApp.Api.Music
 
             var obj = (JObject)JsonConvert.DeserializeObject(res);
 
-            if (obj["code"].ToString() != "200")
+            code = obj["code"].ToString();
+            if (code != "200")
             {
                 return null;
             }
