@@ -215,10 +215,10 @@ namespace MusicLyricApp.Api.Music
                 if (decompressText.Contains("<?xml"))
                 {
                     // 移除字符串头部的 BOM 标识 (如果有)
-                    string _byteOrderMarkUtf8 = Encoding.UTF8.GetString(Encoding.UTF8.GetPreamble());
-                    if (decompressText[0] == _byteOrderMarkUtf8[0])
+                    string byteOrderMarkUtf8 = Encoding.UTF8.GetString(Encoding.UTF8.GetPreamble());
+                    if (decompressText[0] == byteOrderMarkUtf8[0])
                     {
-                        decompressText = decompressText.Remove(0, _byteOrderMarkUtf8.Length);
+                        decompressText = decompressText.Remove(0, byteOrderMarkUtf8.Length);
                     }
 
                     var doc = XmlUtils.Create(decompressText);
