@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using hyjiacan.py4n;
 using MusicLyricApp.Api.Translate;
 using MusicLyricApp.Bean;
 using MusicLyricApp.Exception;
@@ -18,6 +19,8 @@ namespace MusicLyricApp.Utils
     public abstract class LyricUtils
     {
         private static readonly Regex VerbatimRegex = new Regex(@"\(\d+,\d+\)");
+        
+        private const PinyinFormat PinyinDefineFormat = PinyinFormat.WITH_TONE_MARK  | PinyinFormat.LOWERCASE | PinyinFormat.WITH_U_UNICODE;
         
         /// <summary>
         /// 获取输出结果
@@ -386,6 +389,12 @@ namespace MusicLyricApp.Utils
                             result.Add(await RomajiUtils.ToRomaji(originList, transConfig.RomajiModeEnum, transConfig.RomajiSystemEnum));
                         }
                         break;
+                    case LyricsTypeEnum.PINYIN:
+                        if (originLanguage == LanguageEnum.CHINESE)
+                        {
+                            result.Add(await ToPinyin(originList, transConfig.LostRule));
+                        }
+                        break;
                     case LyricsTypeEnum.CHINESE:
                     case LyricsTypeEnum.ENGLISH:
                         // 输出语言和原始歌词语言只有不同时，才翻译
@@ -545,6 +554,36 @@ namespace MusicLyricApp.Utils
             transList.Sort();
 
             return transList;
+        }
+        
+        private static Task<List<LyricLineVo>> ToPinyin(List<LyricLineVo> inputList, TransLyricLostRuleEnum lostRule)
+        {
+            var resultList = new List<LyricLineVo>();
+            
+            foreach (var vo in inputList)
+            {
+                string content;
+                
+                if (vo.IsIllegalContent())
+                {
+                    if (lostRule == TransLyricLostRuleEnum.IGNORE)
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        content = "";
+                    }
+                }
+                else
+                {
+                    content = Pinyin4Net.GetPinyin(vo.Content, PinyinDefineFormat);
+                }
+                    
+                resultList.Add(new LyricLineVo(content, vo.Timestamp));
+            }
+
+            return Task.FromResult(resultList);
         }
         
         /**
