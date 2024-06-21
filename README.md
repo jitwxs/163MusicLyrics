@@ -15,6 +15,7 @@
 - [x] 支持批量查询 && 扫盘查询 Support batch search && search in drive
 - [x] 支持多种歌词原文和译文的组织方式 Support multiple original lyrics and translated lyrics compositions
 - [x] 支持使用百度翻译、彩云小译 API 翻译歌词 Support using Baidu Translate, LingoCloud APIs to auto-translate lyrics
+- [x] 支持中文歌词拼音译文 Support Pinyin lyrics for chinese language music
 - [x] 支持提取（部分）歌曲试听链接 Support retrieving the preview link for (some) songs
 - [x] 支持多种文件编码格式 && 自定义文件名输出 Support multiple character encoding standards and customizable filenames for exporting
 - [x] 支持 LRC 和 SRT 输出格式 Support LRC and SRT formats for exporting
@@ -71,13 +72,19 @@ the project, if you are willing to contribute, you can:
 
 ### Donate
 
-如果本项目为您带来方便，欢迎 Star 来让更多人发现和使用它。本项目为个人维护项目，如果您愿意请作者喝一瓶可乐的话，欢迎打赏。
+如果本项目为您带来方便，欢迎 Star 来让更多人发现和使用它。本项目为个人维护项目，不收取任何费用，如果您愿意请作者喝杯咖啡话，欢迎打赏。
 
 If this project brings you convenience, you're welcome to star it to let more people discover and use it. This project is
-maintained personally. If you would like to treat the creator with a bottle of coke, you're welcome to donate.
+maintained personally, all features are free. If you would like to treat the creator with a bottle of coke, you're welcome to donate.
 
 | username | donate | platform | date |
 |:---------|:-------|:-------|:-------|
+| 小海豚 | 10 CNY | alipay | 2024-05-20 |
+| **云 | 11.45 CNY | alipay | 2024-03-07 |
+| 提瓦特履邢者 | 6.66 CNY | wechat | 2024-02-25 |
+| *🤔 | 2 CNY | wechat | 2024-02-25 |
+| 烈火 | 10 CNY | wechat | 2024-02-20 |
+| 刻晴的狗 | 20 CNY | alipay | 2024-02-20 |
 | **明 | 6 CNY | alipay | 2024-01-10 |
 | Chalotte | 10 CNY | wechat | 2024-01-03 |
 | **娟 | 2.22 CNY | alipay | 2023-12-07 |
@@ -110,9 +117,9 @@ maintained personally. If you would like to treat the creator with a bottle of c
 | **远 | 5 CNY | alipay | 2022-12-05 |
 | **暄 | 3.5 CNY | alipay | 2022-11-05 |
 
-> 如您选择打赏，记得备注您的昵称，我将为您登记到本页面中。
+> 如您选择打赏，记得备注您的昵称，我将不定期为您登记到本页面中。
 >
->If you choose to donate, remember to note your nickname, I will register it to this page.
+>If you choose to donate, remember to note your nickname, I will register it to this page at free time.
 
 <div align="center">
     <img src="https://cdn.jsdelivr.net/gh/jitwxs/cdn/blog/configuration/alipay_donate_full.jpg" height="200" style="float:left;margin-right:20px;margin-left: 310px">
