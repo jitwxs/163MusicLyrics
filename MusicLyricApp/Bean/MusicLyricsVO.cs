@@ -88,6 +88,7 @@ namespace MusicLyricApp.Bean
         [Description("中文译文")] CHINESE = 2,
         [Description("英文译文")] ENGLISH = 3,
         [Description("罗马音译文")] ROMAJI = 4,
+        [Description("拼音译文")] PINYIN = 5,
     }
 
     public enum LanguageEnum

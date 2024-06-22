@@ -31,6 +31,7 @@
         <Reference Include="System" />
     </ItemGroup>
     <ItemGroup>
+        <PackageReference Include="hyjiacan.pinyin4net" Version="4.1.1" />
         <PackageReference Include="Kawazu" Version="1.1.4" />
         <PackageReference Include="Markdig" Version="0.30.4" />
         <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
@@ -50,6 +51,7 @@
       <Compile Include="Utils\GlobalUtilsTest.cs" />
       <Compile Include="Utils\LyricUtilsTest.cs" />
       <Compile Include="Utils\NetEaseMusicSearchUtils.cs" />
+      <Compile Include="Utils\PinyinTest.cs" />
       <Compile Include="Utils\SrtUtilsTest.cs" />
       <Compile Include="Utils\XmlUtils.cs" />
     </ItemGroup>
