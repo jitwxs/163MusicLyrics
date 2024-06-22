@@ -59,11 +59,11 @@ namespace MusicLyricApp.Api.Music
                 ResultVo<QQMusicBean.Song> SongCacheFunc()
                 {
                     var resp = _api.GetSong(songId);
-                    return resp.IsIllegal() ? ResultVo<QQMusicBean.Song>.Failure(ErrorMsg.SONG_NOT_EXIST) : new ResultVo<QQMusicBean.Song>(resp.Data[0]);
+                    return resp.IsIllegal ? ResultVo<QQMusicBean.Song>.Failure(ErrorMsg.SONG_NOT_EXIST) : new ResultVo<QQMusicBean.Song>(resp.Data[0]);
                 }
                 
                 var songRes = GlobalCache.Process(Source(), CacheType.QQ_MUSIC_SONG, songId, SongCacheFunc);
-                if (songRes.IsSuccess())
+                if (songRes.IsSuccess)
                 {
                     result[songId] = new ResultVo<SongVo>(new SongVo
                     {

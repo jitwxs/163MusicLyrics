@@ -55,7 +55,7 @@ namespace MusicLyricAppTest.Api.Music
             
             var res = _api.GetPlaylistVo(playlistId);
             
-            Assert.True(res.IsSuccess());
+            Assert.True(res.IsSuccess);
 
             var resData = res.Data;
 

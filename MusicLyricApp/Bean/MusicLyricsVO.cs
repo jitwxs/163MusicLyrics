@@ -387,12 +387,12 @@ namespace MusicLyricApp.Bean
         /// <summary>
         /// 歌词内容
         /// </summary>
-        public string Lyric = "";
+        public string Lyric = string.Empty;
 
         /// <summary>
         /// 译文歌词内容
         /// </summary>
-        public string TranslateLyric = "";
+        public string TranslateLyric = string.Empty;
 
         /// <summary>
         /// 歌曲时长 ms
@@ -634,7 +634,7 @@ namespace MusicLyricApp.Bean
             var index = lyricLine.IndexOf("]");
             if (index == -1)
             {
-                Timestamp = new LyricTimestamp("");
+                Timestamp = new LyricTimestamp(string.Empty);
                 Content = lyricLine;
             }
             else
@@ -661,7 +661,7 @@ namespace MusicLyricApp.Bean
 
             var index = 0;
 
-            string timestamp = "", nextTimestamp = "";
+            string timestamp = string.Empty, nextTimestamp = string.Empty;
             int timestampIndex = 0, nextTimestampIndex = 0;
             while (index < mc.Count)
             {
@@ -785,6 +785,8 @@ namespace MusicLyricApp.Bean
 
         public string ErrorMsg { get; set; }
 
+        public bool IsSuccess => ErrorMsg == Bean.ErrorMsg.SUCCESS;
+
         private ResultVo()
         {
         }
@@ -804,14 +806,9 @@ namespace MusicLyricApp.Bean
             ErrorMsg = Bean.ErrorMsg.SUCCESS;
         }
 
-        public bool IsSuccess()
-        {
-            return ErrorMsg == Bean.ErrorMsg.SUCCESS;
-        }
-
         public ResultVo<T> Assert()
         {
-            if (!IsSuccess())
+            if (!IsSuccess)
             {
                 throw new MusicLyricException(ErrorMsg);
             }

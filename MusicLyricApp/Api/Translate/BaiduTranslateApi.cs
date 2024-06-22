@@ -98,7 +98,7 @@ namespace MusicLyricApp.Api.Translate
 
                 if (errorCode != null && !errorCode.Equals("52000"))
                 {
-                    return ResultVo<string[]>.Failure(errorCode + " -> https://fanyi-api.baidu.com/doc/21");
+                    return ResultVo<string[]>.Failure($"{errorCode} -> https://fanyi-api.baidu.com/doc/21");
                 }
                 
                 foreach (var one in translateResult.trans_result)
@@ -113,7 +113,7 @@ namespace MusicLyricApp.Api.Translate
             {
                 var output = transResultDict[inputs[i]];
 
-                outputs[i] = output ?? "";
+                outputs[i] = output ?? string.Empty;
             }
 
             return new ResultVo<string[]>(outputs);
