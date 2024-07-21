@@ -352,6 +352,11 @@ namespace MusicLyricApp.Utils
             return int.TryParse(str, out var result) ? result : defaultValue;
         }
 
+        public static string GetOrDefault(string v, string defaultValue)
+        {
+            return string.IsNullOrEmpty(v) ? defaultValue : v;
+        }
+
         public static string MergeStr(IEnumerable<string> strList)
         {
             return string.Join(Environment.NewLine, strList);

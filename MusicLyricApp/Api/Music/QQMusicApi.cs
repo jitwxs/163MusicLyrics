@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using MusicLyricApp.Bean;
 using MusicLyricApp.Cache;
+using MusicLyricApp.Utils;
 
 namespace MusicLyricApp.Api.Music
 {
@@ -70,7 +71,8 @@ namespace MusicLyricApp.Api.Music
                         Id = songRes.Data.Id,
                         DisplayId = songRes.Data.Mid,
                         Pics = $"https://y.qq.com/music/photo_new/T002R800x800M000{songRes.Data.Album.Pmid}.jpg",
-                        Name = songRes.Data.Name,
+                        // #212 QQ music need use title attribute as song name
+                        Name = GlobalUtils.GetOrDefault(songRes.Data.Title, songRes.Data.Name),
                         Singer = string.Join(",", songRes.Data.Singer.Select(e => e.Name)),
                         Album = songRes.Data.Album.Name,
                         Duration = songRes.Data.Interval * 1000
