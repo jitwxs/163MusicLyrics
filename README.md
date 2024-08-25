@@ -79,6 +79,9 @@ maintained personally, all features are free. If you would like to treat the cre
 
 | username | donate | platform | date |
 |:---------|:-------|:-------|:-------|
+| slrds5 | 5 CNY | wechat | 2024-08-24 |
+| ボカ口P | 1.21 CNY | alipay | 2024-06-25 |
+| CY_次元斩 | 5 CNY | wechat | 2024-06-23 |
 | 小海豚 | 10 CNY | alipay | 2024-05-20 |
 | **云 | 11.45 CNY | alipay | 2024-03-07 |
 | 提瓦特履邢者 | 6.66 CNY | wechat | 2024-02-25 |
