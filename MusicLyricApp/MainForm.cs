@@ -150,14 +150,13 @@ namespace MusicLyricApp
         private void ReloadInputIdText()
         {
             var inputText = Search_Text.Text.Trim();
+            var inputStrList = new List<string>();
             
             // 判断是否是目录
             if (Directory.Exists(inputText))
             {
                 var searchSource = _globalSearchInfo.SettingBean.Param.SearchSource;
                 var searchType = _globalSearchInfo.SettingBean.Param.SearchType;
-                
-                var subFileNameList = new List<string>();
                 
                 var directoryInfo = new DirectoryInfo(inputText);
                 foreach (var info in directoryInfo.GetFileSystemInfos())
@@ -182,26 +181,28 @@ namespace MusicLyricApp
                         {
                             // check filename is legal param
                             GlobalUtils.CheckInputId(name, searchSource, searchType);
-                            subFileNameList.Add(name);
+                            inputStrList.Add(name);
                         }
                         catch (MusicLyricException ignore)
                         {
                         }
                     }
                 }
-
-                _globalSearchInfo.InputIds = subFileNameList.ToArray();
             }
             else
             {
                 // 不是目录，认为是实际的 ID
-                var ids = Search_Text.Text.Trim().Split(',');
-                _globalSearchInfo.InputIds = new string[ids.Length];
-                for (var i = 0; i < ids.Length; i++)
+                foreach (var name in Search_Text.Text.Trim().Split(','))
                 {
-                    _globalSearchInfo.InputIds[i] = ids[i].Trim();
+                    if (string.IsNullOrWhiteSpace(name))
+                    {
+                        continue;
+                    }
+                    inputStrList.Add(name.Trim());
                 }
             }
+            
+            _globalSearchInfo.InputIds = inputStrList.ToArray();
         }
 
         /// <summary>
@@ -275,7 +276,7 @@ namespace MusicLyricApp
             var inputs = _globalSearchInfo.InputIds;
             if (inputs.Length < 1)
             {
-                throw new MusicLyricException(ErrorMsg.INPUT_ID_ILLEGAL);
+                throw new MusicLyricException(ErrorMsg.SEARCH_RESULT_EMPTY);
             }
 
             foreach (var input in inputs)
