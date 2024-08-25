@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using MusicLyricApp.Bean;
 using MusicLyricApp.Cache;
+using MusicLyricApp.Utils;
 
 namespace MusicLyricApp.Api.Music
 {
@@ -70,7 +71,8 @@ namespace MusicLyricApp.Api.Music
                         Id = songRes.Data.Id,
                         DisplayId = songRes.Data.Mid,
                         Pics = $"https://y.qq.com/music/photo_new/T002R800x800M000{songRes.Data.Album.Pmid}.jpg",
-                        Name = songRes.Data.Name,
+                        // #212 QQ music need use title attribute as song name
+                        Name = GlobalUtils.GetOrDefault(songRes.Data.Title, songRes.Data.Name),
                         Singer = string.Join(",", songRes.Data.Singer.Select(e => e.Name)),
                         Album = songRes.Data.Album.Name,
                         Duration = songRes.Data.Interval * 1000
@@ -92,8 +94,26 @@ namespace MusicLyricApp.Api.Music
 
         protected override ResultVo<LyricVo> GetLyricVo0(string id, string displayId, bool isVerbatim)
         {
-            var resp = isVerbatim ? _api.GetVerbatimLyric(id) : _api.GetLyric(displayId);
-
+            // #214 QQ music verbatim API only use for verbatim lyrics, it's translate lyrics maybe not intact,
+            // so for search by verbatim, we also need query translate lyrics by common API
+            QQMusicBean.LyricResult resp;
+            if (isVerbatim)
+            {
+                resp = _api.GetVerbatimLyric(id);
+                if (resp.Code == 0)
+                {
+                    var resp2 = _api.GetLyric(displayId);
+                    if (resp2.Code == 0)
+                    {
+                        resp.Trans = resp2.Trans;
+                    }
+                }
+            }
+            else
+            {
+                resp = _api.GetLyric(displayId);
+            }
+            
             return resp.Code == 0 ? new ResultVo<LyricVo>(resp.ToVo()) : ResultVo<LyricVo>.Failure(ErrorMsg.LRC_NOT_EXIST);
         }
 

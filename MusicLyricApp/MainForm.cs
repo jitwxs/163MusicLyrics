@@ -154,6 +154,9 @@ namespace MusicLyricApp
             // 判断是否是目录
             if (Directory.Exists(inputText))
             {
+                var searchSource = _globalSearchInfo.SettingBean.Param.SearchSource;
+                var searchType = _globalSearchInfo.SettingBean.Param.SearchType;
+                
                 var subFileNameList = new List<string>();
                 
                 var directoryInfo = new DirectoryInfo(inputText);
@@ -174,8 +177,16 @@ namespace MusicLyricApp
                         }
 
                         name = name.Trim();
-                        
-                        subFileNameList.Add(name);
+
+                        try
+                        {
+                            // check filename is legal param
+                            GlobalUtils.CheckInputId(name, searchSource, searchType);
+                            subFileNameList.Add(name);
+                        }
+                        catch (MusicLyricException ignore)
+                        {
+                        }
                     }
                 }
 
