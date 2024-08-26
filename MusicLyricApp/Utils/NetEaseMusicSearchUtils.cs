@@ -59,7 +59,7 @@ namespace MusicLyricApp.Utils
                 {
                     if (i + 2 < bPh2x)
                     {
-                        var res = bPa2x(QZ7S[++i] + "" + QZ7S[++i])[0];
+                        var res = bPa2x(QZ7S[++i] + string.Empty + QZ7S[++i])[0];
                         wZ8R.Add(res);
                     }
                     else
@@ -314,7 +314,7 @@ namespace MusicLyricApp.Utils
             var bt2x = wZ8R.Length;
             if (wZ8R == null || bt2x < 0)
             {
-                return "";
+                return string.Empty;
             }
 
             var Pm6g = new List<string>();
@@ -323,7 +323,7 @@ namespace MusicLyricApp.Utils
                 Pm6g.Add(csQ7J(wZ8R[i]));
             }
 
-            return string.Join("", Pm6g.ToArray());
+            return string.Join(string.Empty, Pm6g.ToArray());
         }
 
         private static string csQ7J(int dq2x)
@@ -344,7 +344,7 @@ namespace MusicLyricApp.Utils
         {
             if (string.IsNullOrWhiteSpace(content))
             {
-                return "";
+                return string.Empty;
             }
 
             var Pa6U = bPa2x(content);
@@ -365,7 +365,7 @@ namespace MusicLyricApp.Utils
                 An9e.Add(Kh5m[bn2x++]);
             }
 
-            return Uri.UnescapeDataString(string.Join("", An9e.ToArray()));
+            return Uri.UnescapeDataString(string.Join(string.Empty, An9e.ToArray()));
         }
     }
 }
