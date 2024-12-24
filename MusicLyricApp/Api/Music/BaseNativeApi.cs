@@ -12,8 +12,7 @@ namespace MusicLyricApp.Api.Music
         public const string Useragent =
             "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Safari/537.36";
 
-        public const string DefaultCookie =
-            "os=pc;osver=Microsoft-Windows-10-Professional-build-16299.125-64bit;appver=2.0.3.131777;channel=netease;__remember_me=true";
+        public string DefaultCookie = "NMTID=" + Guid.NewGuid();
 
         private Func<string> _cookieFunc;
 

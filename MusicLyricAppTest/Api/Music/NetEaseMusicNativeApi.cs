@@ -16,7 +16,16 @@ namespace MusicLyricAppTest.Api.Music
         }
         
         [Test]
-        public void TestSearch()
+        public void TestSearchSong()
+        {
+            var res = _api.Search("慰问", SearchTypeEnum.SONG_ID);
+            
+            Assert.AreEqual(ErrorMsg.NEED_LOGIN, res.ErrorMsg);
+            Assert.IsNull(res.Data);
+        }
+        
+        [Test]
+        public void TestSearchPlaylist()
         {
             var res = _api.Search("慰问", SearchTypeEnum.PLAYLIST_ID);
             
@@ -39,6 +48,13 @@ namespace MusicLyricAppTest.Api.Music
             Assert.AreEqual(200L, lyricResult.Code);
         }
 
+        [Test]
+        public void TestGetSongs()
+        {
+            var res = _api.GetSongs(new[] {"1987814537"});
+            Assert.AreEqual(1, res.Count);
+        }
+        
         [Test]
         public void TestPureGetLyric()
         {
