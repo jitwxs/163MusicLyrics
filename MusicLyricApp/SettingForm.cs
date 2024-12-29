@@ -40,6 +40,7 @@ namespace MusicLyricApp
                 _settingBean.Config.DotType = (DotTypeEnum)Dot_ComboBox.SelectedIndex;
                 _settingBean.Config.LrcTimestampFormat = LrcTimestampFormat_TextBox.Text;
                 _settingBean.Config.SrtTimestampFormat = SrtTimestampFormat_TextBox.Text;
+                _settingBean.Config.SingerSeparator = SingerSeparator_TextBox.Text;
             
                 // 原文歌词
                 _settingBean.Config.IgnoreEmptyLyric = IgnoreEmptyLyric_CheckBox.Checked;

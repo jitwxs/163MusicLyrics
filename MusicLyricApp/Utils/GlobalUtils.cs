@@ -162,7 +162,7 @@ namespace MusicLyricApp.Utils
         /**
          * 获取输出文件名
          */
-        public static string GetOutputName(SaveVo saveVo, string format)
+        public static string GetOutputName(SaveVo saveVo, string format, string singerSeparator)
         {
             if (saveVo == null)
             {
@@ -180,7 +180,7 @@ namespace MusicLyricApp.Utils
                 .Replace("${index}", saveVo.Index.ToString())
                 .Replace("${id}", songVo.DisplayId)
                 .Replace("${name}", ControlLength(songVo.Name))
-                .Replace("${singer}", ControlLength(songVo.Singer))
+                .Replace("${singer}", ControlLength(string.Join(singerSeparator, songVo.Singer)))
                 .Replace("${album}", ControlLength(songVo.Album));
 
             outputName = ResolveCustomFunction(outputName);

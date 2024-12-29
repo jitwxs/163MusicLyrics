@@ -494,7 +494,7 @@ namespace MusicLyricApp.Bean
                     Id = Id,
                     DisplayId = Mid,
                     Name = Name,
-                    Singer = string.Join(",", Singer.Select(e => e.Name))
+                    Singer = Singer.Select(e => e.Name).ToArray()
                 };
             }
         }
@@ -560,7 +560,7 @@ namespace MusicLyricApp.Bean
                         Id = Songid.ToString(),
                         DisplayId = Songmid,
                         Name = Songname,
-                        Singer = string.Join(",", singer.Select(e => e.Name))
+                        Singer = singer.Select(e => e.Name).ToArray()
                     };
                 }
             }

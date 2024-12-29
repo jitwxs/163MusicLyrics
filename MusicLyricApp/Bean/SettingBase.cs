@@ -40,6 +40,11 @@ namespace MusicLyricApp.Bean
         public DotTypeEnum DotType = DotTypeEnum.DOWN;
         
         /// <summary>
+        /// 多个歌手的分隔符
+        /// </summary>
+        public string SingerSeparator = ",";
+        
+        /// <summary>
         /// 参数记忆
         /// </summary>
         public bool RememberParam = false;

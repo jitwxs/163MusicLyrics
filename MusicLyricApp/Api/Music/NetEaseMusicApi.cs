@@ -102,7 +102,7 @@ namespace MusicLyricApp.Api.Music
                         DisplayId = songId,
                         Pics = song.Al.PicUrl,
                         Name = song.Name,
-                        Singer = string.Join(",", song.Ar.Select(e => e.Name)),
+                        Singer = song.Ar.Select(e => e.Name).ToArray(),
                         Album = song.Al.Name,
                         Duration = song.Dt
                     });

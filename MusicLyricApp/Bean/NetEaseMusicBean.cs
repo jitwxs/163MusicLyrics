@@ -407,7 +407,7 @@ namespace MusicLyricApp.Bean
                 Id = Id,
                 DisplayId = Id,
                 Name = Name,
-                Singer = string.Join(",", Ar.Select(e => e.Name))
+                Singer = Ar.Select(e => e.Name).ToArray()
             };
         }
     }
