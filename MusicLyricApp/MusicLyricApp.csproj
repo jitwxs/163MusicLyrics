@@ -301,6 +301,7 @@
     <Compile Include="Utils\NetworkUtils.cs" />
     <Compile Include="Utils\MathUtils.cs" />
     <Compile Include="Utils\RomajiUtils.cs" />
+    <Compile Include="Utils\ScalingFormUtils.cs" />
     <Compile Include="Utils\SrtUtils.cs" />
     <Compile Include="Utils\XmlUtils.cs" />
     <EmbeddedResource Include="BlurForm.resx">
