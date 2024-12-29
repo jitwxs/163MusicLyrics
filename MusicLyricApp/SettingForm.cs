@@ -12,6 +12,8 @@ namespace MusicLyricApp
     public partial class SettingForm : MusicLyricForm
     {
         private readonly SettingBean _settingBean;
+        
+        private ScalingFormConfig _scalingFormConfig;
 
         public SettingForm(SettingBean settingBean)
         {
@@ -277,6 +279,11 @@ namespace MusicLyricApp
                     }
                     break;
             }
+        }
+
+        private void SettingForm_Resize(object sender, EventArgs e)
+        {
+            _scalingFormConfig?.SetControls(this);
         }
     }
 }

@@ -38,6 +38,8 @@ namespace MusicLyricApp
 
         private BlurForm _blurForm;
         
+        private ScalingFormConfig _scalingFormConfig;
+        
         [DllImport("user32.dll")]
         private static extern IntPtr GetActiveWindow();
 
@@ -1066,9 +1068,7 @@ namespace MusicLyricApp
 
         private void MainForm_Resize(object sender, EventArgs e)
         {
-            float newX = this.Width / ScalingFormUtils.X; //获取当前宽度与初始宽度的比例
-            float newY = this.Height / ScalingFormUtils.Y; //获取当前高度与初始高度的比例
-            ScalingFormUtils.SetControls(newX, newY, this);
+            _scalingFormConfig?.SetControls(this);
         }
     }
 }

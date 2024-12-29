@@ -107,11 +107,11 @@ namespace MusicLyricApp
             this.Controls.Add(this.UpgradeSpan1_Label);
             this.Controls.Add(this.Upgrade_Btn);
             this.Controls.Add(this.label1);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.Name = "UpgradeForm";
             this.Text = "版本更新";
+            this.Resize += new System.EventHandler(this.UpgradeForm_Resize);
             this.ResumeLayout(false);
         }
 

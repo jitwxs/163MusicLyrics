@@ -29,6 +29,8 @@ namespace MusicLyricApp
 
         private void AfterInitializeComponent()
         {
+            _scalingFormConfig = new ScalingFormConfig(this);
+            
             // 歌词时间戳
             Dot_ComboBox.Items.AddRange(GlobalUtils.GetEnumDescArray<DotTypeEnum>());
             Dot_ComboBox.SelectedIndex = (int)_settingBean.Config.DotType;
@@ -774,12 +776,12 @@ namespace MusicLyricApp
             this.Controls.Add(this.SettingTips_TextBox);
             this.Controls.Add(this.Save_Btn);
             this.Controls.Add(this.Timestamp_GroupBox);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Margin = new System.Windows.Forms.Padding(4);
             this.MaximizeBox = false;
             this.Name = "SettingForm";
             this.Text = "设置";
+            this.Resize += new System.EventHandler(this.SettingForm_Resize);
             this.Timestamp_GroupBox.ResumeLayout(false);
             this.Timestamp_GroupBox.PerformLayout();
             this.AppConfig_GroupBox.ResumeLayout(false);

@@ -30,10 +30,8 @@ namespace MusicLyricApp
             this.SearchType_ComboBox.Items.AddRange(GlobalUtils.GetEnumDescArray<SearchTypeEnum>());
             this.OutputFormat_CombBox.Items.AddRange(new object[] { "LRC", "SRT" });
             this.SearchSource_ComboBox.Items.AddRange(GlobalUtils.GetEnumDescArray<SearchSourceEnum>());
-            
-            ScalingFormUtils.X = this.Width;
-            ScalingFormUtils.Y = this.Height;
-            ScalingFormUtils.SetTag(this);
+
+            _scalingFormConfig = new ScalingFormConfig(this);
         }
 
         #region Windows 窗体设计器生成的代码

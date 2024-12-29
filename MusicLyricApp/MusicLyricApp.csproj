@@ -255,6 +255,7 @@
     <Compile Include="Bean\NetEaseMusicBean.cs" />
     <Compile Include="Bean\MusicLyricsVO.cs" />
     <Compile Include="Bean\QQMusicBean.cs" />
+    <Compile Include="Bean\ScalingFormConfig.cs" />
     <Compile Include="Bean\SettingBase.cs" />
     <Compile Include="Bean\TranslateBean.cs" />
     <Compile Include="BlurForm.cs">
@@ -301,7 +302,6 @@
     <Compile Include="Utils\NetworkUtils.cs" />
     <Compile Include="Utils\MathUtils.cs" />
     <Compile Include="Utils\RomajiUtils.cs" />
-    <Compile Include="Utils\ScalingFormUtils.cs" />
     <Compile Include="Utils\SrtUtils.cs" />
     <Compile Include="Utils\XmlUtils.cs" />
     <EmbeddedResource Include="BlurForm.resx">
