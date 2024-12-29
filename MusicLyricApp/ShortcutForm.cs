@@ -1,13 +1,19 @@
-﻿using System.Text;
+﻿using System;
+using System.Text;
 using Markdig;
+using MusicLyricApp.Bean;
 
 namespace MusicLyricApp
 {
     public partial class ShortcutForm : MusicLyricForm
     {
+        private ScalingFormConfig _scalingFormConfig;
+        
         public ShortcutForm()
         {
             InitializeComponent();
+            
+            _scalingFormConfig = new ScalingFormConfig(this);
 
             var sb = new StringBuilder();
             sb
@@ -33,6 +39,11 @@ namespace MusicLyricApp
                 .Append("</table>");
             
             Shortcut_Browser.DocumentText = Markdown.ToHtml(sb.ToString());
+        }
+
+        private void ShortcutForm_Resize(object sender, EventArgs e)
+        {
+            _scalingFormConfig?.SetControls(this);
         }
     }
 }

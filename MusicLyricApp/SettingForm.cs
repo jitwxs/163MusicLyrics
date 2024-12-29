@@ -12,6 +12,8 @@ namespace MusicLyricApp
     public partial class SettingForm : MusicLyricForm
     {
         private readonly SettingBean _settingBean;
+        
+        private ScalingFormConfig _scalingFormConfig;
 
         public SettingForm(SettingBean settingBean)
         {
@@ -37,13 +39,14 @@ namespace MusicLyricApp
             if (input == Save_Btn)
             {
                 // 歌词时间戳
-                _settingBean.Param.DotType = (DotTypeEnum)Dot_ComboBox.SelectedIndex;
-                _settingBean.Param.LrcTimestampFormat = LrcTimestampFormat_TextBox.Text;
-                _settingBean.Param.SrtTimestampFormat = SrtTimestampFormat_TextBox.Text;
+                _settingBean.Config.DotType = (DotTypeEnum)Dot_ComboBox.SelectedIndex;
+                _settingBean.Config.LrcTimestampFormat = LrcTimestampFormat_TextBox.Text;
+                _settingBean.Config.SrtTimestampFormat = SrtTimestampFormat_TextBox.Text;
+                _settingBean.Config.SingerSeparator = SingerSeparator_TextBox.Text;
             
                 // 原文歌词
-                _settingBean.Param.IgnoreEmptyLyric = IgnoreEmptyLyric_CheckBox.Checked;
-                _settingBean.Param.EnableVerbatimLyric = VerbatimLyric_CheckBox.Checked;
+                _settingBean.Config.IgnoreEmptyLyric = IgnoreEmptyLyric_CheckBox.Checked;
+                _settingBean.Config.EnableVerbatimLyric = VerbatimLyric_CheckBox.Checked;
             
                 // 译文歌词
                 _settingBean.Config.TransConfig.LostRule = (TransLyricLostRuleEnum)TransLostRule_ComboBox.SelectedIndex;
@@ -276,6 +279,11 @@ namespace MusicLyricApp
                     }
                     break;
             }
+        }
+
+        private void SettingForm_Resize(object sender, EventArgs e)
+        {
+            _scalingFormConfig?.SetControls(this);
         }
     }
 }

@@ -30,6 +30,8 @@ namespace MusicLyricApp
             this.SearchType_ComboBox.Items.AddRange(GlobalUtils.GetEnumDescArray<SearchTypeEnum>());
             this.OutputFormat_CombBox.Items.AddRange(new object[] { "LRC", "SRT" });
             this.SearchSource_ComboBox.Items.AddRange(GlobalUtils.GetEnumDescArray<SearchSourceEnum>());
+
+            _scalingFormConfig = new ScalingFormConfig(this);
         }
 
         #region Windows 窗体设计器生成的代码
@@ -370,7 +372,6 @@ namespace MusicLyricApp
             this.Controls.Add(this.LrcType_ComboBox);
             this.Controls.Add(this.Save_Btn);
             this.Controls.Add(this.Top_MenuStrip);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.KeyPreview = true;
             this.MainMenuStrip = this.Top_MenuStrip;
@@ -379,6 +380,7 @@ namespace MusicLyricApp
             this.Text = "云音乐歌词提取 " + Constants.Version;
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.MainForm_KeyDown);
+            this.Resize += new System.EventHandler(this.MainForm_Resize);
             this.Top_MenuStrip.ResumeLayout(false);
             this.Top_MenuStrip.PerformLayout();
             this.ResumeLayout(false);

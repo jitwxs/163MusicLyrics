@@ -350,7 +350,7 @@ namespace MusicLyricApp.Bean
         /// <summary>
         /// 歌手名
         /// </summary>
-        public string Singer { get; set; }
+        public string[] Singer { get; set; }
     }
 
     /// <summary>

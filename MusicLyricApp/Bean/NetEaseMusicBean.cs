@@ -194,14 +194,15 @@ namespace MusicLyricApp.Bean
         /// </summary>
         public Privilege[] Privileges { get; set; }
 
-        public PlaylistVo Convert()
+        public PlaylistVo Convert(SimpleSongVo[] simpleSongVos)
         {
+            var creator = Playlist.Creator;
             return new PlaylistVo
             {
                 Name = Playlist.Name,
-                AuthorName = Playlist.Creator.Nickname,
+                AuthorName = creator == null ? "" : creator.Nickname,
                 Description = Playlist.Description,
-                SimpleSongVos = Playlist.Tracks.Select(e => e.ConvertSimple()).ToArray()
+                SimpleSongVos = simpleSongVos
             };
         }
     }
@@ -277,6 +278,16 @@ namespace MusicLyricApp.Bean
     public class Playlist : SimplePlaylist
     {
         /// <summary>
+        /// 歌单名
+        /// </summary>
+        public string Name { get; set; }
+        
+        /// <summary>
+        /// 歌单创建者
+        /// </summary>
+        public Creator Creator { get; set; }
+        
+        /// <summary>
         /// 歌单封面 ID
         /// </summary>
         public long CoverImgId { get; set; }
@@ -285,8 +296,6 @@ namespace MusicLyricApp.Bean
         /// 歌单创建时间
         /// </summary>
         public long CreateTime { get; set; }
-        
-        public int Status { get; set; }
         
         /// <summary>
         /// 订阅数量
@@ -304,14 +313,16 @@ namespace MusicLyricApp.Bean
         public long CommentCount { get; set; }
         
         /// <summary>
-        /// 歌单标签
-        /// </summary>
-        public string[] Tags { get; set; }
-        
-        /// <summary>
         /// 歌单歌曲列表信息
         /// </summary>
-        public Song[] Tracks { get; set; }
+        public SimpleTrack[] TrackIds { get; set; }
+    }
+
+    public class SimpleTrack
+    {
+        public long Id { get; set; }
+        
+        public long Uid { get; set; }
     }
 
     /// <summary>
@@ -396,7 +407,7 @@ namespace MusicLyricApp.Bean
                 Id = Id,
                 DisplayId = Id,
                 Name = Name,
-                Singer = string.Join(",", Ar.Select(e => e.Name))
+                Singer = Ar.Select(e => e.Name).ToArray()
             };
         }
     }

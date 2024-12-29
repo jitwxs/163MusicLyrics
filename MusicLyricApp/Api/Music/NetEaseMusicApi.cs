@@ -30,10 +30,24 @@ namespace MusicLyricApp.Api.Music
 
             if (resp.Code == 200)
             {
-                // cache song
-                GlobalCache.DoCache(Source(), CacheType.NET_EASE_SONG, value => value.Id, resp.Playlist.Tracks);
+                var songIds = resp.Playlist.TrackIds.Select(e => e.Id.ToString()).ToArray();
 
-                return new ResultVo<PlaylistVo>(resp.Convert());
+                SimpleSongVo[] simpleSongVos;
+                if (songIds.Length > 0)
+                {
+                    simpleSongVos = new SimpleSongVo[songIds.Length];
+                    var songVo = GetSongVo0(songIds);
+                    for (var i = 0; i < songIds.Length; i++)
+                    {
+                        simpleSongVos[i] = songVo[songIds[i]].Data;
+                    }
+                }
+                else
+                {
+                    simpleSongVos = Array.Empty<SimpleSongVo>();
+                }
+                
+                return new ResultVo<PlaylistVo>(resp.Convert(simpleSongVos));
             } 
             else if (resp.Code == 20001)
             {
@@ -88,7 +102,7 @@ namespace MusicLyricApp.Api.Music
                         DisplayId = songId,
                         Pics = song.Al.PicUrl,
                         Name = song.Name,
-                        Singer = string.Join(",", song.Ar.Select(e => e.Name)),
+                        Singer = song.Ar.Select(e => e.Name).ToArray(),
                         Album = song.Al.Name,
                         Duration = song.Dt
                     });

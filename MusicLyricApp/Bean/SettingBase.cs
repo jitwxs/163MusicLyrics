@@ -15,6 +15,36 @@ namespace MusicLyricApp.Bean
     public class ConfigBean
     {
         /// <summary>
+        /// LRC 歌词时间戳格式
+        /// </summary>
+        public string LrcTimestampFormat = "[mm:ss.SSS]";
+
+        /// <summary>
+        /// SRT 歌词时间戳格式
+        /// </summary>
+        public string SrtTimestampFormat = "HH:mm:ss,SSS";
+        
+        /// <summary>
+        /// 启用逐字歌词模式
+        /// </summary>
+        public bool EnableVerbatimLyric = false;
+
+        /// <summary>
+        /// 忽略空的歌词行
+        /// </summary>
+        public bool IgnoreEmptyLyric = true;
+
+        /// <summary>
+        /// 小数位处理策略
+        /// </summary>
+        public DotTypeEnum DotType = DotTypeEnum.DOWN;
+        
+        /// <summary>
+        /// 多个歌手的分隔符
+        /// </summary>
+        public string SingerSeparator = ",";
+        
+        /// <summary>
         /// 参数记忆
         /// </summary>
         public bool RememberParam = false;
@@ -132,31 +162,6 @@ namespace MusicLyricApp.Bean
         /// 指定歌词合并的分隔符
         /// </summary>
         public string LrcMergeSeparator = string.Empty;
-        
-        /// <summary>
-        /// LRC 歌词时间戳格式
-        /// </summary>
-        public string LrcTimestampFormat = "[mm:ss.SSS]";
-
-        /// <summary>
-        /// SRT 歌词时间戳格式
-        /// </summary>
-        public string SrtTimestampFormat = "HH:mm:ss,SSS";
-        
-        /// <summary>
-        /// 启用逐字歌词模式
-        /// </summary>
-        public bool EnableVerbatimLyric = false;
-
-        /// <summary>
-        /// 忽略空的歌词行
-        /// </summary>
-        public bool IgnoreEmptyLyric = true;
-
-        /// <summary>
-        /// 小数位处理策略
-        /// </summary>
-        public DotTypeEnum DotType = DotTypeEnum.DOWN;
 
         /// <summary>
         /// 输出文件格式

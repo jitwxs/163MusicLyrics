@@ -255,6 +255,7 @@
     <Compile Include="Bean\NetEaseMusicBean.cs" />
     <Compile Include="Bean\MusicLyricsVO.cs" />
     <Compile Include="Bean\QQMusicBean.cs" />
+    <Compile Include="Bean\ScalingFormConfig.cs" />
     <Compile Include="Bean\SettingBase.cs" />
     <Compile Include="Bean\TranslateBean.cs" />
     <Compile Include="BlurForm.cs">

@@ -121,7 +121,7 @@ namespace MusicLyricAppTest.Utils
             var songVo = new SongVo
             {
                 Name = "name0",
-                Singer = "singer1",
+                Singer = new [] {"singer1", "singer2"},
                 Album = "album2",
                 DisplayId = "id3",
                 Id = "id4",
@@ -129,10 +129,10 @@ namespace MusicLyricAppTest.Utils
             
             var saveVo = new SaveVo(10, songVo, null);
             
-            Assert.AreEqual("name0 - singer1", GetOutputName(saveVo, "${name} - ${singer}"));
-            Assert.AreEqual("10 & name0 p id3 @ name0 - singer1 x album2", GetOutputName(saveVo, 
-                "${index} & ${name} p ${id} @ ${name} - ${singer} x ${album}"));
-            Assert.AreEqual("$name - $singer", GetOutputName(saveVo, "$name - $singer"));
+            Assert.AreEqual("name0 - singer1,singer2", GetOutputName(saveVo, "${name} - ${singer}", ","));
+            Assert.AreEqual("10 & name0 p id3 @ name0 - singer1,singer2 x album2", GetOutputName(saveVo, 
+                "${index} & ${name} p ${id} @ ${name} - ${singer} x ${album}", ","));
+            Assert.AreEqual("$name - $singer", GetOutputName(saveVo, "$name - $singer", ","));
         }
     }
 }

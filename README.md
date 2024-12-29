@@ -79,6 +79,7 @@ maintained personally, all features are free. If you would like to treat the cre
 
 | username     | donate    | platform | date       |
 |:-------------|:----------|:-------|:-----------|
+| 张大师          | 3 CNY     | wechat | 2024-12-26 |
 | * TUYA       | 8 CNY     | alipay | 2024-12-24 |
 | Q*L          | 1.66 CNY  | wechat | 2024-12-22 |
 | 白巧克力         | 10 CNY    | wechat | 2024-12-22 |

@@ -38,6 +38,8 @@ namespace MusicLyricApp
 
         private BlurForm _blurForm;
         
+        private ScalingFormConfig _scalingFormConfig;
+        
         [DllImport("user32.dll")]
         private static extern IntPtr GetActiveWindow();
 
@@ -317,7 +319,8 @@ namespace MusicLyricApp
         /// <param name="songIdDict">歌曲ID</param>
         private void SingleSearch(List<SearchInfo.InputSongId> songIdDict)
         {
-            var isVerbatimLyric = _globalSearchInfo.SettingBean.Param.EnableVerbatimLyric;
+            var isVerbatimLyric = _globalSearchInfo.SettingBean.Config.EnableVerbatimLyric;
+            var singerSeparator = _globalSearchInfo.SettingBean.Config.SingerSeparator;
 
             var resDict = SearchBySongId(songIdDict, isVerbatimLyric);
             var songId = songIdDict.First().SongId;
@@ -329,7 +332,7 @@ namespace MusicLyricApp
 
             // 前端设置
             SongName_TextBox.Text = result.SongVo.Name;
-            Singer_TextBox.Text = result.SongVo.Singer;
+            Singer_TextBox.Text = string.Join(singerSeparator, result.SongVo.Singer);
             Album_TextBox.Text = result.SongVo.Album;
             UpdateLrcTextBox(string.Empty);
         }
@@ -339,7 +342,7 @@ namespace MusicLyricApp
         /// </summary>
         private void BatchSearch(List<SearchInfo.InputSongId> ids)
         {
-            var isVerbatimLyric = _globalSearchInfo.SettingBean.Param.EnableVerbatimLyric;
+            var isVerbatimLyric = _globalSearchInfo.SettingBean.Config.EnableVerbatimLyric;
             var resultMaps = SearchBySongId(ids, isVerbatimLyric);
 
             // 输出日志
@@ -398,6 +401,10 @@ namespace MusicLyricApp
                     _globalSaveVoMap.Clear();
                     
                     var songIds = InitInputSongIds();
+                    if (songIds.Count == 0)
+                    {
+                        throw new MusicLyricException(ErrorMsg.SEARCH_RESULT_EMPTY);
+                    }
                     if (songIds.Count > 1)
                     {
                         BatchSearch(songIds);
@@ -572,16 +579,18 @@ namespace MusicLyricApp
                 MessageBox.Show(ErrorMsg.LRC_NOT_EXIST, "提示");
                 return;
             }
+
+            var config = _globalSearchInfo.SettingBean.Config;
             
             // 纯音乐跳过
-            if (saveVo.LyricVo.IsPureMusic() && _globalSearchInfo.SettingBean.Config.IgnorePureMusicInSave)
+            if (saveVo.LyricVo.IsPureMusic() && config.IgnorePureMusicInSave)
             {
                 MessageBox.Show(ErrorMsg.PURE_MUSIC_IGNORE_SAVE, "提示");
                 return;
             }
             
             var saveDialog = new SaveFileDialog();
-            saveDialog.FileName = GlobalUtils.GetOutputName(saveVo, _globalSearchInfo.SettingBean.Config.OutputFileNameFormat);
+            saveDialog.FileName = GlobalUtils.GetOutputName(saveVo, config.OutputFileNameFormat, config.SingerSeparator);
             saveDialog.Filter = _globalSearchInfo.SettingBean.Param.OutputFileFormat.ToDescription();
 
             if (saveDialog.ShowDialog() != DialogResult.OK)
@@ -615,6 +624,8 @@ namespace MusicLyricApp
             {
                 return;
             }
+
+            var config = _globalSearchInfo.SettingBean.Config;
             
             // 保存
             var skipCount = 0;
@@ -634,13 +645,13 @@ namespace MusicLyricApp
                     {
                         var saveVo = item.Value;
                         var lyricVo = saveVo.LyricVo;
-                        if (lyricVo.IsEmpty() || (lyricVo.IsPureMusic() && _globalSearchInfo.SettingBean.Config.IgnorePureMusicInSave))
+                        if (lyricVo.IsEmpty() || (lyricVo.IsPureMusic() && config.IgnorePureMusicInSave))
                         {
                             skipCount++;
                             continue;
                         }
 
-                        var path = filePath + '/' + GlobalUtils.GetOutputName(saveVo, _globalSearchInfo.SettingBean.Config.OutputFileNameFormat) + fileSuffix;
+                        var path = filePath + '/' + GlobalUtils.GetOutputName(saveVo, config.OutputFileNameFormat, config.SingerSeparator) + fileSuffix;
 
                         await WriteToFile(path, lyricVo);
                         success.Add(item.Key);
@@ -689,6 +700,8 @@ namespace MusicLyricApp
                 return false;
             }
 
+            var config = _globalSearchInfo.SettingBean.Config;
+
             foreach (var line in csvBean.Lines)
             {
                 var url = line[urlIndex];
@@ -703,7 +716,7 @@ namespace MusicLyricApp
                     continue;
                 }
                 
-                var path = filePath + '/' + GlobalUtils.GetOutputName(saveVo, _globalSearchInfo.SettingBean.Config.OutputFileNameFormat) + GlobalUtils.GetSuffix(url);
+                var path = filePath + '/' + GlobalUtils.GetOutputName(saveVo, config.OutputFileNameFormat, config.SingerSeparator) + GlobalUtils.GetSuffix(url);
 
                 if (await HttpUtils.DownloadFile(url, path))
                 {
@@ -1051,6 +1064,11 @@ namespace MusicLyricApp
             {
                 _inCheckVersion = false;
             }
+        }
+
+        private void MainForm_Resize(object sender, EventArgs e)
+        {
+            _scalingFormConfig?.SetControls(this);
         }
     }
 }

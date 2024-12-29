@@ -8,6 +8,9 @@ namespace MusicLyricApp
     public partial class UpgradeForm : MusicLyricForm
     {
         private readonly GitHubInfo _gitHubInfo;
+        
+        private ScalingFormConfig _scalingFormConfig;
+        
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         private const string SEPARATOR = " | ";
@@ -24,6 +27,7 @@ namespace MusicLyricApp
             InitializeComponent();
             
             _gitHubInfo = info;
+            _scalingFormConfig = new ScalingFormConfig(this);
 
             UpgradeTag_Label.Text = info.TagName;
             UpgradeSpan1_Label.Text = $"更新日期：{info.PublishedAt.DateTime.AddHours(8)}" + SEPARATOR + $"下载次数：{info.Assets[0].DownloadCount}";
@@ -46,6 +50,11 @@ namespace MusicLyricApp
             {
                 Logger.Error(ex, "打开失败");
             }
+        }
+
+        private void UpgradeForm_Resize(object sender, EventArgs e)
+        {
+            _scalingFormConfig?.SetControls(this);
         }
     }
 }
