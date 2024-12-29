@@ -398,6 +398,10 @@ namespace MusicLyricApp
                     _globalSaveVoMap.Clear();
                     
                     var songIds = InitInputSongIds();
+                    if (songIds.Count == 0)
+                    {
+                        throw new MusicLyricException(ErrorMsg.SEARCH_RESULT_EMPTY);
+                    }
                     if (songIds.Count > 1)
                     {
                         BatchSearch(songIds);
