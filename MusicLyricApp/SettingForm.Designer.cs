@@ -31,13 +31,13 @@ namespace MusicLyricApp
         {
             // 歌词时间戳
             Dot_ComboBox.Items.AddRange(GlobalUtils.GetEnumDescArray<DotTypeEnum>());
-            Dot_ComboBox.SelectedIndex = (int)_settingBean.Param.DotType;
-            LrcTimestampFormat_TextBox.Text = _settingBean.Param.LrcTimestampFormat;
-            SrtTimestampFormat_TextBox.Text = _settingBean.Param.SrtTimestampFormat;
+            Dot_ComboBox.SelectedIndex = (int)_settingBean.Config.DotType;
+            LrcTimestampFormat_TextBox.Text = _settingBean.Config.LrcTimestampFormat;
+            SrtTimestampFormat_TextBox.Text = _settingBean.Config.SrtTimestampFormat;
             
             // 原文歌词
-            IgnoreEmptyLyric_CheckBox.Checked = _settingBean.Param.IgnoreEmptyLyric;
-            VerbatimLyric_CheckBox.Checked = _settingBean.Param.EnableVerbatimLyric;
+            IgnoreEmptyLyric_CheckBox.Checked = _settingBean.Config.IgnoreEmptyLyric;
+            VerbatimLyric_CheckBox.Checked = _settingBean.Config.EnableVerbatimLyric;
             
             // 译文歌词
             TransLostRule_ComboBox.Items.AddRange(GlobalUtils.GetEnumDescArray<TransLyricLostRuleEnum>());

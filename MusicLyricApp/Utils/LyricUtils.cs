@@ -31,13 +31,14 @@ namespace MusicLyricApp.Utils
         public static async Task<List<string>> GetOutputContent(LyricVo lyricVo, SearchInfo searchInfo)
         {
             var param = searchInfo.SettingBean.Param;
+            var config = searchInfo.SettingBean.Config;
             
-            var dotType = param.DotType;
-            var timestampFormat = param.OutputFileFormat == OutputFormatEnum.SRT ? param.SrtTimestampFormat : param.LrcTimestampFormat;
+            var dotType = config.DotType;
+            var timestampFormat = param.OutputFileFormat == OutputFormatEnum.SRT ? config.SrtTimestampFormat : config.LrcTimestampFormat;
             
             var voListList = await FormatLyric(lyricVo.Lyric, lyricVo.TranslateLyric, searchInfo);
 
-            if (lyricVo.SearchSource == SearchSourceEnum.QQ_MUSIC && searchInfo.SettingBean.Param.EnableVerbatimLyric)
+            if (lyricVo.SearchSource == SearchSourceEnum.QQ_MUSIC && config.EnableVerbatimLyric)
             {
                 for (var i = 0; i < voListList.Count; i++)
                 {
@@ -67,7 +68,7 @@ namespace MusicLyricApp.Utils
         /// </summary>
         public static string DealVerbatimLyric(string originLrc, SearchSourceEnum searchSource)
         {
-            var defaultParam = new PersistParamBean();
+            var defaultParam = new ConfigBean();
             var sb = new StringBuilder();
             
             foreach (var line in SplitLrc(originLrc))
@@ -161,7 +162,7 @@ namespace MusicLyricApp.Utils
             var outputLyricsTypes = searchInfo.SettingBean.Config.DeserializationOutputLyricsTypes();
             var showLrcType = searchInfo.SettingBean.Param.ShowLrcType;
             var searchSource = searchInfo.SettingBean.Param.SearchSource;
-            var ignoreEmptyLyric = searchInfo.SettingBean.Param.IgnoreEmptyLyric;
+            var ignoreEmptyLyric = searchInfo.SettingBean.Config.IgnoreEmptyLyric;
 
             var res = new List<List<LyricLineVo>>();
             
