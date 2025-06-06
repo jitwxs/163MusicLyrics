@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace MusicLyricApp.Models;
 
 public static class Constants
 {
-    public static readonly string SettingPath = Environment.CurrentDirectory + "\\MusicLyricAppSetting.json";
+    public static readonly string SettingPath = Path.Combine(new string[]{Environment.CurrentDirectory, "MusicLyricAppSetting.json"});
 
     public static class HelpTips
     {
