@@ -20,7 +20,8 @@ public class SearchService(SettingBean settingBean) : ISearchService
     private readonly Dictionary<SearchSourceEnum, IMusicApi> _api = new()
     {
         { SearchSourceEnum.QQ_MUSIC, new QQMusicApi(() => settingBean.Config.QQMusicCookie) },
-        { SearchSourceEnum.NET_EASE_MUSIC, new NetEaseMusicApi(() => settingBean.Config.NetEaseCookie) }
+        { SearchSourceEnum.NET_EASE_MUSIC, new NetEaseMusicApi(() => settingBean.Config.NetEaseCookie) },
+        { SearchSourceEnum.SODA_MUSIC, new SodaMusicApi() }
     };
 
     public IMusicApi GetMusicApi(SearchSourceEnum searchSource)
@@ -64,7 +65,11 @@ public class SearchService(SettingBean settingBean) : ISearchService
 
                     break;
                 case SearchTypeEnum.SONG_ID:
-                    searchParam.SongIds.Add(new InputSongId(searchSong.QueryId, searchSong));
+                    // 汽水音乐直接用原始构造，其他保持不变
+                    if (searchSong.SearchSource == SearchSourceEnum.SODA_MUSIC)
+                        searchParam.SongIds.Add(new InputSongId(searchSong.QueryId, searchSong.SearchSource, searchSong.SearchType));
+                    else
+                        searchParam.SongIds.Add(new InputSongId(searchSong.QueryId, searchSong));
                     break;
                 default:
                     throw new MusicLyricException(ErrorMsgConst.SYSTEM_ERROR);

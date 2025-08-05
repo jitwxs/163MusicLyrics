@@ -111,11 +111,11 @@ public partial class SearchParamViewModel : ViewModelBase
     {
         _paramBean = paramBean;
         
-        SelectedSearchSourceItem = SearchSources.First(item => Equals(item.Value, _paramBean.SearchSource));
-        SelectedLrcTypeItem = LrcTypes.First(item => Equals(item.Value, _paramBean.ShowLrcType));
-        SelectedSearchTypeItem = SearchTypes.First(item => Equals(item.Value, _paramBean.SearchType));
-        SelectedOutputFormatItem = OutputFormats.First(item => Equals(item.Value, _paramBean.OutputFileFormat));
-        SelectedOutputEncodingItem = OutputEncodings.First(item => Equals(item.Value, _paramBean.Encoding));
+        SelectedSearchSourceItem = SearchSources.FirstOrDefault(item => Equals(item.Value, _paramBean.SearchSource)) ?? SearchSources.First();
+        SelectedLrcTypeItem = LrcTypes.FirstOrDefault(item => Equals(item.Value, _paramBean.ShowLrcType)) ?? LrcTypes.First();
+        SelectedSearchTypeItem = SearchTypes.FirstOrDefault(item => Equals(item.Value, _paramBean.SearchType)) ?? SearchTypes.First();
+        SelectedOutputFormatItem = OutputFormats.FirstOrDefault(item => Equals(item.Value, _paramBean.OutputFileFormat)) ?? OutputFormats.First();
+        SelectedOutputEncodingItem = OutputEncodings.FirstOrDefault(item => Equals(item.Value, _paramBean.Encoding)) ?? OutputEncodings.First();
         LrcMergeSeparator = _paramBean.LrcMergeSeparator;
     }
 }

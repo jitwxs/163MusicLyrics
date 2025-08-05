@@ -20,7 +20,8 @@ public enum ShowLrcTypeEnum
 public enum SearchSourceEnum
 {
     [Description("网易云")] NET_EASE_MUSIC = 0,
-    [Description("QQ音乐")] QQ_MUSIC = 1
+    [Description("QQ音乐")] QQ_MUSIC = 1,
+    [Description("汽水音乐")] SODA_MUSIC = 2
 }
 
 // 搜索类型
@@ -739,6 +740,7 @@ public class InputSongId
     public InputSongId(string queryId, SearchSourceEnum searchSource, SearchTypeEnum searchType)
     {
         QueryId = queryId;
+        SongId = queryId; // 修正：默认SongId等于QueryId
         SearchSource = searchSource;
         SearchType = searchType;
     }

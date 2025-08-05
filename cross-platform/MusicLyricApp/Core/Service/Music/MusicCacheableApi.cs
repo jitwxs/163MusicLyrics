@@ -38,6 +38,9 @@ public abstract class MusicCacheableApi : IMusicApi
 
     public Dictionary<string, ResultVo<SongVo>> GetSongVo(string[] songIds)
     {
+        // 过滤掉null或空字符串
+        songIds = songIds.Where(id => !string.IsNullOrWhiteSpace(id)).ToArray();
+
         var result = GlobalCache.BatchQuery<SongVo>(Source(), CacheType.SONG_VO, songIds,
             out var notHitKeys).ToDictionary(pair => pair.Key, pair => new ResultVo<SongVo>(pair.Value));
 
