@@ -12,6 +12,19 @@
             <Setter Property="HorizontalContentAlignment" Value="Center" />
             <Setter Property="VerticalContentAlignment" Value="Center" />
         </Style>
+        <Style Selector="Border.settings-card">
+            <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundBaseLowBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource SystemControlBackgroundBaseMediumLowBrush}" />
+        </Style>
+        <Style Selector="Border.settings-divider">
+            <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundBaseMediumLowBrush}" />
+        </Style>
+        <Style Selector="TextBlock.secondary">
+            <Setter Property="Foreground" Value="{DynamicResource SystemControlForegroundBaseMediumBrush}" />
+        </Style>
+        <Style Selector="Button.subtle">
+            <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundBaseLowBrush}" />
+        </Style>
         <Style Selector="TabControl > TabItem">
             <Setter Property="FontSize" Value="12" />
             <Setter Property="FontWeight" Value="Normal" />
@@ -25,7 +38,7 @@
             <TabItem Header="歌词定制">
                 <ScrollViewer HorizontalScrollBarVisibility="Disabled">
                     <StackPanel Spacing="10" Margin="10">
-                        <Border Padding="12" BorderBrush="#D0D7DE" BorderThickness="1" CornerRadius="8" Background="#FFFFFF">
+                        <Border Padding="12" BorderThickness="1" CornerRadius="8" Classes="settings-card">
                             <Grid ColumnDefinitions="140,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="10">
                                 <TextBlock Grid.Row="0" Grid.Column="0" Text="中文处理" VerticalAlignment="Center" />
                                 <ComboBox Grid.Row="0" Grid.Column="1"
@@ -56,7 +69,7 @@
                             </Grid>
                         </Border>
 
-                        <Border Padding="12" BorderBrush="#D0D7DE" BorderThickness="1" CornerRadius="8" Background="#FFFFFF">
+                        <Border Padding="12" BorderThickness="1" CornerRadius="8" Classes="settings-card">
                             <StackPanel Spacing="10">
                                 <StackPanel Orientation="Horizontal" Spacing="8">
                                     <TextBlock Text="时间标签格式设置" FontWeight="SemiBold" VerticalAlignment="Center" />
@@ -77,7 +90,7 @@
                             </StackPanel>
                         </Border>
 
-                        <Border Padding="12" BorderBrush="#D0D7DE" BorderThickness="1" CornerRadius="8" Background="#FFFFFF">
+                        <Border Padding="12" BorderThickness="1" CornerRadius="8" Classes="settings-card">
                             <StackPanel Spacing="8">
                                 <TextBlock Text="歌词类型优先级（右键可上移/下移）" FontWeight="SemiBold" />
                                 <DataGrid ItemsSource="{Binding LyricsTypes}"
@@ -113,7 +126,7 @@
             <TabItem Header="扩展">
                 <ScrollViewer HorizontalScrollBarVisibility="Disabled">
                     <StackPanel Spacing="10" Margin="10">
-                        <Border Padding="12" BorderBrush="#D0D7DE" BorderThickness="1" CornerRadius="8" Background="#FFFFFF">
+                        <Border Padding="12" BorderThickness="1" CornerRadius="8" Classes="settings-card">
                             <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="140,*" ColumnSpacing="10" RowSpacing="8">
                                 <TextBlock Grid.Row="0" Grid.Column="0" Text="百度翻译 APP ID" VerticalAlignment="Center" />
                                 <TextBox Grid.Row="0" Grid.Column="1"
@@ -127,7 +140,7 @@
                             </Grid>
                         </Border>
 
-                        <Border Padding="12" BorderBrush="#D0D7DE" BorderThickness="1" CornerRadius="8" Background="#FFFFFF">
+                        <Border Padding="12" BorderThickness="1" CornerRadius="8" Classes="settings-card">
                             <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="140,*" ColumnSpacing="10" RowSpacing="8">
                                 <TextBlock Grid.Row="0" Grid.Column="0" Text="网易云 Cookie" VerticalAlignment="Center" />
                                 <TextBox Grid.Row="0" Grid.Column="1"
@@ -144,10 +157,10 @@
             <TabItem Header="网络设置">
                 <ScrollViewer HorizontalScrollBarVisibility="Disabled">
                     <StackPanel Spacing="10" Margin="10">
-                        <Border Padding="12" BorderBrush="#D0D7DE" BorderThickness="1" CornerRadius="8" Background="#FFFFFF">
+                        <Border Padding="12" BorderThickness="1" CornerRadius="8" Classes="settings-card">
                             <StackPanel Spacing="8">
                                 <TextBlock Text="代理设置" FontWeight="SemiBold" />
-                                <TextBlock Text="系统代理：跟随系统/全局 VPN；直接连接：禁用系统代理；HTTP 代理：使用手动填写的代理服务器。" Foreground="#667085" TextWrapping="Wrap" />
+                                <TextBlock Text="系统代理：跟随系统/全局 VPN；直接连接：禁用系统代理；HTTP 代理：使用手动填写的代理服务器。" Classes="secondary" TextWrapping="Wrap" />
                                 <Grid ColumnDefinitions="140,*,80,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="8">
                                     <TextBlock Grid.Row="0" Grid.Column="0" Text="类型" VerticalAlignment="Center" />
                                     <ComboBox Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="3"
@@ -184,7 +197,7 @@
                                     <Button Width="90"
                                             Content="应用"
                                             Command="{Binding ApplyProxyCommand}" />
-                                    <TextBlock Text="更改后部分请求需重启应用才会完全生效" Foreground="#667085" VerticalAlignment="Center" />
+                                    <TextBlock Text="更改后部分请求需重启应用才会完全生效" Classes="secondary" VerticalAlignment="Center" />
                                 </StackPanel>
                             </StackPanel>
                         </Border>
@@ -195,14 +208,14 @@
             <TabItem Header="下载与缓存">
                 <ScrollViewer HorizontalScrollBarVisibility="Disabled">
                     <StackPanel Spacing="10" Margin="10">
-                        <Border Padding="12" BorderBrush="#D0D7DE" BorderThickness="1" CornerRadius="8" Background="#FFFFFF">
+                        <Border Padding="12" BorderThickness="1" CornerRadius="8" Classes="settings-card">
                             <StackPanel Spacing="8">
                                 <StackPanel Orientation="Horizontal" Spacing="8">
                                     <TextBlock Text="下载与缓存行为" FontWeight="SemiBold" VerticalAlignment="Center" />
                                     <Button Width="22" Height="22" Padding="0" Content="?" Command="{Binding OutputTipsCommand}" />
                                 </StackPanel>
-                                <TextBlock Text="控制歌词保存时的附加下载和命名规则" Foreground="#667085" />
-                                <Border Height="1" Background="#EAECF0" Margin="0,2,0,2" />
+                                <TextBlock Text="控制歌词保存时的附加下载和命名规则" Classes="secondary" />
+                                <Border Height="1" Margin="0,2,0,2" Classes="settings-divider" />
                                 <WrapPanel>
                                     <CheckBox Content="跳过纯音乐"
                                               IsChecked="{Binding SettingParamViewModel.IgnorePureMusicInSave, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
@@ -225,10 +238,10 @@
                                     <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Spacing="8">
                                         <TextBox Width="100"
                                                  Text="{Binding SettingParamViewModel.SingerCountLimit, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                                        <TextBlock Text="-1 表示不截断" Foreground="#667085" VerticalAlignment="Center" />
+                                        <TextBlock Text="-1 表示不截断" Classes="secondary" VerticalAlignment="Center" />
                                     </StackPanel>
                                 </Grid>
-                                <Border Height="1" Background="#EAECF0" Margin="0,2,0,2" />
+                                <Border Height="1" Margin="0,2,0,2" Classes="settings-divider" />
                                 <Grid ColumnDefinitions="140,*" RowDefinitions="Auto,Auto" ColumnSpacing="10" RowSpacing="8">
                                     <TextBlock Grid.Row="0" Grid.Column="0" Text="同名文件处理" VerticalAlignment="Center" />
                                     <ComboBox Grid.Row="0" Grid.Column="1"
@@ -239,13 +252,13 @@
                                         <TextBox Width="180"
                                                  IsEnabled="{Binding SettingParamViewModel.IsConflictSuffixEnabled}"
                                                  Text="{Binding SettingParamViewModel.FileConflictSuffixPattern, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                                        <TextBlock Text="使用 {n} 代表序号，例如  ({n}) 或 -v{n}" Foreground="#667085" VerticalAlignment="Center" />
+                                        <TextBlock Text="使用 {n} 代表序号，例如  ({n}) 或 -v{n}" Classes="secondary" VerticalAlignment="Center" />
                                     </StackPanel>
                                 </Grid>
                             </StackPanel>
                         </Border>
 
-                        <Border Padding="12" BorderBrush="#D0D7DE" BorderThickness="1" CornerRadius="8" Background="#FFFFFF">
+                        <Border Padding="12" BorderThickness="1" CornerRadius="8" Classes="settings-card">
                             <StackPanel Spacing="8">
                                 <TextBlock Text="保存路径" FontWeight="SemiBold" />
                                 <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
@@ -254,13 +267,13 @@
                                     <Button Grid.Column="1"
                                             Content="选择"
                                             Width="80"
-                                            Background="#F2F4F7"
+                                            Classes="subtle"
                                             Command="{Binding SelectSaveFolderCommand}" />
                                 </Grid>
                             </StackPanel>
                         </Border>
 
-                        <Border Padding="12" BorderBrush="#D0D7DE" BorderThickness="1" CornerRadius="8" Background="#FFFFFF">
+                        <Border Padding="12" BorderThickness="1" CornerRadius="8" Classes="settings-card">
                             <StackPanel Spacing="8">
                                 <TextBlock Text="本地搜索缓存" FontWeight="SemiBold" />
                                 <Grid ColumnDefinitions="140,*,Auto,Auto" ColumnSpacing="8" RowDefinitions="Auto,Auto" RowSpacing="8">
@@ -270,12 +283,12 @@
                                     <Button Grid.Row="0" Grid.Column="2"
                                             Content="更改目录"
                                             Width="90"
-                                            Background="#F2F4F7"
+                                            Classes="subtle"
                                             Command="{Binding SelectSearchCacheFolderCommand}" />
                                     <Button Grid.Row="0" Grid.Column="3"
                                             Content="打开目录"
                                             Width="90"
-                                            Background="#F2F4F7"
+                                            Classes="subtle"
                                             Command="{Binding OpenSearchCachePathCommand}" />
 
                                     <TextBlock Grid.Row="1" Grid.Column="0" Text="最大缓存(MB)" VerticalAlignment="Center" />
@@ -297,7 +310,7 @@
             <TabItem Header="应用设置">
                 <ScrollViewer HorizontalScrollBarVisibility="Disabled">
                     <StackPanel Spacing="10" Margin="10">
-                        <Border Padding="12" BorderBrush="#D0D7DE" BorderThickness="1" CornerRadius="8" Background="#FFFFFF">
+                        <Border Padding="12" BorderThickness="1" CornerRadius="8" Classes="settings-card">
                             <StackPanel Spacing="8">
                                 <WrapPanel>
                                     <CheckBox Content="聚合模糊搜索"
@@ -326,10 +339,10 @@
                             </StackPanel>
                         </Border>
 
-                        <Border Padding="12" BorderBrush="#D0D7DE" BorderThickness="1" CornerRadius="8" Background="#FFFFFF">
+                        <Border Padding="12" BorderThickness="1" CornerRadius="8" Classes="settings-card">
                             <StackPanel Spacing="6">
                                 <TextBlock Text="快捷键" FontWeight="SemiBold" />
-                                <TextBlock Foreground="#667085">
+                                <TextBlock Classes="secondary">
                                     <Run Text="Enter：精确搜索" />
                                     <LineBreak />
                                     <Run Text="Ctrl + Enter：模糊搜索" />
@@ -339,7 +352,7 @@
                             </StackPanel>
                         </Border>
 
-                        <Border Padding="12" BorderBrush="#D0D7DE" BorderThickness="1" CornerRadius="8" Background="#FFFFFF">
+                        <Border Padding="12" BorderThickness="1" CornerRadius="8" Classes="settings-card">
                             <Grid ColumnDefinitions="140,*,Auto" ColumnSpacing="10">
                                 <TextBlock Grid.Column="0" Text="配置文件" VerticalAlignment="Center" />
                                 <TextBox Grid.Column="1" Text="{Binding ConfigPath}" IsReadOnly="True" VerticalAlignment="Center" />
@@ -351,7 +364,7 @@
             </TabItem>
         </TabControl>
 
-        <Border Grid.Row="2" Padding="8" BorderBrush="#D0D7DE" BorderThickness="1" CornerRadius="6" Background="#FAFBFC">
+        <Border Grid.Row="2" Padding="8" BorderThickness="1" CornerRadius="6" Classes="settings-card">
             <TextBox Text="{Binding SettingTips}" IsReadOnly="True" AcceptsReturn="True" Height="120" BorderThickness="0" Background="Transparent" />
         </Border>
     </Grid>
