@@ -1,13 +1,14 @@
-﻿using System;
+﻿using hyjiacan.py4n;
+using MusicLyricApp.Core.Service.Translate;
+using MusicLyricApp.Models;
+using NTextCat;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using hyjiacan.py4n;
-using MusicLyricApp.Core.Service.Translate;
-using MusicLyricApp.Models;
-using NTextCat;
 using ToolGood.Words;
 
 namespace MusicLyricApp.Core.Utils;
@@ -28,27 +29,27 @@ public static partial class LyricUtils
     /// </summary>
     public static async Task<List<string>> GetOutputContent(LyricVo lyricVo, SettingBean settingBean)
     {
-        var param = settingBean.Param;
-        var config = settingBean.Config;
+        PersistParamBean param = settingBean.Param;
+        ConfigBean config = settingBean.Config;
 
-        var dotType = config.DotType;
-        var timestampFormat = param.OutputFileFormat == OutputFormatEnum.SRT
+        DotTypeEnum dotType = config.DotType;
+        string timestampFormat = param.OutputFileFormat == OutputFormatEnum.SRT
             ? config.SrtTimestampFormat
             : config.LrcTimestampFormat;
 
-        var voListList = await FormatLyric(lyricVo, settingBean);
+        List<List<LyricLineVo>> voListList = await FormatLyric(lyricVo, settingBean);
 
         if (config.VerbatimLyricMode != VerbatimLyricModeEnum.DISABLE)
         {
-            for (var i = 0; i < voListList.Count; i++)
+            for (int i = 0; i < voListList.Count; i++)
             {
                 voListList[i] = VerbatimLyricUtils.FormatSubLineLyric(voListList[i], timestampFormat, dotType);
             }
         }
 
-        var res = new List<string>();
+        List<string> res = new List<string>();
 
-        foreach (var voList in voListList)
+        foreach (List<LyricLineVo> voList in voListList)
         {
             string line;
             if (param.OutputFileFormat == OutputFormatEnum.SRT)
@@ -57,7 +58,7 @@ public static partial class LyricUtils
             }
             else
             {
-                line = string.Join(Environment.NewLine, 
+                line = string.Join(Environment.NewLine,
                     from o in voList
                     let printed = o.Print(timestampFormat, dotType)
                     select config.VerbatimLyricMode == VerbatimLyricModeEnum.A2_MODE
@@ -87,12 +88,12 @@ public static partial class LyricUtils
     /// <returns></returns>
     private static async Task<List<List<LyricLineVo>>> FormatLyric(LyricVo lyricVo, SettingBean settingBean)
     {
-        var outputLyricsTypes = settingBean.Config.DeserializationOutputLyricsTypes();
-        var showLrcType = settingBean.Param.ShowLrcType;
-        var searchSource = lyricVo.SearchSource;
-        var ignoreEmptyLyric = settingBean.Config.IgnoreEmptyLyric;
+        List<LyricsTypeEnum> outputLyricsTypes = settingBean.Config.DeserializationOutputLyricsTypes();
+        ShowLrcTypeEnum showLrcType = settingBean.Param.ShowLrcType;
+        SearchSourceEnum searchSource = lyricVo.SearchSource;
+        bool ignoreEmptyLyric = settingBean.Config.IgnoreEmptyLyric;
 
-        var res = new List<List<LyricLineVo>>();
+        List<List<LyricLineVo>> res = new List<List<LyricLineVo>>();
 
         // 1. 未配置任何输出
         if (outputLyricsTypes.Count == 0)
@@ -100,10 +101,10 @@ public static partial class LyricUtils
             return res;
         }
 
-        var originLyrics = SplitLrc(lyricVo.Lyric, searchSource, ignoreEmptyLyric);
+        List<LyricLineVo> originLyrics = SplitLrc(lyricVo.Lyric, searchSource, ignoreEmptyLyric);
 
         // 2. 仅输出原文  
-        var originLyricsOutputSortInConfig = outputLyricsTypes.IndexOf(LyricsTypeEnum.ORIGIN);
+        int originLyricsOutputSortInConfig = outputLyricsTypes.IndexOf(LyricsTypeEnum.ORIGIN);
         if (outputLyricsTypes.Count == 1 && originLyricsOutputSortInConfig != -1)
         {
             res.Add(originLyrics);
@@ -111,7 +112,7 @@ public static partial class LyricUtils
         }
 
         // 3. 处理其他译文
-        var lyricsComplexList = await DealTranslateLyric(originLyrics, lyricVo, settingBean.Config.TransConfig,
+        List<List<LyricLineVo>> lyricsComplexList = await DealTranslateLyric(originLyrics, lyricVo, settingBean.Config.TransConfig,
             searchSource, outputLyricsTypes);
 
         // 原文歌词插入到结果集的指定位置
@@ -120,11 +121,11 @@ public static partial class LyricUtils
             lyricsComplexList.Insert(originLyricsOutputSortInConfig, originLyrics);
         }
 
-        var single = new List<LyricLineVo>();
+        List<LyricLineVo> single = new List<LyricLineVo>();
         switch (showLrcType)
         {
             case ShowLrcTypeEnum.STAGGER:
-                foreach (var each in lyricsComplexList)
+                foreach (List<LyricLineVo> each in lyricsComplexList)
                 {
                     single = SortLrc(single, each, true);
                 }
@@ -137,7 +138,7 @@ public static partial class LyricUtils
                 }
                 else
                 {
-                    foreach (var each in lyricsComplexList)
+                    foreach (List<LyricLineVo> each in lyricsComplexList)
                     {
                         single.AddRange(each);
                     }
@@ -145,12 +146,9 @@ public static partial class LyricUtils
 
                 break;
             case ShowLrcTypeEnum.MERGE:
-                foreach (var each in lyricsComplexList)
-                {
-                    single = MergeLrc(single, each, settingBean.Param.LrcMergeSeparator, true);
-                }
-
+                single = MergeLrc(originLyrics, lyricsComplexList, settingBean.Param.LrcMergeSeparator);
                 break;
+
             default:
                 throw new NotSupportedException("not support showLrcType: " + showLrcType);
         }
@@ -179,11 +177,11 @@ public static partial class LyricUtils
      */
     private static List<LyricLineVo> SplitLrc(string lrc, SearchSourceEnum searchSource, bool ignoreEmptyLine)
     {
-        var temp = SplitLrc(lrc);
+        string[] temp = SplitLrc(lrc);
 
-        var resultList = new List<LyricLineVo>();
+        List<LyricLineVo> resultList = new List<LyricLineVo>();
 
-        foreach (var line in temp)
+        foreach (string line in temp)
         {
             // QQ 音乐歌词正式开始标识符
             if (searchSource == SearchSourceEnum.QQ_MUSIC)
@@ -195,7 +193,7 @@ public static partial class LyricUtils
                 }
             }
 
-            var lyricLineVo = new LyricLineVo(line);
+            LyricLineVo lyricLineVo = new LyricLineVo(line);
 
             // 无效内容处理
             if (lyricLineVo.IsIllegalContent())
@@ -222,13 +220,13 @@ public static partial class LyricUtils
     private static List<LyricLineVo> SortLrc(List<LyricLineVo> listA, List<LyricLineVo> listB, bool aFirst)
     {
         int lenA = listA.Count, lenB = listB.Count;
-        var c = new List<LyricLineVo>();
+        List<LyricLineVo> c = new List<LyricLineVo>();
 
         int i = 0, j = 0;
 
         while (i < lenA && j < lenB)
         {
-            var compare = Compare(listA[i], listB[j], aFirst);
+            int compare = Compare(listA[i], listB[j], aFirst);
 
             if (compare > 0)
             {
@@ -254,36 +252,74 @@ public static partial class LyricUtils
     /// <summary>
     /// 歌词合并
     /// </summary>
-    private static List<LyricLineVo> MergeLrc(List<LyricLineVo> listA, List<LyricLineVo> listB, string splitStr,
-        bool aFirst)
+    private static List<LyricLineVo> MergeLrc(List<LyricLineVo> baseLyric, List<List<LyricLineVo>> mergingLyrics, string splitText)
     {
-        var c = SortLrc(listA, listB, aFirst);
-
-        if (c.Count == 0)
+        // handle empty base
+        if (baseLyric == null || baseLyric.Count == 0)
         {
-            return c;
+            return [];
         }
 
-        var list = new List<LyricLineVo>
+        // initialize buckets for each base line
+        List<List<LyricLineVo>> buckets = new(baseLyric.Count);
+        for (int i = 0; i < baseLyric.Count; i++)
         {
-            c[0]
-        };
+            buckets.Add([]);
+        }
 
-        for (var i = 1; i < c.Count; i++)
+        // distribute each line from mergingLyrics into the closest baseLyric index
+        if (mergingLyrics != null)
         {
-            if (c[i - 1].Timestamp.TimeOffset == c[i].Timestamp.TimeOffset)
+            foreach (List<LyricLineVo> oneLyrics in mergingLyrics)
             {
-                var index = list.Count - 1;
+                if (oneLyrics == null) continue;
 
-                list[index].Content = list[index].Content + splitStr + c[i].Content;
-            }
-            else
-            {
-                list.Add(c[i]);
+                foreach (LyricLineVo line in oneLyrics)
+                {
+                    // find closest index in baseLyric by timestamp
+                    long ts = line.Timestamp.TimeOffset;
+                    int bestIndex = 0;
+                    long bestDiff = Math.Abs(baseLyric[0].Timestamp.TimeOffset - ts);
+
+                    for (int i = 1; i < baseLyric.Count; i++)
+                    {
+                        long diff = Math.Abs(baseLyric[i].Timestamp.TimeOffset - ts);
+                        if (diff < bestDiff)
+                        {
+                            bestDiff = diff;
+                            bestIndex = i;
+                        }
+                    }
+
+                    buckets[bestIndex].Add(line);
+                }
             }
         }
 
-        return list;
+        // merge buckets into resulting list, using baseLyric timestamps
+        List<LyricLineVo> result = new(baseLyric.Count);
+
+        for (int i = 0; i < buckets.Count; i++)
+        {
+            List<LyricLineVo> bucket = buckets[i];
+
+            List<string> parts = [];
+            foreach (LyricLineVo item in bucket)
+            {
+                parts.Add(item.Content);
+            }
+
+            string mergedContent;
+            if (parts.Count == 0)
+            {
+                continue;
+            }
+
+            mergedContent = string.Join(splitText ?? string.Empty, parts);
+            result.Add(new LyricLineVo(mergedContent, baseLyric[i].Timestamp));
+        }
+
+        return result;
     }
 
     /// <summary>
@@ -298,7 +334,7 @@ public static partial class LyricUtils
     private static async Task<List<List<LyricLineVo>>> DealTranslateLyric(List<LyricLineVo> originList, LyricVo lyricVo,
         TransConfigBean transConfig, SearchSourceEnum searchSource, List<LyricsTypeEnum> outputLyricsTypes)
     {
-        var result = new List<List<LyricLineVo>>();
+        List<List<LyricLineVo>> result = new List<List<LyricLineVo>>();
 
         // 不存在原文歌词
         if (originList.Count == 0)
@@ -308,16 +344,16 @@ public static partial class LyricUtils
 
         // 1. 初始化原始译文
         // 1.1 原始译文歌词的空行没有意义，指定 true 不走配置
-        var baseTransList = SplitLrc(lyricVo.TranslateLyric, searchSource, true);
+        List<LyricLineVo> baseTransList = SplitLrc(lyricVo.TranslateLyric, searchSource, true);
         // 1.2 处理译文精度误差, 译文缺省规则
-        var transList = ResolveTransLyricDigitDeviationAndLost(originList, baseTransList,
+        List<LyricLineVo> transList = ResolveTransLyricDigitDeviationAndLost(originList, baseTransList,
             transConfig.MatchPrecisionDeviation, transConfig.LostRule);
 
         // 推断原文歌词和原始译文歌词，对应语言
         LanguageEnum originLanguage = CertainLanguage(originList), baseTransLanguage = CertainLanguage(transList);
 
         // 2. 处理其他输出类型
-        foreach (var transTypeEnum in outputLyricsTypes)
+        foreach (LyricsTypeEnum transTypeEnum in outputLyricsTypes)
         {
             switch (transTypeEnum)
             {
@@ -325,8 +361,8 @@ public static partial class LyricUtils
                     result.Add(transList);
                     break;
                 case LyricsTypeEnum.TRANSLITERATION:
-                    var baseTransliterationList = SplitLrc(lyricVo.TransliterationLyric, searchSource, true);
-                    var transliterationList = ResolveTransLyricDigitDeviationAndLost(originList,
+                    List<LyricLineVo> baseTransliterationList = SplitLrc(lyricVo.TransliterationLyric, searchSource, true);
+                    List<LyricLineVo> transliterationList = ResolveTransLyricDigitDeviationAndLost(originList,
                         baseTransliterationList, transConfig.MatchPrecisionDeviation, transConfig.LostRule);
                     result.Add(transliterationList);
                     break;
@@ -353,10 +389,10 @@ public static partial class LyricUtils
                         }
                         else
                         {
-                            var outputLanguage = CastToLanguageEnum(transTypeEnum);
+                            LanguageEnum outputLanguage = CastToLanguageEnum(transTypeEnum);
 
                             // 调用合适的翻译 API
-                            foreach (var translateApi in GetAvailableTranslateApi(transConfig))
+                            foreach (ITranslateApi translateApi in GetAvailableTranslateApi(transConfig))
                             {
                                 string[]? inputs = null, outputs = null;
 
@@ -376,8 +412,8 @@ public static partial class LyricUtils
 
                                 if (inputs != null && outputs != null)
                                 {
-                                    var outputList = new List<LyricLineVo>();
-                                    for (var i = 0; i < inputs.Length; i++)
+                                    List<LyricLineVo> outputList = new List<LyricLineVo>();
+                                    for (int i = 0; i < inputs.Length; i++)
                                     {
                                         outputList.Add(new LyricLineVo(outputs[i], originList[i].Timestamp));
                                     }
@@ -398,7 +434,7 @@ public static partial class LyricUtils
 
     public static List<ITranslateApi> GetAvailableTranslateApi(TransConfigBean transConfig)
     {
-        var res = new List<ITranslateApi>();
+        List<ITranslateApi> res = new List<ITranslateApi>();
 
         try
         {
@@ -430,19 +466,19 @@ public static partial class LyricUtils
         List<LyricLineVo> baseTransList,
         int precisionDigitDeviation, TransLyricLostRuleEnum lostRule)
     {
-        var originTimeOffsetDict = new Dictionary<long, LyricLineVo>();
-        foreach (var one in originList)
+        Dictionary<long, LyricLineVo> originTimeOffsetDict = new Dictionary<long, LyricLineVo>();
+        foreach (LyricLineVo one in originList)
         {
             originTimeOffsetDict[one.Timestamp.TimeOffset] = one;
         }
 
-        var notMatchTranslateDict = new Dictionary<int, LyricLineVo>();
+        Dictionary<int, LyricLineVo> notMatchTranslateDict = new Dictionary<int, LyricLineVo>();
 
         // 误差 == 0
-        for (var i = 0; i < baseTransList.Count; i++)
+        for (int i = 0; i < baseTransList.Count; i++)
         {
-            var translate = baseTransList[i];
-            var timestamp = translate.Timestamp.TimeOffset;
+            LyricLineVo translate = baseTransList[i];
+            long timestamp = translate.Timestamp.TimeOffset;
 
             if (!originTimeOffsetDict.Remove(timestamp))
             {
@@ -452,13 +488,13 @@ public static partial class LyricUtils
 
         if (precisionDigitDeviation != 0)
         {
-            foreach (var pair in notMatchTranslateDict)
+            foreach (KeyValuePair<int, LyricLineVo> pair in notMatchTranslateDict)
             {
-                var index = pair.Key;
-                var translate = pair.Value;
-                var timestamp = translate.Timestamp.TimeOffset;
+                int index = pair.Key;
+                LyricLineVo translate = pair.Value;
+                long timestamp = translate.Timestamp.TimeOffset;
 
-                var tsStart = Math.Max(index == 0 ? 0 : baseTransList[index - 1].Timestamp.TimeOffset + 1,
+                long tsStart = Math.Max(index == 0 ? 0 : baseTransList[index - 1].Timestamp.TimeOffset + 1,
                     timestamp - precisionDigitDeviation);
 
                 long tsEnd;
@@ -473,12 +509,12 @@ public static partial class LyricUtils
 
                 tsEnd = Math.Min(tsEnd, timestamp + precisionDigitDeviation);
 
-                for (var ts = tsStart; ts <= tsEnd; ts++)
+                for (long ts = tsStart; ts <= tsEnd; ts++)
                 {
                     if (originTimeOffsetDict.Remove(ts))
                     {
                         // 将译文时间调整为误差后的译文
-                        var newTranslate = new LyricLineVo(translate.Content, new LyricTimestamp(ts));
+                        LyricLineVo newTranslate = new LyricLineVo(translate.Content, new LyricTimestamp(ts));
 
                         baseTransList[pair.Key] = newTranslate;
                     }
@@ -489,15 +525,15 @@ public static partial class LyricUtils
         // 处理译文缺失规则
         if (lostRule != TransLyricLostRuleEnum.IGNORE)
         {
-            foreach (var pair in originTimeOffsetDict)
+            foreach (KeyValuePair<long, LyricLineVo> pair in originTimeOffsetDict)
             {
-                var content = lostRule == TransLyricLostRuleEnum.FILL_ORIGIN ? pair.Value.Content : "";
+                string content = lostRule == TransLyricLostRuleEnum.FILL_ORIGIN ? pair.Value.Content : "";
 
                 baseTransList.Add(new LyricLineVo(content, pair.Value.Timestamp));
             }
         }
 
-        var transList = new List<LyricLineVo>(baseTransList);
+        List<LyricLineVo> transList = new List<LyricLineVo>(baseTransList);
         transList.Sort();
 
         return transList;
@@ -505,9 +541,9 @@ public static partial class LyricUtils
 
     private static Task<List<LyricLineVo>> ToPinyin(List<LyricLineVo> inputList, TransLyricLostRuleEnum lostRule)
     {
-        var resultList = new List<LyricLineVo>();
+        List<LyricLineVo> resultList = new List<LyricLineVo>();
 
-        foreach (var vo in inputList)
+        foreach (LyricLineVo vo in inputList)
         {
             string content;
 
@@ -538,7 +574,7 @@ public static partial class LyricUtils
      */
     private static int Compare(LyricLineVo originLrc, LyricLineVo translateLrc, bool hasOriginLrcPrior)
     {
-        var compareTo = originLrc.CompareTo(translateLrc);
+        int compareTo = originLrc.CompareTo(translateLrc);
 
         if (compareTo == 0)
         {
@@ -553,31 +589,31 @@ public static partial class LyricUtils
     /// </summary>
     private static LanguageEnum CertainLanguage(List<LyricLineVo> lineVos)
     {
-        var assembly = Assembly.GetExecutingAssembly();
-        using var stream = assembly.GetManifestResourceStream(assembly.GetManifestResourceNames()
+        Assembly assembly = Assembly.GetExecutingAssembly();
+        using Stream? stream = assembly.GetManifestResourceStream(assembly.GetManifestResourceNames()
             .Single(str => str.EndsWith("Core14.profile.xml")));
-        var factory = new RankedLanguageIdentifierFactory();
-        var identifier = factory.Load(stream);
+        RankedLanguageIdentifierFactory factory = new RankedLanguageIdentifierFactory();
+        RankedLanguageIdentifier identifier = factory.Load(stream);
 
-        var certainDict = new Dictionary<LanguageEnum, int>();
-        foreach (var one in lineVos)
+        Dictionary<LanguageEnum, int> certainDict = new Dictionary<LanguageEnum, int>();
+        foreach (LyricLineVo one in lineVos)
         {
-            var languages = identifier.Identify(one.Content);
+            IEnumerable<Tuple<LanguageInfo, double>> languages = identifier.Identify(one.Content);
 
-            var tuple = languages?.First();
+            Tuple<LanguageInfo, double>? tuple = languages?.First();
             if (tuple == null)
             {
                 continue;
             }
 
-            var languageEnum = CastLanguage(tuple.Item1.Iso639_3);
+            LanguageEnum languageEnum = CastLanguage(tuple.Item1.Iso639_3);
 
             if (!certainDict.TryAdd(languageEnum, 1))
             {
                 certainDict[languageEnum]++;
             }
         }
-            
+
         return certainDict.Count == 0 ? LanguageEnum.OTHER : certainDict.MaxBy(pair => pair.Value).Key;
     }
 
