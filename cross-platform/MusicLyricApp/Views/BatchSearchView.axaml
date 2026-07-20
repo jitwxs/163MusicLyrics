@@ -16,20 +16,35 @@
         </Style>
     </UserControl.Styles>
 
-    <Grid RowDefinitions="Auto,*,Auto,Auto" Margin="12" RowSpacing="10">
+    <Grid RowDefinitions="Auto,Auto,*,Auto,Auto" Margin="12" RowSpacing="10">
         <Grid Grid.Row="0" ColumnDefinitions="*,Auto" ColumnSpacing="8">
             <TextBox Text="{Binding BatchInputText}"
-                     Height="60"
+                     Height="96"
                      AcceptsReturn="True"
                      TextWrapping="Wrap"
-                     IsReadOnly="True" />
-            <Button Grid.Column="1"
-                    Content="本地扫描"
-                    Width="130"
-                    Command="{Binding ExecuteSelectFolderCommand}" />
+                     Watermark="每行一个歌名；也可直接粘贴含网易云链接的 Markdown 文件" />
+            <StackPanel Grid.Column="1" Spacing="8">
+                <Button Content="按歌名/链接批量搜索"
+                        Width="150"
+                        Command="{Binding ExecuteSearchNamesCommand}" />
+                <Button Content="本地扫描"
+                        Width="150"
+                        Command="{Binding ExecuteSelectFolderCommand}" />
+            </StackPanel>
         </Grid>
 
-        <DataGrid Grid.Row="1"
+        <Grid Grid.Row="1" ColumnDefinitions="Auto,220,*" ColumnSpacing="8">
+            <TextBlock Text="优先歌手" VerticalAlignment="Center" />
+            <TextBox Grid.Column="1"
+                     Text="{Binding PreferredArtist}"
+                     Watermark="可留空" />
+            <TextBlock Grid.Column="2"
+                       Text="{Binding SearchProgressText}"
+                       Foreground="#667085"
+                       VerticalAlignment="Center" />
+        </Grid>
+
+        <DataGrid Grid.Row="2"
                   ItemsSource="{Binding Items}"
                   AutoGenerateColumns="False"
                   CanUserReorderColumns="False"
@@ -58,11 +73,13 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
+                <DataGridTextColumn Header="输入歌名" Binding="{Binding RequestedName}" Width="160" />
                 <DataGridTextColumn Header="歌曲源" Binding="{Binding SongSource}" Width="90" />
                 <DataGridTextColumn Header="歌曲ID" Binding="{Binding SongId}" Width="120" />
                 <DataGridTextColumn Header="歌曲名" Binding="{Binding SongName}" Width="*" />
                 <DataGridTextColumn Header="歌手" Binding="{Binding Singer}" Width="180" />
                 <DataGridTextColumn Header="专辑" Binding="{Binding Album}" Width="200" />
+                <DataGridTextColumn Header="译文" Binding="{Binding TranslationStatus}" Width="70" />
                 <DataGridTemplateColumn Header="状态" Width="120" CanUserSort="False">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
@@ -84,14 +101,14 @@
             </DataGrid.Columns>
         </DataGrid>
 
-        <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+        <StackPanel Grid.Row="3" Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
             <Button Content="全选" Width="110" Command="{Binding ExecuteSelectAllCommand}" />
             <Button Content="取消全选" Width="130" Command="{Binding ExecuteClearSelectedCommand}" />
             <Button Content="保存选中" Width="130" Command="{Binding ExecuteSaveSelectedCommand}" />
             <Button Content="删除选中" Width="130" Command="{Binding ExecuteDeleteSelectedCommand}" />
         </StackPanel>
 
-        <Border Grid.Row="3" Padding="8" BorderBrush="#D0D7DE" BorderThickness="1" CornerRadius="6" Background="#FAFBFC">
+        <Border Grid.Row="4" Padding="8" BorderBrush="#D0D7DE" BorderThickness="1" CornerRadius="6" Background="#FAFBFC">
             <TextBlock TextTrimming="CharacterEllipsis">
                 <Run Text="【提示】 " Foreground="#344054" />
                 <Run Text="[" Foreground="#98A2B3" />

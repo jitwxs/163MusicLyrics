@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -27,6 +28,9 @@ public partial class BatchSearchViewModel : ViewModelBase
     public ObservableCollection<BatchSearchItemViewModel> Items { get; } = new();
 
     [ObservableProperty] private string _batchInputText = "";
+    [ObservableProperty] private string _preferredArtist = "MyGO!!!!!";
+    [ObservableProperty] private string _searchProgressText = "";
+    [ObservableProperty] private bool _isBatchNameSearching;
     [ObservableProperty] private string _tipTimestamp = "";
     [ObservableProperty] private string _tipNormalMessage = "";
     [ObservableProperty] private string _tipErrorMessage = "";
@@ -56,7 +60,10 @@ public partial class BatchSearchViewModel : ViewModelBase
             BatchInputText = inputText;
         }
 
-        var existing = Items.ToDictionary(i => i.SongId, i => i);
+        var existing = Items
+            .Where(i => !string.IsNullOrWhiteSpace(i.SongId))
+            .GroupBy(i => i.SongId)
+            .ToDictionary(group => group.Key, group => group.First());
         var added = 0;
 
         foreach (var input in inputSongIds)
@@ -85,6 +92,7 @@ public partial class BatchSearchViewModel : ViewModelBase
                 item.SourceEnum = input.SearchSource;
                 item.Singer = string.Join(_settingBean.Config.SingerSeparator, saveVo.SongVo.Singer);
                 item.Album = saveVo.SongVo.Album;
+                item.TranslationStatus = string.IsNullOrWhiteSpace(saveVo.LyricVo.TranslateLyric) ? "无" : "有";
                 item.Status = "Ready";
                 item.Error = saveVo.LyricVo.IsEmpty() ? ErrorMsgConst.LRC_NOT_EXIST : "";
                 item.Progress = 100;
@@ -107,6 +115,72 @@ public partial class BatchSearchViewModel : ViewModelBase
 
         RefreshStats();
         SetTip($"已同步 {added} 条搜索结果。", false);
+    }
+
+    [RelayCommand]
+    private async Task ExecuteSearchNamesAsync()
+    {
+        if (IsBatchNameSearching)
+        {
+            return;
+        }
+
+        var queries = BatchSongMatcher.ParseQueries(BatchInputText);
+        if (queries.Count == 0)
+        {
+            SetTip("请每行输入一个歌名。", true);
+            return;
+        }
+
+        if (queries.Count > Constants.BatchQuerySize)
+        {
+            SetTip($"单次最多处理 {Constants.BatchQuerySize} 首歌曲。", true);
+            return;
+        }
+
+        ResetBatchResults();
+        IsBatchNameSearching = true;
+        var matchedCount = 0;
+        var unresolvedCount = 0;
+
+        try
+        {
+            for (var index = 0; index < queries.Count; index++)
+            {
+                var query = queries[index];
+                SearchProgressText = $"{index + 1}/{queries.Count}  正在搜索：{query.Title}";
+
+                try
+                {
+                    if (await ResolveKeywordAsync(query))
+                    {
+                        matchedCount++;
+                    }
+                    else
+                    {
+                        unresolvedCount++;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    AddUnresolvedKeyword(query, ex.Message);
+                    unresolvedCount++;
+                }
+
+                if (index + 1 < queries.Count)
+                {
+                    await Task.Delay(Constants.SleepMsBetweenBatchQuery);
+                }
+            }
+
+            RefreshStats();
+            SetTip($"歌名批量搜索完成：匹配 {matchedCount}，待处理 {unresolvedCount}。", unresolvedCount > 0);
+        }
+        finally
+        {
+            IsBatchNameSearching = false;
+            SearchProgressText = "";
+        }
     }
 
     [RelayCommand]
@@ -243,9 +317,9 @@ public partial class BatchSearchViewModel : ViewModelBase
     private void ExecuteViewDetail(BatchSearchItemViewModel? item)
     {
         var target = item ?? Items.FirstOrDefault(x => x.IsSelected);
-        if (target == null)
+        if (target == null || string.IsNullOrWhiteSpace(target.SongId))
         {
-            SetTip("未选择可查看项。", false);
+            SetTip("未选择已匹配的歌曲。", false);
             return;
         }
 
@@ -274,6 +348,226 @@ public partial class BatchSearchViewModel : ViewModelBase
         {
             SetTip(ex.Message, true);
         }
+    }
+
+    private async Task<bool> ResolveKeywordAsync(BatchSongQuery query)
+    {
+        if (!string.IsNullOrWhiteSpace(query.DirectSongId) && query.DirectSource.HasValue)
+        {
+            return await ResolveDirectSongAsync(query);
+        }
+
+        var searchAttempt = await Task.Run(() =>
+        {
+            var results = new List<SearchResultVo>();
+            var errors = new List<string>();
+            foreach (var source in Enum.GetValues<SearchSourceEnum>())
+            {
+                try
+                {
+                    var response = _searchService.GetMusicApi(source).Search(query.Title, SearchTypeEnum.SONG_ID);
+                    if (response.IsSuccess() && !response.Data.IsEmpty())
+                    {
+                        results.Add(response.Data);
+                    }
+                    else if (!response.IsSuccess())
+                    {
+                        errors.Add($"{source.ToDescription()}：{response.ErrorMsg}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    errors.Add($"{source.ToDescription()}：{ex.Message}");
+                }
+            }
+
+            return (results, errors);
+        });
+
+        var preferredArtist = query.Artist ?? PreferredArtist;
+        var candidates = BatchSongMatcher.RankCandidates(
+            BatchSongMatcher.FindExactCandidates(query, searchAttempt.results),
+            preferredArtist);
+
+        if (candidates.Count == 0)
+        {
+            var messages = new List<string>();
+            if (searchAttempt.results.Any(result => result.SearchSource == SearchSourceEnum.NET_EASE_MUSIC))
+            {
+                messages.Add("网易云：未找到完全同名结果");
+            }
+
+            messages.AddRange(searchAttempt.errors);
+            var message = messages.Count > 0
+                ? string.Join("；", messages)
+                : "网易云与 QQ 音乐均无完全同名结果";
+            AddUnresolvedKeyword(query, message);
+            return false;
+        }
+
+        var providerCandidates = candidates
+            .GroupBy(candidate => candidate.Source)
+            .Select(group => group.First())
+            .ToList();
+
+        var fetched = new List<(BatchSongCandidate candidate, SaveVo saveVo, int score)>();
+        var errors = new List<string>();
+
+        foreach (var candidate in providerCandidates)
+        {
+            var rawInput = new InputSongId(candidate.SongId, candidate.Source, SearchTypeEnum.SONG_ID);
+            var inputSongId = new InputSongId(candidate.SongId, rawInput);
+            var result = await Task.Run(() => _searchService.SearchSongs([inputSongId], _settingBean));
+
+            if (!result.TryGetValue(candidate.SongId, out var songResult) || !songResult.IsSuccess())
+            {
+                errors.Add(songResult?.ErrorMsg ?? $"{candidate.Source.ToDescription()} 查询失败");
+                continue;
+            }
+
+            var saveVo = songResult.Data;
+            if (saveVo.LyricVo.IsEmpty())
+            {
+                errors.Add($"{candidate.Source.ToDescription()} 无歌词");
+                continue;
+            }
+
+            var score = ScoreFetchedCandidate(candidate, saveVo, preferredArtist);
+            fetched.Add((candidate, saveVo, score));
+        }
+
+        if (fetched.Count == 0)
+        {
+            AddUnresolvedKeyword(query, errors.Count == 0 ? "完全同名结果没有可用歌词" : string.Join("；", errors));
+            return false;
+        }
+
+        var best = fetched
+            .OrderByDescending(item => item.score)
+            .ThenBy(item => item.candidate.Source == SearchSourceEnum.NET_EASE_MUSIC ? 0 : 1)
+            .First();
+
+        AddKeywordResult(query, best.candidate, best.saveVo);
+        return true;
+    }
+
+    private async Task<bool> ResolveDirectSongAsync(BatchSongQuery query)
+    {
+        var source = query.DirectSource!.Value;
+        var rawInput = new InputSongId(query.DirectSongId!, source, SearchTypeEnum.SONG_ID);
+        var inputSongId = new InputSongId(query.DirectSongId!, rawInput);
+        var result = await Task.Run(() => _searchService.SearchSongs([inputSongId], _settingBean));
+
+        if (!result.TryGetValue(query.DirectSongId!, out var songResult) || !songResult.IsSuccess())
+        {
+            AddUnresolvedKeyword(query, songResult?.ErrorMsg ?? $"{source.ToDescription()} 查询失败");
+            return false;
+        }
+
+        var saveVo = songResult.Data;
+        if (saveVo.LyricVo.IsEmpty())
+        {
+            AddUnresolvedKeyword(query, $"{source.ToDescription()} 无歌词");
+            return false;
+        }
+
+        if (!BatchSongMatcher.DirectSongMatchesQuery(query, saveVo.SongVo.Name, saveVo.SongVo.Singer))
+        {
+            var actualArtist = string.Join(_settingBean.Config.SingerSeparator, saveVo.SongVo.Singer);
+            AddUnresolvedKeyword(
+                query,
+                $"直达链接对应“{saveVo.SongVo.Name}” / {actualArtist}，与输入曲目不一致");
+            return false;
+        }
+
+        var candidate = new BatchSongCandidate(
+            source,
+            query.DirectSongId!,
+            saveVo.SongVo.Name,
+            saveVo.SongVo.Singer,
+            saveVo.SongVo.Album,
+            0);
+        AddKeywordResult(query, candidate, saveVo);
+        return true;
+    }
+
+    private void AddKeywordResult(BatchSongQuery query, BatchSongCandidate candidate, SaveVo saveVo)
+    {
+        var item = Items.FirstOrDefault(existing =>
+            existing.SongId == candidate.SongId && existing.SourceEnum == candidate.Source);
+
+        if (item == null)
+        {
+            item = new BatchSearchItemViewModel();
+            Items.Add(item);
+        }
+
+        _saveMap[candidate.SongId] = saveVo;
+        item.IsKeywordResult = true;
+        item.IsSelected = true;
+        item.RequestedName = query.Title;
+        item.SongId = candidate.SongId;
+        item.SongName = saveVo.SongVo.Name;
+        item.SongSource = GetSourceName(candidate.Source);
+        item.SourceEnum = candidate.Source;
+        item.Singer = string.Join(_settingBean.Config.SingerSeparator, saveVo.SongVo.Singer);
+        item.Album = saveVo.SongVo.Album;
+        item.TranslationStatus = string.IsNullOrWhiteSpace(saveVo.LyricVo.TranslateLyric) ? "无" : "有";
+        item.Status = "Ready";
+        item.Error = string.IsNullOrWhiteSpace(saveVo.LyricVo.TranslateLyric) ? "平台未提供译文" : "";
+        item.Progress = 100;
+    }
+
+    private void AddUnresolvedKeyword(BatchSongQuery query, string error)
+    {
+        Items.Add(new BatchSearchItemViewModel
+        {
+            IsKeywordResult = true,
+            IsSelected = false,
+            RequestedName = query.Title,
+            Singer = query.Artist ?? PreferredArtist,
+            TranslationStatus = "-",
+            Status = "Unresolved",
+            Error = error,
+            Progress = 0
+        });
+    }
+
+    private void ResetBatchResults()
+    {
+        Items.Clear();
+        _saveMap.Clear();
+        _songLinkMap.Clear();
+        RefreshStats();
+    }
+
+    private static int ScoreFetchedCandidate(
+        BatchSongCandidate candidate,
+        SaveVo saveVo,
+        string? preferredArtist)
+    {
+        var score = string.IsNullOrWhiteSpace(saveVo.LyricVo.Lyric) ? 0 : 100;
+        if (!string.IsNullOrWhiteSpace(saveVo.LyricVo.TranslateLyric))
+        {
+            score += 50;
+        }
+
+        if (!string.IsNullOrWhiteSpace(saveVo.LyricVo.TransliterationLyric))
+        {
+            score += 5;
+        }
+
+        if (BatchSongMatcher.ArtistMatches(candidate.Artists, preferredArtist))
+        {
+            score += 20;
+        }
+
+        if (candidate.Source == SearchSourceEnum.NET_EASE_MUSIC)
+        {
+            score += 1;
+        }
+
+        return score;
     }
 
     private void RefreshStats()

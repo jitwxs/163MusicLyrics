@@ -34,7 +34,7 @@ public partial class MainWindowViewModel : ViewModelBase
     
     public SignalLampViewModel LampVm { get; } = new();
 
-    [ObservableProperty] private string _appTitle = "MusicLyricApp v7.3";
+    [ObservableProperty] private string _appTitle = "MusicLyricApp v7.3 Batch";
 
     [ObservableProperty] private string _lastSaveFolderPath = "";
     [ObservableProperty] private string _tipTimestamp = "";
