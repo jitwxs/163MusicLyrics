@@ -55,6 +55,23 @@ public abstract class BaseNativeApi(Func<string> cookieFunc)
         return result;
     }
 
+    protected string SendGet(string url)
+    {
+        using var wc = new WebClient();
+        NetworkClientFactory.ConfigureWebClient(wc);
+        var cookie = cookieFunc.Invoke();
+        if (string.IsNullOrWhiteSpace(cookie))
+        {
+            cookie = _defaultCookie;
+        }
+
+        wc.Encoding = Encoding.UTF8;
+        wc.Headers.Add(HttpRequestHeader.Referer, HttpRefer());
+        wc.Headers.Add(HttpRequestHeader.UserAgent, Useragent);
+        wc.Headers.Add(HttpRequestHeader.Cookie, cookie);
+        return wc.DownloadString(url);
+    }
+
     protected string SendJsonPost(string url, Dictionary<string, object> paramDict)
     {
         using (var wc = new WebClient())

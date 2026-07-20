@@ -82,7 +82,11 @@ public class NetEaseMusicNativeApi : BaseNativeApi
 
         if (code == "50000005")
         {
-            return ResultVo<SearchResult>.Failure(ErrorMsgConst.NEED_LOGIN);
+            var fallbackUrl = "https://music.163.com/api/search/get/web" +
+                              $"?s={Uri.EscapeDataString(keyword)}&type={type}&limit=20&offset=0";
+            obj = (JObject)JsonConvert.DeserializeObject(SendGet(fallbackUrl));
+            code = obj?["code"]?.ToString();
+            result = obj?["result"];
         }
 
         if (result == null || code != "200")
@@ -97,7 +101,26 @@ public class NetEaseMusicNativeApi : BaseNativeApi
             resultStr = NetEaseMusicSearchUtils.Decode(resultStr);
         }
 
+        resultStr = NormalizeLegacySearchResult(resultStr);
         return new ResultVo<SearchResult>(JsonConvert.DeserializeObject<SearchResult>(resultStr));
+    }
+
+    private static string NormalizeLegacySearchResult(string resultStr)
+    {
+        var result = JObject.Parse(resultStr);
+        if (result["songs"] is not JArray songs)
+        {
+            return resultStr;
+        }
+
+        foreach (var song in songs.OfType<JObject>())
+        {
+            song["ar"] ??= song["artists"];
+            song["al"] ??= song["album"];
+            song["dt"] ??= song["duration"];
+        }
+
+        return result.ToString(Formatting.None);
     }
 
     /// <summary>
