@@ -138,7 +138,7 @@ public partial class BatchSearchViewModel : ViewModelBase
             return;
         }
 
-        RemovePreviousKeywordResults();
+        ResetBatchResults();
         IsBatchNameSearching = true;
         var matchedCount = 0;
         var unresolvedCount = 0;
@@ -391,8 +391,15 @@ public partial class BatchSearchViewModel : ViewModelBase
 
         if (candidates.Count == 0)
         {
-            var message = searchAttempt.errors.Count > 0
-                ? string.Join("；", searchAttempt.errors)
+            var messages = new List<string>();
+            if (searchAttempt.results.Any(result => result.SearchSource == SearchSourceEnum.NET_EASE_MUSIC))
+            {
+                messages.Add("网易云：未找到完全同名结果");
+            }
+
+            messages.AddRange(searchAttempt.errors);
+            var message = messages.Count > 0
+                ? string.Join("；", messages)
                 : "网易云与 QQ 音乐均无完全同名结果";
             AddUnresolvedKeyword(query, message);
             return false;
@@ -526,18 +533,12 @@ public partial class BatchSearchViewModel : ViewModelBase
         });
     }
 
-    private void RemovePreviousKeywordResults()
+    private void ResetBatchResults()
     {
-        foreach (var item in Items.Where(item => item.IsKeywordResult).ToList())
-        {
-            if (!string.IsNullOrWhiteSpace(item.SongId))
-            {
-                _saveMap.Remove(item.SongId);
-                _songLinkMap.Remove(item.SongId);
-            }
-
-            Items.Remove(item);
-        }
+        Items.Clear();
+        _saveMap.Clear();
+        _songLinkMap.Clear();
+        RefreshStats();
     }
 
     private static int ScoreFetchedCandidate(

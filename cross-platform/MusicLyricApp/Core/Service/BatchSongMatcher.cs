@@ -23,7 +23,9 @@ public sealed record BatchSongCandidate(
 
 public static class BatchSongMatcher
 {
-    private static readonly Regex ListPrefixRegex = new(@"^\s*(?:[-*+]\s+|\d+[.、)]\s*)", RegexOptions.Compiled);
+    private static readonly Regex ListPrefixRegex = new(
+        @"^\s*(?:[-*+]\s+|\d+[.、)]\s*|(?:M|EN)\s*\d+\s*[:：.、)\-]?\s*)",
+        RegexOptions.Compiled | RegexOptions.IgnoreCase);
     private static readonly Regex MarkdownSeparatorRegex = new(@"^:?-{3,}:?$", RegexOptions.Compiled);
     private static readonly Regex NetEaseSongIdRegex = new(
         @"(?:music\.163\.com/(?:#/)?song\?(?:[^\s|]*&)?id=)(\d+)",

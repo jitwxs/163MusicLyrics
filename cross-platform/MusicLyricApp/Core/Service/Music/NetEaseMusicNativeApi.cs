@@ -108,9 +108,15 @@ public class NetEaseMusicNativeApi : BaseNativeApi
     private static string NormalizeLegacySearchResult(string resultStr)
     {
         var result = JObject.Parse(resultStr);
+        NormalizeLegacySongs(result);
+        return result.ToString(Formatting.None);
+    }
+
+    private static void NormalizeLegacySongs(JObject result)
+    {
         if (result["songs"] is not JArray songs)
         {
-            return resultStr;
+            return;
         }
 
         foreach (var song in songs.OfType<JObject>())
@@ -119,8 +125,6 @@ public class NetEaseMusicNativeApi : BaseNativeApi
             song["al"] ??= song["album"];
             song["dt"] ??= song["duration"];
         }
-
-        return result.ToString(Formatting.None);
     }
 
     /// <summary>
@@ -292,10 +296,11 @@ public class NetEaseMusicNativeApi : BaseNativeApi
     {
         const string url = "https://music.163.com/weapi/v3/song/detail?csrf_token=";
 
+        var requestedIds = inputSongIds.Distinct().ToList();
         var allResults = new List<Song>();
         var cnt = 1;
         
-        foreach (var songIds in GlobalUtils.Batch(inputSongIds, Constants.BatchQuerySize))
+        foreach (var songIds in GlobalUtils.Batch(requestedIds, Constants.BatchQuerySize))
         {
             var songs = songIds.Select(id => new { id });
             var data = new Dictionary<string, string>
@@ -314,6 +319,22 @@ public class NetEaseMusicNativeApi : BaseNativeApi
             if (cnt++ % 2 == 0)
             {
                 Thread.Sleep(Constants.SleepMsBetweenBatchQuery); // sleep 500ms after every two batches
+            }
+        }
+
+        var foundIds = allResults.Select(song => song.Id).ToHashSet();
+        var missingIds = requestedIds.Where(id => !foundIds.Contains(id)).ToList();
+        foreach (var songIds in GlobalUtils.Batch(missingIds, Constants.BatchQuerySize))
+        {
+            var idList = $"[{string.Join(',', songIds)}]";
+            var fallbackUrl = "https://music.163.com/api/song/detail/" +
+                              $"?ids={Uri.EscapeDataString(idList)}";
+            var fallbackObject = JObject.Parse(SendGet(fallbackUrl));
+            NormalizeLegacySongs(fallbackObject);
+            var fallbackResult = fallbackObject.ToObject<DetailResult>();
+            if (fallbackResult?.Code == 200 && fallbackResult.Songs != null)
+            {
+                allResults.AddRange(fallbackResult.Songs.Where(song => foundIds.Add(song.Id)));
             }
         }
         

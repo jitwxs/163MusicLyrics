@@ -16,6 +16,19 @@ public class BatchSongMatcherTest
             query => Assert.Equal("音一会", query.Title));
     }
 
+    [Theory]
+    [InlineData("M5 処救生", "処救生")]
+    [InlineData("M17 羅永線", "羅永線")]
+    [InlineData("EN1 影色舞", "影色舞")]
+    [InlineData("EN2 音一会", "音一会")]
+    [InlineData("m6: 歌いましょう鳴らしましょう", "歌いましょう鳴らしましょう")]
+    public void ParseQueries_StripsLiveSetCuePrefixes(string input, string expectedTitle)
+    {
+        var query = Assert.Single(BatchSongMatcher.ParseQueries(input));
+
+        Assert.Equal(expectedTitle, query.Title);
+    }
+
     [Fact]
     public void ParseQueries_HandlesMarkdownRowsAndSkipsHeader()
     {
