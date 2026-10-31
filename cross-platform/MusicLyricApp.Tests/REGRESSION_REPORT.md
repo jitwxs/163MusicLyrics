@@ -6,12 +6,12 @@
 
 | 检查 | 结果 |
 | --- | --- |
-| Debug 默认测试 + 覆盖率 | 200 通过，0 失败，3 个在线探测按设计跳过 |
-| Release 离线回归 | 200 通过，0 失败 |
+| Debug 离线回归 | 203 通过，0 失败，3 个在线探测按设计跳过 |
+| Release 离线回归 | 203 通过，0 失败 |
 | 单独启用真实服务探测 | 3 通过，0 失败 |
 | `git diff --check` | 通过 |
 
-原有 56 项测试保留，新增 144 项离线用例及 3 项在线探测，共 203 项。参数化测试按实际执行的独立数据行计数。
+原有 56 项测试保留，新增 147 项离线用例及 3 项在线探测，共 206 项。参数化测试按实际执行的独立数据行计数。
 
 真实探测验证网易云及 QQ 的匿名歌曲信息/歌词接口，以及 GitHub 最新版本接口。首次 QQ 探测使用原链接解析测试中的 `003ODsL83GwKj4`，返回 `code=0` 但歌曲数组为空，故该次探测失败。随后对照 `QQMusicNativeApi.GetSong` 源码注明的 `001RaE0n4RrGX9` / `204422870` 样本，确认歌曲信息存在，改用该样本重新执行，3 项均通过。该结果仅代表这些样本在本次执行时可访问，不代表所有曲目和登录态接口均可用。
 
@@ -25,6 +25,9 @@
 | 批量保存时跳过项显示为 Saved | 复用保存预检规则，把跳过项标为 Skipped 并记录原因 | `BatchSkippedSongsMustNotBeMarkedSaved` |
 | 切换输出格式清空歌曲元数据及音频直链 | 格式刷新只更新歌词文本 | `SearchDownloadAndSaveFlowThroughMainCommands` |
 | macOS/Linux 获取歌曲直链后误报不支持播放器 | 自动准备播放仅在平台支持时执行；保留直链和下载能力 | `SearchDownloadAndSaveFlowThroughMainCommands`、平台能力断言 |
+| QQ 关键字搜索缺少服务端必需的公共参数 | 在请求中加入 `comm`（ct/cv/uin/format/platform），保留各搜索类型参数 | `QQMusicNativeApiTests.KeywordSearchSendsRequiredCommAndSearchParameters` |
+
+Issue #333 修复验证：修复前本机请求返回 `top=0; req_1=2001`，修复后同一关键词请求返回 `top=0; req_1=0`。单测捕获并检查最终序列化请求体，不依赖外部网络。
 
 兼容性说明：历史磁盘缓存没有逐字模式标记，歌词部分会按未命中重新获取；不删除用户缓存文件。标准模式和 A2 模式仍可共享同一份原始逐字缓存。
 
@@ -54,7 +57,7 @@ Debug Coverlet/Cobertura 原始报告：整体行覆盖 **48.20%（4103 / 8512�
 - `TestResults/regression.trx`：Debug 离线与默认跳过结果。
 - `TestResults/regression-release.trx`：Release 离线结果。
 - `TestResults/live.trx`：最终 3 项真实服务探测结果。
-- `TestResults/ff4c0103-ca6c-4533-a71f-b3edc00b2926/coverage.cobertura.xml`：本次 Debug 覆盖率。
+- `TestResults/4ed4d1aa-4a85-4521-b8db-23b99776fb98/coverage.cobertura.xml`：本次 Debug 覆盖率。
 
 以上文件留在本地、已被 Git 忽略；再次执行测试可重新生成。源码和本报告可纳入版本控制。构建仍有已有的可空性、废弃 API 等警告，本次没有把这些警告当作全部已修复。
 

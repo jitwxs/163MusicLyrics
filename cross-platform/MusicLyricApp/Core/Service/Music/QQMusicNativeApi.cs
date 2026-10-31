@@ -47,6 +47,16 @@ public class QQMusicNativeApi(Func<string> cookieFunc) : BaseNativeApi(cookieFun
         var data = new Dictionary<string, object>
         {
             {
+                "comm", new Dictionary<string, object>
+                {
+                    { "ct", 24 },
+                    { "cv", 0 },
+                    { "uin", "0" },
+                    { "format", "json" },
+                    { "platform", "yqq" },
+                }
+            },
+            {
                 "req_1", new Dictionary<string, object>
                 {
                     { "method", "DoSearchForQQMusicDesktop" },

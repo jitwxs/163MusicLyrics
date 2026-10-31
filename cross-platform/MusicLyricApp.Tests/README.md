@@ -20,7 +20,7 @@ dotnet test cross-platform/MusicLyricApp.sln \
   --collect:'XPlat Code Coverage'
 ```
 
-默认运行 200 项离线测试，显式跳过 3 项外部服务探测。TRX 和 Cobertura XML 输出到本目录的 `TestResults/`（已被 Git 忽略）。覆盖率反映代码执行情况，不代表所有平台、接口或业务组合均已验证。
+默认运行 203 项离线测试，显式跳过 3 项外部服务探测。TRX 和 Cobertura XML 输出到本目录的 `TestResults/`（已被 Git 忽略）。覆盖率反映代码执行情况，不代表所有平台、接口或业务组合均已验证。
 
 发布配置回归：
 
@@ -44,6 +44,7 @@ MUSICLYRIC_LIVE_TESTS=1 dotnet test cross-platform/MusicLyricApp.sln \
 | 测试文件 | 主要验证行为 |
 | --- | --- |
 | `Regression/SearchRegressionTests.cs` | ID/链接解析、提供商识别、专辑/歌单展开、目录导入、查询错误、磁盘缓存复用、普通/逐字请求、聚合模糊搜索、结果元数据 |
+| `Regression/QQMusicNativeApiTests.cs` | QQ 单曲/专辑/歌单关键词搜索请求载荷，验证服务端要求的公共 `comm` 参数和搜索类型映射 |
 | `Regression/LyricsRegressionTests.cs` | 双语交错/合并/独立、分文件、译文缺失策略、时间误差匹配、简繁转换、音译、空行、纯音乐、LRC/SRT 转换 |
 | `Regression/StorageRegressionTests.cs` | 实际临时文件写入、4 种编码、覆盖/编号、文件名模板、纯音乐跳过、批量统计、目录取消与记忆、剪贴板契约、封面/音频下载及失败 |
 | `Regression/CacheAndSettingsRegressionTests.cs` | 设置持久化与旧配置兼容、缓存损坏/缺失/容量淘汰/来源隔离、代理配置、翻译凭据选择和语言支持、翻译缓存、更新比较与错误 |
