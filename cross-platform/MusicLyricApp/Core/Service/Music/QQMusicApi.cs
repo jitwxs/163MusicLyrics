@@ -10,9 +10,9 @@ public class QQMusicApi : MusicCacheableApi
 {
     private readonly QQMusicNativeApi _api;
 
-    public QQMusicApi(Func<string> cookieAction)
+    public QQMusicApi(Func<string> cookieAction, QQMusicNativeApi? api = null)
     {
-        _api = new QQMusicNativeApi(cookieAction);
+        _api = api ?? new QQMusicNativeApi(cookieAction);
     }
 
     protected override SearchSourceEnum Source0()
@@ -23,18 +23,23 @@ public class QQMusicApi : MusicCacheableApi
     protected override ResultVo<PlaylistVo> GetPlaylistVo0(string playlistId)
     {
         var resp = _api.GetPlaylist(playlistId);
-        if (resp.Code == 0)
-        {
-            // cache song
-            GlobalCache.DoCache(Source(), CacheType.QQ_MUSIC_SONG, value => value.Id, resp.Cdlist[0].SongList);
-            GlobalCache.DoCache(Source(), CacheType.QQ_MUSIC_SONG, value => value.Mid, resp.Cdlist[0].SongList);
-
-            return new ResultVo<PlaylistVo>(resp.Convert());
-        }
-        else
+        var playlist = resp?.Cdlist?.FirstOrDefault(item => item != null);
+        if (resp?.Code != 0 || playlist == null)
         {
             return ResultVo<PlaylistVo>.Failure(ErrorMsgConst.PLAYLIST_NOT_EXIST);
         }
+
+        playlist.SongList = (playlist.SongList ?? [])
+            .Where(song => song != null && !string.IsNullOrWhiteSpace(song.Id) && !string.IsNullOrWhiteSpace(song.Mid))
+            .ToArray();
+
+        foreach (var song in playlist.SongList)
+        {
+            GlobalCache.DoCache(Source(), CacheType.QQ_MUSIC_SONG, song.Id, song);
+            GlobalCache.DoCache(Source(), CacheType.QQ_MUSIC_SONG, song.Mid, song);
+        }
+
+        return new ResultVo<PlaylistVo>(resp.Convert());
     }
 
     protected override ResultVo<AlbumVo> GetAlbumVo0(string albumId)
@@ -59,7 +64,7 @@ public class QQMusicApi : MusicCacheableApi
             ResultVo<QQMusicBean.Song> SongCacheFunc()
             {
                 var resp = _api.GetSong(songId);
-                return resp.IsIllegal()
+                return resp == null || resp.IsIllegal()
                     ? ResultVo<QQMusicBean.Song>.Failure(ErrorMsgConst.SONG_NOT_EXIST)
                     : new ResultVo<QQMusicBean.Song>(resp.Data[0]);
             }
@@ -71,13 +76,16 @@ public class QQMusicApi : MusicCacheableApi
                 {
                     Id = songRes.Data.Id,
                     DisplayId = songRes.Data.Mid,
-                    Pics = $"https://y.qq.com/music/photo_new/T002R800x800M000{songRes.Data.Album.Pmid}.jpg",
+                    Pics = string.IsNullOrWhiteSpace(songRes.Data.Album?.Pmid)
+                        ? string.Empty
+                        : $"https://y.qq.com/music/photo_new/T002R800x800M000{songRes.Data.Album.Pmid}.jpg",
                     // #212 QQ music need use title attribute as song name
-                    Name = GlobalUtils.GetOrDefault(songRes.Data.Title, songRes.Data.Name),
-                    Singer = songRes.Data.Singer.Select(e => e.Name).ToArray(),
-                    Album = songRes.Data.Album.Name,
+                    Name = GlobalUtils.GetOrDefault(songRes.Data.Title, songRes.Data.Name ?? string.Empty),
+                    Singer = songRes.Data.Singer?.Where(singer => singer != null)
+                        .Select(singer => singer.Name ?? string.Empty).ToArray() ?? [],
+                    Album = songRes.Data.Album?.Name ?? string.Empty,
                     Duration = songRes.Data.Interval * 1000,
-                    PublishDate = songRes.Data.Time_public
+                    PublishDate = songRes.Data.Time_public ?? string.Empty
                 });
             }
             else

@@ -306,13 +306,20 @@ public class QQMusicBean
 
         public PlaylistVo Convert()
         {
-            var playlist = Cdlist[0];
+            var playlist = Cdlist?.FirstOrDefault(item => item != null);
+            if (playlist == null)
+            {
+                return new PlaylistVo { SimpleSongVos = [] };
+            }
+
             return new PlaylistVo
             {
-                Name = playlist.Dissname,
-                AuthorName = playlist.Nickname,
-                Description = playlist.Desc,
-                SimpleSongVos = playlist.SongList.Select(e => e.ConvertSimple()).ToArray()
+                Name = playlist.Dissname ?? string.Empty,
+                AuthorName = playlist.Nickname ?? string.Empty,
+                Description = playlist.Desc ?? string.Empty,
+                SimpleSongVos = (playlist.SongList ?? [])
+                    .Where(song => song != null && !string.IsNullOrWhiteSpace(song.Id) && !string.IsNullOrWhiteSpace(song.Mid))
+                    .Select(song => song.ConvertSimple()).ToArray()
             };
         }
     }
@@ -328,7 +335,7 @@ public class QQMusicBean
 
         public bool IsIllegal()
         {
-            return Code != 0 || Data.Length == 0;
+            return Code != 0 || Data == null || Data.Length == 0 || Data[0] == null;
         }
     }
 
@@ -470,10 +477,10 @@ public class QQMusicBean
         {
             return new SimpleSongVo
             {
-                Id = Id,
-                DisplayId = Mid,
-                Name = Name,
-                Singer = Singer.Select(e => e.Name).ToArray()
+                Id = Id ?? string.Empty,
+                DisplayId = Mid ?? string.Empty,
+                Name = Name ?? string.Empty,
+                Singer = Singer?.Where(singer => singer != null).Select(singer => singer.Name ?? string.Empty).ToArray() ?? []
             };
         }
     }
