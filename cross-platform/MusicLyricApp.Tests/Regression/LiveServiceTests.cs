@@ -44,6 +44,33 @@ public class LiveServiceTests
     }
 
     [LiveFact]
+    public async Task Issue297QqSongRetainsLineEndCuesWhenEmptyLinesAreEnabled()
+    {
+        const string songId = "331449";
+        var api = new QQMusicApi(() => "");
+        var songs = api.GetSongVo([songId]);
+        Assert.True(songs.TryGetValue(songId, out var song), "QQ Music did not return the issue's test song.");
+        Assert.True(song!.IsSuccess(), song.ErrorMsg);
+        Assert.Contains("The Winner Takes It All", song.Data.Name);
+
+        var lyrics = api.GetLyricVo(song.Data.Id, song.Data.DisplayId, false);
+        Assert.True(lyrics.IsSuccess(), lyrics.ErrorMsg);
+        var settings = new SettingBean();
+        settings.Config.OutputLyricTypes = "0";
+        settings.Config.IgnoreEmptyLyric = false;
+        var lines = Assert.Single(await LyricUtils.GetOutputContent(lyrics.Data, settings)).Split(Environment.NewLine);
+        Assert.Contains("[00:34.400]", lines);
+        Assert.Contains("[00:39.648]", lines);
+        Assert.Contains("[00:46.877]", lines);
+
+        settings.Config.IgnoreEmptyLyric = true;
+        lines = Assert.Single(await LyricUtils.GetOutputContent(lyrics.Data, settings)).Split(Environment.NewLine);
+        Assert.DoesNotContain("[00:34.400]", lines);
+        Assert.DoesNotContain("[00:39.648]", lines);
+        Assert.DoesNotContain("[00:46.877]", lines);
+    }
+
+    [LiveFact]
     public void QQSongMetadataAndLyrics()
     {
         // Sample song MID documented by QQMusicNativeApi.GetSong.

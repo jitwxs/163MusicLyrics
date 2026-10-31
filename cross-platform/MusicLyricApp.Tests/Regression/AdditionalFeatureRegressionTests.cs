@@ -28,7 +28,8 @@ public class AdditionalFeatureRegressionTests
     public void QQWordTimingsConvertToOrdinaryAndVerbatimLyrics()
     {
         const string input = "[1000,1000]你(1000,500)好(1500,500)";
-        Assert.Equal("[00:01.000]你好" + Environment.NewLine, VerbatimLyricUtils.ConvertVerbatimLyricToCommonLyric4QQMusic(input));
+        Assert.Equal("[00:01.000]你好" + Environment.NewLine + "[00:02.000]" + Environment.NewLine,
+            VerbatimLyricUtils.ConvertVerbatimLyricToCommonLyric4QQMusic(input));
         Assert.Equal("[00:01.000]你[00:01.500]好[00:02.000]" + Environment.NewLine, VerbatimLyricUtils.DealVerbatimLyric4QQMusic(input));
     }
 

@@ -150,6 +150,28 @@ public class LyricsRegressionTests
         Assert.Equal(expected.Replace("\n", Environment.NewLine), Assert.Single(await LyricUtils.GetOutputContent(new LyricVo { Lyric = "[00:01.000]\n[00:02.000]hello" }, settings)));
     }
 
+    [Theory]
+    [InlineData(false, "[00:32.775]I don't wanna talk\n[00:34.400]\n[00:36.707]About things we've gone through\n[00:39.648]\n[00:40.626]Though it's hurting me now it's history\n[00:46.877]")]
+    [InlineData(true, "[00:32.775]I don't wanna talk\n[00:36.707]About things we've gone through\n[00:40.626]Though it's hurting me now it's history")]
+    public async Task QqCommonLyricsHonorEmptyLineSettingForLineEndCues(bool ignore, string expected)
+    {
+        const string qqLyrics = "[32775,1625]I (32775,268)don't (33043,397)wanna (33440,216)talk(33656,744)\n" +
+                                "[36707,2941]About (36707,677)things (37384,552)we've (37936,224)gone (38160,344)through(38504,1144)\n" +
+                                "[40626,6251]Though (40626,272)it's (40898,225)hurting (41123,504)me (41627,705)now (44229,639)it's (44868,264)history(45132,1745)";
+        var commonLyrics = VerbatimLyricUtils.ConvertVerbatimLyricToCommonLyric4QQMusic(qqLyrics);
+        var settings = new SettingBean();
+        settings.Config.OutputLyricTypes = "0";
+        settings.Config.IgnoreEmptyLyric = ignore;
+
+        var output = await LyricUtils.GetOutputContent(new LyricVo
+        {
+            SearchSource = SearchSourceEnum.QQ_MUSIC,
+            Lyric = commonLyrics
+        }, settings);
+
+        Assert.Equal(expected.Replace("\n", Environment.NewLine), Assert.Single(output));
+    }
+
     [Fact]
     public async Task QQHeaderIsRemoved()
     {
