@@ -420,6 +420,27 @@ public partial class MainWindowViewModel : ViewModelBase
     }
 
     [RelayCommand]
+    private async Task ExecuteCopySongLinkAsync()
+    {
+        var link = SearchResultViewModel.SongLink;
+        if (string.IsNullOrWhiteSpace(link))
+        {
+            SetTip("当前没有可复制的歌曲直链。", true);
+            return;
+        }
+
+        try
+        {
+            await _windowProvider.SetTextAsync(link);
+            SetTip("歌曲直链已复制到剪贴板。", false);
+        }
+        catch (Exception ex)
+        {
+            SetTip($"复制歌曲直链失败：{ex.Message}", true);
+        }
+    }
+
+    [RelayCommand]
     private async Task ExecuteSongLinkAsync()
     {
         try

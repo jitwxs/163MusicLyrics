@@ -127,10 +127,17 @@
                                 </TextBlock>
                             </WrapPanel>
 
-                            <TextBlock Foreground="#667085" TextTrimming="CharacterEllipsis">
-                                <Run Text="直链: " />
-                                <Run Text="{Binding SearchResultViewModel.SongLink, Mode=OneWay}" />
-                            </TextBlock>
+                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                <TextBlock Foreground="#667085" TextTrimming="CharacterEllipsis" VerticalAlignment="Center">
+                                    <Run Text="直链: " />
+                                    <Run Text="{Binding SearchResultViewModel.SongLink, Mode=OneWay}" />
+                                </TextBlock>
+                                <Button Grid.Column="1"
+                                        Content="复制"
+                                        Padding="8,2"
+                                        IsEnabled="{Binding HasSongLink}"
+                                        Command="{Binding ExecuteCopySongLinkCommand}" />
+                            </Grid>
                         </StackPanel>
 
                         <Border Grid.Column="1"
