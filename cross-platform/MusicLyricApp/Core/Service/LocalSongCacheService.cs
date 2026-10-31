@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Linq;
 using MusicLyricApp.Core.Utils;
+using MusicLyricApp.Core.Localization;
 using MusicLyricApp.Models;
 using NLog;
 
@@ -37,7 +38,8 @@ public static class LocalSongCacheService
 
             var text = File.ReadAllText(path);
             var entry = text.ToEntity<LocalSongCacheEntry>();
-            if (entry?.SongVo == null || entry.LyricVo == null)
+            if (entry?.SongVo == null || entry.LyricVo == null ||
+                entry.IsVerbatim != (settingBean.Config.VerbatimLyricMode != VerbatimLyricModeEnum.DISABLE))
             {
                 return false;
             }
@@ -103,6 +105,7 @@ public static class LocalSongCacheService
             entry.Index = saveVo.Index;
             entry.SongVo = saveVo.SongVo;
             entry.LyricVo = saveVo.LyricVo;
+            entry.IsVerbatim = settingBean.Config.VerbatimLyricMode != VerbatimLyricModeEnum.DISABLE;
             if (!string.IsNullOrWhiteSpace(songLink))
             {
                 entry.SongLink = songLink;
@@ -163,8 +166,8 @@ public static class LocalSongCacheService
         EnsureConfigDefaults(settingBean);
         var sourceName = source switch
         {
-            SearchSourceEnum.NET_EASE_MUSIC => "网易云",
-            SearchSourceEnum.QQ_MUSIC => "QQ音乐",
+            SearchSourceEnum.NET_EASE_MUSIC => LocalizationService.Get("Status.Search.SourceNetEase"),
+            SearchSourceEnum.QQ_MUSIC => LocalizationService.Get("Status.Search.SourceQQ"),
             _ => source.ToString()
         };
         var filename = $"{sourceName}_{songId}.json";
@@ -206,6 +209,8 @@ public static class LocalSongCacheService
         public int Index { get; set; }
         public SongVo? SongVo { get; set; }
         public LyricVo? LyricVo { get; set; }
+        // Older cache entries have no mode information and must be fetched again.
+        public bool? IsVerbatim { get; set; }
         public string SongLink { get; set; } = "";
         public DateTime UpdatedAt { get; set; }
     }

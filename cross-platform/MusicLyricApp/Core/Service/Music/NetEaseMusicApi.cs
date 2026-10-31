@@ -1,17 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using MusicLyricApp.Core.Utils;
 using MusicLyricApp.Models;
 using NLog;
 
 namespace MusicLyricApp.Core.Service.Music;
 
-public class NetEaseMusicApi(Func<string> cookieFunc) : MusicCacheableApi
+public class NetEaseMusicApi : MusicCacheableApi
 {
     private readonly Logger _logger = LogManager.GetCurrentClassLogger();
         
-    private readonly NetEaseMusicNativeApi _api = new(cookieFunc);
+    private readonly NetEaseMusicNativeApi _api;
+
+    public NetEaseMusicApi(Func<string> cookieFunc, NetEaseMusicNativeApi? api = null)
+    {
+        _api = api ?? new NetEaseMusicNativeApi(cookieFunc);
+    }
 
     protected override SearchSourceEnum Source0()
     {
@@ -147,7 +153,7 @@ public class NetEaseMusicApi(Func<string> cookieFunc) : MusicCacheableApi
         {
             if (resp.Yrc != null)
             {
-                vo.Lyric = VerbatimLyricUtils.DealVerbatimLyric4NetEaseMusic(resp.Yrc.Lyric);
+                vo.Lyric = VerbatimLyricUtils.DealVerbatimLyric4NetEaseMusic(WebUtility.HtmlDecode(resp.Yrc.Lyric));
             }
             // not support translate && Transliteration in common mode
         }
@@ -155,15 +161,15 @@ public class NetEaseMusicApi(Func<string> cookieFunc) : MusicCacheableApi
         {
             if (resp.Lrc != null)
             {
-                vo.Lyric = resp.Lrc.Lyric;
+                vo.Lyric = WebUtility.HtmlDecode(resp.Lrc.Lyric);
             }
             if (resp.Tlyric != null)
             {
-                vo.TranslateLyric = resp.Tlyric.Lyric;
+                vo.TranslateLyric = WebUtility.HtmlDecode(resp.Tlyric.Lyric);
             }
             if (resp.Romalrc != null)
             {
-                vo.TransliterationLyric = resp.Romalrc.Lyric;
+                vo.TransliterationLyric = WebUtility.HtmlDecode(resp.Romalrc.Lyric);
             }
         }
 

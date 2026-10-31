@@ -8,9 +8,18 @@
     <Application.DataTemplates>
         <local:ViewLocator/>
     </Application.DataTemplates>
+
+    <Application.Resources>
+        <DataTemplate x:Key="LocalizedDisplayNameTemplate">
+            <TextBlock Text="{ReflectionBinding DisplayName}" />
+        </DataTemplate>
+    </Application.Resources>
   
     <Application.Styles>
         <FluentTheme />
+        <Style Selector="ComboBox">
+            <Setter Property="ItemTemplate" Value="{StaticResource LocalizedDisplayNameTemplate}" />
+        </Style>
         <StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml"/>
     </Application.Styles>
 </Application>

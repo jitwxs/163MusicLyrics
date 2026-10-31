@@ -2,6 +2,7 @@
 using Avalonia.Controls;
 using MusicLyricApp.Models;
 using MusicLyricApp.ViewModels;
+using MusicLyricApp.Core.Localization;
 
 namespace MusicLyricApp.Views;
 
@@ -11,7 +12,7 @@ public class BlurSearchWindow : Window
 
     public BlurSearchWindow(List<SearchResultVo> searchResList)
     {
-        Title = "搜索结果";
+        LocalizationService.BindWindowTitle(this, "Window.BlurSearch.Title");
         Width = 1400;
         Height = 700;
         Icon = Constants.GetIcon("search-result");

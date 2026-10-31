@@ -1,6 +1,7 @@
 ﻿using Avalonia.Controls;
 using MusicLyricApp.Core.Service;
 using MusicLyricApp.Models;
+using MusicLyricApp.Core.Localization;
 using MusicLyricApp.ViewModels;
 
 namespace MusicLyricApp.Views;
@@ -11,7 +12,7 @@ public class SettingWindow : Window
     {
         Width = 600;
         Height = 700;
-        Title = "设置";
+        LocalizationService.BindWindowTitle(this, "Window.Settings.Title");
 
         Content = new SettingView();
         DataContext = new SettingViewModel(settingBean, windowProvider);

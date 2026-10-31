@@ -19,6 +19,7 @@ using NAudio.Wave;
 using MusicLyricApp.Core;
 using MusicLyricApp.Core.Service;
 using MusicLyricApp.Core.Utils;
+using MusicLyricApp.Core.Localization;
 using MusicLyricApp.Models;
 using MusicLyricApp.ViewModels.Messages;
 using MusicLyricApp.Views;
@@ -27,14 +28,14 @@ namespace MusicLyricApp.ViewModels;
 
 public partial class MainWindowViewModel : ViewModelBase
 {
-    public bool IsPlaybackSupported => OperatingSystem.IsWindows();
+    public virtual bool IsPlaybackSupported => OperatingSystem.IsWindows();
     public SearchParamViewModel SearchParamViewModel { get; } = new();
 
     public SearchResultViewModel SearchResultViewModel { get; } = new();
     
     public SignalLampViewModel LampVm { get; } = new();
 
-    [ObservableProperty] private string _appTitle = "MusicLyricApp v7.3";
+    [ObservableProperty] private string _appTitle = "MusicLyricApp v7.4";
 
     [ObservableProperty] private string _lastSaveFolderPath = "";
     [ObservableProperty] private string _tipTimestamp = "";
@@ -99,14 +100,17 @@ public partial class MainWindowViewModel : ViewModelBase
     }
 
     // Main constructor for runtime use
-    public MainWindowViewModel(IWindowProvider windowProvider)
+    public MainWindowViewModel(IWindowProvider windowProvider, StorageService? storageService = null,
+        SearchService? searchService = null)
     {
         _windowProvider = windowProvider;
+        _storageService = storageService ?? new StorageService();
 
         _settingBean = _storageService.ReadAppConfig();
+        LocalizationService.Instance.SetLanguage(_settingBean.Config.Language);
         NetworkClientFactory.Configure(_settingBean.Config);
 
-        _searchService = new SearchService(_settingBean);
+        _searchService = searchService ?? new SearchService(_settingBean);
         
         _storageService.SetSearchService(_searchService);
         _downloadManagerViewModel = new BatchSearchViewModel(_settingBean, _searchService, _storageService, _windowProvider);
@@ -236,7 +240,7 @@ public partial class MainWindowViewModel : ViewModelBase
                 }
             }
 
-            SetTip("已从下载管理缓存加载歌曲详情。", false);
+            SetTip(LocalizationService.Get("Status.Main.DetailsFromCache"), false);
             return;
         }
 
@@ -268,12 +272,12 @@ public partial class MainWindowViewModel : ViewModelBase
         var saveVo = SearchResultViewModel.SaveVoMap.Values.First();
         if (saveVo.LyricVo.IsEmpty())
         {
-            SearchResultViewModel.ResetConsoleOutput(string.Empty);
+            SearchResultViewModel.ConsoleOutput = string.Empty;
             return;
         }
 
         var content = await LyricUtils.GetOutputContent(saveVo.LyricVo, SettingBean);
-        SearchResultViewModel.ResetConsoleOutput(GlobalUtils.MergeStr(content));
+        SearchResultViewModel.ConsoleOutput = GlobalUtils.MergeStr(content);
     }
 
     [RelayCommand]
@@ -304,7 +308,7 @@ public partial class MainWindowViewModel : ViewModelBase
             {
                 ResetPlaybackAndSongLink();
                 await _searchService.RenderSearchResult(SearchParamViewModel, SearchResultViewModel, SettingBean, result);
-                if (SearchResultViewModel.ConsoleOutput == ErrorMsgConst.LRC_NOT_EXIST)
+                if (SearchResultViewModel.SaveVoMap.Values.Any(saveVo => saveVo.LyricVo.IsEmpty()))
                 {
                     SearchResultViewModel.ConsoleOutput = "";
                     SetTip(ErrorMsgConst.LRC_NOT_EXIST, true);
@@ -326,7 +330,7 @@ public partial class MainWindowViewModel : ViewModelBase
 
                 if (localCacheHitCount > 0)
                 {
-                    SetTip("命中本地缓存", false);
+                    SetTip(LocalizationService.Get("Status.Main.CacheHit"), false);
                 }
             }
             else
@@ -334,7 +338,7 @@ public partial class MainWindowViewModel : ViewModelBase
                 ExecuteOpenDownloadManager();
                 SearchResultViewModel.SaveVoMap.Clear();
                 SearchResultViewModel.ResetConsoleOutput("");
-                SetTip("已打开下载管理窗口。", false);
+                SetTip(LocalizationService.Get("Status.Main.DownloadOpened"), false);
             }
         }
         catch (Exception ex)
@@ -382,7 +386,7 @@ public partial class MainWindowViewModel : ViewModelBase
                     }
 
                     _blurSearchWindow.Activate();
-                    SetTip($"模糊搜索成功，共 {resultVos.Count} 组结果。", false);
+                    SetTip(LocalizationService.Format("Status.Main.BlurSuccess", resultVos.Count), false);
                     return;
                 }
             }
@@ -391,7 +395,7 @@ public partial class MainWindowViewModel : ViewModelBase
             _blurSearchWindow = new BlurSearchWindow(resultVos);
             _blurSearchWindow.Closed += (_, _) => _blurSearchWindow = null;
             _blurSearchWindow.Show();
-            SetTip($"模糊搜索成功，共 {resultVos.Count} 组结果。", false);
+            SetTip(LocalizationService.Format("Status.Main.BlurSuccess", resultVos.Count), false);
         }
         catch (Exception ex)
         {
@@ -414,6 +418,27 @@ public partial class MainWindowViewModel : ViewModelBase
             {
                 SetTip(ex.Message, true);
             }
+        }
+    }
+
+    [RelayCommand]
+    private async Task ExecuteCopySongLinkAsync()
+    {
+        var link = SearchResultViewModel.SongLink;
+        if (string.IsNullOrWhiteSpace(link))
+        {
+            SetTip(LocalizationService.Get("Status.Main.NoSongUrl"), true);
+            return;
+        }
+
+        try
+        {
+            await _windowProvider.SetTextAsync(link);
+            SetTip(LocalizationService.Get("Status.Main.SongUrlCopied"), false);
+        }
+        catch (Exception ex)
+        {
+            SetTip(LocalizationService.Format("Status.Main.CopySongUrlFailed", ex.Message), true);
         }
     }
 
@@ -456,8 +481,11 @@ public partial class MainWindowViewModel : ViewModelBase
             return;
         }
 
-        EnsurePlaybackPrepared();
-        UpdatePlaybackProgress();
+        if (IsPlaybackSupported)
+        {
+            EnsurePlaybackPrepared();
+            UpdatePlaybackProgress();
+        }
     }
 
     private void UpdatePlaybackProgress()
@@ -513,7 +541,7 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         if (!IsPlaybackSupported)
         {
-            SetTip("当前平台不支持内置播放器。", true);
+            SetTip(LocalizationService.Get("Status.Main.UnsupportedPlayer"), true);
             return;
         }
 
@@ -605,14 +633,14 @@ public partial class MainWindowViewModel : ViewModelBase
             _waveOut.Pause();
             _playbackTimer.Stop();
             IsPlayingSong = false;
-            SetTip("已暂停播放。", false);
+            SetTip(LocalizationService.Get("Status.Main.PlaybackPaused"), false);
         }
         else
         {
             _waveOut.Play();
             _playbackTimer.Start();
             IsPlayingSong = true;
-            SetTip("继续播放。", false);
+            SetTip(LocalizationService.Get("Status.Main.PlaybackResumed"), false);
         }
     }
 
@@ -626,7 +654,7 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         if (!IsPlaybackSupported)
         {
-            SetTip("当前平台不支持内置播放器。", true);
+            SetTip(LocalizationService.Get("Status.Main.UnsupportedPlayer"), true);
             return false;
         }
 
@@ -661,7 +689,7 @@ public partial class MainWindowViewModel : ViewModelBase
         catch (Exception ex)
         {
             StopPlaybackInternal(resetPosition: true, disposePlayer: true);
-            SetTip($"播放器初始化失败：{ex.Message}", true);
+            SetTip(LocalizationService.Format("Status.Main.PlayerInitFailed", ex.Message), true);
             return false;
         }
     }
@@ -726,10 +754,9 @@ public partial class MainWindowViewModel : ViewModelBase
     private async Task ExecuteShortCutAsync()
     {
         var sb = new StringBuilder();
-        sb
-            .Append("精确搜索: \t Enter").Append(Environment.NewLine)
-            .Append("模糊搜索: \t Ctrl + Enter").Append(Environment.NewLine)
-            .Append("保存结果: \t Ctrl + S").Append(Environment.NewLine);
+        sb.Append(LocalizationService.Get("Shortcut.ExactSearch")).Append(Environment.NewLine)
+            .Append(LocalizationService.Get("Shortcut.FuzzySearch")).Append(Environment.NewLine)
+            .Append(LocalizationService.Get("Shortcut.Save")).Append(Environment.NewLine);
         
         await DialogHelper.ShowMessage(sb.ToString());
     }
@@ -795,7 +822,7 @@ public partial class MainWindowViewModel : ViewModelBase
                 
                 await Dispatcher.UIThread.InvokeAsync(async () =>
                 {
-                    var box = MessageBoxManager.GetMessageBoxStandard("更新说明", content, ButtonEnum.YesNo);
+                    var box = MessageBoxManager.GetMessageBoxStandard(LocalizationService.Get("Dialog.ReleaseNotes.Title"), content, ButtonEnum.YesNo);
                     var result = await box.ShowWindowAsync();
     
                     if (result == ButtonResult.Yes)
@@ -835,7 +862,7 @@ public partial class MainWindowViewModel : ViewModelBase
         {
             await _storageService.SelectFolderAndRememberAsync(SettingBean, _windowProvider);
             LastSaveFolderPath = SettingBean.Config.LastSaveFolderPath;
-            SetTip($"保存路径已更新：{LastSaveFolderPath}", false);
+            SetTip(LocalizationService.Format("Status.Main.SavePathUpdated", LastSaveFolderPath), false);
         }
         catch (Exception ex)
         {
@@ -891,6 +918,6 @@ public partial class MainWindowViewModel : ViewModelBase
         _batchSearchWindow = new BatchSearchWindow(_downloadManagerViewModel);
         _batchSearchWindow.Closed += (_, _) => _batchSearchWindow = null;
         _batchSearchWindow.Show();
-        SetTip("已打开下载管理窗口。", false);
+        SetTip(LocalizationService.Get("Status.Main.DownloadOpened"), false);
     }
 }

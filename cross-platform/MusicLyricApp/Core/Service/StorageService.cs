@@ -8,6 +8,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Avalonia.Platform.Storage;
 using MusicLyricApp.Core.Utils;
+using MusicLyricApp.Core.Localization;
 using MusicLyricApp.Models;
 using MusicLyricApp.ViewModels;
 using NLog;
@@ -16,6 +17,14 @@ namespace MusicLyricApp.Core.Service;
 
 public class StorageService : IStorageService
 {
+    private readonly Func<string> _configPath;
+    private readonly Func<int, HttpClient> _httpClientFactory;
+
+    public StorageService(Func<string>? configPath = null, Func<int, HttpClient>? httpClientFactory = null)
+    {
+        _configPath = configPath ?? Constants.GetConfigFilePath;
+        _httpClientFactory = httpClientFactory ?? NetworkClientFactory.CreateHttpClient;
+    }
     private ISearchService _searchService;
 
     private readonly Logger _logger = LogManager.GetCurrentClassLogger();
@@ -28,9 +37,9 @@ public class StorageService : IStorageService
     public SettingBean ReadAppConfig()
     {
         SettingBean setting;
-        if (File.Exists(Constants.GetConfigFilePath()))
+        if (File.Exists(_configPath()))
         {
-            var text = File.ReadAllText(Constants.GetConfigFilePath());
+            var text = File.ReadAllText(_configPath());
             setting = text.ToEntity<SettingBean>();
         }
         else
@@ -42,14 +51,14 @@ public class StorageService : IStorageService
         return setting;
     }
 
-    private static HttpClient CreateHttpClient(int timeoutSeconds = 120)
+    private HttpClient CreateHttpClient(int timeoutSeconds = 120)
     {
-        return NetworkClientFactory.CreateHttpClient(timeoutSeconds);
+        return _httpClientFactory(timeoutSeconds);
     }
 
     public void SaveConfig(SettingBean settingBean)
     {
-        var path = Constants.GetConfigFilePath();
+        var path = _configPath();
         File.WriteAllText(path, settingBean.ToJson(), Encoding.UTF8);
         _logger.Info("Save config into {Path}", path);
     }
@@ -176,7 +185,7 @@ public class StorageService : IStorageService
         await input.CopyToAsync(output);
         await output.FlushAsync();
 
-        return "歌曲音频已保存";
+        return LocalizationService.Get("Status.Storage.AudioSaved");
     }
 
     public async Task<string> DownloadSongPic(SearchResultViewModel searchResult, SettingBean settingBean,
@@ -203,7 +212,7 @@ public class StorageService : IStorageService
         await stream.WriteAsync(bytes);
         await stream.FlushAsync();
 
-        return "歌曲封面已保存";
+        return LocalizationService.Get("Status.Storage.CoverSaved");
     }
 
     private async Task<string> SaveSingleResult(SearchResultViewModel searchResult, SettingBean settingBean,
@@ -212,7 +221,7 @@ public class StorageService : IStorageService
         var saveVo = searchResult.SaveVoMap.Values.First();
         var preCheck = IsSkipStorage(saveVo, settingBean);
 
-        if (preCheck != ErrorMsgConst.SUCCESS)
+        if (preCheck != null)
         {
             throw new MusicLyricException(preCheck);
         }
@@ -237,7 +246,7 @@ public class StorageService : IStorageService
 
             var preCheck = IsSkipStorage(saveVo, settingBean);
 
-            if (preCheck != ErrorMsgConst.SUCCESS)
+            if (preCheck != null)
             {
                 skipRes[resKey] = preCheck;
             }
@@ -313,7 +322,7 @@ public class StorageService : IStorageService
         }
     }
 
-    private static string IsSkipStorage(SaveVo saveVo, SettingBean settingBean)
+    internal static string? IsSkipStorage(SaveVo saveVo, SettingBean settingBean)
     {
         // 没有歌词内容
         if (saveVo.LyricVo.IsEmpty())
@@ -327,7 +336,7 @@ public class StorageService : IStorageService
             return ErrorMsgConst.PURE_MUSIC_IGNORE_SAVE;
         }
 
-        return ErrorMsgConst.SUCCESS;
+        return null;
     }
 
     public async Task<IStorageFolder> SelectFolderAndRememberAsync(SettingBean settingBean, IWindowProvider windowProvider)
@@ -365,7 +374,7 @@ public class StorageService : IStorageService
     {
         var folders = await windowProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
         {
-            Title = "选择保存目录",
+            Title = LocalizationService.Get("Dialog.Folder.Output"),
             AllowMultiple = false
         });
 

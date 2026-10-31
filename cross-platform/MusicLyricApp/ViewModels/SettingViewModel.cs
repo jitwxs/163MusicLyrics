@@ -11,6 +11,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Avalonia.Platform.Storage;
 using MusicLyricApp.Core;
+using MusicLyricApp.Core.Localization;
 using MusicLyricApp.Core.Service;
 using MusicLyricApp.Models;
 using MsBox.Avalonia;
@@ -21,7 +22,7 @@ namespace MusicLyricApp.ViewModels;
 
 public partial class SettingViewModel : ViewModelBase
 {
-    [ObservableProperty] private string _settingTips = "这里显示设置说明或帮助信息";
+    [ObservableProperty] private string _settingTips = LocalizationService.Get("Status.Settings.DefaultHelp");
 
     public ObservableCollection<LyricsTypeEnumModel> LyricsTypes { get; } = [];
 
@@ -150,7 +151,7 @@ public partial class SettingViewModel : ViewModelBase
     {
         if (SettingParamViewModel.SelectedNetworkProxyModeItem?.Value != NetworkProxyModeEnum.HTTP_PROXY)
         {
-            SettingTips = "请先选择 HTTP 代理模式";
+            SettingTips = LocalizationService.Get("Status.Settings.ProxyModeRequired");
             return;
         }
 
@@ -162,23 +163,23 @@ public partial class SettingViewModel : ViewModelBase
 
         if (string.IsNullOrWhiteSpace(_settingBean.Config.ProxyHost) || _settingBean.Config.ProxyPort <= 0)
         {
-            SettingTips = "代理地址或端口无效";
+            SettingTips = LocalizationService.Get("Status.Settings.ProxyInvalid");
             return;
         }
 
-        SettingTips = "正在测试代理连接...";
+        SettingTips = LocalizationService.Get("Status.Settings.ProxyTesting");
         try
         {
             NetworkClientFactory.Configure(_settingBean.Config);
             using var client = NetworkClientFactory.CreateHttpClient(8);
             using var resp = await client.GetAsync("https://c.y.qq.com/");
             SettingTips = resp.IsSuccessStatusCode
-                ? "代理测试成功"
-                : $"代理测试失败：HTTP {(int)resp.StatusCode}";
+                ? LocalizationService.Get("Status.Settings.ProxySuccess")
+                : LocalizationService.Format("Status.Settings.ProxyHttpFailed", (int)resp.StatusCode);
         }
         catch (Exception ex)
         {
-            SettingTips = $"代理测试失败：{ex.Message}";
+            SettingTips = LocalizationService.Format("Status.Settings.ProxyFailed", ex.Message);
         }
     }
 
@@ -187,7 +188,7 @@ public partial class SettingViewModel : ViewModelBase
     {
         NetworkClientFactory.Configure(_settingBean.Config);
         _storageService.SaveConfig(_settingBean);
-        SettingTips = "代理设置已应用";
+        SettingTips = LocalizationService.Get("Status.Settings.ProxyApplied");
     }
 
     [RelayCommand]
@@ -201,7 +202,7 @@ public partial class SettingViewModel : ViewModelBase
         var folder = await _storageService.SelectFolderAndRememberAsync(_settingBean, _windowProvider);
         var localPath = folder.Path?.LocalPath ?? folder.Path?.ToString() ?? "";
         SettingParamViewModel.SaveFolderPath = localPath;
-        SettingTips = $"已更新保存路径：{localPath}";
+        SettingTips = LocalizationService.Format("Status.Settings.OutputPathUpdated", localPath);
     }
 
     [RelayCommand]
@@ -214,7 +215,7 @@ public partial class SettingViewModel : ViewModelBase
 
         var folders = await _windowProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
         {
-            Title = "选择搜索缓存目录",
+            Title = LocalizationService.Get("Dialog.Folder.Cache"),
             AllowMultiple = false
         });
 
@@ -231,7 +232,7 @@ public partial class SettingViewModel : ViewModelBase
 
         SettingParamViewModel.SearchCacheFolderPath = path;
         _storageService.SaveConfig(_settingBean);
-        SettingTips = $"已更新缓存目录：{path}";
+        SettingTips = LocalizationService.Format("Status.Settings.CachePathUpdated", path);
     }
 
     [RelayCommand]
@@ -243,7 +244,7 @@ public partial class SettingViewModel : ViewModelBase
             if (checkResult.HasUpdate)
             {
                 var content = UpdateCheckService.BuildReleaseDescription(checkResult.Info);
-                var box = MessageBoxManager.GetMessageBoxStandard("更新说明", content, ButtonEnum.YesNo);
+                var box = MessageBoxManager.GetMessageBoxStandard(LocalizationService.Get("Dialog.ReleaseNotes.Title"), content, ButtonEnum.YesNo);
                 var result = await box.ShowWindowAsync();
                 if (result == ButtonResult.Yes)
                 {

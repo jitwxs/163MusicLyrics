@@ -154,7 +154,7 @@ public static partial class SrtUtils
         var match = SrtTimestampRegex().Match(text);
         if (!match.Success)
         {
-            throw new MusicLyricException($"非法 SRT 时间戳: {text}");
+            throw new MusicLyricException(MusicLyricApp.Core.Localization.LocalizationService.Format("Error.InvalidSrtTimestamp", text));
         }
 
         var h = int.Parse(match.Groups[1].Value, CultureInfo.InvariantCulture);

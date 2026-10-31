@@ -1,6 +1,7 @@
 ﻿<Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:MusicLyricApp.ViewModels"
+        xmlns:loc="using:MusicLyricApp.Core.Localization"
         x:Class="MusicLyricApp.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Icon="/Resources/app-logo.ico"
@@ -29,11 +30,11 @@
         </DockPanel.KeyBindings>
 
         <Menu DockPanel.Dock="Top">
-            <MenuItem Header="项目主页" Command="{Binding ExecuteHomeCommand}" />
-            <MenuItem Header="使用手册" Command="{Binding ExecuteWikiCommand}" />
-            <MenuItem Header="问题反馈" Command="{Binding ExecuteIssueCommand}" />
-            <MenuItem Header="格式转换" Command="{Binding ExecuteFormatConvertCommand}" />
-            <MenuItem Header="更多设置" Command="{Binding ExecuteSettingCommand}" />
+            <MenuItem Header="{loc:Loc Key=UI.ProjectHome}" Command="{Binding ExecuteHomeCommand}" />
+            <MenuItem Header="{loc:Loc Key=UI.UserGuide}" Command="{Binding ExecuteWikiCommand}" />
+            <MenuItem Header="{loc:Loc Key=UI.Feedback}" Command="{Binding ExecuteIssueCommand}" />
+            <MenuItem Header="{loc:Loc Key=UI.FormatConvert}" Command="{Binding ExecuteFormatConvertCommand}" />
+            <MenuItem Header="{loc:Loc Key=UI.Settings}" Command="{Binding ExecuteSettingCommand}" />
         </Menu>
 
         <ScrollViewer>
@@ -41,37 +42,37 @@
                 <Border Padding="8" BorderBrush="#D0D7DE" BorderThickness="1" CornerRadius="6">
                     <Grid RowDefinitions="Auto,Auto" RowSpacing="8">
                         <Grid ColumnDefinitions="Auto,120,Auto,120,Auto,120,*,110" ColumnSpacing="8">
-                            <TextBlock Text="搜索源" VerticalAlignment="Center" />
+                            <TextBlock Text="{loc:Loc Key=UI.SearchSource}" VerticalAlignment="Center" />
                             <ComboBox Grid.Column="1" Width="120"
                                       ItemsSource="{Binding SearchParamViewModel.SearchSources}"
                                       SelectedItem="{Binding SearchParamViewModel.SelectedSearchSourceItem}" />
 
-                            <TextBlock Grid.Column="2" Text="歌词格式" VerticalAlignment="Center" />
+                            <TextBlock Grid.Column="2" Text="{loc:Loc Key=UI.LyricFormat}" VerticalAlignment="Center" />
                             <ComboBox Grid.Column="3" Width="120"
                                       ItemsSource="{Binding SearchParamViewModel.LrcTypes}"
                                       SelectedItem="{Binding SearchParamViewModel.SelectedLrcTypeItem}" />
 
-                            <TextBlock Grid.Column="4" Text="搜索类型" VerticalAlignment="Center" />
+                            <TextBlock Grid.Column="4" Text="{loc:Loc Key=UI.SearchType}" VerticalAlignment="Center" />
                             <ComboBox Grid.Column="5" Width="120"
                                       ItemsSource="{Binding SearchParamViewModel.SearchTypes}"
                                       SelectedItem="{Binding SearchParamViewModel.SelectedSearchTypeItem}" />
 
                             <Button Grid.Column="7"
-                                    Content="下载管理"
+                                    Content="{loc:Loc Key=UI.DownloadManager}"
                                     Width="90"
                                     Command="{Binding ExecuteOpenDownloadManagerCommand}" />
                         </Grid>
 
                         <Grid Grid.Row="1" ColumnDefinitions="*,Auto,120" ColumnSpacing="8">
                             <TextBox Name="SearchTextBox"
-                                     Watermark="请输入歌曲 ID、专辑 ID、歌单 ID 或链接"
+                                     Watermark="{loc:Loc Key=UI.SearchPlaceholder}"
                                      Text="{Binding SearchParamViewModel.SearchText}" />
                             <CheckBox Grid.Column="1"
-                                      Content="模糊"
+                                      Content="{loc:Loc Key=UI.Blur}"
                                       IsChecked="{Binding IsBlurSearch}"
                                       VerticalAlignment="Center" />
                             <Button Grid.Column="2"
-                                    Content="搜索"
+                                    Content="{loc:Loc Key=UI.Search}"
                                     Width="122"
                                     Command="{Binding ExecuteSearchCommand}" />
                         </Grid>
@@ -81,14 +82,14 @@
                 <Border Grid.Row="1" Padding="8" BorderBrush="#D0D7DE" BorderThickness="1" CornerRadius="6">
                     <Border.ContextMenu>
                         <ContextMenu>
-                            <MenuItem Header="下载直链" Command="{Binding ExecuteSongLinkCommand}" />
-                            <MenuItem Header="下载封面" Command="{Binding ExecuteSongPicCommand}" />
+                            <MenuItem Header="{loc:Loc Key=UI.DownloadLink}" Command="{Binding ExecuteSongLinkCommand}" />
+                            <MenuItem Header="{loc:Loc Key=UI.DownloadCover}" Command="{Binding ExecuteSongPicCommand}" />
                             <Separator />
-                            <MenuItem Header="&#x64AD;&#x653E;&#x6B4C;&#x66F2;"
+                            <MenuItem Header="{loc:Loc Key=UI.PlaySong}"
                                       Command="{Binding ExecutePlaySongCommand}"
                                       IsEnabled="{Binding HasSongLink}"
                                       IsVisible="{Binding IsPlaybackSupported}" />
-                            <MenuItem Header="&#x505C;&#x6B62;&#x64AD;&#x653E;"
+                            <MenuItem Header="{loc:Loc Key=UI.StopSong}"
                                       Command="{Binding ExecuteStopSongCommand}"
                                       IsEnabled="{Binding IsPlayingSong}"
                                       IsVisible="{Binding IsPlaybackSupported}" />
@@ -103,34 +104,41 @@
 
                             <WrapPanel ItemSpacing="14">
                                 <TextBlock Foreground="#475467">
-                                    <Run Text="歌手: " />
+                            <Run Text="{loc:Loc Key=UI.Singer}" />
                                     <Run Text="{Binding SearchResultViewModel.Singer, Mode=OneWay}" />
                                 </TextBlock>
                                 <TextBlock Foreground="#475467">
-                                    <Run Text="专辑: " />
+                            <Run Text="{loc:Loc Key=UI.Album}" />
                                     <Run Text="{Binding SearchResultViewModel.Album, Mode=OneWay}" />
                                 </TextBlock>
                             </WrapPanel>
 
                             <WrapPanel ItemSpacing="14">
                                 <TextBlock Foreground="#667085">
-                                    <Run Text="时长: " />
+                            <Run Text="{loc:Loc Key=UI.Duration}" />
                                     <Run Text="{Binding SearchResultViewModel.SongDuration, Mode=OneWay}" />
                                 </TextBlock>
                                 <TextBlock Foreground="#667085">
-                                    <Run Text="发行: " />
+                            <Run Text="{loc:Loc Key=UI.Release}" />
                                     <Run Text="{Binding SearchResultViewModel.PublishDate, Mode=OneWay}" />
                                 </TextBlock>
                                 <TextBlock Foreground="#667085">
-                                    <Run Text="源: " />
+                            <Run Text="{loc:Loc Key=UI.Source}" />
                                     <Run Text="{Binding SearchResultViewModel.SongSource, Mode=OneWay}" />
                                 </TextBlock>
                             </WrapPanel>
 
-                            <TextBlock Foreground="#667085" TextTrimming="CharacterEllipsis">
-                                <Run Text="直链: " />
-                                <Run Text="{Binding SearchResultViewModel.SongLink, Mode=OneWay}" />
-                            </TextBlock>
+                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                <TextBlock Foreground="#667085" TextTrimming="CharacterEllipsis" VerticalAlignment="Center">
+                                    <Run Text="{loc:Loc Key=UI.DirectLink}" />
+                                    <Run Text="{Binding SearchResultViewModel.SongLink, Mode=OneWay}" />
+                                </TextBlock>
+                                <Button Grid.Column="1"
+                                        Content="{loc:Loc Key=UI.Copy}"
+                                        Padding="8,2"
+                                        IsEnabled="{Binding HasSongLink}"
+                                        Command="{Binding ExecuteCopySongLinkCommand}" />
+                            </Grid>
                         </StackPanel>
 
                         <Border Grid.Column="1"
@@ -173,17 +181,17 @@
 
                 <Border Grid.Row="3" Padding="8" BorderBrush="#D0D7DE" BorderThickness="1" CornerRadius="6">
                     <WrapPanel ItemSpacing="8">
-                        <TextBlock Text="输出格式" VerticalAlignment="Center" />
+                        <TextBlock Text="{loc:Loc Key=UI.OutputFormat}" VerticalAlignment="Center" />
                         <ComboBox Width="120"
                                   ItemsSource="{Binding SearchParamViewModel.OutputFormats}"
                                   SelectedItem="{Binding SearchParamViewModel.SelectedOutputFormatItem}" />
 
-                        <TextBlock Text="文件编码" VerticalAlignment="Center" />
+                        <TextBlock Text="{loc:Loc Key=UI.Encoding}" VerticalAlignment="Center" />
                         <ComboBox Width="120"
                                   ItemsSource="{Binding SearchParamViewModel.OutputEncodings}"
                                   SelectedItem="{Binding SearchParamViewModel.SelectedOutputEncodingItem}" />
 
-                        <Button Content="保存"
+                        <Button Content="{loc:Loc Key=UI.Save}"
                                 Width="150"
                                 Command="{Binding ExecuteSaveCommand}" />
                     </WrapPanel>
@@ -201,7 +209,7 @@
                         <TextBlock Grid.Column="1"
                                    TextTrimming="CharacterEllipsis"
                                    ToolTip.Tip="{Binding TipFullMessage}">
-                            <Run Text="【提示】 " Foreground="#344054" />
+                            <Run Text="{loc:Loc Key=UI.Extra03}" Foreground="#344054" />
                             <Run Text="[" Foreground="#98A2B3" />
                             <Run Text="{Binding TipTimestamp}" Foreground="#98A2B3" />
                             <Run Text="] " Foreground="#98A2B3" />

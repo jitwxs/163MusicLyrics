@@ -103,8 +103,7 @@ public static partial class LyricUtils
         var originLyrics = SplitLrc(lyricVo.Lyric, searchSource, ignoreEmptyLyric);
 
         // 2. 仅输出原文  
-        var originLyricsOutputSortInConfig = outputLyricsTypes.IndexOf(LyricsTypeEnum.ORIGIN);
-        if (outputLyricsTypes.Count == 1 && originLyricsOutputSortInConfig != -1)
+        if (outputLyricsTypes.Count == 1 && outputLyricsTypes[0] == LyricsTypeEnum.ORIGIN)
         {
             res.Add(originLyrics);
             return res;
@@ -113,12 +112,6 @@ public static partial class LyricUtils
         // 3. 处理其他译文
         var lyricsComplexList = await DealTranslateLyric(originLyrics, lyricVo, settingBean.Config.TransConfig,
             searchSource, outputLyricsTypes);
-
-        // 原文歌词插入到结果集的指定位置
-        if (originLyricsOutputSortInConfig != -1)
-        {
-            lyricsComplexList.Insert(originLyricsOutputSortInConfig, originLyrics);
-        }
 
         var single = new List<LyricLineVo>();
         switch (showLrcType)
@@ -299,6 +292,7 @@ public static partial class LyricUtils
         TransConfigBean transConfig, SearchSourceEnum searchSource, List<LyricsTypeEnum> outputLyricsTypes)
     {
         var result = new List<List<LyricLineVo>>();
+        var originAdded = false;
 
         // 不存在原文歌词
         if (originList.Count == 0)
@@ -321,6 +315,16 @@ public static partial class LyricUtils
         {
             switch (transTypeEnum)
             {
+                case LyricsTypeEnum.ORIGIN:
+                    // Add at the point it appears in the configured order. Other output
+                    // types can be omitted for a song, so the config index is not a safe
+                    // insertion index into the generated output list.
+                    if (!originAdded)
+                    {
+                        result.Add(originList);
+                        originAdded = true;
+                    }
+                    break;
                 case LyricsTypeEnum.ORIGIN_TRANS:
                     result.Add(transList);
                     break;

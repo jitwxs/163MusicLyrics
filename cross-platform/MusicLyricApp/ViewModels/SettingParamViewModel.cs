@@ -1,14 +1,40 @@
 ﻿using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using MusicLyricApp.Core.Service;
 using MusicLyricApp.Core.Utils;
+using MusicLyricApp.Core.Localization;
 using MusicLyricApp.Models;
 
 namespace MusicLyricApp.ViewModels;
 
 public partial class SettingParamViewModel : ViewModelBase
 {
+    public sealed class LanguageOption(string code, string resourceKey) : INotifyPropertyChanged
+    {
+        public string Code { get; } = code;
+        public string DisplayName => LocalizationService.Get(resourceKey);
+        public event PropertyChangedEventHandler? PropertyChanged;
+        public override string ToString() => DisplayName;
+        public void RefreshDisplayName() => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(DisplayName)));
+    }
+
+    public ObservableCollection<LanguageOption> Languages { get; } =
+    [
+        new("zh-CN", "Language.SimplifiedChinese"),
+        new("en-US", "Language.English")
+    ];
+
+    [ObservableProperty] private LanguageOption? _selectedLanguage;
+
+    partial void OnSelectedLanguageChanged(LanguageOption? value)
+    {
+        if (value == null || _settingBean == null) return;
+        _settingBean.Config.Language = value.Code;
+        LocalizationService.Instance.SetLanguage(value.Code);
+    }
+
     // -1. 同名文件处理策略
     public ObservableCollection<EnumDisplayHelper.EnumDisplayItem<FileConflictStrategyEnum>> FileConflictStrategies { get; } =
         EnumDisplayHelper.GetEnumDisplayCollection<FileConflictStrategyEnum>();
@@ -32,11 +58,7 @@ public partial class SettingParamViewModel : ViewModelBase
 
     // 0. 网络代理模式
     public ObservableCollection<EnumDisplayHelper.EnumDisplayItem<NetworkProxyModeEnum>> NetworkProxyModes { get; } =
-    [
-        new() { Description = "系统代理", Value = NetworkProxyModeEnum.SYSTEM_PROXY },
-        new() { Description = "直接连接", Value = NetworkProxyModeEnum.DIRECT_CONNECT },
-        new() { Description = "HTTP 代理", Value = NetworkProxyModeEnum.HTTP_PROXY }
-    ];
+        EnumDisplayHelper.GetEnumDisplayCollection<NetworkProxyModeEnum>();
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsHttpProxySelected))]
@@ -76,7 +98,7 @@ public partial class SettingParamViewModel : ViewModelBase
     {
         if (!int.TryParse(value, out var port) || port < 1 || port > 65535)
         {
-            ProxyPortError = "端口范围为 1 - 65535";
+            ProxyPortError = LocalizationService.Get("Message.InvalidPort");
             return;
         }
 
@@ -382,13 +404,13 @@ public partial class SettingParamViewModel : ViewModelBase
     {
         if (!int.TryParse(value, out var size))
         {
-            SearchCacheSizeError = "请输入有效数字（1-2048）";
+            SearchCacheSizeError = LocalizationService.Get("Status.Settings.CacheNumberInvalid");
             return;
         }
 
         if (size < 1 || size > 2048)
         {
-            SearchCacheSizeError = "缓存大小范围为 1 - 2048 MB";
+            SearchCacheSizeError = LocalizationService.Get("Status.Settings.CacheRangeInvalid");
             return;
         }
 
@@ -398,9 +420,18 @@ public partial class SettingParamViewModel : ViewModelBase
     
     private SettingBean _settingBean;
 
+    public SettingParamViewModel()
+    {
+        foreach (var language in Languages)
+        {
+            LocalizationService.Instance.PropertyChanged += (_, _) => language.RefreshDisplayName();
+        }
+    }
+
     public void Bind(SettingBean settingBean)
     {
         _settingBean = settingBean;
+        SelectedLanguage = Languages.First(language => language.Code == settingBean.Config.Language);
         NetworkClientFactory.Configure(_settingBean.Config);
 
         SelectedFileConflictStrategyItem = FileConflictStrategies.First(item => Equals(item.Value, _settingBean.Config.FileConflictStrategy));

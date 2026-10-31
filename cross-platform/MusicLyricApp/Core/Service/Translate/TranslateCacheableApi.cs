@@ -5,8 +5,6 @@ namespace MusicLyricApp.Core.Service.Translate;
 
 public abstract class TranslateCacheableApi : ITranslateApi
 {
-    private const string Prefix = "";
-
     protected abstract ResultVo<string[]> Translate0(string[] inputs, LanguageEnum inputLanguage,
         LanguageEnum outputLanguage);
 
@@ -19,7 +17,9 @@ public abstract class TranslateCacheableApi : ITranslateApi
             return [];
         }
 
-        var cacheDict = GlobalCache.BatchQuery<string>(Prefix, CacheType.TRANSLATE, inputs, out var notHitInputs);
+        // The same text can have different translations by provider and language pair.
+        var prefix = $"{GetType().FullName}:{inputLanguage}:{outputLanguage}";
+        var cacheDict = GlobalCache.BatchQuery<string>(prefix, CacheType.TRANSLATE, inputs, out var notHitInputs);
 
         var httpRes = System.Array.Empty<string>();
         if (notHitInputs.Length > 0)
@@ -38,7 +38,7 @@ public abstract class TranslateCacheableApi : ITranslateApi
 
                 if (output != null)
                 {
-                    GlobalCache.DoCache(Prefix, CacheType.TRANSLATE, input, output);
+                    GlobalCache.DoCache(prefix, CacheType.TRANSLATE, input, output);
                 }
             }
 

@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using CommunityToolkit.Mvvm.Messaging;
 using MusicLyricApp.Models;
 using MusicLyricApp.ViewModels;
+using MusicLyricApp.Core.Localization;
 using MusicLyricApp.ViewModels.Messages;
 
 namespace MusicLyricApp.Views;
@@ -13,7 +14,7 @@ public class BatchSearchWindow : Window
 
     public BatchSearchWindow(BatchSearchViewModel viewModel)
     {
-        Title = "下载管理";
+        LocalizationService.BindWindowTitle(this, "Window.BatchSearch.Title");
         Width = 1100;
         Height = 720;
 

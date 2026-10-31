@@ -6,6 +6,7 @@ using System.Net;
 using System.Threading.Tasks;
 using MusicLyricApp.Core.Service.Music;
 using MusicLyricApp.Core.Utils;
+using MusicLyricApp.Core.Localization;
 using MusicLyricApp.Models;
 using MusicLyricApp.ViewModels;
 using NLog;
@@ -13,15 +14,21 @@ using SearchParamViewModel = MusicLyricApp.ViewModels.SearchParamViewModel;
 
 namespace MusicLyricApp.Core.Service;
 
-public class SearchService(SettingBean settingBean) : ISearchService
+public class SearchService : ISearchService
 {
     private readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
-    private readonly Dictionary<SearchSourceEnum, IMusicApi> _api = new()
+    private readonly IReadOnlyDictionary<SearchSourceEnum, IMusicApi> _api;
+
+    public SearchService(SettingBean settingBean,
+        IReadOnlyDictionary<SearchSourceEnum, IMusicApi>? musicApis = null)
     {
-        { SearchSourceEnum.QQ_MUSIC, new QQMusicApi(() => settingBean.Config.QQMusicCookie) },
-        { SearchSourceEnum.NET_EASE_MUSIC, new NetEaseMusicApi(() => settingBean.Config.NetEaseCookie) }
-    };
+        _api = musicApis ?? new Dictionary<SearchSourceEnum, IMusicApi>
+        {
+            { SearchSourceEnum.QQ_MUSIC, new QQMusicApi(() => settingBean.Config.QQMusicCookie) },
+            { SearchSourceEnum.NET_EASE_MUSIC, new NetEaseMusicApi(() => settingBean.Config.NetEaseCookie) }
+        };
+    }
 
     public int LastLocalCacheHitCount { get; private set; }
 
@@ -192,8 +199,8 @@ public class SearchService(SettingBean settingBean) : ISearchService
             searchResult.PublishDate = saveVo.SongVo.PublishDate;
             searchResult.SongSource = saveVo.LyricVo.SearchSource switch
             {
-                SearchSourceEnum.NET_EASE_MUSIC => "网易云",
-                SearchSourceEnum.QQ_MUSIC => "QQ音乐",
+                SearchSourceEnum.NET_EASE_MUSIC => LocalizationService.Get("Status.Search.SourceNetEase"),
+                SearchSourceEnum.QQ_MUSIC => LocalizationService.Get("Status.Search.SourceQQ"),
                 _ => saveVo.LyricVo.SearchSource.ToString()
             };
         }

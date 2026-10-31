@@ -8,6 +8,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using MusicLyricApp.Core;
+using MusicLyricApp.Core.Localization;
 using MusicLyricApp.Core.Service;
 using MusicLyricApp.Models;
 using MusicLyricApp.ViewModels.Messages;
@@ -106,7 +107,7 @@ public partial class BatchSearchViewModel : ViewModelBase
         }
 
         RefreshStats();
-        SetTip($"已同步 {added} 条搜索结果。", false);
+        SetTip(LocalizationService.Format("Status.Batch.Sync", added), false);
     }
 
     [RelayCommand]
@@ -116,7 +117,7 @@ public partial class BatchSearchViewModel : ViewModelBase
         {
             var folders = await _windowProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
             {
-                Title = "Select folder",
+                Title = LocalizationService.Get("Dialog.Folder.Select"),
                 AllowMultiple = false
             });
 
@@ -165,7 +166,7 @@ public partial class BatchSearchViewModel : ViewModelBase
         var toRemove = Items.Where(item => item.IsSelected).ToList();
         if (toRemove.Count == 0)
         {
-            SetTip("未选择可删除项。", false);
+            SetTip(LocalizationService.Get("Status.Batch.NoDeleteSelection"), false);
             return;
         }
 
@@ -177,7 +178,7 @@ public partial class BatchSearchViewModel : ViewModelBase
         }
 
         RefreshStats();
-        SetTip($"已删除 {toRemove.Count} 条记录。", false);
+        SetTip(LocalizationService.Format("Status.Batch.DeleteComplete", toRemove.Count), false);
     }
 
     [RelayCommand]
@@ -186,7 +187,7 @@ public partial class BatchSearchViewModel : ViewModelBase
         var selected = Items.Where(item => item.IsSelected).ToList();
         if (selected.Count == 0)
         {
-            SetTip("未选择可保存项。", false);
+            SetTip(LocalizationService.Get("Status.Batch.NoSaveSelection"), false);
             return;
         }
 
@@ -201,7 +202,7 @@ public partial class BatchSearchViewModel : ViewModelBase
 
         if (saveMap.Count == 0)
         {
-            SetTip("选中项没有可保存歌词。", true);
+            SetTip(LocalizationService.Get("Status.Batch.EmptyLyrics"), true);
             return;
         }
 
@@ -211,8 +212,11 @@ public partial class BatchSearchViewModel : ViewModelBase
             var message = await _storageService.SaveResult(temp, _settingBean, _windowProvider);
             foreach (var item in selected.Where(i => saveMap.ContainsKey(i.SongId)))
             {
-                item.Status = "Saved";
-                item.Progress = 100;
+                var skipReason = StorageService.IsSkipStorage(saveMap[item.SongId], _settingBean);
+                var saved = skipReason == null;
+                item.Status = LocalizationService.Get(saved ? "Status.Batch.Saved" : "Status.Batch.Skipped");
+                item.Error = skipReason ?? "";
+                item.Progress = saved ? 100 : 0;
             }
 
             var stats = ParseSaveMessage(message);
@@ -245,7 +249,7 @@ public partial class BatchSearchViewModel : ViewModelBase
         var target = item ?? Items.FirstOrDefault(x => x.IsSelected);
         if (target == null)
         {
-            SetTip("未选择可查看项。", false);
+            SetTip(LocalizationService.Get("Status.Batch.NoDetailSelection"), false);
             return;
         }
 
@@ -304,8 +308,8 @@ public partial class BatchSearchViewModel : ViewModelBase
     {
         return source switch
         {
-            SearchSourceEnum.NET_EASE_MUSIC => "网易云",
-            SearchSourceEnum.QQ_MUSIC => "QQ音乐",
+            SearchSourceEnum.NET_EASE_MUSIC => LocalizationService.Get("Status.Search.SourceNetEase"),
+            SearchSourceEnum.QQ_MUSIC => LocalizationService.Get("Status.Search.SourceQQ"),
             _ => source.ToString()
         };
     }

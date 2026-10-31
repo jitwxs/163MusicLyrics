@@ -4,6 +4,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:viewModels="clr-namespace:MusicLyricApp.ViewModels"
+    xmlns:loc="using:MusicLyricApp.Core.Localization"
     mc:Ignorable="d"
     x:Class="MusicLyricApp.Views.BlurSearchView"
     x:DataType="viewModels:BlurSearchViewModel"
@@ -46,21 +47,21 @@
         <Border Background="#F8FAFC" CornerRadius="8" Padding="12">
             <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
                 <StackPanel Spacing="4">
-                    <TextBlock Text="模糊搜索结果" FontSize="16" FontWeight="SemiBold" />
+                    <TextBlock Text="{loc:Loc Key=UI.BlurResults}" FontSize="16" FontWeight="SemiBold" />
                     <StackPanel Orientation="Horizontal" Spacing="12">
-                        <TextBlock Text="{Binding SearchResults.Count, StringFormat=共 {0} 条}" Foreground="#667085" />
-                        <TextBlock Text="{Binding SelectedItems.Count, StringFormat=已选 {0} 条}" Foreground="#667085" />
+                        <TextBlock Text="{Binding SearchResultCountText}" Foreground="#667085" />
+                        <TextBlock Text="{Binding SelectedItemsCountText}" Foreground="#667085" />
                     </StackPanel>
                 </StackPanel>
                 <Button Grid.Column="1"
-                        Content="下载选中"
+                        Content="{loc:Loc Key=UI.DownloadSelected}"
                         MinWidth="100"
                         Command="{Binding DownloadSelectedCommand}" />
             </Grid>
         </Border>
 
         <Border Grid.Row="1" Background="White" CornerRadius="8" Padding="8" BorderBrush="#E1E4E8" BorderThickness="1">
-            <TextBlock Text="提示：可多选后下载，右键列表也可操作" Foreground="#667085" />
+            <TextBlock Text="{loc:Loc Key=UI.BlurHint}" Foreground="#667085" />
         </Border>
 
         <Border Grid.Row="2" Background="White" CornerRadius="8" BorderBrush="#E1E4E8" BorderThickness="1">
@@ -70,7 +71,7 @@
                       AutoGenerateColumns="False">
                 <DataGrid.ContextMenu>
                     <ContextMenu>
-                        <MenuItem Header="下载" Command="{Binding DownloadSelectedCommand}" />
+                        <MenuItem Header="{loc:Loc Key=UI.Extra00}" Command="{Binding DownloadSelectedCommand}" />
                     </ContextMenu>
                 </DataGrid.ContextMenu>
             </DataGrid>

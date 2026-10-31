@@ -1,6 +1,7 @@
-<UserControl xmlns="https://github.com/avaloniaui"
+﻿<UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:MusicLyricApp.ViewModels"
+             xmlns:loc="using:MusicLyricApp.Core.Localization"
              x:Class="MusicLyricApp.Views.FormatConvertView"
              x:DataType="vm:FormatConvertViewModel">
     <UserControl.Styles>
@@ -12,15 +13,15 @@
 
     <Grid RowDefinitions="Auto,*,Auto" RowSpacing="10" Margin="12">
         <Grid ColumnDefinitions="Auto,140,Auto,140,Auto" ColumnSpacing="8">
-            <TextBlock Text="输入格式" VerticalAlignment="Center" />
+            <TextBlock Text="{loc:Loc Key=UI.InputFormat}" VerticalAlignment="Center" />
             <ComboBox Grid.Column="1"
                       ItemsSource="{Binding Formats}"
                       SelectedItem="{Binding SourceFormatItem}" />
-            <TextBlock Grid.Column="2" Text="输出格式" VerticalAlignment="Center" />
+            <TextBlock Grid.Column="2" Text="{loc:Loc Key=UI.OutputFormat2}" VerticalAlignment="Center" />
             <ComboBox Grid.Column="3"
                       ItemsSource="{Binding Formats}"
                       SelectedItem="{Binding TargetFormatItem}" />
-            <Button Grid.Column="4" Width="90" Content="交换" Command="{Binding SwapFormatCommand}" />
+            <Button Grid.Column="4" Width="90" Content="{loc:Loc Key=UI.Swap}" Command="{Binding SwapFormatCommand}" />
         </Grid>
 
         <Grid Grid.Row="1" ColumnDefinitions="*,*" ColumnSpacing="10">

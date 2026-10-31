@@ -1,6 +1,5 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using System.Text.RegularExpressions;
 using MusicLyricApp.Core;
@@ -11,87 +10,87 @@ namespace MusicLyricApp.Models;
 // 双语歌词类型
 public enum ShowLrcTypeEnum
 {
-    [Description("交错")] STAGGER = 0,
-    [Description("独立")] ISOLATED = 1,
-    [Description("合并")] MERGE = 2,
+    STAGGER = 0,
+    ISOLATED = 1,
+    MERGE = 2,
 }
 
 // 搜索来源
 public enum SearchSourceEnum
 {
-    [Description("网易云")] NET_EASE_MUSIC = 0,
-    [Description("QQ音乐")] QQ_MUSIC = 1
+    NET_EASE_MUSIC = 0,
+    QQ_MUSIC = 1
 }
 
 // 搜索类型
 public enum SearchTypeEnum
 {
-    [Description("单曲")] SONG_ID = 0,
-    [Description("专辑")] ALBUM_ID = 1,
-    [Description("歌单")] PLAYLIST_ID = 2,
+    SONG_ID = 0,
+    ALBUM_ID = 1,
+    PLAYLIST_ID = 2,
 }
 
 public enum VerbatimLyricModeEnum
 {
-    [Description("不启用")] DISABLE = 0,
-    [Description("标准模式")] STANDARD_MODE = 1,
-    [Description("A2 模式")] A2_MODE = 2,
+    DISABLE = 0,
+    STANDARD_MODE = 1,
+    A2_MODE = 2,
 }
 
 // 强制两位类型
 public enum DotTypeEnum
 {
-    [Description("截位")] DOWN = 0,
-    [Description("四舍五入")] HALF_UP = 1
+    DOWN = 0,
+    HALF_UP = 1
 }
 
 // 输出文件格式
 public enum OutputEncodingEnum
 {
-    [Description("UTF-8")] UTF_8 = 0,
-    [Description("UTF-8-BOM")] UTF_8_BOM = 1,
-    [Description("UTF-32")] UTF_32 = 2,
-    [Description("UNICODE")] UNICODE = 3
+    UTF_8 = 0,
+    UTF_8_BOM = 1,
+    UTF_32 = 2,
+    UNICODE = 3
 }
 
 public enum OutputFormatEnum
 {
-    [Description("LRC")] LRC = 0,
+    LRC = 0,
 
-    [Description("SRT")] SRT = 1
+    SRT = 1
 }
 
 // 译文缺省规则
 public enum TransLyricLostRuleEnum
 {
-    [Description("忽略展示")] IGNORE = 0,
-    [Description("展示空行")] EMPTY_LINE = 1,
-    [Description("填充原文")] FILL_ORIGIN = 2,
+    IGNORE = 0,
+    EMPTY_LINE = 1,
+    FILL_ORIGIN = 2,
 }
 
 // 中文处理策略
 public enum ChineseProcessRuleEnum
 {
-    [Description("不额外处理")] IGNORE = 0,
-    [Description("强制简体")] SIMPLIFIED_CHINESE = 1,
-    [Description("强制繁体")] TRADITIONAL_CHINESE = 2,
+    IGNORE = 0,
+    SIMPLIFIED_CHINESE = 1,
+    TRADITIONAL_CHINESE = 2,
 }
 
 public enum LyricsTypeEnum
 {
-    [Description("原文")] ORIGIN = 0,
-    [Description("原始译文")] ORIGIN_TRANS = 1,
-    [Description("中文译文")] CHINESE = 2,
-    [Description("英文译文")] ENGLISH = 3,
-    [Description("音译文")] TRANSLITERATION = 4,
-    [Description("拼音译文")] PINYIN = 5,
+    ORIGIN = 0,
+    ORIGIN_TRANS = 1,
+    CHINESE = 2,
+    ENGLISH = 3,
+    TRANSLITERATION = 4,
+    PINYIN = 5,
 }
 
 public enum ThemeModeEnum
 {
-    [Description("跟随系统")] FOLLOW_SYSTEM = 0,
-    [Description("亮色")] LIGHT = 1,
-    [Description("暗黑")] DARK = 2,
+    FOLLOW_SYSTEM = 0,
+    LIGHT = 1,
+    DARK = 2,
 }
 
 public enum LanguageEnum
@@ -99,42 +98,42 @@ public enum LanguageEnum
     /// <summary>
     /// 其他
     /// </summary>
-    [Description("Other")] OTHER = 0,
+    OTHER = 0,
 
     /// <summary>
     /// 英语
     /// </summary>
-    [Description("English")] ENGLISH = 1,
+    ENGLISH = 1,
 
     /// <summary>
     /// 日语
     /// </summary>
-    [Description("Japanese")] JAPANESE = 2,
+    JAPANESE = 2,
 
     /// <summary>
     /// 韩语
     /// </summary>
-    [Description("Korean")] KOREAN = 3,
+    KOREAN = 3,
 
     /// <summary>
     /// 俄语
     /// </summary>
-    [Description("Russian")] RUSSIAN = 4,
+    RUSSIAN = 4,
 
     /// <summary>
     /// 法语
     /// </summary>
-    [Description("French")] FRENCH = 5,
+    FRENCH = 5,
 
     /// <summary>
     /// 意大利语
     /// </summary>
-    [Description("Italian")] ITALIAN = 6,
+    ITALIAN = 6,
 
     /// <summary>
     /// 汉语
     /// </summary>
-    [Description("Chinese")] CHINESE = 7,
+    CHINESE = 7,
 }
 
 /**
@@ -142,38 +141,37 @@ public enum LanguageEnum
  */
 public static class ErrorMsgConst
 {
-    public const string SUCCESS = "成功";
-    public const string SEARCH_RESULT_EMPTY = "查询结果为空，请修改查询条件";
-    public const string MUST_SEARCH_BEFORE_SAVE = "您必须先搜索，才能保存内容";
-    public const string MUST_SEARCH_BEFORE_GET_SONG_URL = "您必须先搜索，才能获取歌曲链接";
-    public const string MUST_SEARCH_BEFORE_GET_SONG_PIC = "您必须先搜索，才能获取歌曲封面";
-    public const string INPUT_CONENT_EMPLT = "输入内容不能为空";
-    public const string INPUT_ID_ILLEGAL = "您输入的ID不合法";
-    public const string PLAYLIST_NOT_EXIST = "歌单信息暂未被收录或查询失败";
-    public const string ALBUM_NOT_EXIST = "专辑信息暂未被收录或查询失败";
-    public const string SONG_NOT_EXIST = "歌曲信息暂未被收录或查询失败";
-    public const string LRC_NOT_EXIST = "歌词信息暂未被收录或查询失败";
-    public const string FUNCTION_NOT_SUPPORT = "该功能暂不可用，请等待后续更新";
-    public const string SONG_URL_GET_SUCCESS = "歌曲直链，已复制到剪切板";
-    public const string SONG_URL_GET_FAILED = "歌曲直链，获取失败";
-    public const string SONG_PIC_GET_SUCCESS = "歌曲封面，已复制到剪切板";
-    public const string SONG_PIC_GET_FAILED = "歌曲封面，获取失败";
-    public const string DEPENDENCY_LOSS = "缺少必须依赖，请前往项目主页下载 {0} 插件";
-    public const string SAVE_COMPLETE = "保存完毕，成功 {0} 跳过 {1}";
-    public const string NEED_LOGIN = "本请求需要登陆信息才可使用，请检查 Cookie 是否填写或过期";
-    public const string PURE_MUSIC_IGNORE_SAVE = "该首歌曲是纯音乐，根据设置跳过保存";
-
-    public const string TRANSLATE_LANGUAGE_NOT_SUPPORT = "翻译 API 语言暂不支持，请更换其他语言";
-    public const string NOT_EXIST_TRANSLATE_API = "未配置任何的翻译 API，请关闭自定义语言的翻译类型，或配置 API";
-    public const string CAIYUN_TRANSLATE_AUTH_FAILED = "彩云小译调用失败，请检查相关鉴权配置";
-    public const string BAIDU_TRANSLATE_AUTH_FAILED = "百度翻译调用失败，请检查相关鉴权配置";
-
-    public const string GET_LATEST_VERSION_FAILED = "获取最新版本失败";
-    public const string THIS_IS_LATEST_VERSION = "当前版本已经是最新版本";
-    public const string SYSTEM_ERROR = "系统错误";
-    public const string NETWORK_ERROR = "网络错误，请检查网络链接";
-    public const string API_RATE_LIMIT = "请求过于频繁，请稍后再试";
-    public const string STORAGE_FOLDER_ERROR = "存储文件夹获取错误";
+    private static string T(string key) => MusicLyricApp.Core.Localization.LocalizationService.Get(key);
+    public static string SUCCESS => T("Error.SUCCESS");
+    public static string SEARCH_RESULT_EMPTY => T("Error.SEARCH_RESULT_EMPTY");
+    public static string MUST_SEARCH_BEFORE_SAVE => T("Error.MUST_SEARCH_BEFORE_SAVE");
+    public static string MUST_SEARCH_BEFORE_GET_SONG_URL => T("Error.MUST_SEARCH_BEFORE_GET_SONG_URL");
+    public static string MUST_SEARCH_BEFORE_GET_SONG_PIC => T("Error.MUST_SEARCH_BEFORE_GET_SONG_PIC");
+    public static string INPUT_CONENT_EMPLT => T("Error.INPUT_CONENT_EMPLT");
+    public static string INPUT_ID_ILLEGAL => T("Error.INPUT_ID_ILLEGAL");
+    public static string PLAYLIST_NOT_EXIST => T("Error.PLAYLIST_NOT_EXIST");
+    public static string ALBUM_NOT_EXIST => T("Error.ALBUM_NOT_EXIST");
+    public static string SONG_NOT_EXIST => T("Error.SONG_NOT_EXIST");
+    public static string LRC_NOT_EXIST => T("Error.LRC_NOT_EXIST");
+    public static string FUNCTION_NOT_SUPPORT => T("Error.FUNCTION_NOT_SUPPORT");
+    public static string SONG_URL_GET_SUCCESS => T("Error.SONG_URL_GET_SUCCESS");
+    public static string SONG_URL_GET_FAILED => T("Error.SONG_URL_GET_FAILED");
+    public static string SONG_PIC_GET_SUCCESS => T("Error.SONG_PIC_GET_SUCCESS");
+    public static string SONG_PIC_GET_FAILED => T("Error.SONG_PIC_GET_FAILED");
+    public static string DEPENDENCY_LOSS => T("Error.DEPENDENCY_LOSS");
+    public static string SAVE_COMPLETE => T("Error.SAVE_COMPLETE");
+    public static string NEED_LOGIN => T("Error.NEED_LOGIN");
+    public static string PURE_MUSIC_IGNORE_SAVE => T("Error.PURE_MUSIC_IGNORE_SAVE");
+    public static string TRANSLATE_LANGUAGE_NOT_SUPPORT => T("Error.TRANSLATE_LANGUAGE_NOT_SUPPORT");
+    public static string NOT_EXIST_TRANSLATE_API => T("Error.NOT_EXIST_TRANSLATE_API");
+    public static string CAIYUN_TRANSLATE_AUTH_FAILED => T("Error.CAIYUN_TRANSLATE_AUTH_FAILED");
+    public static string BAIDU_TRANSLATE_AUTH_FAILED => T("Error.BAIDU_TRANSLATE_AUTH_FAILED");
+    public static string GET_LATEST_VERSION_FAILED => T("Error.GET_LATEST_VERSION_FAILED");
+    public static string THIS_IS_LATEST_VERSION => T("Error.THIS_IS_LATEST_VERSION");
+    public static string SYSTEM_ERROR => T("Error.SYSTEM_ERROR");
+    public static string NETWORK_ERROR => T("Error.NETWORK_ERROR");
+    public static string API_RATE_LIMIT => T("Error.API_RATE_LIMIT");
+    public static string STORAGE_FOLDER_ERROR => T("Error.STORAGE_FOLDER_ERROR");
 }
 
 /// <summary>
@@ -865,6 +863,8 @@ public class ResultVo<T>
 
     public string ErrorMsg { get; set; }
 
+    private bool IsSuccessful { get; init; }
+
     private ResultVo()
     {
     }
@@ -874,7 +874,8 @@ public class ResultVo<T>
         return new ResultVo<T>
         {
             Data = default,
-            ErrorMsg = errorMsg
+            ErrorMsg = errorMsg,
+            IsSuccessful = false
         };
     }
 
@@ -882,11 +883,12 @@ public class ResultVo<T>
     {
         Data = data;
         ErrorMsg = ErrorMsgConst.SUCCESS;
+        IsSuccessful = true;
     }
 
     public bool IsSuccess()
     {
-        return ErrorMsg == ErrorMsgConst.SUCCESS;
+        return IsSuccessful;
     }
 
     public ResultVo<T> Assert()
@@ -904,14 +906,6 @@ public static class EnumHelper
 {
     public static string ToDescription(this Enum val)
     {
-        var type = val.GetType();
-        var name = val.ToString();
-        var memberInfo = type.GetMember(name);
-        var attributes = memberInfo[0].GetCustomAttributes(typeof(DescriptionAttribute), false);
-        //如果没有定义描述，就把当前枚举值的对应名称返回
-        if (attributes.Length != 1) 
-            return name;
-
-        return (attributes.Single() as DescriptionAttribute)?.Description ?? string.Empty;
+        return MusicLyricApp.Core.Localization.LocalizationService.Get($"Enum.{val.GetType().Name}.{val}");
     }
 }

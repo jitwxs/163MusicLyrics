@@ -59,14 +59,23 @@ public static partial class VerbatimLyricUtils
 
                 // [70,80]
                 var timeStr = line.Substring(leftParenthesesIndex, parenthesesLength);
-                // 70
-                var timestamp = long.Parse(timeStr.Split(',')[0].Trim()[1..]);
+                var timeParts = timeStr.Trim('[', ']').Split(',');
+                var timestamp = long.Parse(timeParts[0]);
+                var duration = long.Parse(timeParts[1]);
                 var lyricTimestamp = new LyricTimestamp(timestamp);
 
                 var content = GetVerbatimRegex4QqMusicRegex().Replace(line[parenthesesLength..], string.Empty);
 
                 sb.Append(lyricTimestamp.PrintTimestamp(defaultParam.LrcTimestampFormat, defaultParam.DotType))
-                    .Append(content);
+                    .Append(content)
+                    .Append(Environment.NewLine);
+
+                // Keep a line-clear cue so IgnoreEmptyLyric can decide whether to retain it.
+                if (duration > 0 && !string.IsNullOrWhiteSpace(content))
+                {
+                    sb.Append(lyricTimestamp.Add(duration)
+                        .PrintTimestamp(defaultParam.LrcTimestampFormat, defaultParam.DotType));
+                }
             }
             else
             {

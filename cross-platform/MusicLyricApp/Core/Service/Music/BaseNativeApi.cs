@@ -55,7 +55,7 @@ public abstract class BaseNativeApi(Func<string> cookieFunc)
         return result;
     }
 
-    protected string SendJsonPost(string url, Dictionary<string, object> paramDict)
+    protected virtual string SendJsonPost(string url, Dictionary<string, object> paramDict)
     {
         using (var wc = new WebClient())
         {
