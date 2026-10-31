@@ -74,6 +74,18 @@ public class LyricsRegressionTests
         Assert.Equal(new[] { "[00:01.000]hello", "[00:01.000]你好" }, output);
     }
 
+    [Fact]
+    public async Task MissingConfiguredTranslationDoesNotMakeOriginInsertionIndexInvalid()
+    {
+        var settings = new SettingBean();
+        settings.Config.OutputLyricTypes = "2,0"; // Chinese translation, then original.
+        var lyric = new LyricVo { Lyric = "[00:01.000]这是中文歌词" };
+
+        var output = await LyricUtils.GetOutputContent(lyric, settings);
+
+        Assert.Equal("[00:01.000]这是中文歌词", Assert.Single(output));
+    }
+
     [Theory]
     [InlineData(TransLyricLostRuleEnum.IGNORE, "")]
     [InlineData(TransLyricLostRuleEnum.EMPTY_LINE, "[00:01.000]")]
