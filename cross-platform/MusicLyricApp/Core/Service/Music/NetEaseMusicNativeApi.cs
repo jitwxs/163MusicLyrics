@@ -213,7 +213,7 @@ public class NetEaseMusicNativeApi : BaseNativeApi
     /// <exception cref="WebException"></exception>
     /// <returns>一个
     /// <see cref="LyricResult"/></returns>
-    public LyricResult GetLyric(string songId)
+    public virtual LyricResult GetLyric(string songId)
     {
         const string url = "https://music.163.com/weapi/song/lyric?csrf_token=";
 

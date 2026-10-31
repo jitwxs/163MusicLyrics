@@ -1,5 +1,6 @@
 using MusicLyricApp.Core.Service;
 using MusicLyricApp.Core.Service.Music;
+using MusicLyricApp.Core.Utils;
 using MusicLyricApp.Models;
 
 namespace MusicLyricAppTest.Regression;
@@ -21,6 +22,25 @@ public class LiveServiceTests
     public void NetEaseSongMetadataAndLyrics()
     {
         AssertSong(new NetEaseMusicApi(() => ""), "347230");
+    }
+
+    [LiveFact]
+    public async Task Issue322NetEaseLyricsDecodeRealSongEntities()
+    {
+        const string songId = "2079814495";
+        var api = new NetEaseMusicApi(() => "");
+
+        var result = api.GetLyricVo(songId, songId, false);
+
+        Assert.True(result.IsSuccess(), result.ErrorMsg);
+        Assert.Contains("Now I'm feeling u", result.Data.Lyric);
+        Assert.DoesNotContain("&apos;", result.Data.Lyric, StringComparison.OrdinalIgnoreCase);
+
+        var settings = new SettingBean();
+        settings.Config.OutputLyricTypes = "0";
+        var output = string.Join(Environment.NewLine, await LyricUtils.GetOutputContent(result.Data, settings));
+        Assert.Contains("Now I'm feeling u", output);
+        Assert.DoesNotContain("&apos;", output, StringComparison.OrdinalIgnoreCase);
     }
 
     [LiveFact]
