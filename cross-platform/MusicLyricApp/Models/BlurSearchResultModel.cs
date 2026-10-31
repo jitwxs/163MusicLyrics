@@ -3,15 +3,25 @@ using Avalonia.Controls;
 using Avalonia.Data;
 using CommunityToolkit.Mvvm.ComponentModel;
 using MusicLyricApp.Core.Utils;
+using MusicLyricApp.Core.Localization;
 
 namespace MusicLyricApp.Models;
 
 public abstract partial class BlurSearchResultBase : ObservableObject
 {
+    private SearchSourceEnum _source;
     [ObservableProperty] private string? _id;
     [ObservableProperty] private string? _title;
     [ObservableProperty] private string? _author;
     [ObservableProperty] private string? _searchSource;
+
+    public void SetSource(SearchSourceEnum source)
+    {
+        _source = source;
+        SearchSource = _source.ToDescription();
+    }
+
+    public void RefreshLocalizedSource() => SearchSource = _source.ToDescription();
 }
 
 public partial class BlurSongSearchResult : BlurSearchResultBase
@@ -29,7 +39,7 @@ public partial class BlurSongSearchResult : BlurSearchResultBase
         Author = string.Join(",", resultVo.AuthorName);
         Album = resultVo.AlbumName;
         Duration = new LyricTimestamp(resultVo.Duration).PrintTimestamp("mm:ss", DotTypeEnum.DOWN);
-        SearchSource = searchSource.ToDescription();
+        SetSource(searchSource);
     }
 
     public static List<DataGridTextColumn> GetDataGridColumns()
@@ -38,31 +48,31 @@ public partial class BlurSongSearchResult : BlurSearchResultBase
         [
             new DataGridTextColumn
             {
-                Header = "歌曲", Binding = new Binding(nameof(Title)),
+                Header = LocalizationService.Get("UI.BlurGrid.Song"), Binding = new Binding(nameof(Title)),
                 Width = new DataGridLength(3, DataGridLengthUnitType.Star)
             },
 
             new DataGridTextColumn
             {
-                Header = "歌手", Binding = new Binding(nameof(Author)),
+                Header = LocalizationService.Get("UI.BlurGrid.Artist"), Binding = new Binding(nameof(Author)),
                 Width = new DataGridLength(1, DataGridLengthUnitType.Star)
             },
 
             new DataGridTextColumn
             {
-                Header = "专辑", Binding = new Binding(nameof(Album)),
+                Header = LocalizationService.Get("UI.BlurGrid.Album"), Binding = new Binding(nameof(Album)),
                 Width = new DataGridLength(2, DataGridLengthUnitType.Star)
             },
 
             new DataGridTextColumn
             {
-                Header = "时长", Binding = new Binding(nameof(Duration)),
+                Header = LocalizationService.Get("UI.BlurGrid.Duration"), Binding = new Binding(nameof(Duration)),
                 Width = new DataGridLength(1, DataGridLengthUnitType.Star)
             },
 
             new DataGridTextColumn
             {
-                Header = "平台", Binding = new Binding(nameof(SearchSource)),
+                Header = LocalizationService.Get("UI.BlurGrid.Platform"), Binding = new Binding(nameof(SearchSource)),
                 Width = new DataGridLength(1, DataGridLengthUnitType.Star)
             }
         ];
@@ -84,7 +94,7 @@ public partial class BlurAlbumSearchResult : BlurSearchResultBase
         Author = string.Join(",", resultVo.AuthorName);
         SongCount = resultVo.SongCount.ToString();
         PublishTime = resultVo.PublishTime;
-        SearchSource = searchSource.ToDescription();
+        SetSource(searchSource);
     }
 
     public static List<DataGridTextColumn> GetDataGridColumns()
@@ -93,31 +103,31 @@ public partial class BlurAlbumSearchResult : BlurSearchResultBase
         [
             new DataGridTextColumn
             {
-                Header = "专辑", Binding = new Binding(nameof(Title)),
+                Header = LocalizationService.Get("UI.BlurGrid.Album"), Binding = new Binding(nameof(Title)),
                 Width = new DataGridLength(3, DataGridLengthUnitType.Star)
             },
 
             new DataGridTextColumn
             {
-                Header = "歌手", Binding = new Binding(nameof(Author)),
+                Header = LocalizationService.Get("UI.BlurGrid.Artist"), Binding = new Binding(nameof(Author)),
                 Width = new DataGridLength(2, DataGridLengthUnitType.Star)
             },
 
             new DataGridTextColumn
             {
-                Header = "歌曲数量", Binding = new Binding(nameof(SongCount)),
+                Header = LocalizationService.Get("UI.BlurGrid.SongCount"), Binding = new Binding(nameof(SongCount)),
                 Width = new DataGridLength(1, DataGridLengthUnitType.Star)
             },
 
             new DataGridTextColumn
             {
-                Header = "发行时间", Binding = new Binding(nameof(PublishTime)),
+                Header = LocalizationService.Get("UI.BlurGrid.ReleaseDate"), Binding = new Binding(nameof(PublishTime)),
                 Width = new DataGridLength(1, DataGridLengthUnitType.Star)
             },
 
             new DataGridTextColumn
             {
-                Header = "平台", Binding = new Binding(nameof(SearchSource)),
+                Header = LocalizationService.Get("UI.BlurGrid.Platform"), Binding = new Binding(nameof(SearchSource)),
                 Width = new DataGridLength(1, DataGridLengthUnitType.Star)
             }
         ];
@@ -141,7 +151,7 @@ public partial class BlurPlaylistSearchResult : BlurSearchResultBase
         Description = resultVo.Description;
         SongCount = resultVo.SongCount.ToString();
         PlayCount = resultVo.PlayCount.ToString();
-        SearchSource = searchSource.ToDescription();
+        SetSource(searchSource);
     }
 
     public static List<DataGridTextColumn> GetDataGridColumns()
@@ -150,37 +160,37 @@ public partial class BlurPlaylistSearchResult : BlurSearchResultBase
         [
             new DataGridTextColumn
             {
-                Header = "歌单名", Binding = new Binding(nameof(Title)),
+                Header = LocalizationService.Get("UI.BlurGrid.Playlist"), Binding = new Binding(nameof(Title)),
                 Width = new DataGridLength(2, DataGridLengthUnitType.Star)
             },
 
             new DataGridTextColumn
             {
-                Header = "作者名", Binding = new Binding(nameof(Author)),
+                Header = LocalizationService.Get("UI.BlurGrid.Creator"), Binding = new Binding(nameof(Author)),
                 Width = new DataGridLength(1, DataGridLengthUnitType.Star)
             },
 
             new DataGridTextColumn
             {
-                Header = "描述", Binding = new Binding(nameof(Description)),
+                Header = LocalizationService.Get("UI.BlurGrid.Description"), Binding = new Binding(nameof(Description)),
                 Width = new DataGridLength(3, DataGridLengthUnitType.Star)
             },
 
             new DataGridTextColumn
             {
-                Header = "歌曲数量", Binding = new Binding(nameof(SongCount)),
+                Header = LocalizationService.Get("UI.BlurGrid.SongCount"), Binding = new Binding(nameof(SongCount)),
                 Width = new DataGridLength(1, DataGridLengthUnitType.Star)
             },
 
             new DataGridTextColumn
             {
-                Header = "播放量", Binding = new Binding(nameof(PlayCount)),
+                Header = LocalizationService.Get("UI.BlurGrid.PlayCount"), Binding = new Binding(nameof(PlayCount)),
                 Width = new DataGridLength(1, DataGridLengthUnitType.Star)
             },
 
             new DataGridTextColumn
             {
-                Header = "平台", Binding = new Binding(nameof(SearchSource)),
+                Header = LocalizationService.Get("UI.BlurGrid.Platform"), Binding = new Binding(nameof(SearchSource)),
                 Width = new DataGridLength(1, DataGridLengthUnitType.Star)
             }
         ];

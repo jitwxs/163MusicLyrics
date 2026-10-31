@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using MusicLyricApp.Models;
+using MusicLyricApp.Core.Localization;
 
 namespace MusicLyricApp.Core.Utils;
 
@@ -31,7 +32,10 @@ public static class RenderUtils
         log
             .Append(Environment.NewLine)
             .Append(
-                $"累计 {resDict.Count} 成功 {successMap.Count} 失败 {resDict.Count - successMap.Count}")
+                LocalizationService.Get("Message.SearchSummary")
+                    .Replace("{total}", resDict.Count.ToString(), StringComparison.Ordinal)
+                    .Replace("{success}", successMap.Count.ToString(), StringComparison.Ordinal)
+                    .Replace("{failed}", (resDict.Count - successMap.Count).ToString(), StringComparison.Ordinal))
             .Append(Environment.NewLine);
         
         return log.ToString();
@@ -44,7 +48,7 @@ public static class RenderUtils
         if (successRes.Count > 0)
         {
             log
-                .Append("保存成功：")
+                .Append(LocalizationService.Get("Message.StorageSuccessHeader"))
                 .Append(Environment.NewLine);
             foreach (var e in successRes)
             {
@@ -57,7 +61,7 @@ public static class RenderUtils
         if (skipRes.Count > 0)
         {
             log
-                .Append("保存失败：")
+                .Append(LocalizationService.Get("Message.StorageFailureHeader"))
                 .Append(Environment.NewLine);
             foreach (var pair in skipRes)
             {

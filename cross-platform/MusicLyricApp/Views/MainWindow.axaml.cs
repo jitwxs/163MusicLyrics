@@ -11,6 +11,7 @@ using MsBox.Avalonia;
 using MsBox.Avalonia.Enums;
 using MusicLyricApp.Core.Service;
 using MusicLyricApp.ViewModels;
+using MusicLyricApp.Core.Localization;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -89,7 +90,9 @@ public partial class MainWindow : Window, IWindowProvider
 
         e.Cancel = true;
 
-        var box = MessageBoxManager.GetMessageBoxStandard("退出提示", "你确定要退出吗？", ButtonEnum.YesNo);
+        var box = MessageBoxManager.GetMessageBoxStandard(
+            LocalizationService.Get("Dialog.Exit.Title"),
+            LocalizationService.Get("Dialog.Exit.Confirm"), ButtonEnum.YesNo);
         var result = await box.ShowAsync();
 
         if (result == ButtonResult.Yes)

@@ -32,6 +32,17 @@ dotnet build MusicLyricApp.sln -c Debug --no-restore
 dotnet test MusicLyricApp.sln -c Debug --no-build
 ```
 
+也可以直接使用一键脚本（在 `cross-platform/` 目录）：
+
+```sh
+./app.sh run                    # 编译并启动 Debug 版
+./app.sh build                  # 编译 Release 版
+APP_VERSION=7.4.0 ./app.sh package  # 打当前平台独立包
+APP_VERSION=7.4.0 ./app.sh all      # 编译、打包并启动发布版
+```
+
+包会放在 `publish/<版本>/<RID>/`，并生成同名 `.tar.gz` 到 `publish/`。默认 RID 自动按当前操作系统和 CPU 架构选择；也可手动指定，例如 `./app.sh package win-x64`。跨平台发布目标为 `osx-arm64`、`osx-x64`、`win-x64`、`win-arm64`、`linux-x64` 和 `linux-arm64`。
+
 ## 启动
 
 从 `cross-platform` 目录执行：

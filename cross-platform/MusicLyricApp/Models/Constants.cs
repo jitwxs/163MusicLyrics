@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Linq;
 using Avalonia.Controls;
+using MusicLyricApp.Core.Localization;
 
 namespace MusicLyricApp.Models;
 
@@ -49,8 +51,6 @@ public static class Constants
 
     public static class HelpTips
     {
-        public const string Prefix = "【提示区】";
-
         public enum TypeEnum
         {
             /// <summary>
@@ -71,40 +71,38 @@ public static class Constants
 
         public static string GetContent(TypeEnum typeEnum)
         {
-            var list = new List<string> { Prefix };
+            var list = new List<string> { "Help.Prefix" };
 
             switch (typeEnum)
             {
                 case TypeEnum.TIME_STAMP_SETTING:
-                    list.Add("您可自行调整『LRC/SRT 时间戳』配置，系统预设的元变量有：");
-                    list.Add("HH -> 小时，采用 24 小时制，结果为 0 ~ 23");
-                    list.Add("mm -> 分钟，输出区间 [0,59]");
-                    list.Add("ss -> 秒，输出区间 [0,59]");
-                    list.Add("S -> 毫秒，仅保留一位，输出区间 [0,9]");
-                    list.Add("SS -> 毫秒，仅保留两位，输出区间 [0,99]");
-                    list.Add("SSS -> 毫秒，输出区间 [0,999]");
-                    list.Add("当毫秒的占位符为 S 或 SS 时，『毫秒截位规则』配置生效");
+                    list.Add("Help.Timestamp.Intro");
+                    list.Add("Help.Timestamp.Hours");
+                    list.Add("Help.Timestamp.Minutes");
+                    list.Add("Help.Timestamp.Seconds");
+                    list.Add("Help.Timestamp.MillisecondsOne");
+                    list.Add("Help.Timestamp.MillisecondsTwo");
+                    list.Add("Help.Timestamp.MillisecondsThree");
+                    list.Add("Help.Timestamp.Rounding");
                     break;
                 case TypeEnum.OUTPUT_SETTING:
-                    list.Add("您可自行调整『保存文件名』配置，系统预设的元变量有：");
-                    list.Add("${id} -> 歌曲 ID");
-                    list.Add("${index} -> 歌曲位于搜索结果中的索引序号");
-                    list.Add("${name} -> 歌曲名");
-                    list.Add("${singer} -> 歌手名");
-                    list.Add("${album} -> 专辑名");
-                    list.Add("-----");
-                    list.Add("系统预设函数：");
-                    list.Add("$fillLength(content,symbol,length)");
-                    list.Add("长度填充，其中 content 表示操作的内容，symbol 表示填充的内容，length 表示填充的长度。" +
-                             "例如 $fillLength(${index},0,3) 表示对于 ${index} 的结果，长度填充到 3 位，使用 0 填充" +
-                             "【即 1 -> 001, 12 -> 012, 123 -> 123, 1234 -> 1234】");
+                    list.Add("Help.Output.Intro");
+                    list.Add("Help.Output.Id");
+                    list.Add("Help.Output.Index");
+                    list.Add("Help.Output.Name");
+                    list.Add("Help.Output.Singer");
+                    list.Add("Help.Output.Album");
+                    list.Add("Help.Output.Separator");
+                    list.Add("Help.Output.Functions");
+                    list.Add("Help.Output.FillFunction");
+                    list.Add("Help.Output.FillDescription");
                     break;
                 case TypeEnum.DEFAULT:
                 default:
                     break;
             }
 
-            return string.Join(Environment.NewLine + Environment.NewLine, list);
+            return string.Join(Environment.NewLine + Environment.NewLine, list.Select(LocalizationService.Get));
         }
     }
 }

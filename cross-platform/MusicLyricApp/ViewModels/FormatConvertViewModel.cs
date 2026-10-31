@@ -6,6 +6,7 @@ using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MusicLyricApp.Core;
+using MusicLyricApp.Core.Localization;
 using MusicLyricApp.Core.Utils;
 using MusicLyricApp.Models;
 
@@ -59,7 +60,7 @@ public partial class FormatConvertViewModel : ViewModelBase
         (SourceFormatItem, TargetFormatItem) = (TargetFormatItem, SourceFormatItem);
         (InputText, OutputText) = (OutputText, InputText);
         RequestDebouncedConvert();
-        TipMessage = "已交换输入输出格式。";
+        TipMessage = LocalizationService.Get("Status.Format.Swapped");
     }
 
     private void RequestDebouncedConvert()
@@ -82,29 +83,29 @@ public partial class FormatConvertViewModel : ViewModelBase
             if (SourceFormatItem.Value == TargetFormatItem.Value)
             {
                 OutputText = InputText;
-                TipMessage = "源格式和目标格式一致，已直接输出。";
+                TipMessage = LocalizationService.Get("Status.Format.SameFormat");
                 return;
             }
 
             if (SourceFormatItem.Value == OutputFormatEnum.LRC && TargetFormatItem.Value == OutputFormatEnum.SRT)
             {
                 OutputText = ConvertLrcTextToSrt(InputText);
-                TipMessage = "转换成功：LRC -> SRT";
+                TipMessage = LocalizationService.Get("Status.Format.LrcToSrt");
                 return;
             }
 
             if (SourceFormatItem.Value == OutputFormatEnum.SRT && TargetFormatItem.Value == OutputFormatEnum.LRC)
             {
                 OutputText = SrtUtils.SrtToLrc(InputText, _settingBean.Config.LrcTimestampFormat, _settingBean.Config.DotType);
-                TipMessage = "转换成功：SRT -> LRC";
+                TipMessage = LocalizationService.Get("Status.Format.SrtToLrc");
                 return;
             }
 
-            throw new MusicLyricException("暂不支持该格式转换");
+            throw new MusicLyricException(LocalizationService.Get("Status.Format.Unsupported"));
         }
         catch (Exception ex)
         {
-            TipMessage = $"转换失败：{ex.Message}";
+            TipMessage = LocalizationService.Format("Status.Format.Failed", ex.Message);
         }
     }
 

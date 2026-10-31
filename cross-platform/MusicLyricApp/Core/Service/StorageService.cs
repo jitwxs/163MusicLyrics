@@ -8,6 +8,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Avalonia.Platform.Storage;
 using MusicLyricApp.Core.Utils;
+using MusicLyricApp.Core.Localization;
 using MusicLyricApp.Models;
 using MusicLyricApp.ViewModels;
 using NLog;
@@ -184,7 +185,7 @@ public class StorageService : IStorageService
         await input.CopyToAsync(output);
         await output.FlushAsync();
 
-        return "歌曲音频已保存";
+        return LocalizationService.Get("Status.Storage.AudioSaved");
     }
 
     public async Task<string> DownloadSongPic(SearchResultViewModel searchResult, SettingBean settingBean,
@@ -211,7 +212,7 @@ public class StorageService : IStorageService
         await stream.WriteAsync(bytes);
         await stream.FlushAsync();
 
-        return "歌曲封面已保存";
+        return LocalizationService.Get("Status.Storage.CoverSaved");
     }
 
     private async Task<string> SaveSingleResult(SearchResultViewModel searchResult, SettingBean settingBean,
@@ -220,7 +221,7 @@ public class StorageService : IStorageService
         var saveVo = searchResult.SaveVoMap.Values.First();
         var preCheck = IsSkipStorage(saveVo, settingBean);
 
-        if (preCheck != ErrorMsgConst.SUCCESS)
+        if (preCheck != null)
         {
             throw new MusicLyricException(preCheck);
         }
@@ -245,7 +246,7 @@ public class StorageService : IStorageService
 
             var preCheck = IsSkipStorage(saveVo, settingBean);
 
-            if (preCheck != ErrorMsgConst.SUCCESS)
+            if (preCheck != null)
             {
                 skipRes[resKey] = preCheck;
             }
@@ -321,7 +322,7 @@ public class StorageService : IStorageService
         }
     }
 
-    internal static string IsSkipStorage(SaveVo saveVo, SettingBean settingBean)
+    internal static string? IsSkipStorage(SaveVo saveVo, SettingBean settingBean)
     {
         // 没有歌词内容
         if (saveVo.LyricVo.IsEmpty())
@@ -335,7 +336,7 @@ public class StorageService : IStorageService
             return ErrorMsgConst.PURE_MUSIC_IGNORE_SAVE;
         }
 
-        return ErrorMsgConst.SUCCESS;
+        return null;
     }
 
     public async Task<IStorageFolder> SelectFolderAndRememberAsync(SettingBean settingBean, IWindowProvider windowProvider)
@@ -373,7 +374,7 @@ public class StorageService : IStorageService
     {
         var folders = await windowProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
         {
-            Title = "选择保存目录",
+            Title = LocalizationService.Get("Dialog.Folder.Output"),
             AllowMultiple = false
         });
 

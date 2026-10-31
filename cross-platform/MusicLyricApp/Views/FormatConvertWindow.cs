@@ -1,6 +1,7 @@
 using Avalonia.Controls;
 using MusicLyricApp.Models;
 using MusicLyricApp.ViewModels;
+using MusicLyricApp.Core.Localization;
 
 namespace MusicLyricApp.Views;
 
@@ -8,7 +9,7 @@ public class FormatConvertWindow : Window
 {
     public FormatConvertWindow(SettingBean settingBean)
     {
-        Title = "格式转换";
+        LocalizationService.BindWindowTitle(this, "Window.FormatConvert.Title");
         Width = 980;
         Height = 640;
         MinWidth = 860;

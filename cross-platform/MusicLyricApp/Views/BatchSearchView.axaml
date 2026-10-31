@@ -3,6 +3,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:viewModels="clr-namespace:MusicLyricApp.ViewModels"
+             xmlns:loc="using:MusicLyricApp.Core.Localization"
              mc:Ignorable="d"
              x:Name="Root"
              x:Class="MusicLyricApp.Views.BatchSearchView"
@@ -24,7 +25,7 @@
                      TextWrapping="Wrap"
                      IsReadOnly="True" />
             <Button Grid.Column="1"
-                    Content="本地扫描"
+                    Content="{loc:Loc Key=UI.LocalScan}"
                     Width="130"
                     Command="{Binding ExecuteSelectFolderCommand}" />
         </Grid>
@@ -40,10 +41,10 @@
                 <Style Selector="DataGridRow">
                     <Setter Property="ContextMenu">
                         <ContextMenu>
-                            <MenuItem Header="保存"
+                            <MenuItem Header="{loc:Loc Key=UI.Save}"
                                       Command="{Binding #Root.DataContext.ExecuteContextSaveCommand}"
                                       CommandParameter="{Binding}" />
-                            <MenuItem Header="查看详情"
+                            <MenuItem Header="{loc:Loc Key=UI.ViewDetails}"
                                       Command="{Binding #Root.DataContext.ExecuteViewDetailCommand}"
                                       CommandParameter="{Binding}" />
                         </ContextMenu>
@@ -58,19 +59,19 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTextColumn Header="歌曲源" Binding="{Binding SongSource}" Width="90" />
-                <DataGridTextColumn Header="歌曲ID" Binding="{Binding SongId}" Width="120" />
-                <DataGridTextColumn Header="歌曲名" Binding="{Binding SongName}" Width="*" />
-                <DataGridTextColumn Header="歌手" Binding="{Binding Singer}" Width="180" />
-                <DataGridTextColumn Header="专辑" Binding="{Binding Album}" Width="200" />
-                <DataGridTemplateColumn Header="状态" Width="120" CanUserSort="False">
+                <DataGridTextColumn Header="{loc:Loc Key=UI.SongSource}" Binding="{Binding SongSource}" Width="90" />
+                <DataGridTextColumn Header="{loc:Loc Key=UI.SongId}" Binding="{Binding SongId}" Width="120" />
+                <DataGridTextColumn Header="{loc:Loc Key=UI.SongName}" Binding="{Binding SongName}" Width="*" />
+                <DataGridTextColumn Header="{loc:Loc Key=UI.Singer}" Binding="{Binding Singer}" Width="180" />
+                <DataGridTextColumn Header="{loc:Loc Key=UI.Album}" Binding="{Binding Album}" Width="200" />
+                <DataGridTemplateColumn Header="{loc:Loc Key=UI.Extra01}" Width="120" CanUserSort="False">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <TextBlock Text="{Binding Status}" VerticalAlignment="Center" />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTemplateColumn Header="备注" Width="260" CanUserSort="False">
+                <DataGridTemplateColumn Header="{loc:Loc Key=UI.Extra02}" Width="260" CanUserSort="False">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <TextBlock Text="{Binding Error}"
@@ -85,27 +86,27 @@
         </DataGrid>
 
         <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
-            <Button Content="全选" Width="110" Command="{Binding ExecuteSelectAllCommand}" />
-            <Button Content="取消全选" Width="130" Command="{Binding ExecuteClearSelectedCommand}" />
-            <Button Content="保存选中" Width="130" Command="{Binding ExecuteSaveSelectedCommand}" />
-            <Button Content="删除选中" Width="130" Command="{Binding ExecuteDeleteSelectedCommand}" />
+            <Button Content="{loc:Loc Key=UI.SelectAll}" Width="110" Command="{Binding ExecuteSelectAllCommand}" />
+            <Button Content="{loc:Loc Key=UI.ClearSelection}" Width="130" Command="{Binding ExecuteClearSelectedCommand}" />
+            <Button Content="{loc:Loc Key=UI.SaveSelected}" Width="130" Command="{Binding ExecuteSaveSelectedCommand}" />
+            <Button Content="{loc:Loc Key=UI.DeleteSelected}" Width="130" Command="{Binding ExecuteDeleteSelectedCommand}" />
         </StackPanel>
 
         <Border Grid.Row="3" Padding="8" BorderBrush="#D0D7DE" BorderThickness="1" CornerRadius="6" Background="#FAFBFC">
             <TextBlock TextTrimming="CharacterEllipsis">
-                <Run Text="【提示】 " Foreground="#344054" />
+                <Run Text="{loc:Loc Key=UI.Extra03}" Foreground="#344054" />
                 <Run Text="[" Foreground="#98A2B3" />
                 <Run Text="{Binding TipTimestamp}" Foreground="#98A2B3" />
                 <Run Text="] " Foreground="#98A2B3" />
                 <Run Text="{Binding TipNormalMessage}" Foreground="#667085" />
                 <Run Text="{Binding TipErrorMessage}" Foreground="IndianRed" />
-                <Run Text=" | 累计保存歌曲数量: " Foreground="#344054" />
+                <Run Text="{loc:Loc Key=UI.Extra04}" Foreground="#344054" />
                 <Run Text="{Binding TotalSongsCount}" Foreground="#344054" />
-                <Run Text=" | 存在歌词数量: " Foreground="#344054" />
+                <Run Text="{loc:Loc Key=UI.Extra05}" Foreground="#344054" />
                 <Run Text="{Binding SongsWithLyricsCount}" Foreground="#344054" />
-                <Run Text=" | 保存成功: " Foreground="#344054" />
+                <Run Text="{loc:Loc Key=UI.Extra06}" Foreground="#344054" />
                 <Run Text="{Binding SaveSuccessCount}" Foreground="#2E7D32" />
-                <Run Text=" | 保存失败: " Foreground="#344054" />
+                <Run Text="{loc:Loc Key=UI.Extra07}" Foreground="#344054" />
                 <Run Text="{Binding SaveFailedCount}" Foreground="IndianRed" />
             </TextBlock>
         </Border>

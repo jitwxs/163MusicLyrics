@@ -44,5 +44,6 @@
         <EmbeddedResource Include="Core14.profile.xml" />
         <EmbeddedResource Include="Resources\settings.ico" />
         <EmbeddedResource Include="Resources\search-result.ico" />
+        <EmbeddedResource Include="Resources\Localization\*.json" />
     </ItemGroup>
 </Project>

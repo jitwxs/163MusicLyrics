@@ -6,6 +6,7 @@ using System.Net;
 using System.Threading.Tasks;
 using MusicLyricApp.Core.Service.Music;
 using MusicLyricApp.Core.Utils;
+using MusicLyricApp.Core.Localization;
 using MusicLyricApp.Models;
 using MusicLyricApp.ViewModels;
 using NLog;
@@ -198,8 +199,8 @@ public class SearchService : ISearchService
             searchResult.PublishDate = saveVo.SongVo.PublishDate;
             searchResult.SongSource = saveVo.LyricVo.SearchSource switch
             {
-                SearchSourceEnum.NET_EASE_MUSIC => "网易云",
-                SearchSourceEnum.QQ_MUSIC => "QQ音乐",
+                SearchSourceEnum.NET_EASE_MUSIC => LocalizationService.Get("Status.Search.SourceNetEase"),
+                SearchSourceEnum.QQ_MUSIC => LocalizationService.Get("Status.Search.SourceQQ"),
                 _ => saveVo.LyricVo.SearchSource.ToString()
             };
         }

@@ -2,10 +2,17 @@
 
 namespace MusicLyricApp.Models;
 
-public partial class LyricsTypeEnumModel(LyricsTypeEnum one) : ObservableObject
+public partial class LyricsTypeEnumModel : ObservableObject
 {
-    public int Id { get; } = (int)one;
-    public string Name { get; } = one.ToDescription();
+    private readonly LyricsTypeEnum _type;
+    public int Id => (int)_type;
+    public string Name => MusicLyricApp.Core.Localization.LocalizationService.Get($"Enum.{_type.GetType().Name}.{_type}");
+
+    public LyricsTypeEnumModel(LyricsTypeEnum type)
+    {
+        _type = type;
+        MusicLyricApp.Core.Localization.LocalizationService.Instance.PropertyChanged += (_, _) => OnPropertyChanged(nameof(Name));
+    }
 
     [ObservableProperty] private bool _isSelected;
 }

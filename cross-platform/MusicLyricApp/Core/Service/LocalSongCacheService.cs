@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Linq;
 using MusicLyricApp.Core.Utils;
+using MusicLyricApp.Core.Localization;
 using MusicLyricApp.Models;
 using NLog;
 
@@ -165,8 +166,8 @@ public static class LocalSongCacheService
         EnsureConfigDefaults(settingBean);
         var sourceName = source switch
         {
-            SearchSourceEnum.NET_EASE_MUSIC => "网易云",
-            SearchSourceEnum.QQ_MUSIC => "QQ音乐",
+            SearchSourceEnum.NET_EASE_MUSIC => LocalizationService.Get("Status.Search.SourceNetEase"),
+            SearchSourceEnum.QQ_MUSIC => LocalizationService.Get("Status.Search.SourceQQ"),
             _ => source.ToString()
         };
         var filename = $"{sourceName}_{songId}.json";

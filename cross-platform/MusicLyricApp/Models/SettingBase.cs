@@ -1,6 +1,5 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 
 namespace MusicLyricApp.Models;
@@ -15,10 +14,8 @@ public enum NetworkProxyModeEnum
 
 public enum FileConflictStrategyEnum
 {
-    [Description("覆盖同名文件")]
     OVERWRITE = 0,
 
-    [Description("自动追加编号")]
     APPEND_NUMBER = 1
 }
 
@@ -31,6 +28,9 @@ public class SettingBean
 
 public class ConfigBean
 {
+    /// <summary>UI language, stored independently from functional settings.</summary>
+    public string Language = "zh-CN";
+
     /// <summary>
     /// LRC 歌词时间戳格式
     /// </summary>
