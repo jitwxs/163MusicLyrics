@@ -7,7 +7,7 @@ PROJECT_FILE="$PROJECT_DIR/MusicLyricApp.csproj"
 SOLUTION_FILE="$SCRIPT_DIR/MusicLyricApp.sln"
 OUTPUT_ROOT="$SCRIPT_DIR/publish"
 CONFIGURATION="${CONFIGURATION:-Release}"
-APP_VERSION="${APP_VERSION:-local}"
+APP_VERSION="${APP_VERSION:-7.4.0}"
 
 find_dotnet() {
     if command -v dotnet >/dev/null 2>&1; then
@@ -61,7 +61,7 @@ build_app() {
 publish_app() {
     local rid="$1"
     local output_dir="$OUTPUT_ROOT/$APP_VERSION/$rid"
-    local archive="$OUTPUT_ROOT/MusicLyricApp-$APP_VERSION-$rid.tar.gz"
+    local archive
 
     mkdir -p "$OUTPUT_ROOT"
     ensure_restore
@@ -74,7 +74,13 @@ publish_app() {
         -p:IncludeNativeLibrariesForSelfExtract=true \
         -o "$output_dir"
 
-    tar -czf "$archive" -C "$output_dir" .
+    if [[ "$rid" == win-* ]]; then
+        archive="$OUTPUT_ROOT/MusicLyricApp-$APP_VERSION-$rid.zip"
+        (cd "$output_dir" && zip -qr "$archive" .)
+    else
+        archive="$OUTPUT_ROOT/MusicLyricApp-$APP_VERSION-$rid.tar.gz"
+        tar -czf "$archive" -C "$output_dir" .
+    fi
     echo "打包完成：$archive"
     echo "发布目录：$output_dir"
 }
@@ -117,7 +123,7 @@ usage() {
   all [RID]       编译 Release、打包，然后启动发布版
 
 RID 可选：osx-arm64、osx-x64、win-x64、win-arm64、linux-x64、linux-arm64。
-不传 RID 时使用当前机器对应的平台。可通过 APP_VERSION=版本号 覆盖默认包名中的 local。
+不传 RID 时使用当前机器对应的平台。可通过 APP_VERSION=版本号 覆盖默认版本号。
 
 示例：
   $0 run
