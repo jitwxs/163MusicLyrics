@@ -13,15 +13,21 @@ using SearchParamViewModel = MusicLyricApp.ViewModels.SearchParamViewModel;
 
 namespace MusicLyricApp.Core.Service;
 
-public class SearchService(SettingBean settingBean) : ISearchService
+public class SearchService : ISearchService
 {
     private readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
-    private readonly Dictionary<SearchSourceEnum, IMusicApi> _api = new()
+    private readonly IReadOnlyDictionary<SearchSourceEnum, IMusicApi> _api;
+
+    public SearchService(SettingBean settingBean,
+        IReadOnlyDictionary<SearchSourceEnum, IMusicApi>? musicApis = null)
     {
-        { SearchSourceEnum.QQ_MUSIC, new QQMusicApi(() => settingBean.Config.QQMusicCookie) },
-        { SearchSourceEnum.NET_EASE_MUSIC, new NetEaseMusicApi(() => settingBean.Config.NetEaseCookie) }
-    };
+        _api = musicApis ?? new Dictionary<SearchSourceEnum, IMusicApi>
+        {
+            { SearchSourceEnum.QQ_MUSIC, new QQMusicApi(() => settingBean.Config.QQMusicCookie) },
+            { SearchSourceEnum.NET_EASE_MUSIC, new NetEaseMusicApi(() => settingBean.Config.NetEaseCookie) }
+        };
+    }
 
     public int LastLocalCacheHitCount { get; private set; }
 

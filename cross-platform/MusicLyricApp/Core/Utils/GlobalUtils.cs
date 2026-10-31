@@ -116,7 +116,14 @@ public static partial class GlobalUtils
                 }
             }
 
-            return new InputSongId(sb.ToString(), searchSource, searchType);
+            var extractedId = sb.ToString();
+            if (string.IsNullOrEmpty(extractedId) ||
+                (searchSource == SearchSourceEnum.NET_EASE_MUSIC && !CheckNum(extractedId)))
+            {
+                throw new MusicLyricException(ErrorMsgConst.INPUT_ID_ILLEGAL);
+            }
+
+            return new InputSongId(extractedId, searchSource, searchType);
         }
 
         // QQ 音乐，歌曲短链接

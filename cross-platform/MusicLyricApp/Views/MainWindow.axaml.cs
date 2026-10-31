@@ -19,10 +19,14 @@ namespace MusicLyricApp.Views;
 
 public partial class MainWindow : Window, IWindowProvider
 {
-    public MainWindow()
+    public MainWindow() : this(null, null)
+    {
+    }
+
+    public MainWindow(StorageService? storageService, SearchService? searchService)
     {
         InitializeComponent();
-        DataContext = new MainWindowViewModel(this);
+        DataContext = new MainWindowViewModel(this, storageService, searchService);
         
         SearchTextBox.PointerEntered += SearchTextBox_PointerEntered;
         

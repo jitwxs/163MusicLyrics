@@ -10,11 +10,22 @@ namespace MusicLyricApp.Core.Service;
 
 public partial class UpdateCheckService
 {
+    private readonly Func<GitHubInfo?> _fetchLatest;
+
+    public UpdateCheckService(Func<GitHubInfo?>? fetchLatest = null)
+    {
+        _fetchLatest = fetchLatest ?? FetchLatest;
+    }
     public const string ReleasePageUrl = "https://github.com/jitwxs/163MusicLyrics/releases";
 
     public UpdateCheckResult CheckLatestVersion(string currentVersionText)
     {
-        var info = HttpUtils.HttpGet<GitHubInfo>(
+        var info = _fetchLatest();
+
+        return EvaluateLatestVersion(currentVersionText, info);
+    }
+
+    private static GitHubInfo? FetchLatest() => HttpUtils.HttpGet<GitHubInfo>(
             "https://api.github.com/repos/jitwxs/163MusicLyrics/releases/latest",
             "application/json",
             new Dictionary<string, string>
@@ -22,6 +33,9 @@ public partial class UpdateCheckService
                 { "Accept", "application/vnd.github.v3+json" },
                 { "User-Agent", BaseNativeApi.Useragent }
             });
+
+    private static UpdateCheckResult EvaluateLatestVersion(string currentVersionText, GitHubInfo? info)
+    {
 
         if (info == null)
         {

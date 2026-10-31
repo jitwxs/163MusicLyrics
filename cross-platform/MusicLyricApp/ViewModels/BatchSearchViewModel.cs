@@ -211,8 +211,11 @@ public partial class BatchSearchViewModel : ViewModelBase
             var message = await _storageService.SaveResult(temp, _settingBean, _windowProvider);
             foreach (var item in selected.Where(i => saveMap.ContainsKey(i.SongId)))
             {
-                item.Status = "Saved";
-                item.Progress = 100;
+                var skipReason = StorageService.IsSkipStorage(saveMap[item.SongId], _settingBean);
+                var saved = skipReason == ErrorMsgConst.SUCCESS;
+                item.Status = saved ? "Saved" : "Skipped";
+                item.Error = saved ? "" : skipReason;
+                item.Progress = saved ? 100 : 0;
             }
 
             var stats = ParseSaveMessage(message);

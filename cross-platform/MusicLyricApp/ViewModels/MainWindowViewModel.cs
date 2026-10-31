@@ -27,7 +27,7 @@ namespace MusicLyricApp.ViewModels;
 
 public partial class MainWindowViewModel : ViewModelBase
 {
-    public bool IsPlaybackSupported => OperatingSystem.IsWindows();
+    public virtual bool IsPlaybackSupported => OperatingSystem.IsWindows();
     public SearchParamViewModel SearchParamViewModel { get; } = new();
 
     public SearchResultViewModel SearchResultViewModel { get; } = new();
@@ -99,14 +99,16 @@ public partial class MainWindowViewModel : ViewModelBase
     }
 
     // Main constructor for runtime use
-    public MainWindowViewModel(IWindowProvider windowProvider)
+    public MainWindowViewModel(IWindowProvider windowProvider, StorageService? storageService = null,
+        SearchService? searchService = null)
     {
         _windowProvider = windowProvider;
+        _storageService = storageService ?? new StorageService();
 
         _settingBean = _storageService.ReadAppConfig();
         NetworkClientFactory.Configure(_settingBean.Config);
 
-        _searchService = new SearchService(_settingBean);
+        _searchService = searchService ?? new SearchService(_settingBean);
         
         _storageService.SetSearchService(_searchService);
         _downloadManagerViewModel = new BatchSearchViewModel(_settingBean, _searchService, _storageService, _windowProvider);
@@ -268,12 +270,12 @@ public partial class MainWindowViewModel : ViewModelBase
         var saveVo = SearchResultViewModel.SaveVoMap.Values.First();
         if (saveVo.LyricVo.IsEmpty())
         {
-            SearchResultViewModel.ResetConsoleOutput(string.Empty);
+            SearchResultViewModel.ConsoleOutput = string.Empty;
             return;
         }
 
         var content = await LyricUtils.GetOutputContent(saveVo.LyricVo, SettingBean);
-        SearchResultViewModel.ResetConsoleOutput(GlobalUtils.MergeStr(content));
+        SearchResultViewModel.ConsoleOutput = GlobalUtils.MergeStr(content);
     }
 
     [RelayCommand]
@@ -456,8 +458,11 @@ public partial class MainWindowViewModel : ViewModelBase
             return;
         }
 
-        EnsurePlaybackPrepared();
-        UpdatePlaybackProgress();
+        if (IsPlaybackSupported)
+        {
+            EnsurePlaybackPrepared();
+            UpdatePlaybackProgress();
+        }
     }
 
     private void UpdatePlaybackProgress()
