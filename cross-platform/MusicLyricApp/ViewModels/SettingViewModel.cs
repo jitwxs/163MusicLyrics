@@ -34,15 +34,21 @@ public partial class SettingViewModel : ViewModelBase
 
     private readonly SettingBean _settingBean;
     private readonly IWindowProvider? _windowProvider;
+    private readonly Action<string> _openDirectory;
     private readonly StorageService _storageService = new();
     private readonly UpdateCheckService _updateCheckService = new();
     
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-    public SettingViewModel(SettingBean settingBean, IWindowProvider? windowProvider = null)
+    public SettingViewModel(SettingBean settingBean, IWindowProvider? windowProvider = null,
+        Action<string>? openDirectory = null)
     {
         _settingBean = settingBean;
         _windowProvider = windowProvider;
+        _openDirectory = openDirectory ?? (path =>
+        {
+            using var _ = Process.Start(new ProcessStartInfo { FileName = path, UseShellExecute = true });
+        });
         LocalSongCacheService.EnsureConfigDefaults(_settingBean);
         SettingParamViewModel.Bind(_settingBean);
 
@@ -199,10 +205,51 @@ public partial class SettingViewModel : ViewModelBase
             return;
         }
 
-        var folder = await _storageService.SelectFolderAndRememberAsync(_settingBean, _windowProvider);
-        var localPath = folder.Path?.LocalPath ?? folder.Path?.ToString() ?? "";
-        SettingParamViewModel.SaveFolderPath = localPath;
-        SettingTips = LocalizationService.Format("Status.Settings.OutputPathUpdated", localPath);
+        try
+        {
+            var folder = await _storageService.SelectFolderAndRememberAsync(_settingBean, _windowProvider);
+            if (folder == null)
+            {
+                return;
+            }
+
+            var localPath = folder.Path?.LocalPath ?? folder.Path?.ToString();
+            if (string.IsNullOrWhiteSpace(localPath))
+            {
+                return;
+            }
+
+            SettingParamViewModel.SaveFolderPath = localPath;
+            SettingTips = LocalizationService.Format("Status.Settings.OutputPathUpdated", localPath);
+        }
+        catch (Exception ex)
+        {
+            Logger.Error(ex, "SelectSaveFolder error");
+            SettingTips = ex.Message;
+        }
+    }
+
+    [RelayCommand]
+    private void OpenSaveFolder()
+    {
+        var path = SettingParamViewModel.SaveFolderPath;
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            SettingTips = LocalizationService.Get("Status.Settings.OutputPathEmpty");
+            return;
+        }
+
+        try
+        {
+            Directory.CreateDirectory(path);
+            _openDirectory(path);
+            SettingTips = LocalizationService.Format("Status.Settings.OutputPathOpened", path);
+        }
+        catch (Exception ex)
+        {
+            Logger.Error(ex, "OpenSaveFolder error");
+            SettingTips = LocalizationService.Format("Status.Settings.OpenOutputPathFailed", ex.Message);
+        }
     }
 
     [RelayCommand]
@@ -213,26 +260,34 @@ public partial class SettingViewModel : ViewModelBase
             return;
         }
 
-        var folders = await _windowProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
+        try
         {
-            Title = LocalizationService.Get("Dialog.Folder.Cache"),
-            AllowMultiple = false
-        });
+            var folders = await _windowProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
+            {
+                Title = LocalizationService.Get("Dialog.Folder.Cache"),
+                AllowMultiple = false
+            });
 
-        if (folders.Count == 0)
-        {
-            return;
+            if (folders.Count == 0)
+            {
+                return;
+            }
+
+            var path = folders[0].Path?.LocalPath ?? folders[0].Path?.ToString();
+            if (string.IsNullOrWhiteSpace(path))
+            {
+                return;
+            }
+
+            SettingParamViewModel.SearchCacheFolderPath = path;
+            _storageService.SaveConfig(_settingBean);
+            SettingTips = LocalizationService.Format("Status.Settings.CachePathUpdated", path);
         }
-
-        var path = folders[0].Path?.LocalPath ?? folders[0].Path?.ToString();
-        if (string.IsNullOrWhiteSpace(path))
+        catch (Exception ex)
         {
-            return;
+            Logger.Error(ex, "SelectSearchCacheFolder error");
+            SettingTips = ex.Message;
         }
-
-        SettingParamViewModel.SearchCacheFolderPath = path;
-        _storageService.SaveConfig(_settingBean);
-        SettingTips = LocalizationService.Format("Status.Settings.CachePathUpdated", path);
     }
 
     [RelayCommand]

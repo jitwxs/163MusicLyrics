@@ -818,7 +818,7 @@ public partial class MainWindowViewModel : ViewModelBase
         }
 
         // 创建新窗口
-        _settingWindow = new SettingWindow(SettingBean, _windowProvider);
+        _settingWindow = new SettingWindow(SettingBean);
         _settingWindow.Closed += (_, _) => 
         {
             if (_settingWindow.DataContext is SettingViewModel vm)
@@ -828,7 +828,14 @@ public partial class MainWindowViewModel : ViewModelBase
             }
             _settingWindow = null;
         };
-        _settingWindow.Show();
+        if (_windowProvider is Window owner)
+        {
+            _settingWindow.Show(owner);
+        }
+        else
+        {
+            _settingWindow.Show();
+        }
     }
     
     private bool _inCheckVersion;
@@ -893,7 +900,11 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         try
         {
-            await _storageService.SelectFolderAndRememberAsync(SettingBean, _windowProvider);
+            var folder = await _storageService.SelectFolderAndRememberAsync(SettingBean, _windowProvider);
+            if (folder == null)
+            {
+                return;
+            }
             LastSaveFolderPath = SettingBean.Config.LastSaveFolderPath;
             SetTip(LocalizationService.Format("Status.Main.SavePathUpdated", LastSaveFolderPath), false);
         }
