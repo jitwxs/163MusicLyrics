@@ -42,7 +42,7 @@ public abstract class TranslateCacheableApi : ITranslateApi
                 }
             }
 
-            res[index++] = output;
+            res[index++] = output ?? string.Empty;
         }
 
         return res;

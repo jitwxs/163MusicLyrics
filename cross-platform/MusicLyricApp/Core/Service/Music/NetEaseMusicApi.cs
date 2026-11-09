@@ -28,7 +28,7 @@ public class NetEaseMusicApi : MusicCacheableApi
     {
         var resp = _api.GetPlaylist(playlistId);
 
-        if (resp.Code == 200)
+        if (resp.Code == 200 && resp.Playlist != null)
         {
             var songIds = resp.Playlist.TrackIds.Select(e => e.Id.ToString()).ToArray();
 
@@ -62,7 +62,7 @@ public class NetEaseMusicApi : MusicCacheableApi
     protected override ResultVo<AlbumVo> GetAlbumVo0(string albumId)
     {
         var resp = _api.GetAlbum(albumId);
-        if (resp.Code == 200)
+        if (resp.Code == 200 && resp.Album != null)
         {
             // cache song
             GlobalCache.DoCache(Source(), CacheType.NET_EASE_SONG, value => value.Id, resp.Songs);
@@ -100,10 +100,10 @@ public class NetEaseMusicApi : MusicCacheableApi
                 {
                     Id = song.Id,
                     DisplayId = songId,
-                    Pics = song.Al.PicUrl,
+                    Pics = song.Al?.PicUrl ?? string.Empty,
                     Name = song.Name,
                     Singer = song.Ar.Select(e => e.Name).ToArray(),
-                    Album = song.Al.Name,
+                    Album = song.Al?.Name ?? string.Empty,
                     Duration = song.Dt,
                     PublishDate = song.PublishTime > 0
                         ? GlobalUtils.FormatDate(song.PublishTime).Split(' ')[0]

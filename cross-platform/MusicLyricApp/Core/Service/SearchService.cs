@@ -149,7 +149,7 @@ public class SearchService : ISearchService
                     songResult = new ResultVo<SaveVo>(saveVo);
                     LocalSongCacheService.SaveCache(settingBean, searchSourcePair.Key, songId, saveVo);
                 }
-                catch (WebException ex)
+                catch (Exception ex) when (ex is WebException or System.Net.Http.HttpRequestException or TaskCanceledException)
                 {
                     _logger.Error(ex, "SearchBySongId network error, songId: {SongId}, delay: {Delay}", songId,
                         NetworkUtils.GetWebRoundtripTime(50));

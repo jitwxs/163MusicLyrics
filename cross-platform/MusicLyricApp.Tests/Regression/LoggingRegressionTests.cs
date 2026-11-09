@@ -99,7 +99,7 @@ public class LoggingRegressionTests
             }
         };
         File.AppendAllText(configPath, Environment.NewLine);
-        await reloaded.Task.WaitAsync(TimeSpan.FromSeconds(10));
+        await reloaded.Task.WaitAsync(TimeSpan.FromSeconds(10), TestContext.Current.CancellationToken);
         factory.GetLogger("test").Info("must remain disabled after reload");
         factory.Flush();
 
@@ -223,7 +223,7 @@ public class LoggingRegressionTests
             element.Attribute("fileName") != null);
         fileTarget.SetAttributeValue("layout", "reloaded-layout | ${message}");
         document.Save(configPath);
-        await reloaded.Task.WaitAsync(TimeSpan.FromSeconds(10));
+        await reloaded.Task.WaitAsync(TimeSpan.FromSeconds(10), TestContext.Current.CancellationToken);
         logger.Info("enabled-after-reload");
         factory.Flush();
 

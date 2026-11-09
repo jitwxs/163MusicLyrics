@@ -186,7 +186,7 @@ public static class NetEaseMusicSearchUtils
     {
         if (Xp8h == null || bmT3x == null || Xp8h.Length != bmT3x.Length)
         {
-            return Xp8h;
+            return Xp8h ?? [];
         }
 
         var sx7q = new int[Xp8h.Length];
@@ -241,7 +241,7 @@ public static class NetEaseMusicSearchUtils
     {
         if (biA1x == null)
         {
-            return biA1x;
+            return [];
         }
 
         var sx7q = new int[biA1x.Length];
@@ -257,7 +257,7 @@ public static class NetEaseMusicSearchUtils
     {
         if (biz1x == null)
         {
-            return null;
+            return [];
         }
 
         if (bmr3x == null)

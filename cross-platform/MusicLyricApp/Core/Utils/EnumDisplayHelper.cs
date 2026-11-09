@@ -8,7 +8,7 @@ namespace MusicLyricApp.Core.Utils;
 
 public static class EnumDisplayHelper
 {
-    public class EnumDisplayItem<T> : INotifyPropertyChanged where T : Enum
+    public class EnumDisplayItem<T> : INotifyPropertyChanged where T : struct, Enum
     {
         private string _description = string.Empty;
         public string Description
@@ -29,7 +29,7 @@ public static class EnumDisplayHelper
         public override string ToString() => Description;
     }
 
-    public static ObservableCollection<EnumDisplayItem<T>> GetEnumDisplayCollection<T>() where T : Enum
+    public static ObservableCollection<EnumDisplayItem<T>> GetEnumDisplayCollection<T>() where T : struct, Enum
     {
         var items = new ObservableCollection<EnumDisplayItem<T>>(
             Enum.GetValues(typeof(T))
@@ -46,7 +46,7 @@ public static class EnumDisplayHelper
         return items;
     }
 
-    private static string GetDescription<T>(T enumValue) where T : Enum
+    private static string GetDescription<T>(T enumValue) where T : struct, Enum
     {
         var name = enumValue.ToString();
         return LocalizationService.Get($"Enum.{enumValue.GetType().Name}.{name}");

@@ -135,9 +135,9 @@ public class QQMusicApi : MusicCacheableApi
     {
         var resp = _api.Search(keyword, searchType);
 
-        if (resp.Code == 0 && resp.Req_1.Code == 0 && resp.Req_1.Data.Code == 0)
+        if (resp.Code == 0 && resp.Req_1 is { Code: 0, Data: { Code: 0, Body: { } body } })
         {
-            return new ResultVo<SearchResultVo>(resp.Req_1.Data.Body.Convert(searchType));
+            return new ResultVo<SearchResultVo>(body.Convert(searchType));
         }
 
         return ResultVo<SearchResultVo>.Failure(ErrorMsgConst.NETWORK_ERROR);

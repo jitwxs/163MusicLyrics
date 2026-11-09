@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Linq;
 using System.Text.RegularExpressions;
 using MusicLyricApp.Core.Service.Music;
 using MusicLyricApp.Core.Utils;
@@ -62,8 +63,8 @@ public partial class UpdateCheckService
         sb
             .Append($"Tag: {info.TagName}").Append('\t')
             .Append($"UpdateTime: {info.PublishedAt.DateTime.AddHours(8)}").Append('\t')
-            .Append($"DownloadCount: {info.Assets[0].DownloadCount}").Append('\t')
-            .Append($"Author: {info.Author.Login}")
+            .Append($"DownloadCount: {info.Assets?.FirstOrDefault()?.DownloadCount ?? 0}").Append('\t')
+            .Append($"Author: {info.Author?.Login ?? string.Empty}")
             .Append(Environment.NewLine)
             .Append(Environment.NewLine)
             .Append(info.Body);

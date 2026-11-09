@@ -19,8 +19,8 @@ public static class HttpUtils
     /// <param name="contentType">application/xml、application/json、application/text、application/x-www-form-urlencoded</param>
     /// <param name="headers">填充消息头</param>        
     /// <returns></returns>
-    public static string HttpPost(string url, string postData = null, string contentType = "application/json",
-        int timeOut = 30, Dictionary<string, string> headers = null)
+    public static string HttpPost(string url, string? postData = null, string? contentType = "application/json",
+        int timeOut = 30, Dictionary<string, string>? headers = null)
     {
         postData = postData ?? string.Empty;
         using (HttpClient client = NetworkClientFactory.CreateHttpClient(timeOut))
@@ -36,7 +36,7 @@ public static class HttpUtils
                 if (contentType != null)
                     httpContent.Headers.ContentType = new MediaTypeHeaderValue(contentType);
 
-                HttpResponseMessage response = client.PostAsync(url, httpContent).Result;
+                using HttpResponseMessage response = client.PostAsync(url, httpContent).Result;
                 return response.Content.ReadAsStringAsync().Result;
             }
         }
@@ -52,8 +52,8 @@ public static class HttpUtils
     /// <param name="headers">填充消息头</param>        
     /// <returns></returns>
     /// <exception cref="HttpRequestException"></exception>
-    public static async Task<string> HttpPostAsync(string url, string postData = null,
-        string contentType = "application/json", int timeOut = 30, Dictionary<string, string> headers = null)
+    public static async Task<string> HttpPostAsync(string url, string? postData = null,
+        string? contentType = "application/json", int timeOut = 30, Dictionary<string, string>? headers = null)
     {
         postData = postData ?? string.Empty;
         using (HttpClient client = NetworkClientFactory.CreateHttpClient(timeOut))
@@ -69,7 +69,7 @@ public static class HttpUtils
                 if (contentType != null)
                     httpContent.Headers.ContentType = new MediaTypeHeaderValue(contentType);
 
-                HttpResponseMessage response = await client.PostAsync(url, httpContent);
+                using HttpResponseMessage response = await client.PostAsync(url, httpContent);
                 return await response.Content.ReadAsStringAsync();
             }
         }
@@ -83,15 +83,15 @@ public static class HttpUtils
     /// <param name="contentType"></param>
     /// <returns></returns>
     /// <exception cref="HttpRequestException"></exception>
-    public static string HttpGet(string url, string contentType = "application/json",
-        Dictionary<string, string> headers = null)
+    public static string HttpGet(string url, string? contentType = "application/json",
+        Dictionary<string, string>? headers = null)
     {
-        var response = HttpGet0(url, contentType, headers);
+        using var response = HttpGet0(url, contentType, headers);
         return response.Content.ReadAsStringAsync().Result;
     }
 
-    public static HttpResponseMessage HttpGet0(string url, string contentType = "application/json",
-        Dictionary<string, string> headers = null)
+    public static HttpResponseMessage HttpGet0(string url, string? contentType = "application/json",
+        Dictionary<string, string>? headers = null)
     {
         using (HttpClient client = NetworkClientFactory.CreateHttpClient())
         {
@@ -114,8 +114,8 @@ public static class HttpUtils
     /// <param name="headers"></param>
     /// <param name="contentType"></param>
     /// <returns></returns>
-    public static async Task<string> HttpGetAsync(string url, string contentType = "application/json",
-        Dictionary<string, string> headers = null)
+    public static async Task<string> HttpGetAsync(string url, string? contentType = "application/json",
+        Dictionary<string, string>? headers = null)
     {
         using (HttpClient client = NetworkClientFactory.CreateHttpClient())
         {
@@ -127,7 +127,7 @@ public static class HttpUtils
                     client.DefaultRequestHeaders.Add(header.Key, header.Value);
             }
 
-            HttpResponseMessage response = await client.GetAsync(url);
+            using HttpResponseMessage response = await client.GetAsync(url);
             return await response.Content.ReadAsStringAsync();
         }
     }
@@ -141,8 +141,8 @@ public static class HttpUtils
     /// <param name="contentType">application/xml、application/json、application/text、application/x-www-form-urlencoded</param>
     /// <param name="headers">填充消息头</param>        
     /// <returns></returns>
-    public static T HttpPost<T>(string url, string postData = null, string contentType = "application/json",
-        int timeOut = 30, Dictionary<string, string> headers = null)
+    public static T HttpPost<T>(string url, string? postData = null, string? contentType = "application/json",
+        int timeOut = 30, Dictionary<string, string>? headers = null)
     {
         return HttpPost(url, postData, contentType, timeOut, headers).ToEntity<T>();
     }
@@ -156,8 +156,8 @@ public static class HttpUtils
     /// <param name="contentType">application/xml、application/json、application/text、application/x-www-form-urlencoded</param>
     /// <param name="headers">填充消息头</param>        
     /// <returns></returns>
-    public static async Task<T> HttpPostAsync<T>(string url, string postData = null,
-        string contentType = "application/json", int timeOut = 30, Dictionary<string, string> headers = null)
+    public static async Task<T> HttpPostAsync<T>(string url, string? postData = null,
+        string? contentType = "application/json", int timeOut = 30, Dictionary<string, string>? headers = null)
     {
         var res = await HttpPostAsync(url, postData, contentType, timeOut, headers);
         return res.ToEntity<T>();
@@ -170,8 +170,8 @@ public static class HttpUtils
     /// <param name="headers"></param>
     /// <param name="contentType"></param>
     /// <returns></returns>
-    public static T HttpGet<T>(string url, string contentType = "application/json",
-        Dictionary<string, string> headers = null)
+    public static T HttpGet<T>(string url, string? contentType = "application/json",
+        Dictionary<string, string>? headers = null)
     {
         return HttpGet(url, contentType, headers).ToEntity<T>();
     }
@@ -183,8 +183,8 @@ public static class HttpUtils
     /// <param name="headers"></param>
     /// <param name="contentType"></param>
     /// <returns></returns>
-    public static async Task<T> HttpGetAsync<T>(string url, string contentType = "application/json",
-        Dictionary<string, string> headers = null)
+    public static async Task<T> HttpGetAsync<T>(string url, string? contentType = "application/json",
+        Dictionary<string, string>? headers = null)
     {
         var res = await HttpGetAsync(url, contentType, headers);
         return res.ToEntity<T>();

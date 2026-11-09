@@ -175,8 +175,8 @@ public partial class MainWindowViewModel : ViewModelBase
         _settingBean = new StorageService().ReadAppConfig();
         NetworkClientFactory.Configure(_settingBean.Config);
         _searchService = new SearchService(_settingBean);
-        _windowProvider = null;
-        _downloadManagerViewModel = new BatchSearchViewModel(_settingBean, _searchService, new StorageService(), null!);
+        _windowProvider = new DesignWindowProvider();
+        _downloadManagerViewModel = new BatchSearchViewModel(_settingBean, _searchService, new StorageService(), _windowProvider);
         
         SearchParamViewModel.Bind(_settingBean.Param);
         LastSaveFolderPath = _settingBean.Config.LastSaveFolderPath;
@@ -650,7 +650,12 @@ public partial class MainWindowViewModel : ViewModelBase
             return;
         }
 
-        if (_audioReader == null && !EnsurePlaybackPrepared())
+        if (_audioReader == null)
+        {
+            EnsurePlaybackPrepared();
+        }
+
+        if (_audioReader == null)
         {
             return;
         }

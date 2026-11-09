@@ -41,7 +41,7 @@ public partial class SettingParamViewModel : ViewModelBase
         EnumDisplayHelper.GetEnumDisplayCollection<FileConflictStrategyEnum>();
 
     [ObservableProperty]
-    private EnumDisplayHelper.EnumDisplayItem<FileConflictStrategyEnum> _selectedFileConflictStrategyItem;
+    private EnumDisplayHelper.EnumDisplayItem<FileConflictStrategyEnum>? _selectedFileConflictStrategyItem;
 
     [ObservableProperty]
     private bool _isConflictSuffixEnabled;
@@ -63,7 +63,7 @@ public partial class SettingParamViewModel : ViewModelBase
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsHttpProxySelected))]
-    private EnumDisplayHelper.EnumDisplayItem<NetworkProxyModeEnum> _selectedNetworkProxyModeItem;
+    private EnumDisplayHelper.EnumDisplayItem<NetworkProxyModeEnum>? _selectedNetworkProxyModeItem;
 
     public bool IsHttpProxySelected => SelectedNetworkProxyModeItem?.Value == NetworkProxyModeEnum.HTTP_PROXY;
 
@@ -79,7 +79,7 @@ public partial class SettingParamViewModel : ViewModelBase
     }
 
     // 0.1 HTTP 代理地址
-    [ObservableProperty] private string _proxyHost;
+    [ObservableProperty] private string _proxyHost = string.Empty;
 
     partial void OnProxyHostChanged(string value)
     {
@@ -91,9 +91,9 @@ public partial class SettingParamViewModel : ViewModelBase
     }
 
     // 0.2 HTTP 代理端口
-    [ObservableProperty] private string _proxyPortText;
+    [ObservableProperty] private string _proxyPortText = string.Empty;
 
-    [ObservableProperty] private string _proxyPortError;
+    [ObservableProperty] private string _proxyPortError = string.Empty;
 
     partial void OnProxyPortTextChanged(string value)
     {
@@ -112,7 +112,7 @@ public partial class SettingParamViewModel : ViewModelBase
     }
 
     // 0.3 HTTP 代理用户名
-    [ObservableProperty] private string _proxyUsername;
+    [ObservableProperty] private string _proxyUsername = string.Empty;
 
     partial void OnProxyUsernameChanged(string value)
     {
@@ -124,7 +124,7 @@ public partial class SettingParamViewModel : ViewModelBase
     }
 
     // 0.4 HTTP 代理密码
-    [ObservableProperty] private string _proxyPassword;
+    [ObservableProperty] private string _proxyPassword = string.Empty;
 
     partial void OnProxyPasswordChanged(string value)
     {
@@ -140,7 +140,7 @@ public partial class SettingParamViewModel : ViewModelBase
         EnumDisplayHelper.GetEnumDisplayCollection<DotTypeEnum>();
     
     [ObservableProperty]
-    private EnumDisplayHelper.EnumDisplayItem<DotTypeEnum> _selectedDotTypeItem;
+    private EnumDisplayHelper.EnumDisplayItem<DotTypeEnum>? _selectedDotTypeItem;
 
     public DotTypeEnum SelectedDotType => SelectedDotTypeItem?.Value ?? default;
     
@@ -154,7 +154,7 @@ public partial class SettingParamViewModel : ViewModelBase
         EnumDisplayHelper.GetEnumDisplayCollection<TransLyricLostRuleEnum>();
     
     [ObservableProperty]
-    private EnumDisplayHelper.EnumDisplayItem<TransLyricLostRuleEnum> _selectedTransLyricLostRuleItem;
+    private EnumDisplayHelper.EnumDisplayItem<TransLyricLostRuleEnum>? _selectedTransLyricLostRuleItem;
 
     public TransLyricLostRuleEnum SelectedTransLyricLostRule => SelectedTransLyricLostRuleItem?.Value ?? default;
     
@@ -168,7 +168,7 @@ public partial class SettingParamViewModel : ViewModelBase
         EnumDisplayHelper.GetEnumDisplayCollection<ChineseProcessRuleEnum>();
     
     [ObservableProperty]
-    private EnumDisplayHelper.EnumDisplayItem<ChineseProcessRuleEnum> _selectedChineseProcessRuleItem;
+    private EnumDisplayHelper.EnumDisplayItem<ChineseProcessRuleEnum>? _selectedChineseProcessRuleItem;
 
     public ChineseProcessRuleEnum SelectedChineseProcessRule => SelectedChineseProcessRuleItem?.Value ?? default;
     
@@ -184,7 +184,7 @@ public partial class SettingParamViewModel : ViewModelBase
         EnumDisplayHelper.GetEnumDisplayCollection<ThemeModeEnum>();
     
     [ObservableProperty]
-    private EnumDisplayHelper.EnumDisplayItem<ThemeModeEnum> _selectedThemeModeRuleItem;
+    private EnumDisplayHelper.EnumDisplayItem<ThemeModeEnum>? _selectedThemeModeRuleItem;
 
     public ThemeModeEnum SelectedThemeModeRule => SelectedThemeModeRuleItem?.Value ?? default;
     
@@ -196,7 +196,7 @@ public partial class SettingParamViewModel : ViewModelBase
     }
     
     // 5. LRC 时间戳
-    [ObservableProperty] private string _lrcTimestampFormat;
+    [ObservableProperty] private string _lrcTimestampFormat = string.Empty;
     
     partial void OnLrcTimestampFormatChanged(string value)
     {
@@ -204,7 +204,7 @@ public partial class SettingParamViewModel : ViewModelBase
     }
     
     // 6. SRT 时间戳
-    [ObservableProperty] private string _srtTimestampFormat;
+    [ObservableProperty] private string _srtTimestampFormat = string.Empty;
     
     partial void OnSrtTimestampFormatChanged(string value)
     {
@@ -224,7 +224,7 @@ public partial class SettingParamViewModel : ViewModelBase
         EnumDisplayHelper.GetEnumDisplayCollection<VerbatimLyricModeEnum>();
     
     [ObservableProperty]
-    private EnumDisplayHelper.EnumDisplayItem<VerbatimLyricModeEnum> _selectedVerbatimLyricModeItem;
+    private EnumDisplayHelper.EnumDisplayItem<VerbatimLyricModeEnum>? _selectedVerbatimLyricModeItem;
 
     public VerbatimLyricModeEnum SelectedTVerbatimLyricMode => SelectedVerbatimLyricModeItem?.Value ?? default;
     
@@ -244,7 +244,7 @@ public partial class SettingParamViewModel : ViewModelBase
     }
 
     // 10. 百度 APP ID
-    [ObservableProperty] private string _baiduAppId;
+    [ObservableProperty] private string _baiduAppId = string.Empty;
     
     partial void OnBaiduAppIdChanged(string value)
     {
@@ -252,7 +252,7 @@ public partial class SettingParamViewModel : ViewModelBase
     }
     
     // 11. 百度密钥
-    [ObservableProperty] private string _baiduSecret;
+    [ObservableProperty] private string _baiduSecret = string.Empty;
     
     partial void OnBaiduSecretChanged(string value)
     {
@@ -260,7 +260,7 @@ public partial class SettingParamViewModel : ViewModelBase
     }
     
     // 12. 彩云小译 Token
-    [ObservableProperty] private string _caiYunToken;
+    [ObservableProperty] private string _caiYunToken = string.Empty;
     
     partial void OnCaiYunTokenChanged(string value)
     {
@@ -284,7 +284,7 @@ public partial class SettingParamViewModel : ViewModelBase
     }
     
     // 15. 保存文件名
-    [ObservableProperty] private string _outputFileNameFormat;
+    [ObservableProperty] private string _outputFileNameFormat = string.Empty;
     
     partial void OnOutputFileNameFormatChanged(string value)
     {
@@ -316,7 +316,7 @@ public partial class SettingParamViewModel : ViewModelBase
     }
     
     // 19. QQ音乐 Cookie
-    [ObservableProperty] private string _qqMusicCookie;
+    [ObservableProperty] private string _qqMusicCookie = string.Empty;
     
     partial void OnQqMusicCookieChanged(string value)
     {
@@ -324,7 +324,7 @@ public partial class SettingParamViewModel : ViewModelBase
     }
     
     // 20. 网易云 Cookie
-    [ObservableProperty] private string _netEaseCookie;
+    [ObservableProperty] private string _netEaseCookie = string.Empty;
     
     partial void OnNetEaseCookieChanged(string value)
     {
@@ -332,15 +332,15 @@ public partial class SettingParamViewModel : ViewModelBase
     }
     
     // 21. 歌手分隔符
-    [ObservableProperty] private string _singerSeparator;
+    [ObservableProperty] private string _singerSeparator = string.Empty;
     
-    partial void OnSingerSeparatorChanged(string newValue)
+    partial void OnSingerSeparatorChanged(string value)
     {
-        _settingBean.Config.SingerSeparator = newValue;
+        _settingBean.Config.SingerSeparator = value;
     }
 
     // 21.3 同名文件后缀模板
-    [ObservableProperty] private string _fileConflictSuffixPattern;
+    [ObservableProperty] private string _fileConflictSuffixPattern = string.Empty;
 
     partial void OnFileConflictSuffixPatternChanged(string value)
     {
@@ -372,7 +372,7 @@ public partial class SettingParamViewModel : ViewModelBase
     }
 
     // 22. 歌词合并符
-    [ObservableProperty] private string _lrcMergeSeparator;
+    [ObservableProperty] private string _lrcMergeSeparator = string.Empty;
 
     partial void OnLrcMergeSeparatorChanged(string value)
     {
@@ -380,7 +380,7 @@ public partial class SettingParamViewModel : ViewModelBase
     }
 
     // 23. 保存路径
-    [ObservableProperty] private string _saveFolderPath;
+    [ObservableProperty] private string _saveFolderPath = string.Empty;
 
     partial void OnSaveFolderPathChanged(string value)
     {
@@ -396,7 +396,7 @@ public partial class SettingParamViewModel : ViewModelBase
     }
 
     // 25. 搜索缓存目录
-    [ObservableProperty] private string _searchCacheFolderPath;
+    [ObservableProperty] private string _searchCacheFolderPath = string.Empty;
 
     partial void OnSearchCacheFolderPathChanged(string value)
     {
@@ -404,10 +404,10 @@ public partial class SettingParamViewModel : ViewModelBase
     }
 
     // 26. 搜索缓存最大占用（MB）输入文本
-    [ObservableProperty] private string _searchCacheMaxSizeMbText;
+    [ObservableProperty] private string _searchCacheMaxSizeMbText = string.Empty;
 
     // 27. 搜索缓存大小输入错误提示
-    [ObservableProperty] private string _searchCacheSizeError;
+    [ObservableProperty] private string _searchCacheSizeError = string.Empty;
 
     partial void OnSearchCacheMaxSizeMbTextChanged(string value)
     {
@@ -428,9 +428,9 @@ public partial class SettingParamViewModel : ViewModelBase
     }
     
     // 28. 启动时加载到下载管理的缓存歌曲数量
-    [ObservableProperty] private string _searchCacheStartupLoadLimitText;
+    [ObservableProperty] private string _searchCacheStartupLoadLimitText = string.Empty;
 
-    [ObservableProperty] private string _searchCacheStartupLoadLimitError;
+    [ObservableProperty] private string _searchCacheStartupLoadLimitError = string.Empty;
 
     partial void OnSearchCacheStartupLoadLimitTextChanged(string value)
     {
@@ -444,7 +444,7 @@ public partial class SettingParamViewModel : ViewModelBase
         _settingBean.Config.SearchCacheStartupLoadLimit = limit;
     }
 
-    private SettingBean _settingBean;
+    private SettingBean _settingBean = new();
 
     public SettingParamViewModel()
     {

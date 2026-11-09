@@ -95,11 +95,21 @@ public class BaiduTranslateApi : TranslateCacheableApi
 
             var translateResult = JsonConvert.DeserializeObject<BaiduTranslateResult>(resultStr);
 
+            if (translateResult == null)
+            {
+                return ResultVo<string[]>.Failure(ErrorMsgConst.BAIDU_TRANSLATE_AUTH_FAILED);
+            }
+
             var errorCode = translateResult.error_code;
 
-            if (errorCode != null && !errorCode.Equals("52000"))
+            if (!string.IsNullOrEmpty(errorCode) && !errorCode.Equals("52000"))
             {
                 return ResultVo<string[]>.Failure(errorCode + " -> https://fanyi-api.baidu.com/doc/21");
+            }
+
+            if (translateResult.trans_result == null)
+            {
+                return ResultVo<string[]>.Failure(ErrorMsgConst.BAIDU_TRANSLATE_AUTH_FAILED);
             }
 
             foreach (var one in translateResult.trans_result)

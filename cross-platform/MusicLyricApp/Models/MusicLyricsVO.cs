@@ -208,13 +208,13 @@ public class SearchResultVo
 
     public class SongSearchResultVo
     {
-        public string DisplayId { get; set; }
+        public string DisplayId { get; set; } = string.Empty;
 
-        public string Title { get; set; }
+        public string Title { get; set; } = string.Empty;
 
-        public string[] AuthorName { get; set; }
+        public string[] AuthorName { get; set; } = [];
 
-        public string AlbumName { get; set; }
+        public string AlbumName { get; set; } = string.Empty;
 
         /// <summary>
         /// 歌曲时长 ms
@@ -224,11 +224,11 @@ public class SearchResultVo
 
     public class AlbumSearchResultVo
     {
-        public string DisplayId { get; set; }
+        public string DisplayId { get; set; } = string.Empty;
 
-        public string AlbumName { get; set; }
+        public string AlbumName { get; set; } = string.Empty;
 
-        public string[] AuthorName { get; set; }
+        public string[] AuthorName { get; set; } = [];
 
         /// <summary>
         /// 歌曲数量
@@ -238,21 +238,21 @@ public class SearchResultVo
         /// <summary>
         /// 发行时间
         /// </summary>
-        public string PublishTime { get; set; }
+        public string PublishTime { get; set; } = string.Empty;
     }
 
     public class PlaylistResultVo
     {
-        public string DisplayId { get; set; }
+        public string DisplayId { get; set; } = string.Empty;
 
-        public string PlaylistName { get; set; }
+        public string PlaylistName { get; set; } = string.Empty;
 
-        public string AuthorName { get; set; }
+        public string AuthorName { get; set; } = string.Empty;
 
         /// <summary>
         /// 歌单描述
         /// </summary>
-        public string Description { get; set; }
+        public string Description { get; set; } = string.Empty;
 
         /// <summary>
         /// 播放数量
@@ -274,22 +274,22 @@ public class PlaylistVo
     /// <summary>
     /// 歌单名
     /// </summary>
-    public string Name { get; set; }
+    public string Name { get; set; } = string.Empty;
 
     /// <summary>
     /// 作者名
     /// </summary>
-    public string AuthorName { get; set; }
+    public string AuthorName { get; set; } = string.Empty;
 
     /// <summary>
     /// 歌单描述
     /// </summary>
-    public string Description { get; set; }
+    public string Description { get; set; } = string.Empty;
 
     /// <summary>
     /// 歌曲信息
     /// </summary>
-    public SimpleSongVo[] SimpleSongVos { get; set; }
+    public SimpleSongVo[] SimpleSongVos { get; set; } = [];
 }
 
 /// <summary>
@@ -300,27 +300,27 @@ public class AlbumVo
     /// <summary>
     /// 专辑名
     /// </summary>
-    public string Name { get; set; }
+    public string Name { get; set; } = string.Empty;
 
     /// <summary>
     /// 发行公司
     /// </summary>
-    public string Company { get; set; }
+    public string Company { get; set; } = string.Empty;
 
     /// <summary>
     /// 专辑描述
     /// </summary>
-    public string Desc { get; set; }
+    public string Desc { get; set; } = string.Empty;
 
     /// <summary>
     /// 歌曲信息
     /// </summary>
-    public SimpleSongVo[] SimpleSongVos { get; set; }
+    public SimpleSongVo[] SimpleSongVos { get; set; } = [];
 
     /// <summary>
     /// 发布时间，eg: 2005-07-08
     /// </summary>
-    public string TimePublic { get; set; }
+    public string TimePublic { get; set; } = string.Empty;
 }
 
 /// <summary>
@@ -331,22 +331,22 @@ public class SimpleSongVo
     /// <summary>
     /// 内部 ID
     /// </summary>
-    public string Id { get; set; }
+    public string Id { get; set; } = string.Empty;
 
     /// <summary>
     /// 前端展示的 ID
     /// </summary>
-    public string DisplayId { get; set; }
+    public string DisplayId { get; set; } = string.Empty;
 
     /// <summary>
     /// 歌曲名
     /// </summary>
-    public string Name { get; set; }
+    public string Name { get; set; } = string.Empty;
 
     /// <summary>
     /// 歌手名
     /// </summary>
-    public string[] Singer { get; set; }
+    public string[] Singer { get; set; } = [];
 }
 
 /// <summary>
@@ -357,12 +357,12 @@ public class SongVo : SimpleSongVo
     /// <summary>
     /// 所属专辑名
     /// </summary>
-    public string Album { get; set; }
+    public string Album { get; set; } = string.Empty;
 
     /// <summary>
     /// 歌曲封面 Url
     /// </summary>
-    public string Pics { get; set; }
+    public string Pics { get; set; } = string.Empty;
 
     /// <summary>
     /// 歌曲时长 ms
@@ -456,7 +456,7 @@ public class LyricTimestamp : IComparable
     /// 初始化 LyricTimestamp
     /// </summary>
     /// <param name="timestamp">[mm:ss.SSS] or [mm:ss] or [mm:ss:SSS]</param>
-    public LyricTimestamp(string timestamp)
+    public LyricTimestamp(string? timestamp)
     {
         long timeOffset = 0; // 默认值
         
@@ -586,7 +586,7 @@ public class LyricTimestamp : IComparable
         TimeOffset = timeOffset;
     }
 
-    public int CompareTo(object input)
+    public int CompareTo(object? input)
     {
         if (!(input is LyricTimestamp obj))
         {
@@ -800,7 +800,7 @@ public class LyricLineVo : IComparable
         return result;
     }
 
-    public int CompareTo(object input)
+    public int CompareTo(object? input)
     {
         if (!(input is LyricLineVo obj))
         {
@@ -838,7 +838,7 @@ public class InputSongId
 {
     public string QueryId { get; }
 
-    public string SongId { get; }
+    public string SongId { get; } = string.Empty;
 
     public SearchSourceEnum SearchSource { get; }
 
@@ -859,9 +859,19 @@ public class InputSongId
 
 public class ResultVo<T>
 {
-    public T Data { get; set; }
+    private T? _data;
 
-    public string ErrorMsg { get; set; }
+    /// <summary>Successful payload; accessing a failed result reports its business error.</summary>
+    public T Data
+    {
+        get => IsSuccessful && _data is not null ? _data : throw new MusicLyricException(ErrorMsg);
+        set => _data = value;
+    }
+
+    // Newtonsoft.Json must not read the payload getter when logging a failed result.
+    public bool ShouldSerializeData() => IsSuccessful;
+
+    public string ErrorMsg { get; set; } = string.Empty;
 
     private bool IsSuccessful { get; init; }
 
@@ -873,7 +883,6 @@ public class ResultVo<T>
     {
         return new ResultVo<T>
         {
-            Data = default,
             ErrorMsg = errorMsg,
             IsSuccessful = false
         };

@@ -71,13 +71,13 @@ public class NetEaseMusicNativeApi : BaseNativeApi
 
         var res = SendPost(url, Prepare(JsonConvert.SerializeObject(data)));
 
-        var obj = (JObject)JsonConvert.DeserializeObject(res);
+        var obj = JsonConvert.DeserializeObject<JObject>(res);
         if (obj == null)
         {
             return ResultVo<SearchResult>.Failure(ErrorMsgConst.SONG_NOT_EXIST);
         }
 
-        var code = obj["code"].ToString();
+        var code = obj["code"]?.ToString();
         var result = obj["result"];
 
         if (code == "50000005")
@@ -92,12 +92,12 @@ public class NetEaseMusicNativeApi : BaseNativeApi
 
         var resultStr = result.ToString();
 
-        if (obj["abroad"] != null && bool.Parse(obj["abroad"].ToString()))
+        if (obj["abroad"]?.Value<bool>() == true)
         {
             resultStr = NetEaseMusicSearchUtils.Decode(resultStr);
         }
 
-        return new ResultVo<SearchResult>(JsonConvert.DeserializeObject<SearchResult>(resultStr));
+        return new ResultVo<SearchResult>(resultStr.ToEntity<SearchResult>());
     }
 
     /// <summary>
@@ -169,9 +169,9 @@ public class NetEaseMusicNativeApi : BaseNativeApi
 
         var raw = SendPost(url, Prepare(JsonConvert.SerializeObject(data)));
 
-        var albumResult = JsonConvert.DeserializeObject<AlbumResult>(raw);
+        var albumResult = raw.ToEntity<AlbumResult>();
 
-        if (albumResult.Code == 200)
+        if (albumResult.Code == 200 && albumResult.Album != null)
         {
             var blurPicUrl = albumResult.Album.BlurPicUrl;
             foreach (var song in albumResult.Songs)
@@ -203,7 +203,7 @@ public class NetEaseMusicNativeApi : BaseNativeApi
 
         var raw = SendPost(url, Prepare(JsonConvert.SerializeObject(data)));
 
-        return JsonConvert.DeserializeObject<PlaylistResult>(raw);
+        return raw.ToEntity<PlaylistResult>();
     }
 
     /// <summary>
@@ -233,7 +233,7 @@ public class NetEaseMusicNativeApi : BaseNativeApi
 
         var raw = SendPost(url, Prepare(JsonConvert.SerializeObject(data)));
 
-        return JsonConvert.DeserializeObject<LyricResult>(raw);
+        return raw.ToEntity<LyricResult>();
     }
 
     /// <summary>
@@ -256,7 +256,7 @@ public class NetEaseMusicNativeApi : BaseNativeApi
 
         var raw = SendPost(url, Prepare(JsonConvert.SerializeObject(data)));
 
-        return JsonConvert.DeserializeObject<SongUrls>(raw);
+        return raw.ToEntity<SongUrls>();
     }
 
     /// <summary>

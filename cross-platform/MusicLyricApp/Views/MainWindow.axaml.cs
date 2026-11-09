@@ -51,7 +51,9 @@ public partial class MainWindow : ArcWindow, IWindowProvider
         {
             foreach (var gesture in AppShortcuts.Get(id).AllGestures)
             {
-                KeyBindings.Add(new KeyBinding { Gesture = gesture, Command = command, CommandParameter = parameter });
+                var binding = new KeyBinding { Gesture = gesture, Command = command };
+                if (parameter != null) binding.CommandParameter = parameter;
+                KeyBindings.Add(binding);
             }
         }
 

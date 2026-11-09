@@ -251,6 +251,7 @@ public class SearchPageRegressionTests
             window.Show();
             Dispatcher.UIThread.RunJobs();
             var select = Assert.Single(window.GetVisualDescendants().OfType<Select>(), s => s.Name == "LrcTypeSelect");
+            Assert.NotNull(vm.SearchParamViewModel.SelectedLrcTypeItem);
             Assert.Equal(vm.SearchParamViewModel.SelectedLrcTypeItem.DisplayName, select.SelectedText);
             vm.SearchResultViewModel.SetSongSource(SearchSourceEnum.QQ_MUSIC);
             var english = vm.SearchResultViewModel.SongSource;

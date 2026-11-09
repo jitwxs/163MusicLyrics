@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Text;
 using System.Xml;
@@ -292,9 +293,13 @@ public class QQMusicNativeApi(Func<string> cookieFunc) : BaseNativeApi(cookieFun
         var res = resp.ToEntity<QQMusicBean.MusicFcgApiResult>();
 
         var link = "";
-        if (res.Code == 0 && res.Req.Code == 0 && res.Req_0.Code == 0)
+        if (res.Code == 0 && res.Req is { Code: 0, Data: { } hostData } &&
+            res.Req_0 is { Code: 0, Data: { } urlData })
         {
-            link = res.Req.Data.Sip[0] + res.Req_0.Data.Midurlinfo[0].Purl;
+            var host = hostData.Sip?.FirstOrDefault();
+            var path = urlData.Midurlinfo?.FirstOrDefault()?.Purl;
+            if (!string.IsNullOrWhiteSpace(host) && !string.IsNullOrWhiteSpace(path))
+                link = host + path;
         }
 
         return new ResultVo<string>(link);

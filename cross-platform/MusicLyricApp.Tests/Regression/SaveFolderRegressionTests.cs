@@ -251,7 +251,7 @@ public class SaveFolderRegressionTests
         Assert.Equal(ws.Root, ws.Storage().ReadAppConfig().Config.LastSaveFolderPath);
         pending.SetResult(new[] { folder.Object });
 
-        Assert.Same(folder.Object, await selection.WaitAsync(TimeSpan.FromSeconds(5)));
+        Assert.Same(folder.Object, await selection.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken));
         Assert.Equal(path, ws.Settings.Config.LastSaveFolderPath);
         Assert.Equal(path, ws.Storage().ReadAppConfig().Config.LastSaveFolderPath);
         Assert.Empty(ws.CreatedFiles);
@@ -386,7 +386,7 @@ public class SaveFolderRegressionTests
             completePicker();
             try
             {
-                await execution.WaitAsync(TimeSpan.FromSeconds(5));
+                await execution.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
             }
             finally
             {

@@ -2,7 +2,6 @@
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -105,10 +104,10 @@ public partial class SearchView : UserControl
 
         try
         {
-            var client = new WebClient();
-            NetworkClientFactory.ConfigureWebClient(client);
-            var imageData = await client.DownloadDataTaskAsync(saveVo.SongVo.Pics);
-            image.Source = new Bitmap(new MemoryStream(imageData));
+            using var client = NetworkClientFactory.CreateHttpClient();
+            var imageData = await client.GetByteArrayAsync(saveVo.SongVo.Pics);
+            using var stream = new MemoryStream(imageData);
+            image.Source = new Bitmap(stream);
         }
         catch (Exception)
         {

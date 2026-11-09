@@ -7,7 +7,10 @@ namespace MusicLyricAppTest.Regression;
 
 public sealed class LiveFactAttribute : FactAttribute
 {
-    public LiveFactAttribute()
+    public LiveFactAttribute(
+        [System.Runtime.CompilerServices.CallerFilePath] string? sourceFilePath = null,
+        [System.Runtime.CompilerServices.CallerLineNumber] int sourceLineNumber = 0)
+        : base(sourceFilePath, sourceLineNumber)
     {
         if (Environment.GetEnvironmentVariable("MUSICLYRIC_LIVE_TESTS") != "1")
             Skip = "External services: set MUSICLYRIC_LIVE_TESTS=1 to opt in.";

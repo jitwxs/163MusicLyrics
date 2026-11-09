@@ -38,6 +38,13 @@ dotnet build MusicLyricApp.sln -c Debug --no-restore
 dotnet test MusicLyricApp.sln -c Debug --no-build
 ```
 
+检查代码质量时，可完整重建并将警告视为错误（保留 nullable 检查）：
+
+```sh
+dotnet build MusicLyricApp.sln -t:Rebuild --no-restore -warnaserror
+dotnet test MusicLyricApp.sln --no-build --filter 'FullyQualifiedName!~LiveServiceTests'
+```
+
 也可以直接使用一键脚本（在 `cross-platform/` 目录）：
 
 ```sh

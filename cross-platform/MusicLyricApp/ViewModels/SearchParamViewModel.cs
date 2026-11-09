@@ -13,7 +13,7 @@ public partial class SearchParamViewModel : ViewModelBase
     public ObservableCollection<EnumDisplayHelper.EnumDisplayItem<SearchSourceEnum>> SearchSources { get; } =
         EnumDisplayHelper.GetEnumDisplayCollection<SearchSourceEnum>();
 
-    [ObservableProperty] private EnumDisplayHelper.EnumDisplayItem<SearchSourceEnum> _selectedSearchSourceItem;
+    [ObservableProperty] private EnumDisplayHelper.EnumDisplayItem<SearchSourceEnum>? _selectedSearchSourceItem;
 
     public SearchSourceEnum SelectedSearchSource => SelectedSearchSourceItem?.Value ?? default;
 
@@ -40,7 +40,7 @@ public partial class SearchParamViewModel : ViewModelBase
     public ObservableCollection<EnumDisplayHelper.EnumDisplayItem<ShowLrcTypeEnum>> LrcTypes { get; } =
         EnumDisplayHelper.GetEnumDisplayCollection<ShowLrcTypeEnum>();
 
-    [ObservableProperty] private EnumDisplayHelper.EnumDisplayItem<ShowLrcTypeEnum> _selectedLrcTypeItem;
+    [ObservableProperty] private EnumDisplayHelper.EnumDisplayItem<ShowLrcTypeEnum>? _selectedLrcTypeItem;
 
     public ShowLrcTypeEnum SelectedLrcType => SelectedLrcTypeItem?.Value ?? default;
 
@@ -53,7 +53,7 @@ public partial class SearchParamViewModel : ViewModelBase
     public ObservableCollection<EnumDisplayHelper.EnumDisplayItem<SearchTypeEnum>> SearchTypes { get; } =
         EnumDisplayHelper.GetEnumDisplayCollection<SearchTypeEnum>();
 
-    [ObservableProperty] private EnumDisplayHelper.EnumDisplayItem<SearchTypeEnum> _selectedSearchTypeItem;
+    [ObservableProperty] private EnumDisplayHelper.EnumDisplayItem<SearchTypeEnum>? _selectedSearchTypeItem;
 
     public SearchTypeEnum SelectedSearchType => SelectedSearchTypeItem?.Value ?? default;
 
@@ -80,7 +80,7 @@ public partial class SearchParamViewModel : ViewModelBase
     public ObservableCollection<EnumDisplayHelper.EnumDisplayItem<OutputFormatEnum>> OutputFormats { get; } =
         EnumDisplayHelper.GetEnumDisplayCollection<OutputFormatEnum>();
 
-    [ObservableProperty] private EnumDisplayHelper.EnumDisplayItem<OutputFormatEnum> _selectedOutputFormatItem;
+    [ObservableProperty] private EnumDisplayHelper.EnumDisplayItem<OutputFormatEnum>? _selectedOutputFormatItem;
 
     public OutputFormatEnum SelectedOutputFormat => SelectedOutputFormatItem?.Value ?? default;
 
@@ -93,7 +93,7 @@ public partial class SearchParamViewModel : ViewModelBase
     public ObservableCollection<EnumDisplayHelper.EnumDisplayItem<OutputEncodingEnum>> OutputEncodings { get; } =
         EnumDisplayHelper.GetEnumDisplayCollection<OutputEncodingEnum>();
 
-    [ObservableProperty] private EnumDisplayHelper.EnumDisplayItem<OutputEncodingEnum> _selectedOutputEncodingItem;
+    [ObservableProperty] private EnumDisplayHelper.EnumDisplayItem<OutputEncodingEnum>? _selectedOutputEncodingItem;
 
     public OutputEncodingEnum SelectedOutputEncoding => SelectedOutputEncodingItem?.Value ?? default;
 
@@ -105,7 +105,7 @@ public partial class SearchParamViewModel : ViewModelBase
     // 6. 歌词合并符
     [ObservableProperty] private string _lrcMergeSeparator = "";
 
-    partial void OnLrcMergeSeparatorChanged(string? value)
+    partial void OnLrcMergeSeparatorChanged(string value)
     {
         _paramBean.LrcMergeSeparator = value ?? string.Empty;
     }
@@ -118,7 +118,7 @@ public partial class SearchParamViewModel : ViewModelBase
     /// </summary>
     public readonly List<InputSongId> SongIds = [];
 
-    private PersistParamBean _paramBean;
+    private PersistParamBean _paramBean = new();
 
     public void Bind(PersistParamBean paramBean)
     {

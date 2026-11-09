@@ -25,7 +25,7 @@ public class StorageService : IStorageService
         _configPath = configPath ?? Constants.GetConfigFilePath;
         _httpClientFactory = httpClientFactory ?? NetworkClientFactory.CreateHttpClient;
     }
-    private ISearchService _searchService;
+    private ISearchService? _searchService;
 
     private readonly Logger _logger = LogManager.GetCurrentClassLogger();
     
@@ -80,7 +80,8 @@ public class StorageService : IStorageService
     public string SaveSongLink(SearchResultViewModel searchResult, SettingBean settingBean,
         IWindowProvider windowProvider)
     {
-        var musicApi = _searchService.GetMusicApi(settingBean.Param.SearchSource);
+        var musicApi = (_searchService ?? throw new InvalidOperationException("Search service has not been configured."))
+            .GetMusicApi(settingBean.Param.SearchSource);
 
         switch (searchResult.SaveVoMap.Count)
         {
@@ -163,7 +164,8 @@ public class StorageService : IStorageService
         var link = searchResult.SongLink;
         if (string.IsNullOrWhiteSpace(link))
         {
-            var musicApi = _searchService.GetMusicApi(settingBean.Param.SearchSource);
+            var musicApi = (_searchService ?? throw new InvalidOperationException("Search service has not been configured."))
+            .GetMusicApi(settingBean.Param.SearchSource);
             var linkResult = musicApi.GetSongLink(saveVo.SongVo.DisplayId);
             if (!linkResult.IsSuccess())
             {
@@ -472,7 +474,8 @@ public class StorageService : IStorageService
     private static async Task<IStorageFile> CreateOutputFileAsync(IStorageFolder folder, string desiredFileName, SettingBean settingBean)
     {
         var resolvedFileName = ResolveFileNameWithConflict(folder, desiredFileName, settingBean);
-        return await folder.CreateFileAsync(resolvedFileName);
+        return await folder.CreateFileAsync(resolvedFileName)
+               ?? throw new IOException($"Unable to create output file: {resolvedFileName}");
     }
 
     private static string ResolveFileNameWithConflict(IStorageFolder folder, string desiredFileName, SettingBean settingBean)

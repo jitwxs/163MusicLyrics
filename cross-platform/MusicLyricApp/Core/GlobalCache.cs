@@ -17,7 +17,7 @@ public static class GlobalCache
         }
 
         var res = cacheFunc.Invoke();
-        if (res.IsSuccess())
+        if (res.IsSuccess() && res.Data is not null)
         {
             DoCache(keyPrefix, cacheType, key, res.Data);
         }
@@ -49,7 +49,7 @@ public static class GlobalCache
         return result;
     }
 
-    public static T Query<T>(object keyPrefix, CacheType cacheType, string originKey)
+    public static T? Query<T>(object keyPrefix, CacheType cacheType, string originKey)
     {
         var key = AddPrefix(keyPrefix, originKey);
 
@@ -64,7 +64,7 @@ public static class GlobalCache
     }
 
     public static void DoCache<TValue>(object keyPrefix, CacheType cacheType, Func<TValue, string> keyFunc,
-        IEnumerable<TValue> values)
+        IEnumerable<TValue> values) where TValue : notnull
     {
         foreach (var value in values)
         {

@@ -1,14 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.Net;
+using System.Net.Http;
 using System.Text;
-using MusicLyricApp.Core.Service;
 using MusicLyricApp.Core.Utils;
 
 namespace MusicLyricApp.Core.Service.Music;
 
-public abstract class BaseNativeApi(Func<string> cookieFunc)
+public abstract class BaseNativeApi(Func<string> cookieFunc, Func<HttpClient>? httpClientFactory = null)
 {
     public const string Useragent =
         "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Safari/537.36";
@@ -17,62 +15,28 @@ public abstract class BaseNativeApi(Func<string> cookieFunc)
 
     protected abstract string HttpRefer();
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="url">链接</param>
-    /// <param name="paramDict">参数</param>
-    /// <param name="method">模式</param>
-    /// <exception cref="WebException"></exception>
-    /// <returns></returns>
     protected string SendPost(string url, Dictionary<string, string> paramDict)
     {
-        string result;
-        using (var wc = new WebClient())
-        {
-            NetworkClientFactory.ConfigureWebClient(wc);
-            var cookie = cookieFunc.Invoke();
-            if (string.IsNullOrWhiteSpace(cookie))
-            {
-                cookie = _defaultCookie;
-            }
-
-            wc.Headers.Add(HttpRequestHeader.ContentType, "application/x-www-form-urlencoded");
-            wc.Headers.Add(HttpRequestHeader.Referer, HttpRefer());
-            wc.Headers.Add(HttpRequestHeader.UserAgent, Useragent);
-            wc.Headers.Add(HttpRequestHeader.Cookie, cookie);
-
-            var request = new NameValueCollection();
-            foreach (var keyPair in @paramDict)
-            {
-                request.Add(keyPair.Key, keyPair.Value);
-            }
-
-            var bytes = wc.UploadValues(url, "POST", request);
-            result = Encoding.UTF8.GetString(bytes);
-        }
-
-        return result;
+        using var content = new FormUrlEncodedContent(paramDict);
+        return Send(url, content);
     }
 
     protected virtual string SendJsonPost(string url, Dictionary<string, object> paramDict)
     {
-        using (var wc = new WebClient())
-        {
-            NetworkClientFactory.ConfigureWebClient(wc);
-            var cookie = cookieFunc.Invoke();
-            if (string.IsNullOrWhiteSpace(cookie))
-            {
-                cookie = _defaultCookie;
-            }
+        using var content = new StringContent(paramDict.ToJson(), Encoding.UTF8, "application/json");
+        return Send(url, content);
+    }
 
-            wc.Encoding = Encoding.UTF8;
-            wc.Headers.Add(HttpRequestHeader.ContentType, "application/json");
-            wc.Headers.Add(HttpRequestHeader.Referer, HttpRefer());
-            wc.Headers.Add(HttpRequestHeader.UserAgent, Useragent);
-            wc.Headers.Add(HttpRequestHeader.Cookie, cookie);
-
-            return wc.UploadString(url, paramDict.ToJson());
-        }
+    private string Send(string url, HttpContent content)
+    {
+        using var client = httpClientFactory?.Invoke() ?? NetworkClientFactory.CreateHttpClient();
+        var cookie = cookieFunc.Invoke();
+        client.DefaultRequestHeaders.TryAddWithoutValidation("Cookie",
+            string.IsNullOrWhiteSpace(cookie) ? _defaultCookie : cookie);
+        client.DefaultRequestHeaders.Referrer = new Uri(HttpRefer());
+        client.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", Useragent);
+        using var response = client.PostAsync(url, content).GetAwaiter().GetResult();
+        response.EnsureSuccessStatusCode();
+        return response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
     }
 }

@@ -223,7 +223,7 @@ public static partial class GlobalUtils
             .Replace("${index}", saveVo.Index.ToString())
             .Replace("${id}", songVo.DisplayId)
             .Replace("${name}", ControlLength(songVo.Name))
-            .Replace("${singer}", ControlLength(string.Join(singerSeparator, singers)))
+            .Replace("${singer}", ControlLength(string.Join(singerSeparator, singers ?? [])))
             .Replace("${album}", ControlLength(songVo.Album));
 
         outputName = ResolveCustomFunction(outputName);

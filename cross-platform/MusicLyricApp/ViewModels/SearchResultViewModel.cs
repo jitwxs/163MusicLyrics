@@ -7,32 +7,32 @@ namespace MusicLyricApp.ViewModels;
 public partial class SearchResultViewModel : ViewModelBase
 {
     // 歌曲信息属性
-    [ObservableProperty] private string _singer;
+    [ObservableProperty] private string _singer = string.Empty;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasSong), nameof(ShowIdleState), nameof(ShowNoLyricsState))]
-    private string _songName;
+    private string _songName = string.Empty;
 
     /// <summary>True once a single song has been rendered; drives the empty state of the search page.</summary>
     public bool HasSong => !string.IsNullOrWhiteSpace(SongName);
 
-    [ObservableProperty] private string _album;
+    [ObservableProperty] private string _album = string.Empty;
     
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasSongLinkText))]
-    private string _songLink;
+    private string _songLink = string.Empty;
 
     public bool HasSongLinkText => !string.IsNullOrWhiteSpace(SongLink);
 
-    [ObservableProperty] private string _songDuration;
+    [ObservableProperty] private string _songDuration = string.Empty;
 
-    [ObservableProperty] private string _publishDate;
+    [ObservableProperty] private string _publishDate = string.Empty;
 
-    [ObservableProperty] private string _songSource;
+    [ObservableProperty] private string _songSource = string.Empty;
     
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasConsoleOutput), nameof(ShowIdleState), nameof(ShowNoLyricsState))]
-    private string _consoleOutput;
+    private string _consoleOutput = string.Empty;
 
     public bool HasConsoleOutput => !string.IsNullOrWhiteSpace(ConsoleOutput);
 
