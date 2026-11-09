@@ -440,20 +440,281 @@ else:
             tar.add(self.publish, arcname=".")
         return archive
 
+    def test_app_package_uses_helper_for_detected_and_explicit_macos_rids(self):
+        self.prepare_entrypoints()
+        for rid, arguments in (("osx-arm64", ()), ("osx-x64", ("osx-x64",))):
+            with self.subTest(rid=rid):
+                self.assert_success(self.run_entrypoint("app.sh", "package", *arguments))
+                self.assert_bundle(rid)
+                self.assertFalse((self.cwd / "publish").exists())
+        calls = self.dotnet_calls()
+        publishes = [args for args in calls if args[0] == "publish"]
+        self.assertEqual(len(publishes), 2)
+        self.assertEqual(sum(args == ["--list-sdks"] for args in calls), 2)
+        self.assertEqual(sum(args == self.version_query() for args in calls), 2)
+        self.assertEqual(len(calls), 6, f"Unexpected restore/build calls: {calls}")
+        for args, rid in zip(publishes, ("osx-arm64", "osx-x64")):
+            self.assertEqual(args[1], str(self.script_dir / "MusicLyricApp/MusicLyricApp.csproj"))
+            self.assertEqual(args[args.index("-r") + 1], rid)
+            self.assertEqual(args[args.index("-o") + 1],
+                             str(self.output / VERSION / rid))
+        signing = self.signing_calls()
+        self.assertEqual(sum("--verify" in args for args in signing), 4)
+        self.assertEqual(sum("--sign" in args or "-s" in args for args in signing), 2)
 
+    def test_app_run_package_launches_bundle_not_raw_publish_directory(self):
+        self.prepare_entrypoints()
+        for rid, arch, arguments in (
+            ("osx-arm64", "arm64", ()),
+            ("osx-x64", "x86_64", ("osx-x64",)),
+        ):
+            with self.subTest(rid=rid):
+                self.assert_success(self.run_entrypoint("app.sh", "package", rid))
+                raw_host = self.output / VERSION / rid / "MusicLyricApp"
+                raw_host.write_text("#!/bin/sh\necho RAW_HOST_MARKER\nexit 77\n",
+                                    encoding="utf-8")
+                raw_host.chmod(0o755)
+                before = len(self.dotnet_calls())
+                result = self.run_entrypoint(
+                    "app.sh", "run-package", *arguments,
+                    env={"TEST_UNAME_ARCH": arch},
+                )
+                self.assert_success(result)
+                bundle, _ = self.bundle_paths(rid)
+                self.assertIn("BUNDLE_HOST_MARKER", result.stdout.splitlines())
+                self.assertIn(str((bundle / "Contents/MacOS").resolve()),
+                              result.stdout.splitlines())
+                self.assertNotIn("RAW_HOST_MARKER", result.stdout)
+                self.assertEqual(self.dotnet_calls()[before:],
+                                 [["--list-sdks"], self.version_query()])
 
+    def test_app_run_package_does_not_fall_back_to_raw_host_when_bundle_missing(self):
+        self.prepare_entrypoints()
+        raw_host = self.output / VERSION / "osx-arm64/MusicLyricApp"
+        raw_host.parent.mkdir(parents=True)
+        raw_host.write_text("#!/bin/sh\necho RAW_HOST_MARKER\n", encoding="utf-8")
+        raw_host.chmod(0o755)
+        result = self.run_entrypoint("app.sh", "run-package", "osx-arm64")
+        self.assertNotEqual(result.returncode, 0)
+        self.assertNotIn("RAW_HOST_MARKER", result.stdout)
+        self.assertEqual(self.dotnet_calls(), [["--list-sdks"], self.version_query()])
 
+    def test_app_package_version_changes_with_project_or_msbuild_result(self):
+        self.prepare_entrypoints()
+        for version, source in (("8.2.41", "project"), ("9.1.52", "stub")):
+            with self.subTest(source=source, version=version):
+                env = {}
+                if source == "project":
+                    self.write_project_version(version)
+                else:
+                    env["TEST_PROJECT_VERSION"] = version
+                self.assert_success(self.run_entrypoint("app.sh", "package", "osx-arm64", env=env))
+                self.assert_bundle("osx-arm64", version)
+                self.assertTrue((self.output / version / "osx-arm64/MusicLyricApp").is_file())
+                for path in self.bundle_paths():
+                    self.assertFalse(path.exists(), "Default version leaked into artifact name")
+        self.assertEqual(sum(args == self.version_query() for args in self.dotnet_calls()), 2)
 
+    def test_app_version_environment_does_not_override_project_version(self):
+        self.prepare_entrypoints()
+        self.assert_success(self.run_entrypoint(
+            "app.sh", "package", "osx-arm64", env={"APP_VERSION": "99.99.99"}))
+        self.assert_bundle("osx-arm64")
+        for path in self.bundle_paths(version="99.99.99"):
+            self.assertFalse(path.exists())
+        self.assertFalse((self.output / "99.99.99").exists())
+        self.assertIn(self.version_query(), self.dotnet_calls())
 
+    def test_app_invalid_or_empty_project_versions_prevent_publish(self):
+        self.prepare_entrypoints()
+        for command in ("package", "run-package", "all", "dist"):
+            for version in ("", "bad version", "../escape", "7.4/338"):
+                with self.subTest(command=command, version=version):
+                    before = len(self.dotnet_calls())
+                    result = self.run_entrypoint("app.sh", command,
+                                                 env={"TEST_PROJECT_VERSION": version})
+                    self.assertNotEqual(result.returncode, 0)
+                    calls = self.dotnet_calls()[before:]
+                    self.assertIn(self.version_query(), calls)
+                    self.assertFalse(any(args[0] in ("publish", "run", "build") for args in calls))
+                    self.assertEqual(list(self.output.iterdir()), [])
+                    self.assertEqual(self.signing_calls(), [])
 
+    def test_app_dist_packages_five_release_artifacts_in_order_without_running_host(self):
+        self.prepare_entrypoints()
+        result = self.run_entrypoint("app.sh", "dist")
+        self.assert_success(result)
+        rids = ("win-x86", "win-x64", "linux-x64", "osx-x64", "osx-arm64")
+        calls = self.dotnet_calls()
+        publishes = [args for args in calls if args[0] == "publish"]
+        self.assertEqual([args[args.index("-r") + 1] for args in publishes], list(rids))
+        self.assertEqual(calls, [["--list-sdks"], self.version_query(), *publishes])
+        archives = []
+        for rid, args in zip(rids, publishes):
+            with self.subTest(rid=rid):
+                self.assertEqual(args[1], str(self.project_file))
+                self.assertEqual(args[args.index("-o") + 1],
+                                 str(self.output / VERSION / rid))
+                suffix = ".zip" if rid.startswith("win-") else ".tar.gz"
+                archive = self.output / f"MusicLyricApp-{VERSION}-{rid}{suffix}"
+                archives.append(archive)
+                self.assertTrue(archive.is_file(), str(archive))
+                self.assertIn(str(archive), result.stdout)
+                if rid.startswith("win-"):
+                    self.assertTrue(zipfile.is_zipfile(archive))
+                    with zipfile.ZipFile(archive) as zipped:
+                        members = {str(PurePosixPath(name)): name for name in zipped.namelist()}
+                        self.assertNotIn("MusicLyricApp", members)
+                        for name, content in (("MusicLyricApp.exe", self.payload["MusicLyricApp"]),
+                                              ("NLog.config", self.payload["NLog.config"])):
+                            self.assertIn(name, members)
+                            self.assertEqual(zipped.read(members[name]), content)
+                    raw = self.output / VERSION / rid
+                    self.assertTrue((raw / "MusicLyricApp.exe").is_file())
+                    self.assertFalse((raw / "MusicLyricApp").exists())
+                elif rid == "linux-x64":
+                    with tarfile.open(archive, "r:gz") as tar:
+                        members = {str(PurePosixPath(member.name)): member
+                                   for member in tar.getmembers()}
+                        self.assertNotIn("MusicLyricApp.exe", members)
+                        for name in ("MusicLyricApp", "NLog.config"):
+                            self.assertIn(name, members)
+                            self.assertTrue(members[name].isfile())
+                            with tar.extractfile(members[name]) as stream:
+                                self.assertEqual(stream.read(), self.payload[name])
+                        self.assertTrue(members["MusicLyricApp"].mode & stat.S_IXUSR)
+                else:
+                    self.assert_bundle(rid)
+        self.assertEqual(set(self.output.glob("*.zip")) | set(self.output.glob("*.tar.gz")),
+                         set(archives))
+        self.assertIn(f"全部 5 个分发包已生成：{self.output}", result.stdout)
+        self.assertNotIn("BUNDLE_HOST_MARKER", result.stdout)
+        self.assertEqual([Path(args[-1]).name for args in self.signing_calls()
+                          if "--sign" in args or "-s" in args],
+                         [self.bundle_paths(rid)[0].name for rid in ("osx-x64", "osx-arm64")])
 
+    def test_app_dist_cleans_entire_publish_directory_before_first_publish(self):
+        self.prepare_entrypoints()
+        stale_paths = (
+            self.output / "old-version/stale.app/Contents/old-file",
+            self.output / VERSION / "win-x86/stale-file",
+            self.output / f"MusicLyricApp-{VERSION}-win-x86.zip",
+            self.output / ".hidden-stale-file",
+        )
+        for path in stale_paths:
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text("old artifact", encoding="utf-8")
+        outside = self.cwd / "keep.txt"
+        outside.write_text("keep", encoding="utf-8")
 
+        # Even when the first publish fails, no artifacts from the previous run may remain.
+        result = self.run_entrypoint("app.sh", "dist",
+                                     env={"TEST_PUBLISH_FAIL_RID": "win-x86"})
+        self.assertNotEqual(result.returncode, 0)
+        self.assertTrue(self.output.is_dir())
+        self.assertEqual(list(self.output.iterdir()), [])
+        self.assertEqual(outside.read_text(encoding="utf-8"), "keep")
+        publishes = [args for args in self.dotnet_calls() if args[0] == "publish"]
+        self.assertEqual([args[args.index("-r") + 1] for args in publishes], ["win-x86"])
 
+    def test_app_dist_invalid_invocations_preserve_existing_artifacts(self):
+        self.prepare_entrypoints()
+        marker = self.output / "keep.zip"
+        marker.write_bytes(b"existing artifact")
+        for arguments, env in (
+            ((), {"TEST_UNAME_OS": "Linux"}),
+            (("osx-arm64",), {}),
+            ((), {"TEST_PROJECT_VERSION": ""}),
+            ((), {"TEST_NO_SDK": "1"}),
+        ):
+            with self.subTest(arguments=arguments, env=env):
+                result = self.run_entrypoint("app.sh", "dist", *arguments, env=env)
+                self.assertNotEqual(result.returncode, 0)
+                self.assertEqual(marker.read_bytes(), b"existing artifact")
 
+    def test_app_package_preserves_other_publish_artifacts(self):
+        self.prepare_entrypoints()
+        marker = self.output / "keep.zip"
+        marker.write_bytes(b"existing artifact")
+        self.assert_success(self.run_entrypoint("app.sh", "package", "osx-arm64"))
+        self.assertEqual(marker.read_bytes(), b"existing artifact")
+        self.assert_bundle("osx-arm64")
 
+    def test_app_dist_publish_failure_stops_remaining_targets_without_success_summary(self):
+        self.prepare_entrypoints()
+        result = self.run_entrypoint("app.sh", "dist",
+                                     env={"TEST_PUBLISH_FAIL_RID": "linux-x64"})
+        self.assertNotEqual(result.returncode, 0)
+        calls = self.dotnet_calls()
+        publishes = [args for args in calls if args[0] == "publish"]
+        self.assertEqual([args[args.index("-r") + 1] for args in publishes],
+                         ["win-x86", "win-x64", "linux-x64"])
+        self.assertEqual(calls, [["--list-sdks"], self.version_query(), *publishes])
+        for rid in ("win-x86", "win-x64"):
+            self.assertTrue((self.output / f"MusicLyricApp-{VERSION}-{rid}.zip").is_file())
+        self.assertFalse((self.output / f"MusicLyricApp-{VERSION}-linux-x64.tar.gz").exists())
+        for rid in ("osx-x64", "osx-arm64"):
+            self.assert_failed_without_artifacts(result, rid)
+            self.assertFalse((self.output / VERSION / rid).exists())
+        self.assertEqual(self.signing_calls(), [])
+        self.assertNotIn("BUNDLE_HOST_MARKER", result.stdout)
+        self.assertNotIn("全部 5 个分发包已生成", result.stdout + result.stderr)
 
+    def test_app_dist_rejects_non_darwin_and_rid_arguments_without_publish(self):
+        self.prepare_entrypoints()
+        for arguments, env in (
+            ((), {"TEST_UNAME_OS": "Linux"}),
+            (("osx-arm64",), {}),
+            (("osx-x64",), {}),
+            (("linux-x64",), {}),
+        ):
+            with self.subTest(arguments=arguments, env=env):
+                before = len(self.dotnet_calls())
+                result = self.run_entrypoint("app.sh", "dist", *arguments, env=env)
+                self.assertNotEqual(result.returncode, 0)
+                self.assertFalse(any(args[0] in ("publish", "run", "build")
+                                     for args in self.dotnet_calls()[before:]))
+                self.assertEqual(list(self.output.iterdir()), [])
+                self.assertEqual(self.signing_calls(), [])
 
+    def test_app_help_via_bash_and_sh_needs_no_sdk_or_version_query(self):
+        self.prepare_entrypoints()
+        for shell in ("bash", "sh"):
+            for command in ("help", "--help", "-h"):
+                with self.subTest(shell=shell, command=command):
+                    result = self.run_entrypoint(
+                        "app.sh", command, shell=shell,
+                        env={"TEST_NO_SDK": "1", "TEST_PROJECT_VERSION": "", "BASH_VERSION": ""},
+                    )
+                    self.assert_success(result)
+                    self.assertIn("dist", result.stdout)
+                    self.assertIn("package", result.stdout)
+                    self.assertEqual(self.dotnet_calls(), [])
 
+    def test_app_run_and_build_do_not_query_project_version(self):
+        self.prepare_entrypoints()
+        for command in ("run", "build"):
+            with self.subTest(command=command):
+                before = len(self.dotnet_calls())
+                self.assert_success(self.run_entrypoint(
+                    "app.sh", command, env={"TEST_PROJECT_VERSION": ""}))
+                calls = self.dotnet_calls()[before:]
+                self.assertEqual(len(calls), 2)
+                self.assertEqual(calls[0], ["--list-sdks"])
+                self.assertEqual(calls[1][0], command)
+                self.assertEqual(self.signing_calls(), [])
+
+    def test_app_all_queries_project_version_then_builds_packages_and_runs_bundle(self):
+        self.prepare_entrypoints()
+        result = self.run_entrypoint("app.sh", "all", "osx-arm64")
+        self.assert_success(result)
+        calls = self.dotnet_calls()
+        self.assertEqual(calls[:2], [["--list-sdks"], self.version_query()])
+        self.assertEqual([args[0] for args in calls[2:]], ["build", "publish"])
+        self.assert_bundle("osx-arm64")
+        self.assertIn("BUNDLE_HOST_MARKER", result.stdout.splitlines())
+        bundle, _ = self.bundle_paths()
+        self.assertIn(str((bundle / "Contents/MacOS").resolve()), result.stdout.splitlines())
 
     def test_legacy_entrypoint_packages_both_mid_archives_from_script_directory(self):
         self.prepare_entrypoints()

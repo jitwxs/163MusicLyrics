@@ -186,6 +186,9 @@ public class CacheAndSettingsRegressionTests
     [InlineData("MusicLyricApp v7.3", "v7.3", false)]
     [InlineData("MusicLyricApp v7.3", "v7.2", false)]
     [InlineData("MusicLyricApp v7.9", "v8.0", true)]
+    [InlineData("MusicLyricApp v7.4", "v7.5.0", true)]
+    [InlineData("MusicLyricApp v7.5", "v7.5.0", false)]
+    [InlineData("MusicLyricApp v7.5", "v7.4", false)]
     public void UpdateComparison(string current, string latest, bool expected) =>
         Assert.Equal(expected, new UpdateCheckService(() => new GitHubInfo { TagName = latest }).CheckLatestVersion(current).HasUpdate);
 
