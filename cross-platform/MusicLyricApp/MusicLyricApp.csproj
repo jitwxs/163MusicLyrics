@@ -25,7 +25,6 @@
         <PackageReference Include="TKCode.Arc.Icons.Lucide" Version="1.0.0" />
         <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.1"/>
         <PackageReference Include="hyjiacan.py4n" Version="4.0.0" />
-        <PackageReference Include="MessageBox.Avalonia" Version="12.1.0" />
         <PackageReference Include="NAudio" Version="2.2.1" />
         <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
         <PackageReference Include="NLog" Version="5.4.0" />

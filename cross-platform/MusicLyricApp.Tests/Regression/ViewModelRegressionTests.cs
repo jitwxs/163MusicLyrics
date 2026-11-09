@@ -124,7 +124,7 @@ public class ViewModelRegressionTests
     {
         using var ws = new TestWorkspace();
         ws.Settings.Config.OutputLyricTypes = "0,1";
-        var window = new SettingWindow(ws.Settings, ws.Window.Object);
+        var window = TestWorkspace.Host(new SettingView(), new SettingViewModel(ws.Settings, ws.Window.Object));
         try
         {
             window.Show();
@@ -146,11 +146,11 @@ public class ViewModelRegressionTests
     {
         using var ws = new TestWorkspace();
         var vm = new BatchSearchViewModel(ws.Settings, ws.Search(new(MockBehavior.Strict)), ws.Storage(), ws.Window.Object);
-        var window = new BatchSearchWindow(vm);
+        var window = TestWorkspace.Host(new BatchSearchView(), vm);
         try
         {
             window.Show();
-            window.AddResults(new() { ["123"] = new(TestWorkspace.Song()) }, [TestWorkspace.Input()]);
+            vm.AddSearchResults(new() { ["123"] = new(TestWorkspace.Song()) }, [TestWorkspace.Input()]);
             Dispatcher.UIThread.RunJobs();
             var grid = Assert.Single(window.GetVisualDescendants().OfType<DataGrid>());
             Assert.Same(vm.Items, grid.ItemsSource);
@@ -183,7 +183,7 @@ public class ViewModelRegressionTests
     public async Task FormatConversionWindowDebouncesInputAndSwapsFormats()
     {
         using var ws = new TestWorkspace();
-        var window = new FormatConvertWindow(ws.Settings);
+        var window = TestWorkspace.Host(new FormatConvertView(), new FormatConvertViewModel(ws.Settings));
         var vm = Assert.IsType<FormatConvertViewModel>(window.DataContext);
         try
         {

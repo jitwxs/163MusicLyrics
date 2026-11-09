@@ -305,5 +305,19 @@
   "UI.Blur.ResultCount": "{0} results",
   "UI.Blur.SelectedCount": "{0} selected",
   "Status.Batch.Saved": "Saved",
-  "Status.Batch.Skipped": "Skipped"
+  "Status.Batch.Skipped": "Skipped",
+  "Nav.Label": "Main navigation",
+  "Nav.Search": "Lyrics search",
+  "Nav.Batch": "Batch tasks",
+  "Nav.Convert": "Format convert",
+  "Nav.Settings": "Settings",
+  "Nav.CollapseSidebar": "Collapse sidebar",
+  "Nav.ExpandSidebar": "Expand sidebar",
+  "UI.Help": "Help",
+  "UI.Shortcuts": "Keyboard shortcuts",
+  "Dialog.Action.Close": "Close",
+  "Dialog.Action.Cancel": "Cancel",
+  "Dialog.Exit.Action": "Quit app",
+  "Dialog.ReleaseNotes.Open": "Open download page",
+  "Dialog.ReleaseNotes.Later": "Not now"
 }

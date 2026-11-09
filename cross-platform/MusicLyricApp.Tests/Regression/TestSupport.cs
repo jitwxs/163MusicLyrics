@@ -59,6 +59,10 @@ public class TestWorkspace : IDisposable
             .Returns(Task.CompletedTask);
     }
 
+    /// <summary>Hosts a page view in a bare window, the way the main window hosts it.</summary>
+    public static Avalonia.Controls.Window Host(Avalonia.Controls.Control view, object dataContext) =>
+        new() { Width = 1000, Height = 700, DataContext = dataContext, Content = view };
+
     public StorageService Storage(Func<int, HttpClient>? factory = null) => new(() => ConfigPath, factory);
     public SearchService Search(Mock<IMusicApi> netease, Mock<IMusicApi>? qq = null) => new(Settings,
         new Dictionary<SearchSourceEnum, IMusicApi>

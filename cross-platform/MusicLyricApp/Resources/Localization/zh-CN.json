@@ -305,5 +305,19 @@
   "UI.Blur.ResultCount": "共 {0} 条",
   "UI.Blur.SelectedCount": "已选 {0} 条",
   "Status.Batch.Saved": "保存成功",
-  "Status.Batch.Skipped": "已跳过"
+  "Status.Batch.Skipped": "已跳过",
+  "Nav.Label": "主导航",
+  "Nav.Search": "歌词搜索",
+  "Nav.Batch": "批量任务",
+  "Nav.Convert": "格式转换",
+  "Nav.Settings": "设置",
+  "Nav.CollapseSidebar": "收起侧边栏",
+  "Nav.ExpandSidebar": "展开侧边栏",
+  "UI.Help": "帮助",
+  "UI.Shortcuts": "快捷键",
+  "Dialog.Action.Close": "关闭",
+  "Dialog.Action.Cancel": "取消",
+  "Dialog.Exit.Action": "退出应用",
+  "Dialog.ReleaseNotes.Open": "前往下载页",
+  "Dialog.ReleaseNotes.Later": "以后再说"
 }

@@ -1,4 +1,4 @@
-using Avalonia.Controls;
+﻿using Avalonia.Controls;
 using Avalonia.Headless.XUnit;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
@@ -325,7 +325,7 @@ public class CopyLinksRegressionTests
         {
             window.Show();
             Dispatcher.UIThread.RunJobs();
-            var panel = Assert.IsType<Border>(window.FindControl<Border>("SongPlaybackPanel"));
+            var panel = Assert.Single(window.GetVisualDescendants().OfType<Border>(), x => x.Name == "SongPlaybackPanel");
             var menu = Assert.IsType<ContextMenu>(panel.ContextMenu);
             menu.Open(panel);
             Dispatcher.UIThread.RunJobs();

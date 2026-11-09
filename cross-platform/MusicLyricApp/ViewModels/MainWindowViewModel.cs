@@ -13,8 +13,6 @@ using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
-using MsBox.Avalonia;
-using MsBox.Avalonia.Enums;
 using NAudio.Wave;
 using MusicLyricApp.Core;
 using MusicLyricApp.Core.Service;
@@ -67,13 +65,67 @@ public partial class MainWindowViewModel : ViewModelBase
 
     [ObservableProperty] private SettingBean _settingBean;
     
-    private SettingWindow? _settingWindow;
-    
     private BlurSearchWindow? _blurSearchWindow;
-    
-    private BatchSearchWindow? _batchSearchWindow;
 
-    private FormatConvertWindow? _formatConvertWindow;
+    // ---- Page navigation (single window with a sidebar) ----
+    public const string PageSearch = "search";
+    public const string PageBatch = "batch";
+    public const string PageConvert = "convert";
+    public const string PageSettings = "settings";
+
+    /// <summary>Key of the page shown in the main window; bound two-way to the sidebar.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsSearchPage), nameof(IsBatchPage), nameof(IsConvertPage), nameof(IsSettingsPage))]
+    private string _currentPageKey = PageSearch;
+
+    public bool IsSearchPage => CurrentPageKey == PageSearch;
+    public bool IsBatchPage => CurrentPageKey == PageBatch;
+    public bool IsConvertPage => CurrentPageKey == PageConvert;
+    public bool IsSettingsPage => CurrentPageKey == PageSettings;
+
+    public BatchSearchViewModel BatchSearchViewModel => _downloadManagerViewModel;
+
+    /// <summary>Created on first visit and kept, so the text being converted survives page switches.</summary>
+    [ObservableProperty] private FormatConvertViewModel? _formatConvertViewModel;
+
+    /// <summary>Recreated on every visit (as the old settings window was) and flushed when leaving.</summary>
+    [ObservableProperty] private SettingViewModel? _settingViewModel;
+
+    partial void OnCurrentPageKeyChanged(string? oldValue, string newValue)
+    {
+        if (oldValue == PageSettings)
+        {
+            FlushSettingsPage();
+        }
+
+        switch (newValue)
+        {
+            case PageSettings:
+                SettingViewModel = new SettingViewModel(SettingBean, _windowProvider);
+                break;
+            case PageConvert:
+                FormatConvertViewModel ??= new FormatConvertViewModel(SettingBean);
+                break;
+            case PageSearch or PageBatch:
+                break;
+            default:
+                // Unknown keys (e.g. a cleared sidebar selection) fall back to the search page.
+                CurrentPageKey = PageSearch;
+                break;
+        }
+    }
+
+    /// <summary>Applies what the settings page holds in memory, like closing the old settings window did.</summary>
+    private void FlushSettingsPage()
+    {
+        if (SettingViewModel == null)
+        {
+            return;
+        }
+
+        SettingViewModel.OnClosing();
+        UpdateTheme();
+    }
 
     // Parameterless constructor for design-time use
     public MainWindowViewModel()
@@ -193,6 +245,7 @@ public partial class MainWindowViewModel : ViewModelBase
         }
 
         SearchParamViewModel.SearchText = request.SongId;
+        CurrentPageKey = PageSearch;
 
         ResetPlaybackAndSongLink();
 
@@ -249,6 +302,11 @@ public partial class MainWindowViewModel : ViewModelBase
 
     public void SaveConfig()
     {
+        if (IsSettingsPage)
+        {
+            SettingViewModel?.OnClosing();
+        }
+
         _storageService.SaveConfig(SettingBean);
     }
 
@@ -740,27 +798,7 @@ public partial class MainWindowViewModel : ViewModelBase
     [RelayCommand]
     private void ExecuteFormatConvert()
     {
-        if (_formatConvertWindow != null)
-        {
-            if (!_formatConvertWindow.IsVisible)
-            {
-                _formatConvertWindow = null;
-            }
-            else
-            {
-                if (_formatConvertWindow.WindowState == WindowState.Minimized)
-                {
-                    _formatConvertWindow.WindowState = WindowState.Normal;
-                }
-
-                _formatConvertWindow.Activate();
-                return;
-            }
-        }
-
-        _formatConvertWindow = new FormatConvertWindow(SettingBean);
-        _formatConvertWindow.Closed += (_, _) => _formatConvertWindow = null;
-        _formatConvertWindow.Show();
+        CurrentPageKey = PageConvert;
     }
     
     [RelayCommand]
@@ -797,45 +835,7 @@ public partial class MainWindowViewModel : ViewModelBase
     [RelayCommand]
     private void ExecuteSetting()
     {
-        if (_settingWindow != null)
-        {
-            if (!_settingWindow.IsVisible)
-            {
-                // 窗口已经被关闭或隐藏
-                _settingWindow = null;
-            }
-            else
-            {
-                // 窗口还在：如果最小化，恢复正常；否则激活
-                if (_settingWindow.WindowState == WindowState.Minimized)
-                {
-                    _settingWindow.WindowState = WindowState.Normal;
-                }
-
-                _settingWindow.Activate();
-                return;
-            }
-        }
-
-        // 创建新窗口
-        _settingWindow = new SettingWindow(SettingBean);
-        _settingWindow.Closed += (_, _) => 
-        {
-            if (_settingWindow.DataContext is SettingViewModel vm)
-            {
-                vm.OnClosing();
-                UpdateTheme();
-            }
-            _settingWindow = null;
-        };
-        if (_windowProvider is Window owner)
-        {
-            _settingWindow.Show(owner);
-        }
-        else
-        {
-            _settingWindow.Show();
-        }
+        CurrentPageKey = PageSettings;
     }
     
     private bool _inCheckVersion;
@@ -860,20 +860,14 @@ public partial class MainWindowViewModel : ViewModelBase
             {
                 var content = UpdateCheckService.BuildReleaseDescription(checkResult.Info);
                 
-                await Dispatcher.UIThread.InvokeAsync(async () =>
+                if (await DialogHelper.ShowReleaseNotesAsync(content))
                 {
-                    var box = MessageBoxManager.GetMessageBoxStandard(LocalizationService.Get("Dialog.ReleaseNotes.Title"), content, ButtonEnum.YesNo);
-                    var result = await box.ShowWindowAsync();
-    
-                    if (result == ButtonResult.Yes)
+                    Process.Start(new ProcessStartInfo
                     {
-                        Process.Start(new ProcessStartInfo
-                        {
-                            FileName = UpdateCheckService.ReleasePageUrl,
-                            UseShellExecute = true
-                        });
-                    }
-                });
+                        FileName = UpdateCheckService.ReleasePageUrl,
+                        UseShellExecute = true
+                    });
+                }
             }
             else if (_showMessageIfNotExistLatestVersion)
             {
@@ -942,26 +936,7 @@ public partial class MainWindowViewModel : ViewModelBase
     [RelayCommand]
     private void ExecuteOpenDownloadManager()
     {
-        if (_batchSearchWindow != null)
-        {
-            if (!_batchSearchWindow.IsVisible)
-            {
-                _batchSearchWindow = null;
-            }
-            else
-            {
-                if (_batchSearchWindow.WindowState == WindowState.Minimized)
-                {
-                    _batchSearchWindow.WindowState = WindowState.Normal;
-                }
-                _batchSearchWindow.Activate();
-                return;
-            }
-        }
-
-        _batchSearchWindow = new BatchSearchWindow(_downloadManagerViewModel);
-        _batchSearchWindow.Closed += (_, _) => _batchSearchWindow = null;
-        _batchSearchWindow.Show();
+        CurrentPageKey = PageBatch;
         SetTip(LocalizationService.Get("Status.Main.DownloadOpened"), false);
     }
 }
