@@ -1,24 +1,10 @@
 <Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              x:Class="MusicLyricApp.App"
-             xmlns:local="using:MusicLyricApp"
-             >
+             xmlns:local="using:MusicLyricApp">
+    <!-- Arc (registered in Program.UseArc) supplies the theme for every control, shared ones included. -->
 
     <Application.DataTemplates>
         <local:ViewLocator/>
     </Application.DataTemplates>
-
-    <Application.Resources>
-        <DataTemplate x:Key="LocalizedDisplayNameTemplate">
-            <TextBlock Text="{ReflectionBinding DisplayName}" />
-        </DataTemplate>
-    </Application.Resources>
-  
-    <Application.Styles>
-        <FluentTheme />
-        <Style Selector="ComboBox">
-            <Setter Property="ItemTemplate" Value="{StaticResource LocalizedDisplayNameTemplate}" />
-        </Style>
-        <StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml"/>
-    </Application.Styles>
 </Application>

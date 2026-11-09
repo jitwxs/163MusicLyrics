@@ -15,9 +15,7 @@
 
     <ItemGroup>
         <PackageReference Include="Avalonia" Version="12.1.4"/>
-        <PackageReference Include="Avalonia.Controls.DataGrid" Version="12.1.2" />
         <PackageReference Include="Avalonia.Desktop" Version="12.1.4"/>
-        <PackageReference Include="Avalonia.Themes.Fluent" Version="12.1.4"/>
         <PackageReference Include="Avalonia.Fonts.Inter" Version="12.1.4"/>
         <PackageReference Include="TKCode.Arc" Version="1.0.0" />
         <PackageReference Include="TKCode.Arc.Blocks" Version="1.0.0" />

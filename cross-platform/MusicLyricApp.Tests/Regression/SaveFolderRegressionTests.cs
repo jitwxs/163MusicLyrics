@@ -59,7 +59,7 @@ public class SaveFolderRegressionTests
             var cachePath = vm.SettingParamViewModel.SearchCacheFolderPath;
             var tips = vm.SettingTips;
             var expectedCommand = cache ? vm.SelectSearchCacheFolderCommand : vm.SelectSaveFolderCommand;
-            settings.GetVisualDescendants().OfType<TabControl>().Single().SelectedIndex = 3;
+            ShowDownloadSection(Assert.IsType<SettingView>(settings.Content));
             Dispatcher.UIThread.RunJobs();
             var button = Assert.Single(settings.GetVisualDescendants().OfType<Button>(),
                 x => ReferenceEquals(x.Command, expectedCommand));
@@ -361,6 +361,15 @@ public class SaveFolderRegressionTests
         }
     }
 
+    /// <summary>Opens the "download and cache" section of the Arc settings page, where both folder rows live.</summary>
+    private static void ShowDownloadSection(SettingView view)
+    {
+        var page = Assert.IsType<TKCode.Arc.SettingsPage>(view.FindControl<TKCode.Arc.SettingsPage>("SettingsPage"));
+        var section = Assert.IsType<TKCode.Arc.SettingsSection>(view.FindControl<TKCode.Arc.SettingsSection>("DownloadSection"));
+        Assert.True(page.Select(section));
+        Dispatcher.UIThread.RunJobs();
+    }
+
     // ICommand.Execute adds an async-void exception-forwarding path that ExecuteAsync alone does not test.
     private static async Task ExecuteFromUiAsync(IAsyncRelayCommand command, Action completePicker)
     {
@@ -490,16 +499,16 @@ public class SaveFolderRegressionTests
         try
         {
             window.Show();
-            view.GetVisualDescendants().OfType<TabControl>().Single().SelectedIndex = 3;
+            ShowDownloadSection(view);
             Dispatcher.UIThread.RunJobs();
-            var input = Assert.IsType<TextBox>(view.FindControl<TextBox>("SaveFolderPathTextBox"));
-            var button = Assert.IsType<Button>(view.FindControl<Button>("OpenSaveFolderButton"));
+            var input = Assert.IsType<TKCode.Arc.Input>(view.FindControl<TextBox>("SaveFolderPathTextBox"));
+            var button = Assert.IsType<TKCode.Arc.Button>(view.FindControl<Button>("OpenSaveFolderButton"));
             var grid = Assert.IsType<Grid>(input.Parent);
             Assert.Equal(3, grid.ColumnDefinitions.Count);
             Assert.Same(grid, button.Parent);
             Assert.Equal(2, Grid.GetColumn(button));
             Assert.Same(vm.OpenSaveFolderCommand, button.Command);
-            Assert.Equal(LocalizationService.Get("UI.Extra22"), button.Content);
+            Assert.Equal(LocalizationService.Get("Settings.OpenFolder"), button.Content);
             Assert.Equal(ws.Root, input.Text);
             Assert.True(button.Bounds.Width > 0);
             Assert.True(input.Bounds.Width < grid.Bounds.Width - button.Bounds.Width);
