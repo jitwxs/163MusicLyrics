@@ -21,14 +21,14 @@ find_dotnet() {
         export DOTNET_ROOT="$HOME/.dotnet"
         export PATH="$DOTNET_ROOT:$PATH"
     else
-        echo "找不到 .NET SDK。请安装 .NET 9 SDK，或将 dotnet 放入 PATH。" >&2
+        echo "找不到 .NET SDK。请安装 .NET 10 SDK，或将 dotnet 放入 PATH。" >&2
         exit 1
     fi
 
     local installed_sdks
     installed_sdks="$("$DOTNET_EXE" --list-sdks)"
-    if [[ ! "$installed_sdks" =~ (^|$'\n')9\.[0-9] ]]; then
-        echo "未检测到 .NET 9 SDK。当前项目目标框架为 net9.0。" >&2
+    if [[ ! "$installed_sdks" =~ (^|$'\n')10\.[0-9] ]]; then
+        echo "未检测到 .NET 10 SDK。当前项目目标框架为 net10.0。" >&2
         exit 1
     fi
 }

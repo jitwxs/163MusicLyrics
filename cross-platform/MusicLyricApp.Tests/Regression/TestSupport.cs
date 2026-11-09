@@ -1,10 +1,11 @@
-using System.Net;
+﻿using System.Net;
 using System.Net.Http;
 using Avalonia;
 using Avalonia.Headless;
 using Avalonia.Headless.XUnit;
 using Avalonia.Platform.Storage;
 using Moq;
+using TKCode.Arc;
 using MusicLyricApp.Core.Service;
 using MusicLyricApp.Core.Service.Music;
 using MusicLyricApp.Models;
@@ -20,7 +21,8 @@ public class TestApp : MusicLyricApp.App
 {
     public override void OnFrameworkInitializationCompleted() { }
     public static AppBuilder BuildAvaloniaApp() => AppBuilder.Configure<TestApp>()
-        .UseHeadless(new AvaloniaHeadlessPlatformOptions());
+        .UseHeadless(new AvaloniaHeadlessPlatformOptions())
+        .UseArc(arc => arc.UseArcControls().UseArcBlocks());
 }
 
 public class TestWorkspace : IDisposable

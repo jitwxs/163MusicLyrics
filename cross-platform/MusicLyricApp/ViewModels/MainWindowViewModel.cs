@@ -892,7 +892,7 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private void UpdateTheme()
     {
-        ((App)Application.Current!).SetTheme(SettingBean.Config.ThemeMode);
+        ThemeService.Apply(SettingBean.Config.ThemeMode);
     }
 
     [RelayCommand]

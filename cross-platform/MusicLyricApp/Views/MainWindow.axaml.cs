@@ -1,9 +1,10 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Input;
+using Avalonia.Input.Platform;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform.Storage;
 using Avalonia.Threading;
@@ -116,7 +117,10 @@ public partial class MainWindow : Window, IWindowProvider
 
     public async Task SetTextAsync(string? text)
     {
-        await Clipboard?.SetTextAsync(text)!;
+        if (Clipboard != null)
+        {
+            await Clipboard.SetTextAsync(text);
+        }
     }
 
     public async Task<IStorageFolder?> TryGetFolderFromPathAsync(string path)
@@ -130,7 +134,9 @@ public partial class MainWindow : Window, IWindowProvider
 
         if (!vm.SettingBean.Config.AutoReadClipboard) return;
         
-        var message = await Clipboard?.GetTextAsync()!;
+        if (Clipboard == null) return;
+
+        var message = await Clipboard.TryGetTextAsync();
         if (message != null)
         {
             vm.SearchParamViewModel.SearchText = message;

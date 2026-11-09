@@ -1,6 +1,6 @@
 # 跨平台桌面版开发
 
-本目录是 .NET 9 + Avalonia 11.3 桌面应用，采用 CommunityToolkit.Mvvm。
+本目录是 .NET 10 + Avalonia 12.1 + TKCode.Arc 桌面应用，采用 CommunityToolkit.Mvvm。
 仓库中的 `archive-winform/` 是旧版 Windows Forms 实现，`prototype/` 是界面原型，均不参与本解决方案编译。
 
 ## 代码入口
@@ -15,7 +15,7 @@
 
 ## 本地编译与测试
 
-需要 .NET 9 SDK。macOS Apple Silicon 使用 arm64 SDK。
+需要 .NET 10 SDK。macOS Apple Silicon 使用 arm64 SDK。
 若 SDK 安装在用户目录 `~/.dotnet`，先在终端执行：
 
 ```sh
