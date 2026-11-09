@@ -35,7 +35,7 @@ public partial class MainWindowViewModel : ViewModelBase
     
     public SignalLampViewModel LampVm { get; } = new();
 
-    [ObservableProperty] private string _appTitle = "MusicLyricApp v7.4";
+    [ObservableProperty] private string _appTitle = "MusicLyricApp v7.5";
 
     [ObservableProperty] private string _lastSaveFolderPath = "";
     [ObservableProperty] private string _tipTimestamp = "";
@@ -443,6 +443,39 @@ public partial class MainWindowViewModel : ViewModelBase
     }
 
     [RelayCommand]
+    private async Task ExecuteCopySongPicAsync()
+    {
+        if (SearchResultViewModel.SaveVoMap.Count == 0)
+        {
+            SetTip(ErrorMsgConst.MUST_SEARCH_BEFORE_GET_SONG_PIC, true);
+            return;
+        }
+
+        if (SearchResultViewModel.SaveVoMap.Count != 1)
+        {
+            SetTip(LocalizationService.Get("Status.Main.SingleSongRequired"), true);
+            return;
+        }
+
+        var link = SearchResultViewModel.SaveVoMap.Values.Single().SongVo.Pics;
+        if (string.IsNullOrWhiteSpace(link))
+        {
+            SetTip(ErrorMsgConst.SONG_PIC_GET_FAILED, true);
+            return;
+        }
+
+        try
+        {
+            await _windowProvider.SetTextAsync(link);
+            SetTip(ErrorMsgConst.SONG_PIC_GET_SUCCESS, false);
+        }
+        catch (Exception ex)
+        {
+            SetTip(LocalizationService.Format("Status.Main.CopyCoverUrlFailed", ex.Message), true);
+        }
+    }
+
+    [RelayCommand]
     private async Task ExecuteSongLinkAsync()
     {
         try
@@ -785,7 +818,7 @@ public partial class MainWindowViewModel : ViewModelBase
         }
 
         // 创建新窗口
-        _settingWindow = new SettingWindow(SettingBean, _windowProvider);
+        _settingWindow = new SettingWindow(SettingBean);
         _settingWindow.Closed += (_, _) => 
         {
             if (_settingWindow.DataContext is SettingViewModel vm)
@@ -795,7 +828,14 @@ public partial class MainWindowViewModel : ViewModelBase
             }
             _settingWindow = null;
         };
-        _settingWindow.Show();
+        if (_windowProvider is Window owner)
+        {
+            _settingWindow.Show(owner);
+        }
+        else
+        {
+            _settingWindow.Show();
+        }
     }
     
     private bool _inCheckVersion;
@@ -860,7 +900,11 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         try
         {
-            await _storageService.SelectFolderAndRememberAsync(SettingBean, _windowProvider);
+            var folder = await _storageService.SelectFolderAndRememberAsync(SettingBean, _windowProvider);
+            if (folder == null)
+            {
+                return;
+            }
             LastSaveFolderPath = SettingBean.Config.LastSaveFolderPath;
             SetTip(LocalizationService.Format("Status.Main.SavePathUpdated", LastSaveFolderPath), false);
         }

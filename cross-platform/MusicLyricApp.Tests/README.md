@@ -20,7 +20,15 @@ dotnet test cross-platform/MusicLyricApp.sln \
   --collect:'XPlat Code Coverage'
 ```
 
-默认运行 203 项离线测试，显式跳过 3 项外部服务探测。TRX 和 Cobertura XML 输出到本目录的 `TestResults/`（已被 Git 忽略）。覆盖率反映代码执行情况，不代表所有平台、接口或业务组合均已验证。
+当前默认发现 296 项 .NET 测试：291 项离线用例，5 项需显式启用的外部服务探测；上述 `Category!=Live` 过滤器只运行离线用例。TRX 和 Cobertura XML 输出到本目录的 `TestResults/`（已被 Git 忽略）。覆盖率反映代码执行情况，不代表所有平台、接口或业务组合均已验证。
+
+发布脚本有独立的 Python 测试，**不会被 `dotnet test` 自动执行**，发布前也需运行：
+
+```sh
+PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s cross-platform/tests -p 'test*.py' -v
+```
+
+当前包含 40 项脚本用例，使用临时目录和模拟的 SDK、系统及签名工具，真实执行文件复制、ZIP/tar 创建和解包；不联网、不启动真实 GUI，也不清理仓库实际 `publish/`。
 
 发布配置回归：
 
@@ -44,7 +52,12 @@ MUSICLYRIC_LIVE_TESTS=1 dotnet test cross-platform/MusicLyricApp.sln \
 | 测试文件 | 主要验证行为 |
 | --- | --- |
 | `Regression/SearchRegressionTests.cs` | ID/链接解析、提供商识别、专辑/歌单展开、目录导入、查询错误、磁盘缓存复用、普通/逐字请求、聚合模糊搜索、结果元数据 |
-| `Regression/QQMusicNativeApiTests.cs` | QQ 单曲/专辑/歌单关键词搜索请求载荷，验证服务端要求的公共 `comm` 参数和搜索类型映射 |
+| `Regression/QQMusicNativeApiTests.cs` | QQ 单曲/专辑/歌单关键词搜索请求载荷，验证 `ct=20/cv=1859` 和搜索类型映射（#339） |
+| `Regression/QQSearchFlowRegressionTests.cs` | 原始 QQ JSON → 原生 API → 业务 API → 模糊搜索的结果转换、三层业务失败、空结果及关键词去空白 |
+| `Regression/LoggingRegressionTests.cs` | 启动前应用开关、持久化、重启、重复切换、关闭时不改旧日志、真实配置文件重载、INFO 过滤及其他输出目标（#340） |
+| `Regression/CopyLinksRegressionTests.cs` | 封面/直链复制命令、真实右键菜单绑定、异步等待/失败/重试、签名 URL 原样保留、切歌及移除重复复制按钮（#314）；标题与程序集版本一致 |
+| `Regression/SaveFolderRegressionTests.cs` | 真实设置按钮的异步命令执行、取消/异常不逃逸 UI、路径与配置保留、窗口归属/复用/重建/关闭生命周期、打开目录及布局 |
+| `../tests/test_macos_packaging.py` | macOS bundle/资源符号链接、签名及归档解压后验签契约、五目标分发、自动版本、失败停止、连续构建清理、旧产物保护、旧发布入口（#338） |
 | `Regression/LyricsRegressionTests.cs` | 双语交错/合并/独立、分文件、译文缺失策略、时间误差匹配、简繁转换、音译、空行、纯音乐、LRC/SRT 转换 |
 | `Regression/StorageRegressionTests.cs` | 实际临时文件写入、4 种编码、覆盖/编号、文件名模板、纯音乐跳过、批量统计、目录取消与记忆、剪贴板契约、封面/音频下载及失败 |
 | `Regression/CacheAndSettingsRegressionTests.cs` | 设置持久化与旧配置兼容、缓存损坏/缺失/容量淘汰/来源隔离、代理配置、翻译凭据选择和语言支持、翻译缓存、更新比较与错误 |
@@ -56,12 +69,12 @@ MUSICLYRIC_LIVE_TESTS=1 dotnet test cross-platform/MusicLyricApp.sln \
 
 ## 隔离和测试边界
 
-- 每项文件/缓存/设置测试使用独立临时目录，结束后清理；不覆盖用户实际配置和歌词。
+- 每项文件/缓存/设置测试使用独立临时目录，结束后清理；不覆盖用户实际配置和歌词。设置页成功选目录会使用默认持久化服务，测试不直接触发该默认写入路径；成功持久化由注入临时配置的存储层及主窗口命令验证。
 - 音乐查询通过 `IMusicApi` 严格模拟；下载通过可替换的 `HttpMessageHandler` 返回字节或错误。默认离线用例不访问真实服务。
 - `IStorageFolder`、`IStorageFile` 和 `IWindowProvider` 的模拟把内容写入真实临时文件，但不调用系统目录选择器和剪贴板。
 - Avalonia Headless XUnit 加载真实应用资源与窗口，验证命令、绑定、计时器等；不验证屏幕像素、真实键鼠输入和系统音频。
 - 主流程测试禁用真实音频初始化；Windows 播放器仍须在有音频设备的 Windows 环境验收。
-- `NetworkClientFactory` 和 `GlobalCache` 存在进程级共享状态，因此关闭测试并行，避免相互干扰。
+- `NetworkClientFactory`、`GlobalCache` 和界面语言存在进程级共享状态，因此关闭测试并行；语言用例使用 Avalonia UI 上下文，并在结束时恢复原语言和 UI culture，避免依赖执行顺序。
 - 新增可选构造参数用于替换配置路径、音乐接口、下载客户端和版本接口；正常启动沿用原默认实现。
 
 ## 仍须人工/专用环境验收
@@ -73,7 +86,7 @@ MUSICLYRIC_LIVE_TESTS=1 dotnet test cross-platform/MusicLyricApp.sln \
 | Windows 音频 | 查询可试听歌曲，播放/暂停/继续/拖动/停止；切歌和关闭窗口后停止声音并释放资源；无直链时提示正确 |
 | macOS/Linux 实机界面 | 调整窗口尺寸、切换主题、检查中文/字体/封面/表格显示；键鼠操作和不同 DPI 下无布局问题 |
 | 系统剪贴板 | 启用自动读取，复制合法歌曲链接并进入输入框；关闭该设置后不自动读取；复制封面/直链实际可粘贴 |
-| 系统目录选择器 | 选择、取消、记住目录、目录被删除、不可写目录；错误提示正确且不误报保存成功 |
+| 系统目录选择器 | 分别点击保存路径、缓存路径的“更改目录”，在真实原生弹窗中选择/取消；设置窗口始终保留，返回后恢复焦点；另检查记住目录、目录被删除、不可写目录及错误提示 |
 | 登录态与受限内容 | 使用测试账户分别验证两家平台受限歌单/歌曲、有效及过期 Cookie；不把凭据提交到仓库 |
 | 真实模糊查询和批量资源 | 两家平台分别查询单曲/专辑/歌单并选择多条结果；保存与下载实际内容正确；注意服务限流 |
 | 百度/彩云在线翻译 | 使用测试凭据分别验证成功、鉴权失败、限流与多语言结果；当前只验证离线选择、支持范围和缓存行为 |

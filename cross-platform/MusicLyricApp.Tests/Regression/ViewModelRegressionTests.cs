@@ -6,6 +6,7 @@ using Avalonia.VisualTree;
 using CommunityToolkit.Mvvm.Messaging;
 using Moq;
 using MusicLyricApp.Core.Service;
+using MusicLyricApp.Core.Localization;
 using MusicLyricApp.Models;
 using MusicLyricApp.ViewModels;
 using MusicLyricApp.ViewModels.Messages;
@@ -76,18 +77,36 @@ public class ViewModelRegressionTests
         Assert.Equal(1, vm.TotalSongsCount);
     }
 
-    [Fact]
-    public async Task BatchSaveSelectedWritesOnlySelectedSong()
+    // Language changes notify UI subscribers left by other windows; keep Avalonia services active.
+    [AvaloniaTheory]
+    [InlineData("zh-CN")]
+    [InlineData("en-US")]
+    public async Task BatchSaveSelectedWritesOnlySelectedSong(string language)
     {
-        using var ws = new TestWorkspace();
-        var vm = new BatchSearchViewModel(ws.Settings, ws.Search(new(MockBehavior.Strict)), ws.Storage(), ws.Window.Object);
-        vm.AddSearchResults(new() { ["123"] = new(TestWorkspace.Song()), ["456"] = new(TestWorkspace.Song("456")) }, [TestWorkspace.Input(), TestWorkspace.Input("456")]);
-        vm.SelectSongsByIds(["456"]);
-        await vm.ExecuteSaveSelectedCommand.ExecuteAsync(null);
-        Assert.Contains("456", Assert.Single(ws.CreatedFiles));
-        Assert.Equal(1, vm.SaveSuccessCount);
-        Assert.Equal("Saved", vm.Items.Single(x => x.SongId == "456").Status);
-        Assert.Equal("Ready", vm.Items.Single(x => x.SongId == "123").Status);
+        var originalLanguage = LocalizationService.Instance.Language;
+        var originalCulture = System.Globalization.CultureInfo.CurrentUICulture;
+        try
+        {
+            LocalizationService.Instance.SetLanguage(language);
+            using var ws = new TestWorkspace();
+            var vm = new BatchSearchViewModel(ws.Settings, ws.Search(new(MockBehavior.Strict)), ws.Storage(), ws.Window.Object);
+            vm.AddSearchResults(new() { ["123"] = new(TestWorkspace.Song()), ["456"] = new(TestWorkspace.Song("456")) }, [TestWorkspace.Input(), TestWorkspace.Input("456")]);
+            vm.SelectSongsByIds(["456"]);
+            await vm.ExecuteSaveSelectedCommand.ExecuteAsync(null);
+            Assert.Contains("456", Assert.Single(ws.CreatedFiles));
+            Assert.Equal(1, vm.SaveSuccessCount);
+            var saved = vm.Items.Single(x => x.SongId == "456");
+            Assert.Equal(LocalizationService.Get("Status.Batch.Saved"), saved.Status);
+            Assert.Equal(100, saved.Progress);
+            Assert.Empty(saved.Error);
+            Assert.Equal("Ready", vm.Items.Single(x => x.SongId == "123").Status);
+            Assert.Equal(0, vm.SaveFailedCount);
+        }
+        finally
+        {
+            LocalizationService.Instance.SetLanguage(originalLanguage);
+            System.Globalization.CultureInfo.CurrentUICulture = originalCulture;
+        }
     }
 
     [Fact]

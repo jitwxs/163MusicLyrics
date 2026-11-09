@@ -262,14 +262,19 @@
                         <Border Padding="12" BorderThickness="1" CornerRadius="8" Classes="settings-card">
                             <StackPanel Spacing="8">
                                 <TextBlock Text="{loc:Loc Key=UI.Extra17}" FontWeight="SemiBold" />
-                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
-                                    <TextBox Grid.Column="0"
+                                <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+                                    <TextBox Name="SaveFolderPathTextBox" Grid.Column="0"
                                              Text="{Binding SettingParamViewModel.SaveFolderPath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                                     <Button Grid.Column="1"
-                                            Content="{loc:Loc Key=UI.Extra18}"
-                                            Width="80"
+                                            Content="{loc:Loc Key=UI.Extra21}"
+                                            Width="90"
                                             Classes="subtle"
                                             Command="{Binding SelectSaveFolderCommand}" />
+                                    <Button Name="OpenSaveFolderButton" Grid.Column="2"
+                                            Content="{loc:Loc Key=UI.Extra22}"
+                                            Width="90"
+                                            Classes="subtle"
+                                            Command="{Binding OpenSaveFolderCommand}" />
                                 </Grid>
                             </StackPanel>
                         </Border>
@@ -322,6 +327,9 @@
                                               Margin="0,0,12,8" />
                                     <CheckBox Content="{loc:Loc Key=UI.Extra26}"
                                               IsChecked="{Binding SettingParamViewModel.AutoCheckUpdate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                              Margin="0,0,12,8" />
+                                    <CheckBox Content="{loc:Loc Key=UI.EnableFileLogging}"
+                                              IsChecked="{Binding SettingParamViewModel.EnableFileLogging, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                               Margin="0,0,12,8" />
                                     <CheckBox Content="{loc:Loc Key=UI.Extra27}"
                                               IsChecked="{Binding SettingParamViewModel.ConfirmBeforeExit, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"

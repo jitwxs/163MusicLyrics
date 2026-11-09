@@ -79,9 +79,14 @@
                     </Grid>
                 </Border>
 
-                <Border Grid.Row="1" Padding="8" BorderBrush="#D0D7DE" BorderThickness="1" CornerRadius="6">
+                <Border Name="SongPlaybackPanel" Grid.Row="1" Padding="8" BorderBrush="#D0D7DE" BorderThickness="1" CornerRadius="6">
                     <Border.ContextMenu>
                         <ContextMenu>
+                            <MenuItem Header="{loc:Loc Key=UI.CopySongLink}"
+                                      Command="{Binding ExecuteCopySongLinkCommand}"
+                                      IsEnabled="{Binding HasSongLink}" />
+                            <MenuItem Header="{loc:Loc Key=UI.CopyCoverLink}" Command="{Binding ExecuteCopySongPicCommand}" />
+                            <Separator />
                             <MenuItem Header="{loc:Loc Key=UI.DownloadLink}" Command="{Binding ExecuteSongLinkCommand}" />
                             <MenuItem Header="{loc:Loc Key=UI.DownloadCover}" Command="{Binding ExecuteSongPicCommand}" />
                             <Separator />
@@ -128,17 +133,10 @@
                                 </TextBlock>
                             </WrapPanel>
 
-                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
-                                <TextBlock Foreground="#667085" TextTrimming="CharacterEllipsis" VerticalAlignment="Center">
-                                    <Run Text="{loc:Loc Key=UI.DirectLink}" />
-                                    <Run Text="{Binding SearchResultViewModel.SongLink, Mode=OneWay}" />
-                                </TextBlock>
-                                <Button Grid.Column="1"
-                                        Content="{loc:Loc Key=UI.Copy}"
-                                        Padding="8,2"
-                                        IsEnabled="{Binding HasSongLink}"
-                                        Command="{Binding ExecuteCopySongLinkCommand}" />
-                            </Grid>
+                            <TextBlock Foreground="#667085" TextTrimming="CharacterEllipsis" VerticalAlignment="Center">
+                                <Run Text="{loc:Loc Key=UI.DirectLink}" />
+                                <Run Text="{Binding SearchResultViewModel.SongLink, Mode=OneWay}" />
+                            </TextBlock>
                         </StackPanel>
 
                         <Border Grid.Column="1"

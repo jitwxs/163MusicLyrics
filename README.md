@@ -51,7 +51,9 @@ the project, if you are willing to contribute, you can:
 
 ### Stargazers over time
 
-[![Stargazers over time](https://starchart.cc/jitwxs/163MusicLyrics.svg)](https://starchart.cc/jitwxs/163MusicLyrics)
+<a href="https://trendshift.io/repositories/12366?utm_source=repository-badge&amp;utm_medium=badge&amp;utm_campaign=badge-repository-12366" target="_blank" rel="noopener noreferrer"><img src="https://trendshift.io/api/badge/repositories/12366" alt="jitwxs%2F163MusicLyrics | Trendshift" width="250" height="55"/></a>
+
+[![Star History Chart](https://api.star-history.com/chart?repos=jitwxs/163musiclyrics&type=date&legend=bottom-right)](https://www.star-history.com/?repos=jitwxs%2F163musiclyrics&type=date&legend=bottom-right)
 
 ### Reference
 

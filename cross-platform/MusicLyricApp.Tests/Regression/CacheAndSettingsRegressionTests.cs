@@ -34,6 +34,7 @@ public class CacheAndSettingsRegressionTests
         using var ws = new TestWorkspace();
         var config = ws.Storage().ReadAppConfig();
         Assert.Equal(ThemeModeEnum.FOLLOW_SYSTEM, config.Config.ThemeMode);
+        Assert.True(config.Config.EnableFileLogging);
         Assert.Equal(128, config.Config.SearchCacheMaxSizeMb);
         Assert.False(string.IsNullOrWhiteSpace(config.Config.SearchCacheFolderPath));
         Assert.False(File.Exists(ws.ConfigPath));
@@ -48,6 +49,7 @@ public class CacheAndSettingsRegressionTests
         Assert.Equal(" & ", settings.Config.SingerSeparator);
         Assert.Equal(SearchSourceEnum.QQ_MUSIC, settings.Param.SearchSource);
         Assert.True(settings.Config.ConfirmBeforeExit);
+        Assert.True(settings.Config.EnableFileLogging);
         Assert.Equal(128, settings.Config.SearchCacheMaxSizeMb);
     }
 
@@ -184,6 +186,9 @@ public class CacheAndSettingsRegressionTests
     [InlineData("MusicLyricApp v7.3", "v7.3", false)]
     [InlineData("MusicLyricApp v7.3", "v7.2", false)]
     [InlineData("MusicLyricApp v7.9", "v8.0", true)]
+    [InlineData("MusicLyricApp v7.4", "v7.5.0", true)]
+    [InlineData("MusicLyricApp v7.5", "v7.5.0", false)]
+    [InlineData("MusicLyricApp v7.5", "v7.4", false)]
     public void UpdateComparison(string current, string latest, bool expected) =>
         Assert.Equal(expected, new UpdateCheckService(() => new GitHubInfo { TagName = latest }).CheckLatestVersion(current).HasUpdate);
 

@@ -1,6 +1,9 @@
 #!/bin/bash
 set -e
 
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$script_dir"
+
 echo "🧹 Cleaning previous publish output..."
 rm -rf publish/*
 
@@ -122,8 +125,13 @@ for target in "${targets[@]}"; do
       tar -czf "$output_root/$archive_name" -C "$output_dir" .
     fi
   elif [[ "$target" == osx-* ]]; then
-    archive_name="${app_name}-${version}-${target}-mid.tar.gz"
-    tar -czf "$output_root/$archive_name" -C "$output_dir" .
+    if [[ "$(uname -s)" == "Darwin" ]]; then
+      archive_name="${app_name}-${version}-${target}.tar.gz"
+      bash "$script_dir/package-macos-app.sh" "$version" "$target" "$output_dir" "$output_root"
+    else
+      archive_name="${app_name}-${version}-${target}-mid.tar.gz"
+      tar -czf "$output_root/$archive_name" -C "$output_dir" .
+    fi
   else
     archive_name="${app_name}-${version}-${target}.tar.gz"
     tar -czf "$output_root/$archive_name" -C "$output_dir" .
@@ -136,4 +144,5 @@ for target in "${targets[@]}"; do
 done
 
 echo -e "\n✅ All targets published and compressed."
-echo "💡 To package macOS .app, copy the -mid tar.gz files to a macOS machine and run: ./build-macos-app.sh $version"
+echo "💡 If built outside macOS, copy the -mid tar.gz files into this project's cross-platform/publish on a Mac and run: bash build-macos-app.sh $version"
+echo "💡 Only upload the final macOS tar.gz archives containing .app bundles, not the -mid archives."
