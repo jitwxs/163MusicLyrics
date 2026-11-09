@@ -154,7 +154,7 @@ public class MainFlowRegressionTests
             window.Close();
             Dispatcher.UIThread.RunJobs();
             Assert.True(window.IsVisible);
-            // ConfirmAsync renders its surface on the window's overlay layer.
+            // Arc dialogs render their surface on the window's overlay layer.
             var layer = Assert.IsAssignableFrom<Avalonia.Controls.Primitives.OverlayLayer>(
                 Avalonia.Controls.Primitives.OverlayLayer.GetOverlayLayer(window));
             var texts = layer.GetVisualDescendants().OfType<TextBlock>().Select(t => t.Text).ToList();

@@ -57,15 +57,21 @@ public static class DialogHelper
     public static async Task<bool> ConfirmAsync(string title, string message, string confirmText, bool isDanger = false)
     {
         return await Dispatcher.UIThread.InvokeAsync(async () =>
-        {
-            if (Owner is not { } owner)
-            {
-                return false;
-            }
+            Owner is { } owner && await ConfirmOnAsync(owner, title, message, confirmText, isDanger));
+    }
 
-            return await Dialog.ConfirmAsync(owner, title, message, confirmText,
-                LocalizationService.Get("Dialog.Action.Cancel"), isDanger);
-        });
+    /// <summary>
+    /// Yes/no question anchored to <paramref name="owner"/>. The message sits in the dialog body, so the dialog
+    /// stays compact; <see cref="Dialog.ConfirmAsync"/> leaves an empty body under its description.
+    /// Escape, the scrim and the close button all count as cancel.
+    /// </summary>
+    public static async Task<bool> ConfirmOnAsync(Visual owner, string title, string message, string confirmText,
+        bool isDanger = false)
+    {
+        var result = await Dialog.ShowAsync(owner, title, BuildBody(message), null,
+            new DialogAction(LocalizationService.Get("Dialog.Action.Cancel"), false, ButtonVariant.Secondary),
+            new DialogAction(confirmText, true, isDanger ? ButtonVariant.Danger : ButtonVariant.Primary));
+        return result is true;
     }
 
     /// <summary>Shows release notes; returns true when the user chooses to open the download page.</summary>

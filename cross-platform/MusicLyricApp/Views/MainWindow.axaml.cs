@@ -84,11 +84,10 @@ public partial class MainWindow : ArcWindow, IWindowProvider
 
         e.Cancel = true;
 
-        var confirmed = await Dialog.ConfirmAsync(this,
+        var confirmed = await DialogHelper.ConfirmOnAsync(this,
             LocalizationService.Get("Dialog.Exit.Title"),
             LocalizationService.Get("Dialog.Exit.Confirm"),
-            LocalizationService.Get("Dialog.Exit.Action"),
-            LocalizationService.Get("Dialog.Action.Cancel"));
+            LocalizationService.Get("Dialog.Exit.Action"));
 
         if (!confirmed)
         {
