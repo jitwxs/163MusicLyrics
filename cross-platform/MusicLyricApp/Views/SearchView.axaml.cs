@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
@@ -9,8 +9,11 @@ using Avalonia.Input;
 using Avalonia.Input.Platform;
 using Avalonia.Markup.Xaml;
 using Avalonia.Media.Imaging;
+using MusicLyricApp.Core;
+using MusicLyricApp.Core.Localization;
 using MusicLyricApp.Core.Service;
 using MusicLyricApp.ViewModels;
+using TKCode.Arc;
 
 namespace MusicLyricApp.Views;
 
@@ -25,6 +28,41 @@ public partial class SearchView : UserControl
         this.FindControl<TextBox>("SearchTextBox")!.PointerEntered += SearchTextBox_PointerEntered;
         this.FindControl<BlurSearchView>("BlurResultsView")!.BackRequested += (_, _) =>
             _viewModel?.ExecuteCloseBlurResultsCommand.Execute(null);
+
+        ApplyShortcutTexts();
+        LocalizationService.Instance.PropertyChanged += (_, _) => ApplyShortcutTexts();
+    }
+
+    /// <summary>Search page shortcuts only apply while focus is inside the page.</summary>
+    private void BindShortcuts(MainWindowViewModel vm)
+    {
+        KeyBindings.Clear();
+        void Bind(string id, System.Windows.Input.ICommand command)
+        {
+            foreach (var gesture in AppShortcuts.Get(id).AllGestures)
+            {
+                KeyBindings.Add(new KeyBinding { Gesture = gesture, Command = command });
+            }
+        }
+
+        Bind(AppShortcuts.ExactSearch, vm.ExecuteExactSearchWithModeCommand);
+        Bind(AppShortcuts.FuzzySearch, vm.ExecuteBlurSearchWithModeCommand);
+        Bind(AppShortcuts.Save, vm.ExecuteSaveCommand);
+    }
+
+    /// <summary>Hints that name keys use the same platform-aware text as the shortcuts dialog.</summary>
+    private void ApplyShortcutTexts()
+    {
+        var exact = AppShortcuts.Get(AppShortcuts.ExactSearch);
+        var fuzzy = AppShortcuts.Get(AppShortcuts.FuzzySearch);
+        var save = AppShortcuts.Get(AppShortcuts.Save);
+        string Tip(string label, AppShortcut s) => LocalizationService.Format("Shortcuts.TooltipFormat", label, s.KeysText);
+
+        this.FindControl<EmptyState>("SongEmptyState")!.Description =
+            LocalizationService.Format("Search.EmptyDescription", exact.KeysText, fuzzy.KeysText);
+        ToolTip.SetTip(this.FindControl<Control>("SearchButton")!, Tip(exact.Label, exact));
+        ToolTip.SetTip(this.FindControl<Control>("FuzzySwitch")!, Tip(fuzzy.Label, fuzzy));
+        ToolTip.SetTip(this.FindControl<Control>("SaveButton")!, Tip(save.Label, save));
     }
 
     protected override void OnDataContextChanged(EventArgs e)
@@ -41,6 +79,7 @@ public partial class SearchView : UserControl
         if (_viewModel != null)
         {
             _viewModel.SearchResultViewModel.PropertyChanged += SearchResultOnPropertyChanged;
+            BindShortcuts(_viewModel);
         }
     }
 

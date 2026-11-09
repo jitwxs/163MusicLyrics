@@ -39,7 +39,7 @@
         <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{arc:ArcDesignTokenResource Space4}">
             <StackPanel Spacing="{arc:ArcDesignTokenResource Space1}">
                 <TextBlock Text="{loc:Loc Key=Nav.Batch}"
-                           FontSize="{arc:ArcDesignTokenResource TypeXL}"
+                           FontSize="{arc:ArcDesignTokenResource TypeLG}"
                            FontWeight="SemiBold"
                            Foreground="{arc:ArcDesignTokenResource Foreground}" />
                 <TextBlock Classes="secondary" Text="{loc:Loc Key=Batch.Description}" TextWrapping="Wrap" />

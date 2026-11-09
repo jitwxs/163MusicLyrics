@@ -18,35 +18,6 @@
         <vm:MainWindowViewModel />
     </Design.DataContext>
 
-    <arc:ArcWindow.TitleBar>
-        <arc:TitleBar>
-            <arc:TitleBar.RightContent>
-                <arc:DropdownMenu Name="HelpMenu" Label="{loc:Loc Key=UI.Help}">
-                    <arc:DropdownMenu.Trigger>
-                        <arc:Button Variant="Ghost" Size="Small" IsPressScaleEnabled="False"
-                                    ToolTip.Tip="{loc:Loc Key=UI.Help}"
-                                    AutomationProperties.Name="{loc:Loc Key=UI.Help}">
-                            <arc:ArcGlyph Data="{x:Static arc:ArcIcons.CircleHelp}" />
-                        </arc:Button>
-                    </arc:DropdownMenu.Trigger>
-                    <arc:MenuEntry Header="{loc:Loc Key=UI.ProjectHome}"
-                                   Icon="{x:Static arc:ArcIcons.House}"
-                                   Command="{Binding ExecuteHomeCommand}" />
-                    <arc:MenuEntry Header="{loc:Loc Key=UI.UserGuide}"
-                                   Icon="{x:Static arc:ArcIcons.BookOpen}"
-                                   Command="{Binding ExecuteWikiCommand}" />
-                    <arc:MenuEntry Header="{loc:Loc Key=UI.Feedback}"
-                                   Icon="{x:Static arc:ArcIcons.MessageSquare}"
-                                   Command="{Binding ExecuteIssueCommand}" />
-                    <arc:MenuEntry Header="{loc:Loc Key=UI.Shortcuts}"
-                                   Icon="{x:Static arc:ArcIcons.Keyboard}"
-                                   HasSeparatorBefore="True"
-                                   Command="{Binding ExecuteShortCutCommand}" />
-                </arc:DropdownMenu>
-            </arc:TitleBar.RightContent>
-        </arc:TitleBar>
-    </arc:ArcWindow.TitleBar>
-
     <DockPanel>
         <arc:Sidebar Name="NavSidebar"
                      DockPanel.Dock="Left"
@@ -67,10 +38,34 @@
                                  Label="{loc:Loc Key=Nav.Convert}"
                                  Icon="{x:Static arc:ArcIcons.ArrowDownUp}" />
             </arc:SidebarSection>
+            <!-- Settings sections live here rather than in a second navigation inside the page. -->
             <arc:SidebarSection>
                 <arc:SidebarItem Key="settings"
                                  Label="{loc:Loc Key=Nav.Settings}"
-                                 Icon="{x:Static arc:ArcIcons.Settings}" />
+                                 Icon="{x:Static arc:ArcIcons.Settings}"
+                                 IsExpanded="True">
+                    <arc:SidebarItem Key="settings/lyrics" Label="{loc:Loc Key=UI.LyricCustomization}" />
+                    <arc:SidebarItem Key="settings/extensions" Label="{loc:Loc Key=UI.Extensions}" />
+                    <arc:SidebarItem Key="settings/network" Label="{loc:Loc Key=UI.Network}" />
+                    <arc:SidebarItem Key="settings/download" Label="{loc:Loc Key=UI.DownloadCache}" />
+                    <arc:SidebarItem Key="settings/application" Label="{loc:Loc Key=UI.Application}" />
+                </arc:SidebarItem>
+            </arc:SidebarSection>
+
+            <!-- Help: actions that open links or show shortcuts, without changing the page. -->
+            <arc:SidebarSection Header="{loc:Loc Key=UI.Help}">
+                <arc:SidebarItem Key="help/home" IsAction="True"
+                                 Label="{loc:Loc Key=UI.ProjectHome}"
+                                 Icon="{x:Static arc:ArcIcons.House}" />
+                <arc:SidebarItem Key="help/wiki" IsAction="True"
+                                 Label="{loc:Loc Key=UI.UserGuide}"
+                                 Icon="{x:Static arc:ArcIcons.BookOpen}" />
+                <arc:SidebarItem Key="help/issue" IsAction="True"
+                                 Label="{loc:Loc Key=UI.Feedback}"
+                                 Icon="{x:Static arc:ArcIcons.MessageSquare}" />
+                <arc:SidebarItem Key="help/shortcuts" IsAction="True"
+                                 Label="{loc:Loc Key=UI.Shortcuts}"
+                                 Icon="{x:Static arc:ArcIcons.Keyboard}" />
             </arc:SidebarSection>
         </arc:Sidebar>
 

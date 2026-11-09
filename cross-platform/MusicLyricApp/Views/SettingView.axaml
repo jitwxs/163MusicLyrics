@@ -14,36 +14,52 @@
     <UserControl.Styles>
         <!-- Field controls inside rows carry their label in the row header, so hide their own. -->
         <!-- Keep label and control on one line down to a narrow content column (sidebar plus section nav). -->
+        <Style Selector="TextBlock.section-title">
+            <Setter Property="FontSize" Value="{arc:ArcDesignTokenResource TypeLG}" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="{arc:ArcDesignTokenResource Foreground}" />
+        </Style>
         <Style Selector="arc|SettingsRow">
             <Setter Property="StackWidth" Value="360" />
         </Style>
+        <!-- Rows holding a path always stack, so long paths never squeeze their label. -->
+        <Style Selector="arc|SettingsRow.path">
+            <Setter Property="StackWidth" Value="100000" />
+        </Style>
+        <!-- A fixed control width keeps rows aligned and stops long values (cookies) from widening the row. -->
         <Style Selector="arc|SettingsRow arc|Input, arc|SettingsRow arc|PasswordField, arc|SettingsRow arc|NumberField">
             <Setter Property="IsLabelVisible" Value="False" />
             <Setter Property="Size" Value="Small" />
-            <Setter Property="MinWidth" Value="200" />
+            <Setter Property="Width" Value="280" />
         </Style>
         <Style Selector="arc|SettingsRow arc|Select">
             <Setter Property="Size" Value="Small" />
-            <Setter Property="MinWidth" Value="200" />
+            <Setter Property="Width" Value="280" />
         </Style>
     </UserControl.Styles>
 
     <Grid RowDefinitions="Auto,*" Margin="24,16,24,0" RowSpacing="{arc:ArcDesignTokenResource Space3}">
 
         <!-- Help text and test results from the settings commands. -->
+        <!-- Help and command results; closable, and long help scrolls instead of pushing the section down. -->
         <arc:Alert Name="SettingTipsAlert"
                    Tone="Info"
                    Title="{loc:Loc Key=Dialog.Notice.Title}"
-                   IsVisible="{Binding HasSettingTips}">
-            <SelectableTextBlock Text="{Binding SettingTips}" TextWrapping="Wrap" />
+                   IsDismissible="True"
+                   IsOpen="{Binding IsTipsOpen, Mode=TwoWay}">
+            <ScrollViewer MaxHeight="220" HorizontalScrollBarVisibility="Disabled">
+                <SelectableTextBlock Text="{Binding SettingTips}" TextWrapping="Wrap" />
+            </ScrollViewer>
         </arc:Alert>
 
-        <arc:SettingsPage Grid.Row="1" Name="SettingsPage" Title="{loc:Loc Key=Nav.Settings}">
+        <!-- One section at a time; the main sidebar lists the sections under "settings". -->
+        <ScrollViewer Grid.Row="1" Name="SectionScroller" HorizontalScrollBarVisibility="Disabled">
+            <!-- Every section fills the same width, whatever its content. -->
+            <Panel Name="SectionHost" Margin="0,0,0,24">
 
             <!-- 1. Lyrics -->
-            <arc:SettingsSection Name="LyricsSection"
-                                 Header="{loc:Loc Key=UI.LyricCustomization}"
-                                 Icon="{x:Static arc:ArcIcons.Music}">
+            <StackPanel Name="LyricsSection" IsVisible="{Binding IsLyricsSection}" Spacing="{arc:ArcDesignTokenResource Space5}">
+                <TextBlock Classes="section-title" Text="{loc:Loc Key=UI.LyricCustomization}" />
                 <StackPanel Spacing="{arc:ArcDesignTokenResource Space6}">
                     <arc:SettingsGroup Header="{loc:Loc Key=Settings.Group.General}">
                         <arc:SettingsRow Header="{loc:Loc Key=UI.ChineseProcessing}">
@@ -115,12 +131,11 @@
                         </arc:ReorderableList>
                     </arc:SettingsGroup>
                 </StackPanel>
-            </arc:SettingsSection>
+            </StackPanel>
 
             <!-- 2. Extensions: translation services and sign-in cookies -->
-            <arc:SettingsSection Name="ExtensionsSection"
-                                 Header="{loc:Loc Key=UI.Extensions}"
-                                 Icon="{x:Static arc:ArcIcons.Key}">
+            <StackPanel Name="ExtensionsSection" IsVisible="{Binding IsExtensionsSection}" Spacing="{arc:ArcDesignTokenResource Space5}">
+                <TextBlock Classes="section-title" Text="{loc:Loc Key=UI.Extensions}" />
                 <StackPanel Spacing="{arc:ArcDesignTokenResource Space6}">
                     <arc:SettingsGroup Header="{loc:Loc Key=Settings.Group.Translate}"
                                        Description="{loc:Loc Key=Settings.Group.TranslateHint}">
@@ -150,12 +165,11 @@
                         </arc:SettingsRow>
                     </arc:SettingsGroup>
                 </StackPanel>
-            </arc:SettingsSection>
+            </StackPanel>
 
             <!-- 3. Network proxy -->
-            <arc:SettingsSection Name="NetworkSection"
-                                 Header="{loc:Loc Key=UI.Network}"
-                                 Icon="{x:Static arc:ArcIcons.Globe}">
+            <StackPanel Name="NetworkSection" IsVisible="{Binding IsNetworkSection}" Spacing="{arc:ArcDesignTokenResource Space5}">
+                <TextBlock Classes="section-title" Text="{loc:Loc Key=UI.Network}" />
                 <arc:SettingsGroup Header="{loc:Loc Key=UI.ProxySettings}"
                                    Description="{loc:Loc Key=UI.ProxyHelp}">
                     <arc:SettingsRow Header="{loc:Loc Key=UI.Type}">
@@ -203,12 +217,11 @@
                         </StackPanel>
                     </arc:SettingsGroup.Footer>
                 </arc:SettingsGroup>
-            </arc:SettingsSection>
+            </StackPanel>
 
             <!-- 4. Download and cache -->
-            <arc:SettingsSection Name="DownloadSection"
-                                 Header="{loc:Loc Key=UI.DownloadCache}"
-                                 Icon="{x:Static arc:ArcIcons.Download}">
+            <StackPanel Name="DownloadSection" IsVisible="{Binding IsDownloadSection}" Spacing="{arc:ArcDesignTokenResource Space5}">
+                <TextBlock Classes="section-title" Text="{loc:Loc Key=UI.DownloadCache}" />
                 <StackPanel Spacing="{arc:ArcDesignTokenResource Space6}">
                     <arc:SettingsGroup Header="{loc:Loc Key=UI.DownloadBehavior}"
                                        Description="{loc:Loc Key=UI.DownloadHelp}">
@@ -258,9 +271,10 @@
                     </arc:SettingsGroup>
 
                     <arc:SettingsGroup Header="{loc:Loc Key=UI.Extra17}">
-                        <arc:SettingsRow Header="{loc:Loc Key=UI.Extra17}" ContentAlignment="Stretch">
+                        <arc:SettingsRow Header="{loc:Loc Key=UI.Extra17}" Classes="path" ContentAlignment="Stretch">
                             <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="{arc:ArcDesignTokenResource Space2}">
                                 <arc:Input Name="SaveFolderPathTextBox"
+                                           Width="NaN"
                                            Label="{loc:Loc Key=UI.Extra17}"
                                            Text="{Binding SettingParamViewModel.SaveFolderPath, Mode=TwoWay}" />
                                 <arc:Button Grid.Column="1" Variant="Secondary" Size="Small"
@@ -274,9 +288,10 @@
                     </arc:SettingsGroup>
 
                     <arc:SettingsGroup Header="{loc:Loc Key=UI.Extra19}">
-                        <arc:SettingsRow Header="{loc:Loc Key=UI.Extra20}" ContentAlignment="Stretch">
+                        <arc:SettingsRow Header="{loc:Loc Key=UI.Extra20}" Classes="path" ContentAlignment="Stretch">
                             <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="{arc:ArcDesignTokenResource Space2}">
-                                <arc:Input Label="{loc:Loc Key=UI.Extra20}"
+                                <arc:Input Width="NaN"
+                                           Label="{loc:Loc Key=UI.Extra20}"
                                            Text="{Binding SettingParamViewModel.SearchCacheFolderPath, Mode=TwoWay}" />
                                 <arc:Button Grid.Column="1" Variant="Secondary" Size="Small"
                                             Content="{loc:Loc Key=Settings.SelectFolder}"
@@ -294,12 +309,11 @@
                         </arc:SettingsRow>
                     </arc:SettingsGroup>
                 </StackPanel>
-            </arc:SettingsSection>
+            </StackPanel>
 
             <!-- 5. Application -->
-            <arc:SettingsSection Name="ApplicationSection"
-                                 Header="{loc:Loc Key=UI.Application}"
-                                 Icon="{x:Static arc:ArcIcons.Settings}">
+            <StackPanel Name="ApplicationSection" IsVisible="{Binding IsApplicationSection}" Spacing="{arc:ArcDesignTokenResource Space5}">
+                <TextBlock Classes="section-title" Text="{loc:Loc Key=UI.Application}" />
                 <StackPanel Spacing="{arc:ArcDesignTokenResource Space6}">
                     <arc:SettingsGroup Header="{loc:Loc Key=Settings.Group.Appearance}">
                         <arc:SettingsRow Header="{loc:Loc Key=UI.Extra28}">
@@ -343,16 +357,11 @@
                         </arc:SettingsRow>
                     </arc:SettingsGroup>
 
-                    <arc:SettingsGroup Header="{loc:Loc Key=UI.Extra30}">
-                        <arc:SettingsRow Header="{loc:Loc Key=UI.Extra31}" />
-                        <arc:SettingsRow Header="{loc:Loc Key=UI.Extra32}" />
-                        <arc:SettingsRow Header="{loc:Loc Key=UI.Extra33}" />
-                    </arc:SettingsGroup>
 
                     <arc:SettingsGroup Header="{loc:Loc Key=UI.Extra34}">
-                        <arc:SettingsRow Header="{loc:Loc Key=UI.Extra34}" ContentAlignment="Stretch">
+                        <arc:SettingsRow Header="{loc:Loc Key=UI.Extra34}" Classes="path" ContentAlignment="Stretch">
                             <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{arc:ArcDesignTokenResource Space2}">
-                                <arc:Input Label="{loc:Loc Key=UI.Extra34}" Text="{Binding ConfigPath}" IsReadOnly="True" />
+                                <arc:Input Width="NaN" Label="{loc:Loc Key=UI.Extra34}" Text="{Binding ConfigPath}" IsReadOnly="True" />
                                 <arc:Button Grid.Column="1" Variant="Ghost" Size="Small"
                                             Content="{loc:Loc Key=Settings.OpenConfig}"
                                             Command="{Binding OpenConfigPathCommand}" />
@@ -360,7 +369,8 @@
                         </arc:SettingsRow>
                     </arc:SettingsGroup>
                 </StackPanel>
-            </arc:SettingsSection>
-        </arc:SettingsPage>
+            </StackPanel>
+            </Panel>
+        </ScrollViewer>
     </Grid>
 </UserControl>

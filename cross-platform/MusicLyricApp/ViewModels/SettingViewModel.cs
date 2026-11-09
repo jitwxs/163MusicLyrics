@@ -20,9 +20,44 @@ namespace MusicLyricApp.ViewModels;
 
 public partial class SettingViewModel : ViewModelBase
 {
+    // ---- Sections, listed under "settings" in the main sidebar ----
+    public const string SectionLyrics = "lyrics";
+    public const string SectionExtensions = "extensions";
+    public const string SectionNetwork = "network";
+    public const string SectionDownload = "download";
+    public const string SectionApplication = "application";
+
+    public static readonly IReadOnlyList<string> Sections =
+        [SectionLyrics, SectionExtensions, SectionNetwork, SectionDownload, SectionApplication];
+
+    /// <summary>The section the settings page shows; the main sidebar picks it.</summary>
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(HasSettingTips))]
+    [NotifyPropertyChangedFor(nameof(IsLyricsSection), nameof(IsExtensionsSection), nameof(IsNetworkSection),
+        nameof(IsDownloadSection), nameof(IsApplicationSection))]
+    private string _currentSection = SectionLyrics;
+
+    public bool IsLyricsSection => CurrentSection == SectionLyrics;
+    public bool IsExtensionsSection => CurrentSection == SectionExtensions;
+    public bool IsNetworkSection => CurrentSection == SectionNetwork;
+    public bool IsDownloadSection => CurrentSection == SectionDownload;
+    public bool IsApplicationSection => CurrentSection == SectionApplication;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasSettingTips), nameof(IsTipsOpen))]
     private string _settingTips = LocalizationService.Get("Status.Settings.DefaultHelp");
+
+    /// <summary>Two-way open state of the tips alert; closing it clears the tip until the next one.</summary>
+    public bool IsTipsOpen
+    {
+        get => HasSettingTips;
+        set
+        {
+            if (!value && HasSettingTips)
+            {
+                SettingTips = LocalizationService.Get("Status.Settings.DefaultHelp");
+            }
+        }
+    }
 
     /// <summary>True once a command has put real help or a result in <see cref="SettingTips"/>, not the placeholder.</summary>
     public bool HasSettingTips => !string.IsNullOrWhiteSpace(SettingTips) &&

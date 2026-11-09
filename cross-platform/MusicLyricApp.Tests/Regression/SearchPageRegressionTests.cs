@@ -48,6 +48,65 @@ public class SearchPageRegressionTests
     }
 
     [AvaloniaFact]
+    public void FormatControlsRefreshLoadedLyricsWithoutSearching()
+    {
+        using var scope = new Scope();
+        var vm = scope.Vm;
+        var song = TestWorkspace.Song(lyric: "[00:01.000]hello");
+        song.LyricVo.TranslateLyric = "[00:01.000]你好";
+        vm.SettingBean.Config.OutputLyricTypes = "0,1";
+        vm.SearchResultViewModel.SaveVoMap.Add("123", song);
+        vm.SearchResultViewModel.SongName = song.SongVo.Name;
+        vm.SearchResultViewModel.ConsoleOutput = "previous preview";
+
+        // Drive the actual controls to cover their two-way bindings as well as the renderer.
+        scope.Find<Select>("LrcTypeSelect").SelectedItem =
+            vm.SearchParamViewModel.LrcTypes.Single(x => x.Value == ShowLrcTypeEnum.MERGE);
+        vm.SearchParamViewModel.LrcMergeSeparator = " / ";
+        Dispatcher.UIThread.RunJobs();
+        Assert.Equal("[00:01.000]hello / 你好", scope.Find<CodeBlock>("LyricPreview").Code);
+
+        scope.Find<Select>("OutputFormatSelect").SelectedItem =
+            vm.SearchParamViewModel.OutputFormats.Single(x => x.Value == OutputFormatEnum.SRT);
+        Dispatcher.UIThread.RunJobs();
+        Assert.Contains("00:00:01,000 -->", scope.Find<CodeBlock>("LyricPreview").Code);
+        Assert.Contains("hello / 你好", vm.SearchResultViewModel.ConsoleOutput);
+
+        scope.Find<Select>("OutputFormatSelect").SelectedItem =
+            vm.SearchParamViewModel.OutputFormats.Single(x => x.Value == OutputFormatEnum.LRC);
+        scope.Find<Select>("LrcTypeSelect").SelectedItem =
+            vm.SearchParamViewModel.LrcTypes.Single(x => x.Value == ShowLrcTypeEnum.STAGGER);
+        Dispatcher.UIThread.RunJobs();
+        Assert.Equal(string.Join(Environment.NewLine, "[00:01.000]hello", "[00:01.000]你好"),
+            scope.Find<CodeBlock>("LyricPreview").Code);
+        Assert.Same(song, vm.SearchResultViewModel.SaveVoMap["123"]);
+        Assert.Equal(song.SongVo.Name, vm.SearchResultViewModel.SongName);
+        Assert.Empty(vm.TipErrorMessage);
+    }
+
+    [AvaloniaFact]
+    public void LeavingSettingsRefreshesTimestampAndLyricOrder()
+    {
+        using var scope = new Scope();
+        var vm = scope.Vm;
+        var song = TestWorkspace.Song(lyric: "[00:01.000]hello");
+        song.LyricVo.TranslateLyric = "[00:01.000]你好";
+        vm.SettingBean.Config.OutputLyricTypes = "0,1";
+        vm.SearchResultViewModel.SaveVoMap.Add("123", song);
+        vm.SearchResultViewModel.SongName = song.SongVo.Name;
+        vm.CurrentPageKey = MainWindowViewModel.PageSettings;
+        var settings = vm.SettingViewModel!;
+        settings.SelectedLyricsTypeItem = settings.LyricsTypes[1];
+        settings.MoveUpCommand.Execute(null);
+        vm.SettingBean.Config.LrcTimestampFormat = "[mm:ss]";
+        vm.CurrentPageKey = MainWindowViewModel.PageSearch;
+        Dispatcher.UIThread.RunJobs();
+        Assert.Equal(string.Join(Environment.NewLine, "[00:01]你好", "[00:01]hello"),
+            scope.Find<CodeBlock>("LyricPreview").Code);
+        Assert.Empty(vm.TipErrorMessage);
+    }
+
+    [AvaloniaFact]
     public void EnterInSearchFieldRunsOneExactSearch()
     {
         using var scope = new Scope();
@@ -97,17 +156,28 @@ public class SearchPageRegressionTests
         using var scope = new Scope();
         var songEmpty = scope.Find<EmptyState>("SongEmptyState");
         var previewEmpty = scope.Find<EmptyState>("PreviewEmptyState");
+        var strip = scope.Find<Border>("SongPlaybackPanel");
+        // Before any search: one guide in the preview area, no song strip.
         Assert.True(songEmpty.IsVisible);
-        Assert.True(previewEmpty.IsVisible);
+        Assert.False(previewEmpty.IsVisible);
+        Assert.False(strip.IsVisible);
         Assert.Equal(LocalizationService.Get("Search.EmptyTitle"), songEmpty.Title);
 
+        // A song without lyrics: the strip shows the song, the preview says there are no lyrics.
         scope.Vm.SearchResultViewModel.SongName = "song";
+        Dispatcher.UIThread.RunJobs();
+        Assert.True(strip.IsVisible);
+        Assert.False(songEmpty.IsVisible);
+        Assert.True(previewEmpty.IsVisible);
+
         scope.Vm.SearchResultViewModel.ConsoleOutput = "[00:01.000]hello";
         Dispatcher.UIThread.RunJobs();
         Assert.False(songEmpty.IsVisible);
         Assert.False(previewEmpty.IsVisible);
         Assert.Equal("[00:01.000]hello", scope.Find<CodeBlock>("LyricPreview").Code);
-        Assert.Equal("song", scope.Find<SelectableTextBlock>("SongTitle").Text);
+        Assert.Equal("song", scope.Find<TextBlock>("SongTitle").Text);
+        // A long title stays within two lines so the lyrics keep the room.
+        Assert.Equal(2, scope.Find<TextBlock>("SongTitle").MaxLines);
 
         // Badge.Icon renders a raw Geometry as its type name; every badge icon must be a control.
         var badges = scope.Page.GetVisualDescendants().OfType<Badge>().ToList();
@@ -164,6 +234,49 @@ public class SearchPageRegressionTests
             Assert.Null(scope.Vm.BlurResults);
         }
         finally { WeakReferenceMessenger.Default.UnregisterAll(receiver); }
+    }
+
+    [AvaloniaFact]
+    public void SwitchingLanguageRelabelsSelectsAndTheSourceBadge()
+    {
+        var original = LocalizationService.Instance.Language;
+        var ws = new TestWorkspace();
+        ws.Settings.Config.ConfirmBeforeExit = false;
+        ws.Settings.Config.Language = "en-US";
+        ws.Storage().SaveConfig(ws.Settings);
+        var window = new MainWindow(ws.Storage(), ws.Search(new(MockBehavior.Strict)));
+        var vm = Assert.IsType<MainWindowViewModel>(window.DataContext);
+        try
+        {
+            window.Show();
+            Dispatcher.UIThread.RunJobs();
+            var select = Assert.Single(window.GetVisualDescendants().OfType<Select>(), s => s.Name == "LrcTypeSelect");
+            Assert.Equal(vm.SearchParamViewModel.SelectedLrcTypeItem.DisplayName, select.SelectedText);
+            vm.SearchResultViewModel.SetSongSource(SearchSourceEnum.QQ_MUSIC);
+            var english = vm.SearchResultViewModel.SongSource;
+
+            LocalizationService.Instance.SetLanguage("zh-CN");
+            Dispatcher.UIThread.RunJobs();
+            Assert.Equal(LocalizationService.Get("Enum.ShowLrcTypeEnum." + vm.SearchParamViewModel.SelectedLrcType), select.SelectedText);
+            Assert.Equal(LocalizationService.Get("Status.Search.SourceQQ"), vm.SearchResultViewModel.SongSource);
+            Assert.NotEqual(english, vm.SearchResultViewModel.SongSource);
+
+            // Repeated switches while the page is hidden (as from the settings page) keep following.
+            vm.CurrentPageKey = MainWindowViewModel.PageSettings;
+            foreach (var language in new[] { "en-US", "zh-CN", "en-US", "zh-CN" })
+            {
+                LocalizationService.Instance.SetLanguage(language);
+                Dispatcher.UIThread.RunJobs();
+                Assert.Equal(LocalizationService.Get("Enum.ShowLrcTypeEnum." + vm.SearchParamViewModel.SelectedLrcType), select.SelectedText);
+            }
+        }
+        finally
+        {
+            window.Close();
+            WeakReferenceMessenger.Default.UnregisterAll(vm);
+            LocalizationService.Instance.SetLanguage(original);
+            ws.Dispose();
+        }
     }
 
     [AvaloniaFact]

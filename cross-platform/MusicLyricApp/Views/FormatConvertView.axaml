@@ -24,7 +24,7 @@
 
         <StackPanel Spacing="{arc:ArcDesignTokenResource Space1}">
             <TextBlock Text="{loc:Loc Key=Nav.Convert}"
-                       FontSize="{arc:ArcDesignTokenResource TypeXL}"
+                       FontSize="{arc:ArcDesignTokenResource TypeLG}"
                        FontWeight="SemiBold"
                        Foreground="{arc:ArcDesignTokenResource Foreground}" />
             <TextBlock Text="{loc:Loc Key=Convert.Description}"

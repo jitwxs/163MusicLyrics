@@ -79,7 +79,11 @@ public partial class MainWindowViewModel : ViewModelBase
     public const string PageSearch = "search";
     public const string PageBatch = "batch";
     public const string PageConvert = "convert";
-    public const string PageSettings = "settings";
+    /// <summary>Settings sections are sidebar children keyed "settings/&lt;section&gt;" (see <see cref="SettingViewModel"/>).</summary>
+    public const string SettingsKeyPrefix = "settings/";
+    public const string PageSettings = SettingsKeyPrefix + SettingViewModel.SectionLyrics;
+
+    public static bool IsSettingsKey(string? key) => key?.StartsWith(SettingsKeyPrefix, StringComparison.Ordinal) == true;
 
     /// <summary>Key of the page shown in the main window; bound two-way to the sidebar.</summary>
     [ObservableProperty]
@@ -89,28 +93,48 @@ public partial class MainWindowViewModel : ViewModelBase
     public bool IsSearchPage => CurrentPageKey == PageSearch;
     public bool IsBatchPage => CurrentPageKey == PageBatch;
     public bool IsConvertPage => CurrentPageKey == PageConvert;
-    public bool IsSettingsPage => CurrentPageKey == PageSettings;
+    public bool IsSettingsPage => IsSettingsKey(CurrentPageKey);
 
     public BatchSearchViewModel BatchSearchViewModel => _downloadManagerViewModel;
 
     /// <summary>Created on first visit and kept, so the text being converted survives page switches.</summary>
     [ObservableProperty] private FormatConvertViewModel? _formatConvertViewModel;
 
-    /// <summary>Recreated on every visit (as the old settings window was) and flushed when leaving.</summary>
+    /// <summary>
+    /// Recreated on entering the settings area (as the old settings window was) and flushed when leaving it;
+    /// moving between settings sections keeps the same instance.
+    /// </summary>
     [ObservableProperty] private SettingViewModel? _settingViewModel;
 
     partial void OnCurrentPageKeyChanged(string? oldValue, string newValue)
     {
-        if (oldValue == PageSettings)
+        var wasSettings = IsSettingsKey(oldValue);
+        var isSettings = IsSettingsKey(newValue);
+        if (wasSettings && !isSettings)
         {
             FlushSettingsPage();
         }
 
+        if (isSettings)
+        {
+            var section = newValue[SettingsKeyPrefix.Length..];
+            if (!SettingViewModel.Sections.Contains(section))
+            {
+                CurrentPageKey = PageSettings;
+                return;
+            }
+
+            if (!wasSettings || SettingViewModel == null)
+            {
+                SettingViewModel = new SettingViewModel(SettingBean, _windowProvider);
+            }
+
+            SettingViewModel.CurrentSection = section;
+            return;
+        }
+
         switch (newValue)
         {
-            case PageSettings:
-                SettingViewModel = new SettingViewModel(SettingBean, _windowProvider);
-                break;
             case PageConvert:
                 FormatConvertViewModel ??= new FormatConvertViewModel(SettingBean);
                 break;
@@ -133,6 +157,9 @@ public partial class MainWindowViewModel : ViewModelBase
 
         SettingViewModel.OnClosing();
         UpdateTheme();
+
+        // Timestamp formats, lyric types and their order all shape the preview.
+        _ = RefreshCurrentConsoleOutputAsync();
     }
 
     // Parameterless constructor for design-time use
@@ -244,6 +271,7 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private async Task OpenSongDetailAsync(SongDetailRequest request)
     {
+        ++_previewRevision;
         IsBlurSearch = false;
         var sourceItem = SearchParamViewModel.SearchSources.FirstOrDefault(x => x.Value == request.SearchSource);
         if (sourceItem != null)
@@ -317,9 +345,17 @@ public partial class MainWindowViewModel : ViewModelBase
         _storageService.SaveConfig(SettingBean);
     }
 
+    /// <summary>Options that change how the lyrics are rendered; the preview follows them at once.</summary>
+    private static readonly HashSet<string> PreviewAffectingParams =
+    [
+        nameof(SearchParamViewModel.SelectedOutputFormatItem),
+        nameof(SearchParamViewModel.SelectedLrcTypeItem),
+        nameof(SearchParamViewModel.LrcMergeSeparator)
+    ];
+
     private void SearchParamViewModelOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (e.PropertyName != nameof(SearchParamViewModel.SelectedOutputFormatItem))
+        if (e.PropertyName == null || !PreviewAffectingParams.Contains(e.PropertyName))
         {
             return;
         }
@@ -327,22 +363,39 @@ public partial class MainWindowViewModel : ViewModelBase
         _ = RefreshCurrentConsoleOutputAsync();
     }
 
+    private int _previewRevision;
+
     private async Task RefreshCurrentConsoleOutputAsync()
     {
+        var revision = ++_previewRevision;
         if (SearchResultViewModel.SaveVoMap.Count != 1)
         {
             return;
         }
 
         var saveVo = SearchResultViewModel.SaveVoMap.Values.First();
-        if (saveVo.LyricVo.IsEmpty())
+        bool IsCurrent() => revision == _previewRevision &&
+                            SearchResultViewModel.SaveVoMap.Count == 1 &&
+                            ReferenceEquals(SearchResultViewModel.SaveVoMap.Values.First(), saveVo);
+        try
         {
-            SearchResultViewModel.ConsoleOutput = string.Empty;
-            return;
+            var output = saveVo.LyricVo.IsEmpty()
+                ? string.Empty
+                : GlobalUtils.MergeStr(await LyricUtils.GetOutputContent(saveVo.LyricVo, SettingBean));
+            // Translation can finish after another option or song has been selected.
+            if (IsCurrent())
+            {
+                SearchResultViewModel.ConsoleOutput = output;
+            }
         }
-
-        var content = await LyricUtils.GetOutputContent(saveVo.LyricVo, SettingBean);
-        SearchResultViewModel.ConsoleOutput = GlobalUtils.MergeStr(content);
+        catch (Exception ex)
+        {
+            // Event-triggered refreshes have no awaiting caller to report failures.
+            if (IsCurrent())
+            {
+                SetTip(ex.Message, true);
+            }
+        }
     }
 
     [RelayCommand]
@@ -353,6 +406,8 @@ public partial class MainWindowViewModel : ViewModelBase
             await ExecuteBlurSearchAsync();
             return;
         }
+
+        ++_previewRevision;
 
         // An exact search shows its own preview, so any open fuzzy results give way to it.
         BlurResults = null;
@@ -808,15 +863,21 @@ public partial class MainWindowViewModel : ViewModelBase
         });
     }
 
+    /// <summary>Opens a page by sidebar key; settings keep the section already open, if any.</summary>
     [RelayCommand]
-    private async Task ExecuteShortCutAsync()
+    private void ExecuteGoToPage(string? key)
     {
-        var sb = new StringBuilder();
-        sb.Append(LocalizationService.Get("Shortcut.ExactSearch")).Append(Environment.NewLine)
-            .Append(LocalizationService.Get("Shortcut.FuzzySearch")).Append(Environment.NewLine)
-            .Append(LocalizationService.Get("Shortcut.Save")).Append(Environment.NewLine);
-        
-        await DialogHelper.ShowMessage(sb.ToString());
+        if (key == null)
+        {
+            return;
+        }
+
+        if (IsSettingsKey(key) && IsSettingsPage)
+        {
+            return;
+        }
+
+        CurrentPageKey = key;
     }
 
     [RelayCommand]

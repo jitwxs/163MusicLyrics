@@ -27,12 +27,7 @@
         </Style>
     </UserControl.Styles>
 
-    <!-- Shortcuts only apply while focus is inside the search page. -->
-    <UserControl.KeyBindings>
-        <KeyBinding Gesture="Enter" Command="{Binding ExecuteExactSearchWithModeCommand}" />
-        <KeyBinding Gesture="Ctrl+Enter" Command="{Binding ExecuteBlurSearchWithModeCommand}" />
-        <KeyBinding Gesture="Ctrl+S" Command="{Binding ExecuteSaveCommand}" />
-    </UserControl.KeyBindings>
+    <!-- Key bindings come from Core/AppShortcuts and are added in code-behind. -->
 
     <Grid Margin="24,16,24,24" RowDefinitions="Auto,*,Auto" RowSpacing="{arc:ArcDesignTokenResource Space4}">
 
@@ -78,232 +73,226 @@
             </Grid>
         </StackPanel>
 
-        <arc:ResizablePanels Grid.Row="1" Gap="{arc:ArcDesignTokenResource Space4}" Label="{loc:Loc Key=Nav.Search}">
+        <!-- The lyrics are the page: a compact song strip on top, the preview filling the rest. -->
+        <Grid Grid.Row="1" RowDefinitions="Auto,*" RowSpacing="{arc:ArcDesignTokenResource Space3}">
 
-            <!-- Song: cover, metadata, direct link, playback and per-song actions. -->
-            <arc:ResizablePanel Id="song" Label="{loc:Loc Key=UI.BlurGrid.Song}" DefaultSize="2" MinSize="300">
-                <Border Name="SongPlaybackPanel" Classes="pane">
-                    <arc:ContextMenu.Menu>
-                        <arc:MenuSurface>
-                            <arc:MenuEntry Header="{loc:Loc Key=UI.CopySongLink}"
-                                           Icon="{x:Static arc:ArcIcons.Link}"
-                                           Command="{Binding ExecuteCopySongLinkCommand}"
-                                           IsEnabled="{Binding HasSongLink}" />
-                            <arc:MenuEntry Header="{loc:Loc Key=UI.CopyCoverLink}"
-                                           Icon="{x:Static arc:ArcIcons.Image}"
-                                           Command="{Binding ExecuteCopySongPicCommand}" />
-                            <arc:MenuEntry Header="{loc:Loc Key=UI.DownloadLink}"
-                                           Icon="{x:Static arc:ArcIcons.Download}"
-                                           HasSeparatorBefore="True"
-                                           Command="{Binding ExecuteSongLinkCommand}" />
-                            <arc:MenuEntry Header="{loc:Loc Key=UI.DownloadCover}"
-                                           Icon="{x:Static arc:ArcIcons.FileImage}"
-                                           Command="{Binding ExecuteSongPicCommand}" />
-                            <arc:MenuEntry Header="{loc:Loc Key=UI.PlaySong}"
-                                           Icon="{x:Static arc:ArcIcons.Play}"
-                                           HasSeparatorBefore="True"
-                                           Command="{Binding ExecutePlaySongCommand}"
-                                           IsEnabled="{Binding HasSongLink}"
-                                           IsVisible="{Binding IsPlaybackSupported}" />
-                            <arc:MenuEntry Header="{loc:Loc Key=UI.StopSong}"
-                                           Icon="{x:Static arc:ArcIcons.Square}"
-                                           Command="{Binding ExecuteStopSongCommand}"
-                                           IsEnabled="{Binding IsPlayingSong}"
-                                           IsVisible="{Binding IsPlaybackSupported}" />
-                        </arc:MenuSurface>
-                    </arc:ContextMenu.Menu>
+            <!-- Song strip: cover, title, people, facts, link and per-song actions on one band. -->
+            <Border Name="SongPlaybackPanel" Classes="pane" Padding="16,12"
+                    IsVisible="{Binding SearchResultViewModel.HasSong}">
+            <arc:ContextMenu.Menu>
+                <arc:MenuSurface>
+                    <arc:MenuEntry Header="{loc:Loc Key=UI.CopySongLink}"
+                                   Icon="{x:Static arc:ArcIcons.Link}"
+                                   Command="{Binding ExecuteCopySongLinkCommand}"
+                                   IsEnabled="{Binding HasSongLink}" />
+                    <arc:MenuEntry Header="{loc:Loc Key=UI.CopyCoverLink}"
+                                   Icon="{x:Static arc:ArcIcons.Image}"
+                                   Command="{Binding ExecuteCopySongPicCommand}" />
+                    <arc:MenuEntry Header="{loc:Loc Key=UI.DownloadLink}"
+                                   Icon="{x:Static arc:ArcIcons.Download}"
+                                   HasSeparatorBefore="True"
+                                   Command="{Binding ExecuteSongLinkCommand}" />
+                    <arc:MenuEntry Header="{loc:Loc Key=UI.DownloadCover}"
+                                   Icon="{x:Static arc:ArcIcons.FileImage}"
+                                   Command="{Binding ExecuteSongPicCommand}" />
+                    <arc:MenuEntry Header="{loc:Loc Key=UI.PlaySong}"
+                                   Icon="{x:Static arc:ArcIcons.Play}"
+                                   HasSeparatorBefore="True"
+                                   Command="{Binding ExecutePlaySongCommand}"
+                                   IsEnabled="{Binding HasSongLink}"
+                                   IsVisible="{Binding IsPlaybackSupported}" />
+                    <arc:MenuEntry Header="{loc:Loc Key=UI.StopSong}"
+                                   Icon="{x:Static arc:ArcIcons.Square}"
+                                   Command="{Binding ExecuteStopSongCommand}"
+                                   IsEnabled="{Binding IsPlayingSong}"
+                                   IsVisible="{Binding IsPlaybackSupported}" />
+                </arc:MenuSurface>
+            </arc:ContextMenu.Menu>
 
-                    <Panel>
-                        <arc:EmptyState Name="SongEmptyState"
-                                        IsVisible="{Binding !SearchResultViewModel.HasSong}"
-                                        Icon="{x:Static arc:ArcIcons.Music}"
-                                        Title="{loc:Loc Key=Search.EmptyTitle}"
-                                        Description="{loc:Loc Key=Search.EmptyDescription}" />
+                <Grid ColumnDefinitions="Auto,*,Auto" RowDefinitions="Auto,Auto"
+                      ColumnSpacing="{arc:ArcDesignTokenResource Space4}"
+                      RowSpacing="{arc:ArcDesignTokenResource Space2}">
+                    <Border Width="64" Height="64"
+                            VerticalAlignment="Center"
+                            ClipToBounds="True"
+                            Background="{arc:ArcDesignTokenResource SurfaceMuted}"
+                            CornerRadius="{arc:ArcDesignTokenResource RadiusControl}">
+                        <Panel>
+                            <arc:ArcGlyph Data="{x:Static arc:ArcIcons.Music}"
+                                          Size="20"
+                                          Foreground="{arc:ArcDesignTokenResource TextMuted}"
+                                          HorizontalAlignment="Center"
+                                          VerticalAlignment="Center" />
+                            <Image Name="AlbumCoverImage" Stretch="UniformToFill" />
+                        </Panel>
+                    </Border>
 
-                        <ScrollViewer IsVisible="{Binding SearchResultViewModel.HasSong}">
-                            <StackPanel Spacing="{arc:ArcDesignTokenResource Space5}">
-                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="{arc:ArcDesignTokenResource Space4}">
-                                    <Border Width="112" Height="112"
-                                            VerticalAlignment="Top"
-                                            ClipToBounds="True"
-                                            Background="{arc:ArcDesignTokenResource SurfaceMuted}"
-                                            CornerRadius="{arc:ArcDesignTokenResource RadiusControl}">
-                                        <Panel>
-                                            <arc:ArcGlyph Data="{x:Static arc:ArcIcons.Music}"
-                                                          Size="32"
-                                                          Foreground="{arc:ArcDesignTokenResource TextMuted}"
-                                                          HorizontalAlignment="Center"
-                                                          VerticalAlignment="Center" />
-                                            <Image Name="AlbumCoverImage" Stretch="UniformToFill" />
-                                        </Panel>
-                                    </Border>
+                    <StackPanel Grid.Column="1" Spacing="{arc:ArcDesignTokenResource Space1}" VerticalAlignment="Center">
+                        <TextBlock Name="SongTitle"
+                                   Text="{Binding SearchResultViewModel.SongName, Mode=OneWay}"
+                                   ToolTip.Tip="{Binding SearchResultViewModel.SongName, Mode=OneWay}"
+                                   FontSize="{arc:ArcDesignTokenResource TypeBase}"
+                                   FontWeight="SemiBold"
+                                   TextWrapping="Wrap"
+                                   MaxLines="2"
+                                   TextTrimming="CharacterEllipsis"
+                                   Foreground="{arc:ArcDesignTokenResource Foreground}" />
+                        <TextBlock Classes="secondary"
+                                   TextTrimming="CharacterEllipsis"
+                                   ToolTip.Tip="{Binding SearchResultViewModel.Album, Mode=OneWay}">
+                            <Run Text="{Binding SearchResultViewModel.Singer, Mode=OneWay}" />
+                            <Run Text=" · " />
+                            <Run Text="{Binding SearchResultViewModel.Album, Mode=OneWay}" />
+                        </TextBlock>
+                        <WrapPanel ItemSpacing="{arc:ArcDesignTokenResource Space2}"
+                                   LineSpacing="{arc:ArcDesignTokenResource Space2}">
+                            <arc:Badge Size="Small"
+                                       Content="{Binding SearchResultViewModel.SongDuration, Mode=OneWay}"
+                                       ToolTip.Tip="{loc:Loc Key=UI.Duration}">
+                                <arc:Badge.Icon><arc:ArcGlyph Data="{x:Static arc:ArcIcons.Clock}" /></arc:Badge.Icon>
+                            </arc:Badge>
+                            <arc:Badge Size="Small"
+                                       Content="{Binding SearchResultViewModel.PublishDate, Mode=OneWay}"
+                                       ToolTip.Tip="{loc:Loc Key=UI.Release}">
+                                <arc:Badge.Icon><arc:ArcGlyph Data="{x:Static arc:ArcIcons.Calendar}" /></arc:Badge.Icon>
+                            </arc:Badge>
+                            <arc:Badge Size="Small"
+                                       Content="{Binding SearchResultViewModel.SongSource, Mode=OneWay}"
+                                       ToolTip.Tip="{loc:Loc Key=UI.Source}">
+                                <arc:Badge.Icon><arc:ArcGlyph Data="{x:Static arc:ArcIcons.Globe}" /></arc:Badge.Icon>
+                            </arc:Badge>
+                            <!-- Lyric completeness: tone plus words, never colour alone. -->
+                            <arc:Badge Name="LampCompleteBadge" Size="Small" Tone="Success"
+                                       Content="{loc:Loc Key=Search.Lamp.Complete}"
+                                       ToolTip.Tip="{Binding LampVm.Details}"
+                                       IsVisible="{Binding LampVm.IsComplete}">
+                                <arc:Badge.Icon><arc:ArcGlyph Data="{x:Static arc:ArcIcons.CircleCheck}" /></arc:Badge.Icon>
+                            </arc:Badge>
+                            <arc:Badge Name="LampPartialBadge" Size="Small" Tone="Warning"
+                                       Content="{loc:Loc Key=Search.Lamp.Partial}"
+                                       ToolTip.Tip="{Binding LampVm.Details}"
+                                       IsVisible="{Binding LampVm.IsPartial}">
+                                <arc:Badge.Icon><arc:ArcGlyph Data="{x:Static arc:ArcIcons.TriangleAlert}" /></arc:Badge.Icon>
+                            </arc:Badge>
+                            <arc:Badge Name="LampEmptyBadge" Size="Small" Tone="Danger"
+                                       Content="{loc:Loc Key=Search.Lamp.Empty}"
+                                       ToolTip.Tip="{Binding LampVm.Details}"
+                                       IsVisible="{Binding LampVm.IsEmpty}">
+                                <arc:Badge.Icon><arc:ArcGlyph Data="{x:Static arc:ArcIcons.CircleX}" /></arc:Badge.Icon>
+                            </arc:Badge>
+                        </WrapPanel>
+                        <TextBlock Name="SongLinkText"
+                                   Classes="secondary"
+                                   IsVisible="{Binding SearchResultViewModel.HasSongLinkText}"
+                                   TextTrimming="CharacterEllipsis"
+                                   FontFamily="{arc:ArcDesignTokenResource MonoFontFamily}"
+                                   ToolTip.Tip="{Binding SearchResultViewModel.SongLink, Mode=OneWay}">
+                            <Run Text="{loc:Loc Key=UI.DirectLink}" />
+                            <Run Text="{Binding SearchResultViewModel.SongLink, Mode=OneWay}" />
+                        </TextBlock>
+                        <TextBlock Classes="secondary"
+                                   Text="{loc:Loc Key=Search.NoLink}"
+                                   IsVisible="{Binding !SearchResultViewModel.HasSongLinkText}" />
+                    </StackPanel>
 
-                                    <StackPanel Grid.Column="1" Spacing="{arc:ArcDesignTokenResource Space2}">
-                                        <SelectableTextBlock Name="SongTitle"
-                                                             Text="{Binding SearchResultViewModel.SongName, Mode=OneWay}"
-                                                             FontSize="{arc:ArcDesignTokenResource Type2XL}"
-                                                             FontWeight="SemiBold"
-                                                             TextWrapping="Wrap"
-                                                             Foreground="{arc:ArcDesignTokenResource Foreground}" />
-                                        <TextBlock Text="{Binding SearchResultViewModel.Singer, Mode=OneWay}"
-                                                   TextTrimming="CharacterEllipsis"
-                                                   FontSize="{arc:ArcDesignTokenResource TypeBase}"
-                                                   Foreground="{arc:ArcDesignTokenResource TextSecondary}"
-                                                   ToolTip.Tip="{loc:Loc Key=UI.Singer}" />
-                                        <TextBlock Text="{Binding SearchResultViewModel.Album, Mode=OneWay}"
-                                                   TextTrimming="CharacterEllipsis"
-                                                   FontSize="{arc:ArcDesignTokenResource TypeBase}"
-                                                   Foreground="{arc:ArcDesignTokenResource TextSecondary}"
-                                                   ToolTip.Tip="{loc:Loc Key=UI.Album}" />
-                                        <WrapPanel ItemSpacing="{arc:ArcDesignTokenResource Space2}"
-                                                   LineSpacing="{arc:ArcDesignTokenResource Space2}">
-                                            <arc:Badge Size="Small"
-                                                       Content="{Binding SearchResultViewModel.SongDuration, Mode=OneWay}"
-                                                       ToolTip.Tip="{loc:Loc Key=UI.Duration}">
-                                                <arc:Badge.Icon><arc:ArcGlyph Data="{x:Static arc:ArcIcons.Clock}" /></arc:Badge.Icon>
-                                            </arc:Badge>
-                                            <arc:Badge Size="Small"
-                                                       Content="{Binding SearchResultViewModel.PublishDate, Mode=OneWay}"
-                                                       ToolTip.Tip="{loc:Loc Key=UI.Release}">
-                                                <arc:Badge.Icon><arc:ArcGlyph Data="{x:Static arc:ArcIcons.Calendar}" /></arc:Badge.Icon>
-                                            </arc:Badge>
-                                            <arc:Badge Size="Small"
-                                                       Content="{Binding SearchResultViewModel.SongSource, Mode=OneWay}"
-                                                       ToolTip.Tip="{loc:Loc Key=UI.Source}">
-                                                <arc:Badge.Icon><arc:ArcGlyph Data="{x:Static arc:ArcIcons.Globe}" /></arc:Badge.Icon>
-                                            </arc:Badge>
-                                            <!-- Lyric completeness: tone plus words, never colour alone. -->
-                                            <arc:Badge Name="LampCompleteBadge" Size="Small" Tone="Success"
-                                                       Content="{loc:Loc Key=Search.Lamp.Complete}"
-                                                       ToolTip.Tip="{Binding LampVm.Details}"
-                                                       IsVisible="{Binding LampVm.IsComplete}">
-                                                <arc:Badge.Icon><arc:ArcGlyph Data="{x:Static arc:ArcIcons.CircleCheck}" /></arc:Badge.Icon>
-                                            </arc:Badge>
-                                            <arc:Badge Name="LampPartialBadge" Size="Small" Tone="Warning"
-                                                       Content="{loc:Loc Key=Search.Lamp.Partial}"
-                                                       ToolTip.Tip="{Binding LampVm.Details}"
-                                                       IsVisible="{Binding LampVm.IsPartial}">
-                                                <arc:Badge.Icon><arc:ArcGlyph Data="{x:Static arc:ArcIcons.TriangleAlert}" /></arc:Badge.Icon>
-                                            </arc:Badge>
-                                            <arc:Badge Name="LampEmptyBadge" Size="Small" Tone="Danger"
-                                                       Content="{loc:Loc Key=Search.Lamp.Empty}"
-                                                       ToolTip.Tip="{Binding LampVm.Details}"
-                                                       IsVisible="{Binding LampVm.IsEmpty}">
-                                                <arc:Badge.Icon><arc:ArcGlyph Data="{x:Static arc:ArcIcons.CircleX}" /></arc:Badge.Icon>
-                                            </arc:Badge>
-                                        </WrapPanel>
-                                    </StackPanel>
-                                </Grid>
+                    <StackPanel Grid.Column="2"
+                                Orientation="Horizontal"
+                                VerticalAlignment="Center"
+                                Spacing="{arc:ArcDesignTokenResource Space2}">
+                        <arc:Button Variant="Secondary" Size="Small"
+                                    Content="{loc:Loc Key=UI.DownloadLink}"
+                                    Command="{Binding ExecuteSongLinkCommand}" />
+                        <arc:Button Variant="Secondary" Size="Small"
+                                    Content="{loc:Loc Key=UI.DownloadCover}"
+                                    Command="{Binding ExecuteSongPicCommand}" />
+                            <arc:DropdownMenu Label="{loc:Loc Key=Search.MoreActions}">
+                                <arc:DropdownMenu.Trigger>
+                                    <arc:Button Variant="Ghost" Size="Small" IsPressScaleEnabled="False"
+                                                ToolTip.Tip="{loc:Loc Key=Search.MoreActions}"
+                                                AutomationProperties.Name="{loc:Loc Key=Search.MoreActions}">
+                                        <arc:ArcGlyph Data="{x:Static arc:ArcIcons.Ellipsis}" />
+                                    </arc:Button>
+                                </arc:DropdownMenu.Trigger>
+                                <arc:MenuEntry Header="{loc:Loc Key=UI.CopySongLink}"
+                                               Icon="{x:Static arc:ArcIcons.Link}"
+                                               Command="{Binding ExecuteCopySongLinkCommand}"
+                                               IsEnabled="{Binding HasSongLink}" />
+                                <arc:MenuEntry Header="{loc:Loc Key=UI.CopyCoverLink}"
+                                               Icon="{x:Static arc:ArcIcons.Image}"
+                                               Command="{Binding ExecuteCopySongPicCommand}" />
+                                <arc:MenuEntry Header="{loc:Loc Key=UI.StopSong}"
+                                               Icon="{x:Static arc:ArcIcons.Square}"
+                                               HasSeparatorBefore="True"
+                                               Command="{Binding ExecuteStopSongCommand}"
+                                               IsEnabled="{Binding IsPlayingSong}"
+                                               IsVisible="{Binding IsPlaybackSupported}" />
+                            </arc:DropdownMenu>
+                    </StackPanel>
 
-                                <StackPanel Spacing="{arc:ArcDesignTokenResource Space1}">
-                                    <TextBlock Classes="secondary" Text="{loc:Loc Key=UI.DirectLink}" />
-                                    <TextBlock Name="SongLinkText"
-                                               Text="{Binding SearchResultViewModel.SongLink, Mode=OneWay}"
-                                               IsVisible="{Binding SearchResultViewModel.HasSongLinkText}"
-                                               TextTrimming="CharacterEllipsis"
-                                               FontFamily="{arc:ArcDesignTokenResource MonoFontFamily}"
-                                               FontSize="{arc:ArcDesignTokenResource TypeSM}"
-                                               Foreground="{arc:ArcDesignTokenResource Foreground}"
-                                               ToolTip.Tip="{Binding SearchResultViewModel.SongLink, Mode=OneWay}" />
-                                    <TextBlock Classes="secondary"
-                                               Text="{loc:Loc Key=Search.NoLink}"
-                                               IsVisible="{Binding !SearchResultViewModel.HasSongLinkText}" />
-                                </StackPanel>
-
-                                <arc:Slider Name="PlaybackSlider"
-                                            IsVisible="{Binding IsPlaybackSupported}"
-                                            AutomationProperties.Name="{loc:Loc Key=Search.PlayPause}"
-                                            Minimum="0"
-                                            Maximum="{Binding PlaybackDurationSeconds}"
-                                            Value="{Binding PlaybackPositionSeconds, Mode=TwoWay}"
+                    <!-- Playback (Windows only) spans the strip under the song details. -->
+                    <Panel Grid.Row="1" Grid.ColumnSpan="3" IsVisible="{Binding IsPlaybackSupported}">
+                        <arc:Slider Name="PlaybackSlider"
+                                    IsVisible="{Binding IsPlaybackSupported}"
+                                    AutomationProperties.Name="{loc:Loc Key=Search.PlayPause}"
+                                    Minimum="0"
+                                    Maximum="{Binding PlaybackDurationSeconds}"
+                                    Value="{Binding PlaybackPositionSeconds, Mode=TwoWay}"
+                                    IsEnabled="{Binding HasSongLink}"
+                                    IsValueVisible="False">
+                            <arc:Slider.StartContent>
+                                <arc:Button Name="PlayPauseButton"
+                                            Variant="Ghost"
+                                            Size="Small"
+                                            Command="{Binding ExecuteTogglePlayPauseCommand}"
                                             IsEnabled="{Binding HasSongLink}"
-                                            IsValueVisible="False">
-                                    <arc:Slider.StartContent>
-                                        <arc:Button Name="PlayPauseButton"
-                                                    Variant="Ghost"
-                                                    Size="Small"
-                                                    Command="{Binding ExecuteTogglePlayPauseCommand}"
-                                                    IsEnabled="{Binding HasSongLink}"
-                                                    ToolTip.Tip="{loc:Loc Key=Search.PlayPause}"
-                                                    AutomationProperties.Name="{loc:Loc Key=Search.PlayPause}">
-                                            <Panel>
-                                                <arc:ArcGlyph Data="{x:Static arc:ArcIcons.Play}" IsVisible="{Binding !IsPlayingSong}" />
-                                                <arc:ArcGlyph Data="{x:Static arc:ArcIcons.Pause}" IsVisible="{Binding IsPlayingSong}" />
-                                            </Panel>
-                                        </arc:Button>
-                                    </arc:Slider.StartContent>
-                                    <arc:Slider.EndContent>
-                                        <TextBlock Classes="secondary"
-                                                   VerticalAlignment="Center"
-                                                   FontFamily="{arc:ArcDesignTokenResource MonoFontFamily}"
-                                                   Text="{Binding PlaybackProgressText}" />
-                                    </arc:Slider.EndContent>
-                                </arc:Slider>
-
-                                <WrapPanel ItemSpacing="{arc:ArcDesignTokenResource Space2}"
-                                           LineSpacing="{arc:ArcDesignTokenResource Space2}">
-                                    <arc:Button Variant="Secondary" Size="Small"
-                                                Content="{loc:Loc Key=UI.DownloadLink}"
-                                                Command="{Binding ExecuteSongLinkCommand}" />
-                                    <arc:Button Variant="Secondary" Size="Small"
-                                                Content="{loc:Loc Key=UI.DownloadCover}"
-                                                Command="{Binding ExecuteSongPicCommand}" />
-                                    <arc:DropdownMenu Label="{loc:Loc Key=Search.MoreActions}">
-                                        <arc:DropdownMenu.Trigger>
-                                            <arc:Button Variant="Ghost" Size="Small" IsPressScaleEnabled="False"
-                                                        ToolTip.Tip="{loc:Loc Key=Search.MoreActions}"
-                                                        AutomationProperties.Name="{loc:Loc Key=Search.MoreActions}">
-                                                <arc:ArcGlyph Data="{x:Static arc:ArcIcons.Ellipsis}" />
-                                            </arc:Button>
-                                        </arc:DropdownMenu.Trigger>
-                                        <arc:MenuEntry Header="{loc:Loc Key=UI.CopySongLink}"
-                                                       Icon="{x:Static arc:ArcIcons.Link}"
-                                                       Command="{Binding ExecuteCopySongLinkCommand}"
-                                                       IsEnabled="{Binding HasSongLink}" />
-                                        <arc:MenuEntry Header="{loc:Loc Key=UI.CopyCoverLink}"
-                                                       Icon="{x:Static arc:ArcIcons.Image}"
-                                                       Command="{Binding ExecuteCopySongPicCommand}" />
-                                        <arc:MenuEntry Header="{loc:Loc Key=UI.StopSong}"
-                                                       Icon="{x:Static arc:ArcIcons.Square}"
-                                                       HasSeparatorBefore="True"
-                                                       Command="{Binding ExecuteStopSongCommand}"
-                                                       IsEnabled="{Binding IsPlayingSong}"
-                                                       IsVisible="{Binding IsPlaybackSupported}" />
-                                    </arc:DropdownMenu>
-                                </WrapPanel>
-                            </StackPanel>
-                        </ScrollViewer>
+                                            ToolTip.Tip="{loc:Loc Key=Search.PlayPause}"
+                                            AutomationProperties.Name="{loc:Loc Key=Search.PlayPause}">
+                                    <Panel>
+                                        <arc:ArcGlyph Data="{x:Static arc:ArcIcons.Play}" IsVisible="{Binding !IsPlayingSong}" />
+                                        <arc:ArcGlyph Data="{x:Static arc:ArcIcons.Pause}" IsVisible="{Binding IsPlayingSong}" />
+                                    </Panel>
+                                </arc:Button>
+                            </arc:Slider.StartContent>
+                            <arc:Slider.EndContent>
+                                <TextBlock Classes="secondary"
+                                           VerticalAlignment="Center"
+                                           FontFamily="{arc:ArcDesignTokenResource MonoFontFamily}"
+                                           Text="{Binding PlaybackProgressText}" />
+                            </arc:Slider.EndContent>
+                        </arc:Slider>
                     </Panel>
-                </Border>
-            </arc:ResizablePanel>
+                </Grid>
+            </Border>
 
             <!-- Lyrics preview, or the fuzzy search results in its place. -->
-            <arc:ResizablePanel Id="preview" Label="{loc:Loc Key=Search.PreviewTitle}" DefaultSize="3" MinSize="320">
-                <Border Classes="pane">
-                    <Panel>
-                        <Panel IsVisible="{Binding !IsShowingBlurResults}">
-                            <arc:EmptyState Name="PreviewEmptyState"
-                                            IsVisible="{Binding !SearchResultViewModel.HasConsoleOutput}"
-                                            Icon="{x:Static arc:ArcIcons.FileText}"
-                                            Title="{loc:Loc Key=Search.PreviewTitle}"
-                                            Description="{loc:Loc Key=Search.PreviewEmpty}" />
-                            <ScrollViewer IsVisible="{Binding SearchResultViewModel.HasConsoleOutput}">
-                                <arc:CodeBlock Name="LyricPreview"
-                                               Code="{Binding SearchResultViewModel.ConsoleOutput, Mode=OneWay}"
-                                               Language="lrc"
-                                               FileName="{loc:Loc Key=Search.PreviewTitle}"
-                                               ShowLineNumbers="True"
-                                               CopyLabel="{loc:Loc Key=Search.CopyPreview}" />
-                            </ScrollViewer>
-                        </Panel>
-
-                        <views:BlurSearchView Name="BlurResultsView"
-                                              DataContext="{Binding BlurResults}"
-                                              IsVisible="{Binding $parent[views:SearchView].((vm:MainWindowViewModel)DataContext).IsShowingBlurResults}" />
+            <Border Grid.Row="1" Classes="pane" Padding="12">
+                <Panel>
+                    <Panel IsVisible="{Binding !IsShowingBlurResults}">
+                        <arc:EmptyState Name="SongEmptyState"
+                                        IsVisible="{Binding SearchResultViewModel.ShowIdleState}"
+                                        Icon="{x:Static arc:ArcIcons.Music}"
+                                        Title="{loc:Loc Key=Search.EmptyTitle}" />
+                        <arc:EmptyState Name="PreviewEmptyState"
+                                        IsVisible="{Binding SearchResultViewModel.ShowNoLyricsState}"
+                                        Icon="{x:Static arc:ArcIcons.FileText}"
+                                        Title="{loc:Loc Key=Search.Lamp.Empty}"
+                                        Description="{loc:Loc Key=Search.NoLyricsDescription}" />
+                        <ScrollViewer IsVisible="{Binding SearchResultViewModel.HasConsoleOutput}">
+                            <arc:CodeBlock Name="LyricPreview"
+                                           Code="{Binding SearchResultViewModel.ConsoleOutput, Mode=OneWay}"
+                                           Language="lrc"
+                                           FileName="{loc:Loc Key=Search.PreviewTitle}"
+                                           ShowLineNumbers="True"
+                                           CopyLabel="{loc:Loc Key=Search.CopyPreview}" />
+                        </ScrollViewer>
                     </Panel>
-                </Border>
-            </arc:ResizablePanel>
-        </arc:ResizablePanels>
+
+                    <views:BlurSearchView Name="BlurResultsView"
+                                          DataContext="{Binding BlurResults}"
+                                          IsVisible="{Binding $parent[views:SearchView].((vm:MainWindowViewModel)DataContext).IsShowingBlurResults}" />
+                </Panel>
+            </Border>
+        </Grid>
 
         <!-- Output: how the lyrics are written, where, and the one primary action of the page. -->
         <Border Grid.Row="2" Classes="pane" Padding="16,12" IsVisible="{Binding !IsShowingBlurResults}">

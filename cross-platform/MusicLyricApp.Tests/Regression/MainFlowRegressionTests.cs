@@ -186,6 +186,56 @@ public class MainFlowRegressionTests
     }
 
     [AvaloniaFact]
+    public async Task PreviewFollowsLyricFormatAndSettingsWithoutSearchingAgain()
+    {
+        using var ws = new TestWorkspace();
+        ws.Settings.Config.OutputLyricTypes = "0,1";   // original and translation
+        ws.Storage().SaveConfig(ws.Settings);
+        var vm = new MainWindowViewModel(ws.Window.Object, ws.Storage(), ws.Search(new(MockBehavior.Strict)));
+        try
+        {
+            var song = TestWorkspace.Song(lyric: "[00:01.000]hello\n[00:03.000]world");
+            song.LyricVo.TranslateLyric = "[00:01.000]你好\n[00:03.000]世界";
+            vm.SearchResultViewModel.SaveVoMap = new() { ["123"] = song };
+            var param = vm.SearchParamViewModel;
+
+            async Task<string> Preview(ShowLrcTypeEnum type)
+            {
+                param.SelectedLrcTypeItem = param.LrcTypes.Single(x => x.Value == type);
+                var deadline = DateTime.UtcNow.AddSeconds(4);
+                var before = vm.SearchResultViewModel.ConsoleOutput;
+                while (DateTime.UtcNow < deadline && vm.SearchResultViewModel.ConsoleOutput == before)
+                {
+                    await Task.Delay(25);
+                    Dispatcher.UIThread.RunJobs();
+                }
+                return vm.SearchResultViewModel.ConsoleOutput;
+            }
+
+            var isolated = await Preview(ShowLrcTypeEnum.ISOLATED);
+            var merged = await Preview(ShowLrcTypeEnum.MERGE);
+            // Changing the lyric format re-renders the preview at once, with no new search.
+            Assert.Contains("你好", isolated);
+            Assert.Contains("你好", merged);
+            Assert.NotEqual(isolated, merged);
+
+            // Leaving settings re-renders too, e.g. after a timestamp format change.
+            vm.CurrentPageKey = MainWindowViewModel.PageSettings;
+            vm.SettingViewModel!.SettingParamViewModel.LrcTimestampFormat = "[mm:ss.SS]";
+            var beforeLeave = vm.SearchResultViewModel.ConsoleOutput;
+            vm.CurrentPageKey = MainWindowViewModel.PageSearch;
+            var until = DateTime.UtcNow.AddSeconds(4);
+            while (DateTime.UtcNow < until && vm.SearchResultViewModel.ConsoleOutput == beforeLeave)
+            {
+                await Task.Delay(25);
+                Dispatcher.UIThread.RunJobs();
+            }
+            Assert.Contains("[00:01.00]", vm.SearchResultViewModel.ConsoleOutput);
+        }
+        finally { WeakReferenceMessenger.Default.UnregisterAll(vm); }
+    }
+
+    [AvaloniaFact]
     public void BatchSidebarBadgeFollowsItemCount()
     {
         using var ws = new TestWorkspace();

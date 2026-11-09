@@ -53,6 +53,21 @@ public static class DialogHelper
         });
     }
 
+    /// <summary>Shows custom content with a single close action, without blocking the caller.</summary>
+    public static async Task ShowContentAsync(string title, Control content)
+    {
+        await Dispatcher.UIThread.InvokeAsync(() =>
+        {
+            if (Owner is not { } owner)
+            {
+                return;
+            }
+
+            _ = Dialog.ShowAsync(owner, title, content, null,
+                new DialogAction(LocalizationService.Get("Dialog.Action.Close"), null, ButtonVariant.Primary));
+        });
+    }
+
     /// <summary>Asks a yes/no question; returns true only when the confirm button is pressed.</summary>
     public static async Task<bool> ConfirmAsync(string title, string message, string confirmText, bool isDanger = false)
     {

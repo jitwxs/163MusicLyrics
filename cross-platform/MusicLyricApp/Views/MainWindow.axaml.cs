@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Input;
 using Avalonia.Input.Platform;
 using Avalonia.Platform.Storage;
 using Avalonia.Threading;
@@ -35,6 +36,74 @@ public partial class MainWindow : ArcWindow, IWindowProvider
         viewModel.TipRaised += ShowTip;
         viewModel.BatchSearchViewModel.TipRaised += ShowTip;
         UpdateBatchBadge();
+
+        NavSidebar.ItemInvoked += OnSidebarItemInvoked;
+        TitleBarDrag.Attach(this);
+        SelectLocalization.Attach(this);
+        BindGlobalShortcuts(viewModel);
+    }
+
+    /// <summary>Shortcuts that work on every page; search-page ones are bound by <see cref="SearchView"/>.</summary>
+    private void BindGlobalShortcuts(MainWindowViewModel vm)
+    {
+        void Bind(string id, System.Windows.Input.ICommand command, object? parameter = null)
+        {
+            foreach (var gesture in AppShortcuts.Get(id).AllGestures)
+            {
+                KeyBindings.Add(new KeyBinding { Gesture = gesture, Command = command, CommandParameter = parameter });
+            }
+        }
+
+        Bind(AppShortcuts.FocusSearch, new CommunityToolkit.Mvvm.Input.RelayCommand(FocusSearchBox));
+        Bind(AppShortcuts.GoSearch, vm.ExecuteGoToPageCommand, MainWindowViewModel.PageSearch);
+        Bind(AppShortcuts.GoBatch, vm.ExecuteGoToPageCommand, MainWindowViewModel.PageBatch);
+        Bind(AppShortcuts.GoConvert, vm.ExecuteGoToPageCommand, MainWindowViewModel.PageConvert);
+        Bind(AppShortcuts.OpenSettings, vm.ExecuteGoToPageCommand, MainWindowViewModel.PageSettings);
+        Bind(AppShortcuts.ShowShortcuts, new CommunityToolkit.Mvvm.Input.RelayCommand(ShowShortcuts));
+    }
+
+    /// <summary>Switches to the search page and puts the caret in the search box, ready to type.</summary>
+    public void FocusSearchBox()
+    {
+        if (DataContext is MainWindowViewModel vm)
+        {
+            vm.CurrentPageKey = MainWindowViewModel.PageSearch;
+        }
+
+        Dispatcher.UIThread.Post(() =>
+        {
+            if (SearchPage.FindControl<TextBox>("SearchTextBox") is { } box)
+            {
+                box.Focus();
+                box.SelectAll();
+            }
+        }, DispatcherPriority.Input);
+    }
+
+    public void ShowShortcuts() =>
+        _ = DialogHelper.ShowContentAsync(LocalizationService.Get("UI.Shortcuts"), ShortcutsDialog.Build());
+
+    /// <summary>Help rows are actions: SidebarItem has no DataContext, so they are mapped to commands here.</summary>
+    private void OnSidebarItemInvoked(object? sender, SidebarItemInvokedEventArgs e)
+    {
+        if (DataContext is not MainWindowViewModel vm || !e.Item.IsAction)
+        {
+            return;
+        }
+
+        System.Windows.Input.ICommand? command = e.Item.Key switch
+        {
+            "help/home" => vm.ExecuteHomeCommand,
+            "help/wiki" => vm.ExecuteWikiCommand,
+            "help/issue" => vm.ExecuteIssueCommand,
+            "help/shortcuts" => new CommunityToolkit.Mvvm.Input.RelayCommand(ShowShortcuts),
+            _ => null
+        };
+
+        if (command?.CanExecute(null) == true)
+        {
+            command.Execute(null);
+        }
     }
 
     /// <summary>Status messages appear as toasts; errors stay longer and read as errors, not only by colour.</summary>

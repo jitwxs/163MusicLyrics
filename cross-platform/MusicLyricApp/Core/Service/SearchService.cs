@@ -197,12 +197,7 @@ public class SearchService : ISearchService
             var duration = TimeSpan.FromMilliseconds(saveVo.SongVo.Duration);
             searchResult.SongDuration = $"{(int)duration.TotalMinutes:00}:{duration.Seconds:00}";
             searchResult.PublishDate = saveVo.SongVo.PublishDate;
-            searchResult.SongSource = saveVo.LyricVo.SearchSource switch
-            {
-                SearchSourceEnum.NET_EASE_MUSIC => LocalizationService.Get("Status.Search.SourceNetEase"),
-                SearchSourceEnum.QQ_MUSIC => LocalizationService.Get("Status.Search.SourceQQ"),
-                _ => saveVo.LyricVo.SearchSource.ToString()
-            };
+            searchResult.SetSongSource(saveVo.LyricVo.SearchSource);
         }
         else
         {

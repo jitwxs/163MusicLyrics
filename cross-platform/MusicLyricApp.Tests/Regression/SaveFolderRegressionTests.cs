@@ -361,13 +361,12 @@ public class SaveFolderRegressionTests
         }
     }
 
-    /// <summary>Opens the "download and cache" section of the Arc settings page, where both folder rows live.</summary>
+    /// <summary>Shows the "download and cache" section of the settings page, where both folder rows live.</summary>
     private static void ShowDownloadSection(SettingView view)
     {
-        var page = Assert.IsType<TKCode.Arc.SettingsPage>(view.FindControl<TKCode.Arc.SettingsPage>("SettingsPage"));
-        var section = Assert.IsType<TKCode.Arc.SettingsSection>(view.FindControl<TKCode.Arc.SettingsSection>("DownloadSection"));
-        Assert.True(page.Select(section));
+        Assert.IsType<SettingViewModel>(view.DataContext).CurrentSection = SettingViewModel.SectionDownload;
         Dispatcher.UIThread.RunJobs();
+        Assert.True(view.FindControl<StackPanel>("DownloadSection")!.IsVisible);
     }
 
     // ICommand.Execute adds an async-void exception-forwarding path that ExecuteAsync alone does not test.
