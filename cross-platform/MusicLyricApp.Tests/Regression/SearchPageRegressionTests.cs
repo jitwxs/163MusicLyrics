@@ -263,7 +263,7 @@ public class SearchPageRegressionTests
 
             // Repeated switches while the page is hidden (as from the settings page) keep following.
             vm.CurrentPageKey = MainWindowViewModel.PageSettings;
-            foreach (var language in new[] { "en-US", "zh-CN", "en-US", "zh-CN" })
+            foreach (var language in new[] { "en-US", "zh-TW", "zh-CN", "zh-TW", "en-US", "zh-CN" })
             {
                 LocalizationService.Instance.SetLanguage(language);
                 Dispatcher.UIThread.RunJobs();

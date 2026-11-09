@@ -23,6 +23,7 @@ public partial class SettingParamViewModel : ViewModelBase
     public ObservableCollection<LanguageOption> Languages { get; } =
     [
         new("zh-CN", "Language.SimplifiedChinese"),
+        new("zh-TW", "Language.TraditionalChinese"),
         new("en-US", "Language.English")
     ];
 
@@ -456,7 +457,7 @@ public partial class SettingParamViewModel : ViewModelBase
     public void Bind(SettingBean settingBean)
     {
         _settingBean = settingBean;
-        SelectedLanguage = Languages.First(language => language.Code == settingBean.Config.Language);
+        SelectedLanguage = Languages.First(language => language.Code == LocalizationService.NormalizeLanguage(settingBean.Config.Language));
         NetworkClientFactory.Configure(_settingBean.Config);
 
         SelectedFileConflictStrategyItem = FileConflictStrategies.First(item => Equals(item.Value, _settingBean.Config.FileConflictStrategy));

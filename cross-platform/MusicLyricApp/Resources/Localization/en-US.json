@@ -246,6 +246,7 @@
   "Help.Output.FillFunction": "$fillLength(content,symbol,length)",
   "Help.Output.FillDescription": "Padding: content is the value, symbol is the padding character, and length is the target width. Example: $fillLength(${index},0,3) pads ${index} to 3 digits.",
   "Language.SimplifiedChinese": "Chinese (Simplified)",
+  "Language.TraditionalChinese": "Chinese (Traditional)",
   "Language.English": "English",
   "Error.InvalidSrtTimestamp": "Invalid SRT timestamp: {0}",
   "UI.BlurGrid.Song": "Song",

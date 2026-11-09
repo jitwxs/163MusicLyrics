@@ -246,6 +246,7 @@
   "Help.Output.FillFunction": "$fillLength(content,symbol,length)",
   "Help.Output.FillDescription": "长度填充，其中 content 表示操作的内容，symbol 表示填充的内容，length 表示填充的长度。例如 $fillLength(${index},0,3) 表示对于 ${index} 的结果，长度填充到 3 位，使用 0 填充【即 1 -> 001, 12 -> 012, 123 -> 123, 1234 -> 1234】",
   "Language.SimplifiedChinese": "简体中文",
+  "Language.TraditionalChinese": "繁体中文",
   "Language.English": "English",
   "Error.InvalidSrtTimestamp": "非法 SRT 时间戳: {0}",
   "UI.BlurGrid.Song": "歌曲",

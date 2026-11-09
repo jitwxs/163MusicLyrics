@@ -16,6 +16,8 @@ public sealed class LocalizationService : INotifyPropertyChanged
 
     private static readonly IReadOnlyDictionary<string, string> Chinese = LoadResource("zh-CN");
 
+    private static readonly IReadOnlyDictionary<string, string> TraditionalChinese = LoadResource("zh-TW");
+
 
     private static IReadOnlyDictionary<string, string> LoadResource(string culture)
     {
@@ -31,12 +33,26 @@ public sealed class LocalizationService : INotifyPropertyChanged
     public event PropertyChangedEventHandler? PropertyChanged;
     public string Language => _language;
 
-    public string this[string key] => _language == "en-US" && English.TryGetValue(key, out var value)
+    private IReadOnlyDictionary<string, string> CurrentResources => _language switch
+    {
+        "en-US" => English,
+        "zh-TW" => TraditionalChinese,
+        _ => Chinese
+    };
+
+    public string this[string key] => CurrentResources.TryGetValue(key, out var value)
         ? value : Chinese.TryGetValue(key, out var chinese) ? chinese : key;
+
+    public static string NormalizeLanguage(string? language) => language?.ToLowerInvariant() switch
+    {
+        "en-us" => "en-US",
+        "zh-tw" => "zh-TW",
+        _ => "zh-CN"
+    };
 
     public void SetLanguage(string? language)
     {
-        var normalized = string.Equals(language, "en-US", StringComparison.OrdinalIgnoreCase) ? "en-US" : "zh-CN";
+        var normalized = NormalizeLanguage(language);
         if (_language == normalized) return;
         _language = normalized;
         CultureInfo.CurrentUICulture = CultureInfo.GetCultureInfo(normalized);
@@ -44,10 +60,7 @@ public sealed class LocalizationService : INotifyPropertyChanged
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Language)));
     }
 
-    public static string Get(string key) =>
-        Instance.Language == "en-US"
-            ? English.TryGetValue(key, out var english) ? english : key
-            : Chinese.TryGetValue(key, out var chinese) ? chinese : key;
+    public static string Get(string key) => Instance[key];
 
     public static string Format(string key, params object[] args) => string.Format(Get(key), args);
 

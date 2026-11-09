@@ -292,6 +292,7 @@ public class MainFlowRegressionTests
     [AvaloniaTheory]
     [InlineData("zh-CN")]
     [InlineData("en-US")]
+    [InlineData("zh-TW")]
     public async Task BatchSkippedSongsMustNotBeMarkedSaved(string language)
     {
         var originalLanguage = LocalizationService.Instance.Language;

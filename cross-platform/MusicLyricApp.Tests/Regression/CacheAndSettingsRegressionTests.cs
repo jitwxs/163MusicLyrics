@@ -13,6 +13,7 @@ public class CacheAndSettingsRegressionTests
     public void ConfigRoundTripPreservesNestedSettings()
     {
         using var ws = new TestWorkspace();
+        ws.Settings.Config.Language = "zh-TW";
         ws.Settings.Config.ThemeMode = ThemeModeEnum.DARK;
         ws.Settings.Config.NetworkProxyMode = NetworkProxyModeEnum.HTTP_PROXY;
         ws.Settings.Config.ProxyHost = "127.0.0.1";
