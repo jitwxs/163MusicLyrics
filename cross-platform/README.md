@@ -5,8 +5,10 @@
 
 ## 代码入口
 
-- `MusicLyricApp/Program.cs` → `App.axaml.cs` → `Views/MainWindow.axaml.cs`：应用启动和主窗口。
-- `Views/`、`ViewModels/`：界面、查询交互、批量任务、设置与格式转换。
+- `MusicLyricApp/Program.cs` → `App.axaml.cs` → `Views/MainWindow.axaml.cs`：应用启动和主窗口。`Program.cs` 中的 `UseArc(...)` 注册 TKCode.Arc 控件、主题与字体。
+- `Views/`、`ViewModels/`：单窗口界面。`MainWindow` 是带侧边栏的 `ArcWindow`，按 `MainWindowViewModel.CurrentPageKey` 切换四个页面：
+  `SearchView`（歌词搜索，模糊搜索结果 `BlurSearchView` 在页内显示）、`BatchSearchView`（批量任务）、`FormatConvertView`（格式转换）、`SettingView`（设置）。
+  对话框与提示统一使用 Arc 的 `Dialog`（`Core/DialogHelper.cs`）和 Toast；颜色、字号、圆角取自 Arc 设计令牌，不写固定色值。
 - `Core/Service/`：搜索、文件保存、本地缓存、更新检查；`Music/` 对接网易云和 QQ 音乐，`Translate/` 对接翻译服务。
 - `Core/Utils/`、`Models/`：歌词处理、时间戳转换、网络工具与数据模型。
 - `MusicLyricApp.Tests/`：xUnit 测试。

@@ -35,16 +35,6 @@ public static class Constants
         return Path.Combine(configDir, "cache");
     }
 
-    public static WindowIcon GetIcon(string name)
-    {
-        var assembly = Assembly.GetExecutingAssembly();
-        var resourceName = "MusicLyricApp.Resources." + name + ".ico";
-
-        using var stream = assembly.GetManifestResourceStream(resourceName);
-        
-        return new WindowIcon(stream);
-    }
-
     public const int BatchQuerySize = 300;
 
     public const int SleepMsBetweenBatchQuery = 500;

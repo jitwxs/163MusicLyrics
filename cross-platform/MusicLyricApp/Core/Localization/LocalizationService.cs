@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
@@ -6,7 +6,6 @@ using System.Reflection;
 using Avalonia.Markup.Xaml;
 using Avalonia.Data;
 using Avalonia.Data.Converters;
-using Avalonia.Controls;
 
 namespace MusicLyricApp.Core.Localization;
 
@@ -52,13 +51,6 @@ public sealed class LocalizationService : INotifyPropertyChanged
 
     public static string Format(string key, params object[] args) => string.Format(Get(key), args);
 
-    public static void BindWindowTitle(Window window, string resourceKey)
-    {
-        void UpdateTitle(object? sender, PropertyChangedEventArgs args) => window.Title = Get(resourceKey);
-        Instance.PropertyChanged += UpdateTitle;
-        window.Closed += (_, _) => Instance.PropertyChanged -= UpdateTitle;
-        window.Title = Get(resourceKey);
-    }
 }
 
 public sealed class LocExtension : MarkupExtension
