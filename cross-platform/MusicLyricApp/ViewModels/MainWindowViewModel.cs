@@ -286,6 +286,10 @@ public partial class MainWindowViewModel : ViewModelBase
             SearchParamViewModel.SelectedSearchSourceItem = sourceItem;
         }
 
+        // Download-manager rows always identify a song, even if the previous search was a playlist or album.
+        SearchParamViewModel.SelectedSearchTypeItem = SearchParamViewModel.SearchTypes
+            .First(x => x.Value == SearchTypeEnum.SONG_ID);
+        BlurResults = null;
         SearchParamViewModel.SearchText = request.SongId;
         CurrentPageKey = PageSearch;
 

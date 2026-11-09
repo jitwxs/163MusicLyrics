@@ -22,6 +22,56 @@ public class MainFlowRegressionTests
         public override bool IsPlaybackSupported => false;
     }
 
+    [AvaloniaTheory]
+    [InlineData(SearchTypeEnum.PLAYLIST_ID, true)]
+    [InlineData(SearchTypeEnum.ALBUM_ID, true)]
+    [InlineData(SearchTypeEnum.PLAYLIST_ID, false)]
+    [InlineData(SearchTypeEnum.ALBUM_ID, false)]
+    public async Task DownloadManagerSongDetailsResetSearchTypeBeforeSearchingAgain(SearchTypeEnum previousType, bool cached)
+    {
+        using var ws = new TestWorkspace();
+        ws.Settings.Param.SearchType = previousType;
+        ws.Storage().SaveConfig(ws.Settings);
+        var song = TestWorkspace.Song("186008");
+        song.SongVo.Name = "园游会";
+        var api = new Mock<IMusicApi>(MockBehavior.Strict);
+        api.Setup(x => x.GetSongVo(It.Is<string[]>(ids => ids.SequenceEqual(new[] { "186008" }))))
+            .Returns(new Dictionary<string, ResultVo<SongVo>> { ["186008"] = new(song.SongVo) });
+        api.Setup(x => x.GetLyricVo("186008", "186008", false)).Returns(new ResultVo<LyricVo>(song.LyricVo));
+        api.Setup(x => x.GetSongLink("186008")).Returns(new ResultVo<string>("https://test.invalid/186008.mp3"));
+        var vm = new HeadlessMainViewModel(ws, ws.Search(api));
+        try
+        {
+            if (cached)
+            {
+                vm.BatchSearchViewModel.AddSearchResults(new() { ["186008"] = new(song) }, [TestWorkspace.Input("186008")]);
+                vm.BatchSearchViewModel.CacheSongLink("186008", "https://test.invalid/186008.mp3");
+            }
+            vm.CurrentPageKey = MainWindowViewModel.PageBatch;
+            WeakReferenceMessenger.Default.Send(new MusicLyricApp.ViewModels.Messages.OpenSongDetailMessage(
+                new MusicLyricApp.ViewModels.Messages.SongDetailRequest("186008", SearchSourceEnum.NET_EASE_MUSIC)));
+            var deadline = DateTime.UtcNow.AddSeconds(5);
+            while (!vm.HasSongLink && DateTime.UtcNow < deadline)
+            {
+                await Task.Delay(10, TestContext.Current.CancellationToken);
+                Dispatcher.UIThread.RunJobs();
+            }
+            Assert.True(vm.HasSongLink);
+            Assert.Equal(SearchTypeEnum.SONG_ID, vm.SearchParamViewModel.SelectedSearchType);
+            Assert.Equal(SearchTypeEnum.SONG_ID, vm.SettingBean.Param.SearchType);
+            Assert.Equal("186008", vm.SearchParamViewModel.SearchText);
+            Assert.Equal("园游会", vm.SearchResultViewModel.SongName);
+
+            await vm.ExecuteExactSearchWithModeCommand.ExecuteAsync(null);
+            Assert.Empty(vm.TipErrorMessage);
+            Assert.Equal("园游会", vm.SearchResultViewModel.SongName);
+            Assert.Equal("186008", Assert.Single(vm.SearchParamViewModel.SongIds).SongId);
+            api.Verify(x => x.GetPlaylistVo(It.IsAny<string>()), Times.Never);
+            api.Verify(x => x.GetAlbumVo(It.IsAny<string>()), Times.Never);
+        }
+        finally { WeakReferenceMessenger.Default.UnregisterAll(vm); }
+    }
+
     [AvaloniaFact]
     public async Task SearchDownloadAndSaveFlowThroughMainCommands()
     {
