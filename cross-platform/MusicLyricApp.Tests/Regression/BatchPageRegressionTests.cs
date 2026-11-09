@@ -95,9 +95,30 @@ public class BatchPageRegressionTests
             var first = buttons.Single(b => ReferenceEquals(b.CommandParameter, scope.Vm.Items[0]));
             first.Command!.Execute(first.CommandParameter);
             Assert.Equal("123", request?.SongId);
-            Assert.True(scope.Vm.Items[0].IsSelected);
+            Assert.False(scope.Vm.Items[0].IsSelected); // viewing a row does not tick it
         }
         finally { WeakReferenceMessenger.Default.UnregisterAll(receiver); }
+    }
+
+    [AvaloniaFact]
+    public async Task RowSaveButtonSavesOnlyItsRowAndKeepsTheSelection()
+    {
+        using var scope = new Scope(withRows: false);
+        scope.Vm.AddSearchResults(new()
+        {
+            ["123"] = new(TestWorkspace.Song("123")),
+            ["789"] = new(TestWorkspace.Song("789"))
+        }, [TestWorkspace.Input("123"), TestWorkspace.Input("789")]);
+        scope.Vm.SelectSongsByIds(["789"]);
+        Dispatcher.UIThread.RunJobs();
+
+        await scope.Vm.ExecuteContextSaveCommand.ExecuteAsync(scope.Vm.Items[0]);
+
+        Assert.Equal(BatchItemStateEnum.SAVED, scope.Vm.Items[0].State);
+        Assert.NotEqual(BatchItemStateEnum.SAVED, scope.Vm.Items[1].State);
+        Assert.Single(scope.Ws.CreatedFiles);
+        Assert.False(scope.Vm.Items[0].IsSelected);
+        Assert.True(scope.Vm.Items[1].IsSelected);
     }
 
     [AvaloniaFact]

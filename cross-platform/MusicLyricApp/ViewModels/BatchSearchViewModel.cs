@@ -189,9 +189,11 @@ public partial class BatchSearchViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private async Task ExecuteSaveSelectedAsync()
+    private Task ExecuteSaveSelectedAsync() => SaveItemsAsync(Items.Where(item => item.IsSelected).ToList());
+
+    /// <summary>Saves the given rows' lyrics and updates their status; the selection is left untouched.</summary>
+    private async Task SaveItemsAsync(List<BatchSearchItemViewModel> selected)
     {
-        var selected = Items.Where(item => item.IsSelected).ToList();
         if (selected.Count == 0)
         {
             SetTip(LocalizationService.Get("Status.Batch.NoSaveSelection"), false);
@@ -241,15 +243,9 @@ public partial class BatchSearchViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private async Task ExecuteContextSaveAsync(BatchSearchItemViewModel? item)
-    {
-        if (item != null && !item.IsSelected)
-        {
-            item.IsSelected = true;
-        }
-
-        await ExecuteSaveSelectedAsync();
-    }
+    private Task ExecuteContextSaveAsync(BatchSearchItemViewModel? item) =>
+        // A row's own save button saves just that row, whatever else is ticked.
+        item == null ? ExecuteSaveSelectedAsync() : SaveItemsAsync([item]);
 
     [RelayCommand]
     private void ExecuteViewDetail(BatchSearchItemViewModel? item)
@@ -259,11 +255,6 @@ public partial class BatchSearchViewModel : ViewModelBase
         {
             SetTip(LocalizationService.Get("Status.Batch.NoDetailSelection"), false);
             return;
-        }
-
-        if (!target.IsSelected)
-        {
-            target.IsSelected = true;
         }
 
         // The main view model switches back to the search page to show the song.

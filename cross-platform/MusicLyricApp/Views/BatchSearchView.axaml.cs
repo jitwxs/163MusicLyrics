@@ -17,7 +17,7 @@ using TKCode.Arc.DesignTokens;
 namespace MusicLyricApp.Views;
 
 /// <summary>
-/// Batch tasks page. The Arc table owns selection; each row's <see cref="BatchSearchItemViewModel.IsSelected"/>
+/// Download manager page. The Arc table owns selection; each row's <see cref="BatchSearchItemViewModel.IsSelected"/>
 /// mirrors it so the view model's bulk commands keep working on "the selected rows".
 /// </summary>
 public partial class BatchSearchView : UserControl
