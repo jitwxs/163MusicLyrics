@@ -61,9 +61,11 @@
         </StackPanel>
 
         <arc:ResizablePanels Grid.Row="2" Gap="{arc:ArcDesignTokenResource Space4}" Label="{loc:Loc Key=Nav.Convert}">
-            <arc:ResizablePanel Id="input" Label="{loc:Loc Key=Convert.Input}" MinSize="260">
+            <arc:ResizablePanel Id="input" Name="InputPanel" Label="{loc:Loc Key=Convert.Input}" MinSize="260">
                 <arc:Textarea Name="InputTextArea"
                               Label="{loc:Loc Key=Convert.Input}"
+                              IsLabelVisible="False"
+                              VerticalAlignment="Stretch"
                               Placeholder="{loc:Loc Key=Convert.InputPlaceholder}"
                               AcceptsReturn="True"
                               TextWrapping="Wrap"

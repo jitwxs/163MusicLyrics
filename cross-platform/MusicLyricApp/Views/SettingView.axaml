@@ -13,14 +13,18 @@
 
     <UserControl.Styles>
         <!-- Field controls inside rows carry their label in the row header, so hide their own. -->
+        <!-- Keep label and control on one line down to a narrow content column (sidebar plus section nav). -->
+        <Style Selector="arc|SettingsRow">
+            <Setter Property="StackWidth" Value="360" />
+        </Style>
         <Style Selector="arc|SettingsRow arc|Input, arc|SettingsRow arc|PasswordField, arc|SettingsRow arc|NumberField">
             <Setter Property="IsLabelVisible" Value="False" />
             <Setter Property="Size" Value="Small" />
-            <Setter Property="MinWidth" Value="240" />
+            <Setter Property="MinWidth" Value="200" />
         </Style>
         <Style Selector="arc|SettingsRow arc|Select">
             <Setter Property="Size" Value="Small" />
-            <Setter Property="MinWidth" Value="240" />
+            <Setter Property="MinWidth" Value="200" />
         </Style>
     </UserControl.Styles>
 
@@ -30,7 +34,7 @@
         <arc:Alert Name="SettingTipsAlert"
                    Tone="Info"
                    Title="{loc:Loc Key=Dialog.Notice.Title}"
-                   IsVisible="{Binding SettingTips, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                   IsVisible="{Binding HasSettingTips}">
             <SelectableTextBlock Text="{Binding SettingTips}" TextWrapping="Wrap" />
         </arc:Alert>
 

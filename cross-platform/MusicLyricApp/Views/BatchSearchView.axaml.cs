@@ -147,27 +147,21 @@ public partial class BatchSearchView : UserControl
             };
 
         yield return Text("UI.SongSource", x => x.SongSource, new GridLength(96));
-        yield return Text("UI.SongId", x => x.SongId, new GridLength(120));
+        yield return Text("UI.SongId", x => x.SongId, new GridLength(104));
         yield return Text("UI.SongName", x => x.SongName, new GridLength(3, GridUnitType.Star));
         yield return Text("UI.BlurGrid.Artist", x => x.Singer, new GridLength(2, GridUnitType.Star));
         yield return Text("UI.BlurGrid.Album", x => x.Album, new GridLength(2, GridUnitType.Star));
 
+        // Status and its reason share one column so the name, artist and album keep readable widths.
         yield return new DataTableColumn(LocalizationService.Get("UI.Extra01"), item => (item as BatchSearchItemViewModel)?.Status)
         {
-            Width = new GridLength(112),
-            CellTemplate = new FuncDataTemplate<BatchSearchItemViewModel>((_, _) => BuildStatusCell())
-        };
-
-        yield return new DataTableColumn(LocalizationService.Get("UI.Extra02"), item => (item as BatchSearchItemViewModel)?.Error)
-        {
             Width = new GridLength(2, GridUnitType.Star),
-            IsSortable = false,
-            CellTemplate = new FuncDataTemplate<BatchSearchItemViewModel>((_, _) => BuildErrorCell())
+            CellTemplate = new FuncDataTemplate<BatchSearchItemViewModel>((_, _) => BuildStatusCell())
         };
 
         yield return new DataTableColumn(LocalizationService.Get("Batch.Actions"), _ => null)
         {
-            Width = new GridLength(96),
+            Width = new GridLength(104),
             IsSortable = false,
             CellTemplate = new FuncDataTemplate<BatchSearchItemViewModel>((_, _) => BuildActionsCell())
         };
@@ -185,24 +179,28 @@ public partial class BatchSearchView : UserControl
             [!IsVisibleProperty] = new Binding(visibleWhen)
         };
 
-        var panel = new Panel { VerticalAlignment = VerticalAlignment.Center };
-        panel.Children.Add(Badge(BadgeTone.Info, nameof(BatchSearchItemViewModel.IsReady)));
-        panel.Children.Add(Badge(BadgeTone.Danger, nameof(BatchSearchItemViewModel.IsFailed)));
-        panel.Children.Add(Badge(BadgeTone.Success, nameof(BatchSearchItemViewModel.IsSaved)));
-        panel.Children.Add(Badge(BadgeTone.Warning, nameof(BatchSearchItemViewModel.IsSkipped)));
-        return panel;
+        var badges = new Panel { HorizontalAlignment = HorizontalAlignment.Left };
+        badges.Children.Add(Badge(BadgeTone.Info, nameof(BatchSearchItemViewModel.IsReady)));
+        badges.Children.Add(Badge(BadgeTone.Danger, nameof(BatchSearchItemViewModel.IsFailed)));
+        badges.Children.Add(Badge(BadgeTone.Success, nameof(BatchSearchItemViewModel.IsSaved)));
+        badges.Children.Add(Badge(BadgeTone.Warning, nameof(BatchSearchItemViewModel.IsSkipped)));
+
+        var cell = new StackPanel { VerticalAlignment = VerticalAlignment.Center, Children = { badges, BuildErrorText() } };
+        ArcTokens.Bind(cell, StackPanel.SpacingProperty, ArcDesignTokenKind.Space1);
+        return cell;
     }
 
-    private static Control BuildErrorCell()
+    /// <summary>Why a row failed or was skipped, under its badge; hidden when there is nothing to say.</summary>
+    private static Control BuildErrorText()
     {
         var text = new TextBlock
         {
             TextWrapping = TextWrapping.Wrap,
             MaxLines = 2,
             TextTrimming = TextTrimming.CharacterEllipsis,
-            VerticalAlignment = VerticalAlignment.Center,
             [!TextBlock.TextProperty] = new Binding(nameof(BatchSearchItemViewModel.Error)),
-            [!ToolTip.TipProperty] = new Binding(nameof(BatchSearchItemViewModel.Error))
+            [!ToolTip.TipProperty] = new Binding(nameof(BatchSearchItemViewModel.Error)),
+            [!IsVisibleProperty] = new Binding(nameof(BatchSearchItemViewModel.HasError))
         };
         ArcTokens.Bind(text, TextBlock.ForegroundProperty, ArcDesignTokenKind.Danger);
         ArcTokens.Bind(text, TextBlock.FontSizeProperty, ArcDesignTokenKind.TypeSM);

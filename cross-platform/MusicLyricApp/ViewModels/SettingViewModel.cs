@@ -20,7 +20,13 @@ namespace MusicLyricApp.ViewModels;
 
 public partial class SettingViewModel : ViewModelBase
 {
-    [ObservableProperty] private string _settingTips = LocalizationService.Get("Status.Settings.DefaultHelp");
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasSettingTips))]
+    private string _settingTips = LocalizationService.Get("Status.Settings.DefaultHelp");
+
+    /// <summary>True once a command has put real help or a result in <see cref="SettingTips"/>, not the placeholder.</summary>
+    public bool HasSettingTips => !string.IsNullOrWhiteSpace(SettingTips) &&
+                                  SettingTips != LocalizationService.Get("Status.Settings.DefaultHelp");
 
     public ObservableCollection<LyricsTypeEnumModel> LyricsTypes { get; } = [];
 

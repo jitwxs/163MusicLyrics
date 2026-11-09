@@ -1,4 +1,4 @@
-<UserControl xmlns="https://github.com/avaloniaui"
+﻿<UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -157,31 +157,40 @@
                                                    ToolTip.Tip="{loc:Loc Key=UI.Album}" />
                                         <WrapPanel ItemSpacing="{arc:ArcDesignTokenResource Space2}"
                                                    LineSpacing="{arc:ArcDesignTokenResource Space2}">
-                                            <arc:Badge Size="Small" Icon="{x:Static arc:ArcIcons.Clock}"
+                                            <arc:Badge Size="Small"
                                                        Content="{Binding SearchResultViewModel.SongDuration, Mode=OneWay}"
-                                                       ToolTip.Tip="{loc:Loc Key=UI.Duration}" />
-                                            <arc:Badge Size="Small" Icon="{x:Static arc:ArcIcons.Calendar}"
+                                                       ToolTip.Tip="{loc:Loc Key=UI.Duration}">
+                                                <arc:Badge.Icon><arc:ArcGlyph Data="{x:Static arc:ArcIcons.Clock}" /></arc:Badge.Icon>
+                                            </arc:Badge>
+                                            <arc:Badge Size="Small"
                                                        Content="{Binding SearchResultViewModel.PublishDate, Mode=OneWay}"
-                                                       ToolTip.Tip="{loc:Loc Key=UI.Release}" />
-                                            <arc:Badge Size="Small" Icon="{x:Static arc:ArcIcons.Globe}"
+                                                       ToolTip.Tip="{loc:Loc Key=UI.Release}">
+                                                <arc:Badge.Icon><arc:ArcGlyph Data="{x:Static arc:ArcIcons.Calendar}" /></arc:Badge.Icon>
+                                            </arc:Badge>
+                                            <arc:Badge Size="Small"
                                                        Content="{Binding SearchResultViewModel.SongSource, Mode=OneWay}"
-                                                       ToolTip.Tip="{loc:Loc Key=UI.Source}" />
+                                                       ToolTip.Tip="{loc:Loc Key=UI.Source}">
+                                                <arc:Badge.Icon><arc:ArcGlyph Data="{x:Static arc:ArcIcons.Globe}" /></arc:Badge.Icon>
+                                            </arc:Badge>
                                             <!-- Lyric completeness: tone plus words, never colour alone. -->
                                             <arc:Badge Name="LampCompleteBadge" Size="Small" Tone="Success"
-                                                       Icon="{x:Static arc:ArcIcons.CircleCheck}"
                                                        Content="{loc:Loc Key=Search.Lamp.Complete}"
                                                        ToolTip.Tip="{Binding LampVm.Details}"
-                                                       IsVisible="{Binding LampVm.IsComplete}" />
+                                                       IsVisible="{Binding LampVm.IsComplete}">
+                                                <arc:Badge.Icon><arc:ArcGlyph Data="{x:Static arc:ArcIcons.CircleCheck}" /></arc:Badge.Icon>
+                                            </arc:Badge>
                                             <arc:Badge Name="LampPartialBadge" Size="Small" Tone="Warning"
-                                                       Icon="{x:Static arc:ArcIcons.TriangleAlert}"
                                                        Content="{loc:Loc Key=Search.Lamp.Partial}"
                                                        ToolTip.Tip="{Binding LampVm.Details}"
-                                                       IsVisible="{Binding LampVm.IsPartial}" />
+                                                       IsVisible="{Binding LampVm.IsPartial}">
+                                                <arc:Badge.Icon><arc:ArcGlyph Data="{x:Static arc:ArcIcons.TriangleAlert}" /></arc:Badge.Icon>
+                                            </arc:Badge>
                                             <arc:Badge Name="LampEmptyBadge" Size="Small" Tone="Danger"
-                                                       Icon="{x:Static arc:ArcIcons.CircleX}"
                                                        Content="{loc:Loc Key=Search.Lamp.Empty}"
                                                        ToolTip.Tip="{Binding LampVm.Details}"
-                                                       IsVisible="{Binding LampVm.IsEmpty}" />
+                                                       IsVisible="{Binding LampVm.IsEmpty}">
+                                                <arc:Badge.Icon><arc:ArcGlyph Data="{x:Static arc:ArcIcons.CircleX}" /></arc:Badge.Icon>
+                                            </arc:Badge>
                                         </WrapPanel>
                                     </StackPanel>
                                 </Grid>
@@ -327,7 +336,8 @@
                             HorizontalAlignment="Right"
                             VerticalAlignment="Bottom"
                             Spacing="{arc:ArcDesignTokenResource Space1}">
-                    <TextBlock Classes="secondary" Text="{loc:Loc Key=Search.SaveFolder}" HorizontalAlignment="Right" />
+                    <!-- Inset to line up with the text inside the ghost button below. -->
+                    <TextBlock Classes="secondary" Text="{loc:Loc Key=Search.SaveFolder}" Margin="12,0,0,0" />
                     <arc:Button Name="SaveFolderButton"
                                 Variant="Ghost"
                                 Size="Small"

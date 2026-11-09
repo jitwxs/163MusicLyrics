@@ -1,4 +1,4 @@
-using Avalonia.Controls;
+﻿using Avalonia.Controls;
 using Avalonia.Headless;
 using Avalonia.Headless.XUnit;
 using Avalonia.Input;
@@ -108,6 +108,11 @@ public class SearchPageRegressionTests
         Assert.False(previewEmpty.IsVisible);
         Assert.Equal("[00:01.000]hello", scope.Find<CodeBlock>("LyricPreview").Code);
         Assert.Equal("song", scope.Find<SelectableTextBlock>("SongTitle").Text);
+
+        // Badge.Icon renders a raw Geometry as its type name; every badge icon must be a control.
+        var badges = scope.Page.GetVisualDescendants().OfType<Badge>().ToList();
+        Assert.NotEmpty(badges);
+        Assert.All(badges, b => Assert.IsType<ArcGlyph>(b.Icon));
     }
 
     [AvaloniaFact]
