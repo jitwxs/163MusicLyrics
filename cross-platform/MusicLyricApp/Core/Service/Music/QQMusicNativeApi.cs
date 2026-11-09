@@ -49,8 +49,9 @@ public class QQMusicNativeApi(Func<string> cookieFunc) : BaseNativeApi(cookieFun
             {
                 "comm", new Dictionary<string, object>
                 {
-                    { "ct", 24 },
-                    { "cv", 0 },
+                    // The desktop search method returns empty lists with the web client (ct=24, cv=0).
+                    { "ct", 20 },
+                    { "cv", 1859 },
                     { "uin", "0" },
                     { "format", "json" },
                     { "platform", "yqq" },

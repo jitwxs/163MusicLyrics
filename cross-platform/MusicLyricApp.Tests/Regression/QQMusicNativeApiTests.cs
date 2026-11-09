@@ -8,27 +8,33 @@ namespace MusicLyricAppTest.Regression;
 public class QQMusicNativeApiTests
 {
     [Theory]
-    [InlineData(SearchTypeEnum.SONG_ID, 0)]
-    [InlineData(SearchTypeEnum.ALBUM_ID, 2)]
-    [InlineData(SearchTypeEnum.PLAYLIST_ID, 3)]
-    public void KeywordSearchSendsRequiredCommAndSearchParameters(SearchTypeEnum searchType, int expectedType)
+    [InlineData(SearchTypeEnum.SONG_ID, 0, "周杰伦")]
+    [InlineData(SearchTypeEnum.ALBUM_ID, 2, "周杰伦")]
+    [InlineData(SearchTypeEnum.PLAYLIST_ID, 3, "周杰伦")]
+    [InlineData(SearchTypeEnum.SONG_ID, 0, "从头再来")]
+    [InlineData(SearchTypeEnum.ALBUM_ID, 2, "从头再来")]
+    [InlineData(SearchTypeEnum.PLAYLIST_ID, 3, "从头再来")]
+    public void KeywordSearchUsesDesktopClientParametersToAvoidEmptyResults(
+        SearchTypeEnum searchType, int expectedType, string keyword)
     {
         var api = new CapturingQQMusicNativeApi();
 
-        var response = api.Search("周杰伦", searchType);
+        var response = api.Search(keyword, searchType);
 
         Assert.Equal(0, response.Code);
         Assert.Equal("https://u.y.qq.com/cgi-bin/musicu.fcg", api.Url);
         var request = JObject.Parse(api.Body!);
-        Assert.Equal(24, (int?)request["comm"]?["ct"]);
-        Assert.Equal(0, (int?)request["comm"]?["cv"]);
+        Assert.Equal(20, (int?)request["comm"]?["ct"]);
+        Assert.Equal(1859, (int?)request["comm"]?["cv"]);
         Assert.Equal("0", (string?)request["comm"]?["uin"]);
         Assert.Equal("json", (string?)request["comm"]?["format"]);
         Assert.Equal("yqq", (string?)request["comm"]?["platform"]);
         Assert.Equal("DoSearchForQQMusicDesktop", (string?)request["req_1"]?["method"]);
         Assert.Equal("music.search.SearchCgiService", (string?)request["req_1"]?["module"]);
-        Assert.Equal("周杰伦", (string?)request["req_1"]?["param"]?["query"]);
+        Assert.Equal(keyword, (string?)request["req_1"]?["param"]?["query"]);
         Assert.Equal(expectedType, (int?)request["req_1"]?["param"]?["search_type"]);
+        Assert.Equal("20", (string?)request["req_1"]?["param"]?["num_per_page"]);
+        Assert.Equal("1", (string?)request["req_1"]?["param"]?["page_num"]);
     }
 
     private sealed class CapturingQQMusicNativeApi : QQMusicNativeApi
