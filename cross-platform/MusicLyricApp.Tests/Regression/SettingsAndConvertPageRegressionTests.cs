@@ -350,12 +350,12 @@ public class SettingsAndConvertPageRegressionTests
             var empty = view.FindControl<EmptyState>("OutputEmptyState")!;
             var output = view.FindControl<CodeBlock>("OutputBlock")!;
             var alert = view.FindControl<Alert>("TipAlert")!;
-            Assert.True(empty.IsVisible);
+            Assert.True(empty.IsEffectivelyVisible);
             Assert.False(alert.IsVisible);
 
             vm.InputText = "[00:01.000]hello";
             await WaitUntil(() => vm.HasOutput);
-            Assert.False(empty.IsVisible);
+            Assert.False(empty.IsEffectivelyVisible);
             Assert.Contains("00:00:01,000", output.Code);
             Assert.False(vm.IsTipError);
 

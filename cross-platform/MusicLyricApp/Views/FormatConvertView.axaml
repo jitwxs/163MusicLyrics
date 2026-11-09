@@ -74,13 +74,14 @@
                               Text="{Binding InputText, Mode=TwoWay}" />
             </arc:ResizablePanel>
             <arc:ResizablePanel Id="output" Label="{loc:Loc Key=Convert.Output}" MinSize="260">
-                <Border Classes="pane">
+                <!-- The code block draws its own frame; only the empty state sits in a card. -->
                     <Panel>
-                        <arc:EmptyState Name="OutputEmptyState"
-                                        IsVisible="{Binding !HasOutput}"
-                                        Icon="{x:Static arc:ArcIcons.FileText}"
-                                        Title="{loc:Loc Key=Convert.Output}"
-                                        Description="{loc:Loc Key=Convert.OutputEmpty}" />
+                        <Border Classes="pane" IsVisible="{Binding !HasOutput}">
+                            <arc:EmptyState Name="OutputEmptyState"
+                                            Icon="{x:Static arc:ArcIcons.FileText}"
+                                            Title="{loc:Loc Key=Convert.Output}"
+                                            Description="{loc:Loc Key=Convert.OutputEmpty}" />
+                        </Border>
                         <ScrollViewer IsVisible="{Binding HasOutput}">
                             <arc:CodeBlock Name="OutputBlock"
                                            Code="{Binding OutputText}"
@@ -90,7 +91,6 @@
                                            CopyLabel="{loc:Loc Key=Convert.CopyOutput}" />
                         </ScrollViewer>
                     </Panel>
-                </Border>
             </arc:ResizablePanel>
         </arc:ResizablePanels>
 

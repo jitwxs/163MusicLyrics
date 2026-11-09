@@ -59,6 +59,7 @@
                                  Label="{loc:Loc Key=UI.Search}"
                                  IsLabelVisible="False"
                                  Placeholder="{loc:Loc Key=UI.SearchPlaceholder}"
+                                 ClearText="{loc:Loc Key=Search.Clear}"
                                  Text="{Binding SearchParamViewModel.SearchText}" />
                 <arc:Switch Grid.Column="1"
                             Name="FuzzySwitch"
@@ -264,10 +265,14 @@
                 </Grid>
             </Border>
 
-            <!-- Lyrics preview, or the fuzzy search results in its place. -->
-            <Border Grid.Row="1" Classes="pane" Padding="12">
-                <Panel>
+            <!-- Lyrics preview, or the fuzzy search results in its place. The code block and the results table
+                 draw their own frame, so only the empty states sit in a card (no frame inside a frame). -->
+                <Panel Grid.Row="1">
                     <Panel IsVisible="{Binding !IsShowingBlurResults}">
+                        <Border Classes="pane"
+                                Padding="12"
+                                IsVisible="{Binding !SearchResultViewModel.HasConsoleOutput}">
+                            <Panel>
                         <arc:EmptyState Name="SongEmptyState"
                                         IsVisible="{Binding SearchResultViewModel.ShowIdleState}"
                                         Icon="{x:Static arc:ArcIcons.Music}"
@@ -277,6 +282,8 @@
                                         Icon="{x:Static arc:ArcIcons.FileText}"
                                         Title="{loc:Loc Key=Search.Lamp.Empty}"
                                         Description="{loc:Loc Key=Search.NoLyricsDescription}" />
+                            </Panel>
+                        </Border>
                         <ScrollViewer IsVisible="{Binding SearchResultViewModel.HasConsoleOutput}">
                             <arc:CodeBlock Name="LyricPreview"
                                            Code="{Binding SearchResultViewModel.ConsoleOutput, Mode=OneWay}"
@@ -291,7 +298,6 @@
                                           DataContext="{Binding BlurResults}"
                                           IsVisible="{Binding $parent[views:SearchView].((vm:MainWindowViewModel)DataContext).IsShowingBlurResults}" />
                 </Panel>
-            </Border>
         </Grid>
 
         <!-- Output: how the lyrics are written, where, and the one primary action of the page. -->

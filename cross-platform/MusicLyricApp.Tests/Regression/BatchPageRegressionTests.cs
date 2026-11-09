@@ -122,17 +122,67 @@ public class BatchPageRegressionTests
     }
 
     [AvaloniaFact]
+    public async Task StartupRestoresCachedSongsWithoutDuplicatesOrStaleEntries()
+    {
+        using var scope = new Scope(withRows: false);
+        var settings = scope.Ws.Settings;
+        MusicLyricApp.Core.Service.LocalSongCacheService.SaveCache(settings, MusicLyricApp.Models.SearchSourceEnum.NET_EASE_MUSIC, "111", TestWorkspace.Song("111"), "http://link/111");
+        MusicLyricApp.Core.Service.LocalSongCacheService.SaveCache(settings, MusicLyricApp.Models.SearchSourceEnum.QQ_MUSIC, "222", TestWorkspace.Song("222", source: MusicLyricApp.Models.SearchSourceEnum.QQ_MUSIC));
+        File.WriteAllText(Path.Combine(settings.Config.SearchCacheFolderPath, "broken.json"), "{not json");
+
+        // Already in the list (searched before the cache finished loading): kept as is, not duplicated.
+        scope.Vm.AddSearchResults(new() { ["111"] = new(TestWorkspace.Song("111")) }, [TestWorkspace.Input("111")]);
+        await scope.Vm.LoadFromLocalCacheAsync();
+
+        Assert.Equal(["111", "222"], scope.Vm.Items.Select(i => i.SongId));
+        var restored = scope.Vm.Items[1];
+        Assert.Equal(MusicLyricApp.Models.SearchSourceEnum.QQ_MUSIC, restored.SourceEnum);
+        Assert.True(restored.IsReady);
+        Assert.False(restored.IsSelected);
+        Assert.Equal(2, scope.Vm.TotalSongsCount);
+        Assert.True(scope.Vm.TryGetCachedSaveVo("222", out _));
+        Assert.True(scope.Vm.TryGetCachedSongLink("111", out var link));
+        Assert.Equal("http://link/111", link);
+    }
+
+    [AvaloniaFact]
+    public void CacheLoaderKeepsTheNewestSongsNewestFirstAndSkipsOtherLyricModes()
+    {
+        using var ws = new TestWorkspace();
+        var folder = ws.Settings.Config.SearchCacheFolderPath;
+        for (var i = 1; i <= 3; i++)
+        {
+            MusicLyricApp.Core.Service.LocalSongCacheService.SaveCache(ws.Settings, MusicLyricApp.Models.SearchSourceEnum.NET_EASE_MUSIC, $"{i}", TestWorkspace.Song($"{i}"));
+        }
+
+        // Rewrite timestamps so the order is deterministic: 1 oldest, 3 newest.
+        foreach (var file in Directory.GetFiles(folder))
+        {
+            var text = File.ReadAllText(file);
+            var id = System.Text.RegularExpressions.Regex.Match(text, "\"SongId\":\\s*\"(\\d)\"").Groups[1].Value;
+            text = System.Text.RegularExpressions.Regex.Replace(text, "\"UpdatedAt\":\\s*\"[^\"]+\"", $"\"UpdatedAt\":\"2026-01-0{id}T00:00:00\"");
+            File.WriteAllText(file, text);
+        }
+
+        var recent = MusicLyricApp.Core.Service.LocalSongCacheService.LoadRecent(ws.Settings, 2);
+        Assert.Equal(["3", "2"], recent.Select(s => s.SongId)); // newest first
+
+        ws.Settings.Config.VerbatimLyricMode = MusicLyricApp.Models.VerbatimLyricModeEnum.STANDARD_MODE;
+        Assert.Empty(MusicLyricApp.Core.Service.LocalSongCacheService.LoadRecent(ws.Settings, 10));
+    }
+
+    [AvaloniaFact]
     public void EmptyListShowsEmptyStateAndHidesBulkActions()
     {
         using var scope = new Scope(withRows: false);
         var empty = Assert.Single(scope.View.GetVisualDescendants().OfType<EmptyState>());
-        Assert.True(empty.IsVisible);
+        Assert.True(empty.IsEffectivelyVisible);
         Assert.False(scope.View.Table.IsVisible);
         Assert.False(scope.View.FindControl<TKCode.Arc.Button>("SaveSelectedButton")!.IsEffectivelyVisible);
 
         scope.Vm.AddSearchResults(new() { ["123"] = new(TestWorkspace.Song()) }, [TestWorkspace.Input()]);
         Dispatcher.UIThread.RunJobs();
-        Assert.False(empty.IsVisible);
+        Assert.False(empty.IsEffectivelyVisible);
         Assert.True(scope.View.Table.IsVisible);
         Assert.True(scope.View.FindControl<TKCode.Arc.Button>("SaveSelectedButton")!.IsEffectivelyVisible);
         Assert.Equal("1", scope.View.FindControl<TextBlock>("TotalCountText")!.Text);

@@ -37,6 +37,10 @@ public static class Constants
 
     public const int BatchQuerySize = 300;
 
+    /// <summary>Default and upper bound for how many cached songs the download manager restores at startup.</summary>
+    public const int DefaultStartupCacheLoadLimit = 500;
+    public const int MaxStartupCacheLoadLimit = 5000;
+
     public const int SleepMsBetweenBatchQuery = 500;
 
     public static class HelpTips

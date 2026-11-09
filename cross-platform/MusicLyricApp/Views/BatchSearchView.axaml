@@ -33,7 +33,7 @@
         </Style>
     </UserControl.Styles>
 
-    <Grid Margin="24,16,24,24" RowDefinitions="Auto,Auto,*,Auto" RowSpacing="{arc:ArcDesignTokenResource Space4}">
+    <Grid Margin="24,16,24,24" RowDefinitions="Auto,Auto,Auto,*,Auto" RowSpacing="{arc:ArcDesignTokenResource Space4}">
 
         <!-- Header: what this page is, where the rows came from, and how to add more. -->
         <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{arc:ArcDesignTokenResource Space4}">
@@ -95,32 +95,53 @@
             </Border>
         </WrapPanel>
 
-        <Border Grid.Row="2" Classes="pane" Padding="4">
-            <Panel>
+        <!-- Filter the list; the table shows only matching rows. -->
+        <Grid Grid.Row="2"
+              ColumnDefinitions="Auto,*"
+              ColumnSpacing="{arc:ArcDesignTokenResource Space3}"
+              IsVisible="{Binding HasItems}">
+            <arc:SearchField Name="FilterField"
+                             Width="320"
+                             Size="Small"
+                             Label="{loc:Loc Key=Batch.FilterLabel}"
+                             IsLabelVisible="False"
+                             Placeholder="{loc:Loc Key=Batch.FilterPlaceholder}"
+                             ClearText="{loc:Loc Key=Search.Clear}"
+                             Text="{Binding FilterText, Mode=TwoWay}" />
+            <TextBlock Grid.Column="1"
+                       Name="FilterCountText"
+                       Classes="secondary"
+                       VerticalAlignment="Center"
+                       IsVisible="{Binding IsFiltering}"
+                       Text="{Binding FilterCountText}" />
+        </Grid>
+
+        <!-- The table draws its own frame; only the empty state sits in a card. -->
+            <Panel Grid.Row="3">
                 <arc:Table Name="BatchTable"
-                           ItemsSource="{Binding Items}"
+                           ItemsSource="{Binding VisibleItems}"
                            IsVisible="{Binding HasItems}"
                            IsSelectable="True"
                            SelectsOnRowClick="False"
                            IsStriped="True"
                            Caption="{loc:Loc Key=Nav.Batch}"
-                           EmptyMessage="{loc:Loc Key=Batch.EmptyTitle}"
+                           EmptyMessage="{Binding TableEmptyMessage}"
                            ItemNameOne="{loc:Loc Key=Batch.ItemOne}"
                            ItemNameOther="{loc:Loc Key=Batch.ItemOther}"
                            SelectedNoun="{loc:Loc Key=Table.Selected}"
                            SelectAllLabel="{loc:Loc Key=Table.SelectAll}"
                            ClearSelectionLabel="{loc:Loc Key=Table.ClearSelection}" />
 
-                <arc:EmptyState Name="BatchEmptyState"
-                                IsVisible="{Binding !HasItems}"
-                                Icon="{x:Static arc:ArcIcons.ListChecks}"
-                                Title="{loc:Loc Key=Batch.EmptyTitle}"
-                                Description="{loc:Loc Key=Batch.EmptyDescription}" />
+                <Border Classes="pane" IsVisible="{Binding !HasItems}">
+                    <arc:EmptyState Name="BatchEmptyState"
+                                    Icon="{x:Static arc:ArcIcons.ListChecks}"
+                                    Title="{loc:Loc Key=Batch.EmptyTitle}"
+                                    Description="{loc:Loc Key=Batch.EmptyDescription}" />
+                </Border>
             </Panel>
-        </Border>
 
         <!-- Bulk actions on the selected rows; saving is the page's single primary action. -->
-        <StackPanel Grid.Row="3"
+        <StackPanel Grid.Row="4"
                     Orientation="Horizontal"
                     HorizontalAlignment="Right"
                     Spacing="{arc:ArcDesignTokenResource Space3}"

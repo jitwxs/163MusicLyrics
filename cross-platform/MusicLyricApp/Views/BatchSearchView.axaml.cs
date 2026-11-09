@@ -9,6 +9,7 @@ using Avalonia.Data;
 using Avalonia.Layout;
 using Avalonia.Markup.Xaml;
 using Avalonia.Media;
+using MusicLyricApp.Core;
 using MusicLyricApp.Core.Localization;
 using MusicLyricApp.ViewModels;
 using TKCode.Arc;
@@ -49,6 +50,12 @@ public partial class BatchSearchView : UserControl
 
         if (_viewModel != null)
         {
+            // Deleting also clears the songs' local cache, so ask first, anchored to this page's window.
+            _viewModel.ConfirmDeleteAsync = count => DialogHelper.ConfirmOnAsync(this,
+                LocalizationService.Get("Dialog.DeleteSongs.Title"),
+                LocalizationService.Format("Dialog.DeleteSongs.Message", count),
+                LocalizationService.Get("Dialog.DeleteSongs.Action"),
+                isDanger: true);
             _viewModel.Items.CollectionChanged += OnItemsChanged;
             foreach (var item in _viewModel.Items) item.PropertyChanged += OnItemPropertyChanged;
         }

@@ -157,7 +157,7 @@ public class ViewModelRegressionTests
             vm.AddSearchResults(new() { ["123"] = new(TestWorkspace.Song()) }, [TestWorkspace.Input()]);
             Dispatcher.UIThread.RunJobs();
             var table = Assert.Single(window.GetVisualDescendants().OfType<TKCode.Arc.Table>());
-            Assert.Same(vm.Items, table.ItemsSource);
+            Assert.Same(vm.VisibleItems, table.ItemsSource); // the table shows the filtered rows
             Assert.Single(vm.Items);
         }
         finally { window.Close(); }

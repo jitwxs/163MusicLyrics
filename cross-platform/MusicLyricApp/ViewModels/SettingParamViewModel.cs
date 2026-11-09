@@ -426,6 +426,23 @@ public partial class SettingParamViewModel : ViewModelBase
         _settingBean.Config.SearchCacheMaxSizeMb = size;
     }
     
+    // 28. 启动时加载到下载管理的缓存歌曲数量
+    [ObservableProperty] private string _searchCacheStartupLoadLimitText;
+
+    [ObservableProperty] private string _searchCacheStartupLoadLimitError;
+
+    partial void OnSearchCacheStartupLoadLimitTextChanged(string value)
+    {
+        if (!int.TryParse(value, out var limit) || limit < 0 || limit > Constants.MaxStartupCacheLoadLimit)
+        {
+            SearchCacheStartupLoadLimitError = LocalizationService.Format("Status.Settings.StartupLoadRangeInvalid", Constants.MaxStartupCacheLoadLimit);
+            return;
+        }
+
+        SearchCacheStartupLoadLimitError = string.Empty;
+        _settingBean.Config.SearchCacheStartupLoadLimit = limit;
+    }
+
     private SettingBean _settingBean;
 
     public SettingParamViewModel()
@@ -483,6 +500,8 @@ public partial class SettingParamViewModel : ViewModelBase
         SearchCacheFolderPath = _settingBean.Config.SearchCacheFolderPath;
         SearchCacheMaxSizeMbText = (_settingBean.Config.SearchCacheMaxSizeMb <= 0 ? 128 : _settingBean.Config.SearchCacheMaxSizeMb).ToString();
         SearchCacheSizeError = string.Empty;
+        SearchCacheStartupLoadLimitText = _settingBean.Config.SearchCacheStartupLoadLimit.ToString();
+        SearchCacheStartupLoadLimitError = string.Empty;
     }
 }
 

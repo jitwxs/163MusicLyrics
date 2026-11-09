@@ -36,6 +36,7 @@ public partial class MainWindow : ArcWindow, IWindowProvider
         viewModel.TipRaised += ShowTip;
         viewModel.BatchSearchViewModel.TipRaised += ShowTip;
         UpdateBatchBadge();
+        _ = viewModel.BatchSearchViewModel.LoadFromLocalCacheAsync();
 
         NavSidebar.ItemInvoked += OnSidebarItemInvoked;
         TitleBarDrag.Attach(this);

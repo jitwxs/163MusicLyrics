@@ -307,6 +307,13 @@
                                        ErrorMessage="{Binding SettingParamViewModel.SearchCacheSizeError}"
                                        Text="{Binding SettingParamViewModel.SearchCacheMaxSizeMbText, Mode=TwoWay}" />
                         </arc:SettingsRow>
+                        <arc:SettingsRow Header="{loc:Loc Key=Settings.StartupLoadLimit}"
+                                         Description="{loc:Loc Key=Settings.StartupLoadLimitHint}">
+                            <arc:Input Name="StartupLoadLimitInput"
+                                       Label="{loc:Loc Key=Settings.StartupLoadLimit}"
+                                       ErrorMessage="{Binding SettingParamViewModel.SearchCacheStartupLoadLimitError}"
+                                       Text="{Binding SettingParamViewModel.SearchCacheStartupLoadLimitText, Mode=TwoWay}" />
+                        </arc:SettingsRow>
                     </arc:SettingsGroup>
                 </StackPanel>
             </StackPanel>
