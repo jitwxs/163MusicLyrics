@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using Avalonia.Controls;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
@@ -14,16 +13,22 @@ using MusicLyricApp.ViewModels.Messages;
 
 namespace MusicLyricApp.ViewModels;
 
+/// <summary>Fuzzy search results shown inside the search page; the view picks columns from <see cref="SearchType"/>.</summary>
 public partial class BlurSearchViewModel(List<SearchResultVo> searchResList) : ViewModelBase
 {
     private bool _countNotificationsAttached;
 
     [ObservableProperty] private ObservableCollection<BlurSearchResultBase> _searchResults = [];
 
-    // 通知 View 创建列
-    public event Action<List<DataGridTextColumn>>? ColumnsChanged;
+    /// <summary>Kind of the loaded results (song, album or playlist); decides the table columns.</summary>
+    [ObservableProperty] private SearchTypeEnum _searchType;
 
-    [ObservableProperty] private IList _selectedItems = new List<object>();
+    /// <summary>Raised after the UI language changes so the view can rebuild its column headers.</summary>
+    public event Action? LanguageChanged;
+
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(DownloadSelectedCommand))]
+    private IList _selectedItems = new List<object>();
 
     public string SearchResultCountText => LocalizationService.Format("UI.Blur.ResultCount", SearchResults.Count);
     public string SelectedItemsCountText => LocalizationService.Format("UI.Blur.SelectedCount", SelectedItems.Count);
@@ -41,70 +46,57 @@ public partial class BlurSearchViewModel(List<SearchResultVo> searchResList) : V
                 foreach (var item in SearchResults) item.RefreshLocalizedSource();
                 OnPropertyChanged(nameof(SearchResultCountText));
                 OnPropertyChanged(nameof(SelectedItemsCountText));
-                if (SearchResults.FirstOrDefault() is BlurSongSearchResult)
-                    ColumnsChanged?.Invoke(BlurSongSearchResult.GetDataGridColumns());
-                else if (SearchResults.FirstOrDefault() is BlurAlbumSearchResult)
-                    ColumnsChanged?.Invoke(BlurAlbumSearchResult.GetDataGridColumns());
-                else if (SearchResults.FirstOrDefault() is BlurPlaylistSearchResult)
-                    ColumnsChanged?.Invoke(BlurPlaylistSearchResult.GetDataGridColumns());
+                LanguageChanged?.Invoke();
             };
         }
 
-        var searchType = searchResList[0].SearchType;
-        switch (searchType)
+        SearchType = searchResList[0].SearchType;
+        switch (SearchType)
         {
             case SearchTypeEnum.SONG_ID:
                 foreach (var searchResultVo in searchResList)
                 {
-                    var searchSource = searchResultVo.SearchSource;
                     foreach (var songVo in searchResultVo.SongVos)
                     {
-                        SearchResults.Add(new BlurSongSearchResult(searchSource, songVo));
+                        SearchResults.Add(new BlurSongSearchResult(searchResultVo.SearchSource, songVo));
                     }
                 }
-
-                ColumnsChanged?.Invoke(BlurSongSearchResult.GetDataGridColumns());
                 break;
             case SearchTypeEnum.ALBUM_ID:
                 foreach (var searchResultVo in searchResList)
                 {
-                    var searchSource = searchResultVo.SearchSource;
                     foreach (var albumVo in searchResultVo.AlbumVos)
                     {
-                        SearchResults.Add(new BlurAlbumSearchResult(searchSource, albumVo));
+                        SearchResults.Add(new BlurAlbumSearchResult(searchResultVo.SearchSource, albumVo));
                     }
                 }
-
-                ColumnsChanged?.Invoke(BlurAlbumSearchResult.GetDataGridColumns());
                 break;
             case SearchTypeEnum.PLAYLIST_ID:
                 foreach (var searchResultVo in searchResList)
                 {
-                    var searchSource = searchResultVo.SearchSource;
                     foreach (var playlistVo in searchResultVo.PlaylistVos)
                     {
-                        SearchResults.Add(new BlurPlaylistSearchResult(searchSource, playlistVo));
+                        SearchResults.Add(new BlurPlaylistSearchResult(searchResultVo.SearchSource, playlistVo));
                     }
                 }
-
-                ColumnsChanged?.Invoke(BlurPlaylistSearchResult.GetDataGridColumns());
                 break;
             default:
                 throw new MusicLyricException(ErrorMsgConst.FUNCTION_NOT_SUPPORT);
         }
     }
 
-    [RelayCommand]
+    private bool CanDownloadSelected() => SelectedItems.Count > 0;
+
+    [RelayCommand(CanExecute = nameof(CanDownloadSelected))]
     private void DownloadSelected()
     {
         var ids = string.Join(',', SelectedItems
             .OfType<BlurSearchResultBase>()
             .Where(e => !string.IsNullOrEmpty(e.Id))
             .Select(e => e.Id));
-        
-        // send message to main window
+
+        // Ask the main view model to fetch the lyrics, then leave the results view.
         WeakReferenceMessenger.Default.Send(new BlurSearchResultsMessage(ids));
-        // closing window
         WeakReferenceMessenger.Default.Send(new CloseWindowMessage("BlurSearchWindow"));
     }
 }

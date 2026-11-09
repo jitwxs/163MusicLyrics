@@ -1,4 +1,4 @@
-using System.Net.Http;
+﻿using System.Net.Http;
 using Avalonia.Media;
 using Moq;
 using MusicLyricApp.Core.Service;
@@ -46,10 +46,10 @@ public class AdditionalFeatureRegressionTests
     }
 
     [Theory]
-    [InlineData(false, false, "Red")]
-    [InlineData(true, false, "Chocolate")]
-    [InlineData(true, true, "LimeGreen")]
-    public void AvailabilityLampReflectsMissingTranslations(bool original, bool translated, string color)
+    [InlineData(false, false, "Red", LampStateEnum.EMPTY)]
+    [InlineData(true, false, "Chocolate", LampStateEnum.PARTIAL)]
+    [InlineData(true, true, "LimeGreen", LampStateEnum.COMPLETE)]
+    public void AvailabilityLampReflectsMissingTranslations(bool original, bool translated, string color, LampStateEnum state)
     {
         var settings = new SettingBean();
         var song = TestWorkspace.Song(lyric: original ? "original" : "");
@@ -57,6 +57,10 @@ public class AdditionalFeatureRegressionTests
         var vm = new SignalLampViewModel();
         vm.UpdateLampInfo(new() { ["123"] = new(song) }, settings);
         Assert.Equal(Color.Parse(color), Assert.IsAssignableFrom<ISolidColorBrush>(vm.LampColor).Color);
+        Assert.Equal(state, vm.State);
+        Assert.Equal(state == LampStateEnum.COMPLETE, vm.IsComplete);
+        Assert.Equal(state == LampStateEnum.PARTIAL, vm.IsPartial);
+        Assert.Equal(state == LampStateEnum.EMPTY, vm.IsEmpty);
         Assert.Contains(original ? "原文: 1" : "原文: 0", vm.Details);
     }
 

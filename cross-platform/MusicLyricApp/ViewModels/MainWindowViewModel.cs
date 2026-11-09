@@ -65,7 +65,15 @@ public partial class MainWindowViewModel : ViewModelBase
 
     [ObservableProperty] private SettingBean _settingBean;
     
-    private BlurSearchWindow? _blurSearchWindow;
+    /// <summary>Fuzzy search results shown in place of the lyrics preview; null when none are open.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsShowingBlurResults))]
+    private BlurSearchViewModel? _blurResults;
+
+    public bool IsShowingBlurResults => BlurResults != null;
+
+    /// <summary>Raised for every status message; the window shows it as a toast. Args: message, isError.</summary>
+    public event Action<string, bool>? TipRaised;
 
     // ---- Page navigation (single window with a sidebar) ----
     public const string PageSearch = "search";
@@ -188,10 +196,9 @@ public partial class MainWindowViewModel : ViewModelBase
         
         WeakReferenceMessenger.Default.Register<CloseWindowMessage>(this, (r, m) =>
         {
-            if (m.Value == "BlurSearchWindow" && _blurSearchWindow != null)
+            if (m.Value == "BlurSearchWindow")
             {
-                _blurSearchWindow.Close();
-                _blurSearchWindow = null;
+                BlurResults = null;
             }
         });
 
@@ -347,6 +354,9 @@ public partial class MainWindowViewModel : ViewModelBase
             return;
         }
 
+        // An exact search shows its own preview, so any open fuzzy results give way to it.
+        BlurResults = null;
+
         try
         {
             _searchService.InitSongIds(SearchParamViewModel, SettingBean);
@@ -426,33 +436,10 @@ public partial class MainWindowViewModel : ViewModelBase
         {
             var resultVos = _searchService.BlurSearch(SearchParamViewModel, SettingBean);
 
-            if (_blurSearchWindow != null)
-            {
-                if (!_blurSearchWindow.IsVisible)
-                {
-                    // 窗口已经被关闭或隐藏
-                    _blurSearchWindow = null;
-                }
-                else
-                {
-                    _blurSearchWindow.UpdateResults(resultVos);
-
-                    // 窗口还在：如果最小化，恢复正常；否则激活
-                    if (_blurSearchWindow.WindowState == WindowState.Minimized)
-                    {
-                        _blurSearchWindow.WindowState = WindowState.Normal;
-                    }
-
-                    _blurSearchWindow.Activate();
-                    SetTip(LocalizationService.Format("Status.Main.BlurSuccess", resultVos.Count), false);
-                    return;
-                }
-            }
-
-            // 创建新窗口
-            _blurSearchWindow = new BlurSearchWindow(resultVos);
-            _blurSearchWindow.Closed += (_, _) => _blurSearchWindow = null;
-            _blurSearchWindow.Show();
+            var results = new BlurSearchViewModel(resultVos);
+            results.LoadTypeAResults();
+            BlurResults = results;
+            CurrentPageKey = PageSearch;
             SetTip(LocalizationService.Format("Status.Main.BlurSuccess", resultVos.Count), false);
         }
         catch (Exception ex)
@@ -911,11 +898,18 @@ public partial class MainWindowViewModel : ViewModelBase
         }
     }
 
+    [RelayCommand]
+    private void ExecuteCloseBlurResults()
+    {
+        BlurResults = null;
+    }
+
     private void SetTip(string message, bool isError)
     {
         TipTimestamp = DateTime.Now.ToString("HH:mm:ss");
         TipNormalMessage = isError ? "" : message;
         TipErrorMessage = isError ? message : "";
+        TipRaised?.Invoke(message, isError);
     }
 
     partial void OnTipTimestampChanged(string value)

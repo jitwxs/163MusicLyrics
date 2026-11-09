@@ -1,9 +1,5 @@
-﻿using System.Collections.Generic;
-using Avalonia.Controls;
-using Avalonia.Data;
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using MusicLyricApp.Core.Utils;
-using MusicLyricApp.Core.Localization;
 
 namespace MusicLyricApp.Models;
 
@@ -41,42 +37,6 @@ public partial class BlurSongSearchResult : BlurSearchResultBase
         Duration = new LyricTimestamp(resultVo.Duration).PrintTimestamp("mm:ss", DotTypeEnum.DOWN);
         SetSource(searchSource);
     }
-
-    public static List<DataGridTextColumn> GetDataGridColumns()
-    {
-        return
-        [
-            new DataGridTextColumn
-            {
-                Header = LocalizationService.Get("UI.BlurGrid.Song"), Binding = new Binding(nameof(Title)),
-                Width = new DataGridLength(3, DataGridLengthUnitType.Star)
-            },
-
-            new DataGridTextColumn
-            {
-                Header = LocalizationService.Get("UI.BlurGrid.Artist"), Binding = new Binding(nameof(Author)),
-                Width = new DataGridLength(1, DataGridLengthUnitType.Star)
-            },
-
-            new DataGridTextColumn
-            {
-                Header = LocalizationService.Get("UI.BlurGrid.Album"), Binding = new Binding(nameof(Album)),
-                Width = new DataGridLength(2, DataGridLengthUnitType.Star)
-            },
-
-            new DataGridTextColumn
-            {
-                Header = LocalizationService.Get("UI.BlurGrid.Duration"), Binding = new Binding(nameof(Duration)),
-                Width = new DataGridLength(1, DataGridLengthUnitType.Star)
-            },
-
-            new DataGridTextColumn
-            {
-                Header = LocalizationService.Get("UI.BlurGrid.Platform"), Binding = new Binding(nameof(SearchSource)),
-                Width = new DataGridLength(1, DataGridLengthUnitType.Star)
-            }
-        ];
-    }
 }
 
 public partial class BlurAlbumSearchResult : BlurSearchResultBase
@@ -95,42 +55,6 @@ public partial class BlurAlbumSearchResult : BlurSearchResultBase
         SongCount = resultVo.SongCount.ToString();
         PublishTime = resultVo.PublishTime;
         SetSource(searchSource);
-    }
-
-    public static List<DataGridTextColumn> GetDataGridColumns()
-    {
-        return
-        [
-            new DataGridTextColumn
-            {
-                Header = LocalizationService.Get("UI.BlurGrid.Album"), Binding = new Binding(nameof(Title)),
-                Width = new DataGridLength(3, DataGridLengthUnitType.Star)
-            },
-
-            new DataGridTextColumn
-            {
-                Header = LocalizationService.Get("UI.BlurGrid.Artist"), Binding = new Binding(nameof(Author)),
-                Width = new DataGridLength(2, DataGridLengthUnitType.Star)
-            },
-
-            new DataGridTextColumn
-            {
-                Header = LocalizationService.Get("UI.BlurGrid.SongCount"), Binding = new Binding(nameof(SongCount)),
-                Width = new DataGridLength(1, DataGridLengthUnitType.Star)
-            },
-
-            new DataGridTextColumn
-            {
-                Header = LocalizationService.Get("UI.BlurGrid.ReleaseDate"), Binding = new Binding(nameof(PublishTime)),
-                Width = new DataGridLength(1, DataGridLengthUnitType.Star)
-            },
-
-            new DataGridTextColumn
-            {
-                Header = LocalizationService.Get("UI.BlurGrid.Platform"), Binding = new Binding(nameof(SearchSource)),
-                Width = new DataGridLength(1, DataGridLengthUnitType.Star)
-            }
-        ];
     }
 }
 
@@ -152,47 +76,5 @@ public partial class BlurPlaylistSearchResult : BlurSearchResultBase
         SongCount = resultVo.SongCount.ToString();
         PlayCount = resultVo.PlayCount.ToString();
         SetSource(searchSource);
-    }
-
-    public static List<DataGridTextColumn> GetDataGridColumns()
-    {
-        return
-        [
-            new DataGridTextColumn
-            {
-                Header = LocalizationService.Get("UI.BlurGrid.Playlist"), Binding = new Binding(nameof(Title)),
-                Width = new DataGridLength(2, DataGridLengthUnitType.Star)
-            },
-
-            new DataGridTextColumn
-            {
-                Header = LocalizationService.Get("UI.BlurGrid.Creator"), Binding = new Binding(nameof(Author)),
-                Width = new DataGridLength(1, DataGridLengthUnitType.Star)
-            },
-
-            new DataGridTextColumn
-            {
-                Header = LocalizationService.Get("UI.BlurGrid.Description"), Binding = new Binding(nameof(Description)),
-                Width = new DataGridLength(3, DataGridLengthUnitType.Star)
-            },
-
-            new DataGridTextColumn
-            {
-                Header = LocalizationService.Get("UI.BlurGrid.SongCount"), Binding = new Binding(nameof(SongCount)),
-                Width = new DataGridLength(1, DataGridLengthUnitType.Star)
-            },
-
-            new DataGridTextColumn
-            {
-                Header = LocalizationService.Get("UI.BlurGrid.PlayCount"), Binding = new Binding(nameof(PlayCount)),
-                Width = new DataGridLength(1, DataGridLengthUnitType.Star)
-            },
-
-            new DataGridTextColumn
-            {
-                Header = LocalizationService.Get("UI.BlurGrid.Platform"), Binding = new Binding(nameof(SearchSource)),
-                Width = new DataGridLength(1, DataGridLengthUnitType.Star)
-            }
-        ];
     }
 }

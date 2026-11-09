@@ -164,15 +164,25 @@ public class ViewModelRegressionTests
     {
         var result = new SearchResultVo { SearchSource = SearchSourceEnum.QQ_MUSIC };
         result.SongVos.Add(new() { DisplayId = "123", Title = "song", AuthorName = ["singer"], AlbumName = "album" });
-        var window = new BlurSearchWindow([result]);
+        var vm = new BlurSearchViewModel([result]);
+        vm.LoadTypeAResults();
+        var view = new BlurSearchView();
+        var window = TestWorkspace.Host(view, vm);
         var receiver = new object();
         string? selected = null;
         WeakReferenceMessenger.Default.Register<BlurSearchResultsMessage>(receiver, (_, message) => selected = message.Value);
         try
         {
             window.Show();
-            var vm = Assert.IsType<BlurSearchViewModel>(window.DataContext);
-            vm.SelectedItems = new List<object> { Assert.Single(vm.SearchResults) };
+            Dispatcher.UIThread.RunJobs();
+            // Song results get the song columns, and nothing can be fetched until a row is chosen.
+            Assert.Equal(5, view.Table.Columns.Count);
+            Assert.Equal(LocalizationService.Get("UI.BlurGrid.Song"), view.Table.Columns[0].Header);
+            Assert.False(vm.DownloadSelectedCommand.CanExecute(null));
+            view.Table.SelectAll();
+            Dispatcher.UIThread.RunJobs();
+            Assert.Same(Assert.Single(vm.SearchResults), Assert.Single(vm.SelectedItems.Cast<object>()));
+            Assert.True(vm.DownloadSelectedCommand.CanExecute(null));
             vm.DownloadSelectedCommand.Execute(null);
             Assert.Equal("qq.com/songDetail/123", selected);
         }

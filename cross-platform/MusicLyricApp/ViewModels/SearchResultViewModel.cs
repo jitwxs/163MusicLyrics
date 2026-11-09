@@ -9,11 +9,20 @@ public partial class SearchResultViewModel : ViewModelBase
     // 歌曲信息属性
     [ObservableProperty] private string _singer;
 
-    [ObservableProperty] private string _songName;
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasSong))]
+    private string _songName;
+
+    /// <summary>True once a single song has been rendered; drives the empty state of the search page.</summary>
+    public bool HasSong => !string.IsNullOrWhiteSpace(SongName);
 
     [ObservableProperty] private string _album;
     
-    [ObservableProperty] private string _songLink;
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasSongLinkText))]
+    private string _songLink;
+
+    public bool HasSongLinkText => !string.IsNullOrWhiteSpace(SongLink);
 
     [ObservableProperty] private string _songDuration;
 
@@ -21,7 +30,11 @@ public partial class SearchResultViewModel : ViewModelBase
 
     [ObservableProperty] private string _songSource;
     
-    [ObservableProperty] private string _consoleOutput;
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasConsoleOutput))]
+    private string _consoleOutput;
+
+    public bool HasConsoleOutput => !string.IsNullOrWhiteSpace(ConsoleOutput);
     
     [ObservableProperty] private Dictionary<string, SaveVo> _saveVoMap = new();
 

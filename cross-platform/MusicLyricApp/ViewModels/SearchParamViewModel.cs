@@ -20,6 +20,20 @@ public partial class SearchParamViewModel : ViewModelBase
     partial void OnSelectedSearchSourceItemChanged(EnumDisplayHelper.EnumDisplayItem<SearchSourceEnum>? value)
     {
         if (value != null) _paramBean.SearchSource = value.Value;
+        OnPropertyChanged(nameof(SearchSourceValue));
+    }
+
+    /// <summary>Enum view of <see cref="SelectedSearchSourceItem"/> for segmented controls.</summary>
+    public object? SearchSourceValue
+    {
+        get => SelectedSearchSourceItem?.Value;
+        set
+        {
+            if (value is SearchSourceEnum source && !Equals(SelectedSearchSourceItem?.Value, source))
+            {
+                SelectedSearchSourceItem = SearchSources.First(item => item.Value == source);
+            }
+        }
     }
 
     // 2. 歌词格式
@@ -46,6 +60,20 @@ public partial class SearchParamViewModel : ViewModelBase
     partial void OnSelectedSearchTypeItemChanged(EnumDisplayHelper.EnumDisplayItem<SearchTypeEnum>? value)
     {
         if (value != null) _paramBean.SearchType = value.Value;
+        OnPropertyChanged(nameof(SearchTypeValue));
+    }
+
+    /// <summary>Enum view of <see cref="SelectedSearchTypeItem"/> for segmented controls.</summary>
+    public object? SearchTypeValue
+    {
+        get => SelectedSearchTypeItem?.Value;
+        set
+        {
+            if (value is SearchTypeEnum type && !Equals(SelectedSearchTypeItem?.Value, type))
+            {
+                SelectedSearchTypeItem = SearchTypes.First(item => item.Value == type);
+            }
+        }
     }
 
     // 4. 输出格式

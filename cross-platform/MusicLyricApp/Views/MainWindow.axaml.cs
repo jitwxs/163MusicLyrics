@@ -32,7 +32,19 @@ public partial class MainWindow : ArcWindow, IWindowProvider
         DataContext = viewModel;
 
         viewModel.BatchSearchViewModel.Items.CollectionChanged += BatchItemsOnCollectionChanged;
+        viewModel.TipRaised += ShowTip;
         UpdateBatchBadge();
+    }
+
+    /// <summary>Status messages appear as toasts; errors stay longer and read as errors, not only by colour.</summary>
+    private void ShowTip(string message, bool isError)
+    {
+        if (string.IsNullOrWhiteSpace(message))
+        {
+            return;
+        }
+
+        Dispatcher.UIThread.Post(() => Toast.Show(this, message, isError ? ToastKind.Error : ToastKind.Info));
     }
 
     private void BatchItemsOnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e) => UpdateBatchBadge();

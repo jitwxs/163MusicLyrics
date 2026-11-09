@@ -23,6 +23,8 @@ public partial class SearchView : UserControl
     {
         AvaloniaXamlLoader.Load(this);
         this.FindControl<TextBox>("SearchTextBox")!.PointerEntered += SearchTextBox_PointerEntered;
+        this.FindControl<BlurSearchView>("BlurResultsView")!.BackRequested += (_, _) =>
+            _viewModel?.ExecuteCloseBlurResultsCommand.Execute(null);
     }
 
     protected override void OnDataContextChanged(EventArgs e)
@@ -91,14 +93,6 @@ public partial class SearchView : UserControl
         if (message != null)
         {
             _viewModel.SearchParamViewModel.SearchText = message;
-        }
-    }
-
-    private void PlaybackSlider_OnTapped(object? sender, TappedEventArgs e)
-    {
-        if (_viewModel?.ExecuteTogglePlayPauseCommand.CanExecute(null) == true)
-        {
-            _viewModel.ExecuteTogglePlayPauseCommand.Execute(null);
         }
     }
 }

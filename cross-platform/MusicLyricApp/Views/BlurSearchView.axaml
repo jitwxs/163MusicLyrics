@@ -1,80 +1,57 @@
-﻿<UserControl
-    xmlns="https://github.com/avaloniaui"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:viewModels="clr-namespace:MusicLyricApp.ViewModels"
-    xmlns:loc="using:MusicLyricApp.Core.Localization"
-    mc:Ignorable="d"
-    x:Class="MusicLyricApp.Views.BlurSearchView"
-    x:DataType="viewModels:BlurSearchViewModel"
-    d:DesignWidth="900" d:DesignHeight="620">
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:arc="https://github.com/AIDotNet/TKCode.Arc"
+             xmlns:vm="using:MusicLyricApp.ViewModels"
+             xmlns:loc="using:MusicLyricApp.Core.Localization"
+             mc:Ignorable="d"
+             d:DesignWidth="640" d:DesignHeight="520"
+             x:Class="MusicLyricApp.Views.BlurSearchView"
+             x:DataType="vm:BlurSearchViewModel">
 
-    <UserControl.Styles>
-        <Style Selector="Button">
-            <Setter Property="HorizontalContentAlignment" Value="Center" />
-            <Setter Property="VerticalContentAlignment" Value="Center" />
-        </Style>
-        <Style Selector="DataGrid">
-            <Setter Property="Background" Value="White" />
-            <Setter Property="RowHeight" Value="34" />
-            <Setter Property="GridLinesVisibility" Value="Horizontal" />
-            <Setter Property="BorderBrush" Value="#E1E4E8" />
-            <Setter Property="BorderThickness" Value="1" />
-        </Style>
-        <Style Selector="DataGridColumnHeader">
-            <Setter Property="Background" Value="#F5F7FA" />
-            <Setter Property="Foreground" Value="#344054" />
-            <Setter Property="FontWeight" Value="SemiBold" />
-            <Setter Property="BorderBrush" Value="#E1E4E8" />
-            <Setter Property="BorderThickness" Value="0,0,0,1" />
-            <Setter Property="Height" Value="36" />
-        </Style>
-        <Style Selector="DataGridRow">
-            <Setter Property="Background" Value="White" />
-            <Setter Property="BorderBrush" Value="#F0F2F5" />
-            <Setter Property="BorderThickness" Value="0,0,0,1" />
-        </Style>
-        <Style Selector="DataGridRow:pointerover">
-            <Setter Property="Background" Value="#F8FAFC" />
-        </Style>
-        <Style Selector="DataGridRow:selected">
-            <Setter Property="Background" Value="#EEF2FF" />
-        </Style>
-    </UserControl.Styles>
-
-    <Grid RowDefinitions="Auto,Auto,*" Margin="12" RowSpacing="8">
-        <Border Background="#F8FAFC" CornerRadius="8" Padding="12">
-            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
-                <StackPanel Spacing="4">
-                    <TextBlock Text="{loc:Loc Key=UI.BlurResults}" FontSize="16" FontWeight="SemiBold" />
-                    <StackPanel Orientation="Horizontal" Spacing="12">
-                        <TextBlock Text="{Binding SearchResultCountText}" Foreground="#667085" />
-                        <TextBlock Text="{Binding SelectedItemsCountText}" Foreground="#667085" />
-                    </StackPanel>
-                </StackPanel>
-                <Button Grid.Column="1"
-                        Content="{loc:Loc Key=UI.DownloadSelected}"
-                        MinWidth="100"
+    <Grid RowDefinitions="Auto,Auto,*" RowSpacing="{arc:ArcDesignTokenResource Space3}">
+        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="{arc:ArcDesignTokenResource Space3}">
+            <arc:Button Name="BackButton"
+                        Variant="Ghost"
+                        Size="Small"
+                        ToolTip.Tip="{loc:Loc Key=Blur.Back}"
+                        AutomationProperties.Name="{loc:Loc Key=Blur.Back}">
+                <arc:ArcGlyph Data="{x:Static arc:ArcIcons.ArrowLeft}" />
+            </arc:Button>
+            <StackPanel Grid.Column="1" Spacing="{arc:ArcDesignTokenResource Space1}" VerticalAlignment="Center">
+                <TextBlock Text="{loc:Loc Key=UI.BlurResults}"
+                           FontSize="{arc:ArcDesignTokenResource TypeLG}"
+                           FontWeight="SemiBold"
+                           Foreground="{arc:ArcDesignTokenResource Foreground}" />
+                <TextBlock Text="{Binding SearchResultCountText}"
+                           FontSize="{arc:ArcDesignTokenResource TypeSM}"
+                           Foreground="{arc:ArcDesignTokenResource TextSecondary}" />
+            </StackPanel>
+            <arc:Button Grid.Column="2"
+                        Name="GetSelectedButton"
+                        Variant="Primary"
+                        Content="{loc:Loc Key=Blur.GetSelected}"
                         Command="{Binding DownloadSelectedCommand}" />
-            </Grid>
-        </Border>
+        </Grid>
 
-        <Border Grid.Row="1" Background="White" CornerRadius="8" Padding="8" BorderBrush="#E1E4E8" BorderThickness="1">
-            <TextBlock Text="{loc:Loc Key=UI.BlurHint}" Foreground="#667085" />
-        </Border>
+        <TextBlock Grid.Row="1"
+                   Text="{loc:Loc Key=Blur.Hint}"
+                   TextWrapping="Wrap"
+                   FontSize="{arc:ArcDesignTokenResource TypeSM}"
+                   Foreground="{arc:ArcDesignTokenResource TextSecondary}" />
 
-        <Border Grid.Row="2" Background="White" CornerRadius="8" BorderBrush="#E1E4E8" BorderThickness="1">
-            <DataGrid x:Name="BlurDataGrid"
-                      ItemsSource="{Binding SearchResults}"
-                      SelectionMode="Extended"
-                      AutoGenerateColumns="False">
-                <DataGrid.ContextMenu>
-                    <ContextMenu>
-                        <MenuItem Header="{loc:Loc Key=UI.Extra00}" Command="{Binding DownloadSelectedCommand}" />
-                    </ContextMenu>
-                </DataGrid.ContextMenu>
-            </DataGrid>
-        </Border>
+        <arc:Table Grid.Row="2"
+                   Name="ResultsTable"
+                   ItemsSource="{Binding SearchResults}"
+                   IsSelectable="True"
+                   IsStriped="True"
+                   Caption="{loc:Loc Key=UI.BlurResults}"
+                   EmptyMessage="{loc:Loc Key=Table.Empty}"
+                   ItemNameOne="{loc:Loc Key=Table.ItemOne}"
+                   ItemNameOther="{loc:Loc Key=Table.ItemOther}"
+                   SelectedNoun="{loc:Loc Key=Table.Selected}"
+                   SelectAllLabel="{loc:Loc Key=Table.SelectAll}"
+                   ClearSelectionLabel="{loc:Loc Key=Table.ClearSelection}" />
     </Grid>
 </UserControl>
