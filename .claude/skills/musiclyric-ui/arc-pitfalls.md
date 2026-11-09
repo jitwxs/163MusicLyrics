@@ -48,6 +48,11 @@ one is wrong.
 
 ## Avalonia 12
 
+- **`ItemsPresenter` has its own `ItemsPanel`.** In a custom `ListBox` template, write
+  `<ItemsPresenter ItemsPanel="{TemplateBinding ItemsPanel}" />`, or the list silently uses a plain `StackPanel` and
+  realises every row (see `LocalMusicScanView.axaml`).
+- **Hidden `ScrollViewer` content reports `IsEffectivelyVisible == true`** because it is not templated into the
+  visual tree yet. In tests, assert on the scroller, not on its content.
 - **Clipboard calls are extension methods**: `clipboard.TryGetTextAsync()` and friends.
 - **DataAnnotations validation is opt-in.** The app validates numeric settings itself and shows the message through
   `ErrorMessage`.

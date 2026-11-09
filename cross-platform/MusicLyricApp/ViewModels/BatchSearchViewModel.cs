@@ -3,7 +3,6 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Avalonia.Platform.Storage;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
@@ -284,38 +283,6 @@ public partial class BatchSearchViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private async Task ExecuteSelectFolderAsync()
-    {
-        try
-        {
-            var folders = await _windowProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
-            {
-                Title = LocalizationService.Get("Dialog.Folder.Select"),
-                AllowMultiple = false
-            });
-
-            if (folders.Count == 0)
-            {
-                return;
-            }
-
-            var folder = folders[0];
-            var localPath = folder.Path?.LocalPath ?? folder.Path?.ToString();
-            if (string.IsNullOrWhiteSpace(localPath))
-            {
-                return;
-            }
-
-            BatchInputText = localPath;
-            await RunBatchSearchAsync(localPath);
-        }
-        catch (System.Exception ex)
-        {
-            SetTip(ex.Message, true);
-        }
-    }
-
-    [RelayCommand]
     private void ExecuteSelectAll()
     {
         foreach (var item in Items)
@@ -441,24 +408,6 @@ public partial class BatchSearchViewModel : ViewModelBase
 
         // The main view model switches back to the search page to show the song.
         WeakReferenceMessenger.Default.Send(new OpenSongDetailMessage(new SongDetailRequest(target.SongId, target.SourceEnum)));
-    }
-
-    private async Task RunBatchSearchAsync(string inputText)
-    {
-        try
-        {
-            var searchParam = new SearchParamViewModel();
-            searchParam.Bind(_settingBean.Param);
-            searchParam.SearchText = inputText;
-
-            _searchService.InitSongIds(searchParam, _settingBean);
-            var result = await Task.Run(() => _searchService.SearchSongs(searchParam.SongIds, _settingBean));
-            AddSearchResults(result, searchParam.SongIds, inputText);
-        }
-        catch (System.Exception ex)
-        {
-            SetTip(ex.Message, true);
-        }
     }
 
     private void RefreshStats()

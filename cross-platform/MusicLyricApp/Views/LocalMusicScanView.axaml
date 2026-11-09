@@ -1,0 +1,182 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:arc="https://github.com/AIDotNet/TKCode.Arc"
+             xmlns:vm="using:MusicLyricApp.ViewModels"
+             xmlns:loc="using:MusicLyricApp.Core.Localization"
+             mc:Ignorable="d"
+             d:DesignWidth="840" d:DesignHeight="720"
+             x:Class="MusicLyricApp.Views.LocalMusicScanView"
+             x:DataType="vm:LocalMusicScanViewModel">
+
+    <UserControl.Resources>
+        <ControlTheme x:Key="LocalFileRow" TargetType="ListBoxItem">
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="Template">
+                <ControlTemplate>
+                    <Border Background="{TemplateBinding Background}" CornerRadius="8" Padding="6">
+                        <ContentPresenter Name="PART_ContentPresenter" Content="{TemplateBinding Content}"
+                                          ContentTemplate="{TemplateBinding ContentTemplate}"
+                                          HorizontalContentAlignment="Stretch" />
+                    </Border>
+                </ControlTemplate>
+            </Setter>
+            <Style Selector="^:selected"><Setter Property="Background" Value="{arc:ArcDesignTokenResource SurfaceMuted}" /></Style>
+            <Style Selector="^:pointerover"><Setter Property="Background" Value="{arc:ArcDesignTokenResource SurfaceMuted}" /></Style>
+        </ControlTheme>
+        <!-- Avalonia 12: ItemsPresenter has its own ItemsPanel, so the template must pass it on to virtualize. -->
+        <ControlTheme x:Key="LocalFileList" TargetType="ListBox">
+            <Setter Property="ItemContainerTheme" Value="{StaticResource LocalFileRow}" />
+            <Setter Property="ItemsPanel"><ItemsPanelTemplate><VirtualizingStackPanel /></ItemsPanelTemplate></Setter>
+            <Setter Property="Template">
+                <ControlTemplate>
+                    <arc:ScrollArea><ItemsPresenter Name="PART_ItemsPresenter" ItemsPanel="{TemplateBinding ItemsPanel}" /></arc:ScrollArea>
+                </ControlTemplate>
+            </Setter>
+        </ControlTheme>
+    </UserControl.Resources>
+
+    <UserControl.Styles>
+        <Style Selector="Border.pane">
+            <Setter Property="Background" Value="{arc:ArcDesignTokenResource Surface}" />
+            <Setter Property="BorderBrush" Value="{arc:ArcDesignTokenResource BorderSubtle}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="{arc:ArcDesignTokenResource RadiusSurface}" />
+            <Setter Property="Padding" Value="12" />
+        </Style>
+        <Style Selector="TextBlock.secondary">
+            <Setter Property="FontSize" Value="{arc:ArcDesignTokenResource TypeSM}" />
+            <Setter Property="Foreground" Value="{arc:ArcDesignTokenResource TextSecondary}" />
+        </Style>
+    </UserControl.Styles>
+
+    <Grid Margin="24,16,24,24" RowDefinitions="Auto,Auto,*,Auto" RowSpacing="{arc:ArcDesignTokenResource Space4}">
+
+        <StackPanel Spacing="{arc:ArcDesignTokenResource Space1}">
+            <TextBlock Text="{loc:Loc Key=Nav.Local}"
+                       FontSize="{arc:ArcDesignTokenResource TypeLG}"
+                       FontWeight="SemiBold"
+                       Foreground="{arc:ArcDesignTokenResource Foreground}" />
+            <TextBlock Classes="secondary" Text="{loc:Loc Key=LocalScan.Help}" TextWrapping="Wrap" />
+        </StackPanel>
+
+        <!-- Folder, matching and saving options. Disabled while a scan, match or save runs. -->
+        <Border Grid.Row="1" Classes="pane">
+            <StackPanel Spacing="8" IsEnabled="{Binding IsIdle}">
+                <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+                    <arc:Input IsLabelVisible="False" Name="ScanFolderPath" Label="{loc:Loc Key=LocalScan.Folder}"
+                               Text="{Binding FolderPath}" Placeholder="{loc:Loc Key=LocalScan.Folder}" />
+                    <arc:Button Grid.Column="1" Content="{loc:Loc Key=Settings.SelectFolder}" Click="ChooseInputFolder" Variant="Secondary" />
+                    <arc:Button Grid.Column="2" Name="StartScanButton" Content="{loc:Loc Key=LocalScan.Scan}" Command="{Binding ScanCommand}" />
+                </Grid>
+                <WrapPanel ItemSpacing="16" LineSpacing="8">
+                    <arc:Checkbox Content="{loc:Loc Key=LocalScan.Recursive}" IsChecked="{Binding IncludeSubfolders}" VerticalAlignment="Center" />
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <TextBlock Text="{loc:Loc Key=LocalScan.Preferred}" VerticalAlignment="Center" />
+                        <arc:Select ItemsSource="{Binding Sources}" SelectedItem="{Binding PreferredSource}" MinWidth="140" />
+                    </StackPanel>
+                    <arc:Checkbox Content="{loc:Loc Key=LocalScan.Fallback}" IsChecked="{Binding UseFallback}" VerticalAlignment="Center" />
+                    <arc:Checkbox Content="{loc:Loc Key=LocalScan.IdMode}" IsChecked="{Binding FilenameIsId}" VerticalAlignment="Center" />
+                </WrapPanel>
+                <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="8">
+                    <arc:Checkbox Content="{loc:Loc Key=LocalScan.Beside}" IsChecked="{Binding BesideAudio}" VerticalAlignment="Center" />
+                    <arc:Input IsLabelVisible="False" Grid.Column="1" Label="{loc:Loc Key=LocalScan.OutputFolder}" IsEnabled="{Binding !BesideAudio}"
+                               Text="{Binding OutputFolder}" Placeholder="{loc:Loc Key=LocalScan.OutputFolder}" />
+                    <arc:Button Grid.Column="2" Content="{loc:Loc Key=LocalScan.OutputFolder}" Click="ChooseOutputFolder" IsEnabled="{Binding !BesideAudio}" Variant="Secondary" />
+                    <arc:Checkbox Grid.Column="3" Content="{loc:Loc Key=LocalScan.Overwrite}" IsChecked="{Binding Overwrite}"
+                                  VerticalAlignment="Center" ToolTip.Tip="{loc:Loc Key=LocalScan.SaveHint}" />
+                </Grid>
+            </StackPanel>
+        </Border>
+
+        <Grid Grid.Row="2" ColumnDefinitions="4*,3*" ColumnSpacing="12">
+            <Border Classes="pane">
+                <Grid RowDefinitions="Auto,*,Auto" RowSpacing="8">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBlock Text="{Binding Summary}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"
+                                   ToolTip.Tip="{Binding Summary}" />
+                        <arc:Button Grid.Column="1" Content="{loc:Loc Key=LocalScan.ToggleSelection}" Command="{Binding SelectAllCommand}"
+                                    IsEnabled="{Binding IsIdle}" Variant="Ghost" />
+                    </Grid>
+                    <arc:EmptyState Grid.Row="1" Name="LocalFilesEmptyState" IsVisible="{Binding !HasItems}" Icon="{x:Static arc:ArcIcons.FolderOpen}"
+                                    Title="{loc:Loc Key=LocalScan.EmptyTitle}" Description="{loc:Loc Key=LocalScan.EmptyDescription}" />
+                    <ListBox Grid.Row="1" Name="LocalFileList" IsVisible="{Binding HasItems}" Theme="{StaticResource LocalFileList}"
+                             ItemsSource="{Binding Items}" SelectedItem="{Binding SelectedItem}" IsEnabled="{Binding IsIdle}">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate x:DataType="vm:LocalScanItemViewModel">
+                                <Grid ColumnDefinitions="Auto,*" Margin="2,4" ColumnSpacing="10">
+                                    <arc:Checkbox IsChecked="{Binding IsSelected}" VerticalAlignment="Top" AutomationProperties.Name="{Binding FileName}" />
+                                    <StackPanel Grid.Column="1" Spacing="2">
+                                        <TextBlock Text="{Binding FileName}" TextTrimming="CharacterEllipsis" FontWeight="SemiBold" ToolTip.Tip="{Binding Path}" />
+                                        <TextBlock Classes="secondary" Text="{Binding Metadata}" TextTrimming="CharacterEllipsis" />
+                                        <TextBlock Text="{Binding Status}" />
+                                        <TextBlock Classes="secondary" Text="{Binding Detail}" TextTrimming="CharacterEllipsis" MaxLines="2"
+                                                   IsVisible="{Binding Detail, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" ToolTip.Tip="{Binding Detail}" />
+                                    </StackPanel>
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                    <TextBlock Grid.Row="2" Classes="secondary" Text="{loc:Loc Key=LocalScan.ListHint}" TextWrapping="Wrap" IsVisible="{Binding HasItems}" />
+                </Grid>
+            </Border>
+
+            <!-- Input and CodeBlock draw their own frames, so the review column is not wrapped in a card. -->
+            <Panel Grid.Column="1">
+                <Border Classes="pane" IsVisible="{Binding !HasSelection}">
+                    <arc:EmptyState Name="ReviewEmptyState" Icon="{x:Static arc:ArcIcons.FileText}"
+                                    Title="{loc:Loc Key=LocalScan.Review}" Description="{loc:Loc Key=LocalScan.ReviewEmpty}" />
+                </Border>
+                <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,*" RowSpacing="8" IsVisible="{Binding HasSelection}">
+                    <TextBlock Text="{Binding SelectedItem.FileName, FallbackValue=''}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"
+                               ToolTip.Tip="{Binding SelectedItem.Path, FallbackValue=''}" />
+                    <Grid Grid.Row="1" ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                        <arc:Input IsLabelVisible="False" Name="MatchKeyword" Label="{loc:Loc Key=LocalScan.Keyword}"
+                                   Text="{Binding SelectedItem.Keyword, FallbackValue=''}" Placeholder="{loc:Loc Key=LocalScan.Keyword}" IsEnabled="{Binding IsIdle}" />
+                        <arc:Button Grid.Column="1" Content="{loc:Loc Key=LocalScan.SearchAgain}" Command="{Binding SearchAgainCommand}" IsEnabled="{Binding IsIdle}" Variant="Secondary" />
+                    </Grid>
+                    <arc:Select Grid.Row="2" Name="CandidatePicker" ItemsSource="{Binding SelectedItem.Candidates, FallbackValue={x:Null}}"
+                                SelectedItem="{Binding SelectedItem.Candidate, FallbackValue={x:Null}}" IsEnabled="{Binding IsIdle}"
+                                HorizontalAlignment="Stretch" Placeholder="{loc:Loc Key=LocalScan.ChooseCandidate}" />
+                    <WrapPanel Grid.Row="3" ItemSpacing="8" LineSpacing="8" IsEnabled="{Binding IsIdle}">
+                        <arc:Button Content="{loc:Loc Key=LocalScan.Confirm}" Command="{Binding ConfirmCandidateCommand}" Variant="Secondary" />
+                        <arc:Button Content="{loc:Loc Key=Search.PreviewTitle}" Command="{Binding PreviewCommand}" Variant="Secondary" />
+                        <arc:Button Content="{loc:Loc Key=LocalScan.SongPage}" Click="OpenSongPage" Variant="Ghost" />
+                    </WrapPanel>
+                    <TextBlock Grid.Row="4" Classes="secondary" Text="{loc:Loc Key=LocalScan.MatchHint}" TextWrapping="Wrap" />
+                    <Panel Grid.Row="5" MinHeight="80">
+                        <Border Classes="pane" IsVisible="{Binding !HasPreview}">
+                            <TextBlock Classes="secondary" Text="{loc:Loc Key=LocalScan.PreviewEmpty}" TextWrapping="Wrap"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center" TextAlignment="Center" />
+                        </Border>
+                        <ScrollViewer Name="LyricsPreviewScroll" IsVisible="{Binding HasPreview}">
+                            <arc:CodeBlock Name="LyricsPreview" Code="{Binding Preview, Mode=OneWay}" Language="lrc"
+                                           FileName="{loc:Loc Key=Search.PreviewTitle}" ShowLineNumbers="True"
+                                           CopyLabel="{loc:Loc Key=Search.CopyPreview}" />
+                        </ScrollViewer>
+                    </Panel>
+                </Grid>
+            </Panel>
+        </Grid>
+
+        <StackPanel Grid.Row="3" Spacing="8">
+            <StackPanel Spacing="4" IsVisible="{Binding HasIssues}">
+                <TextBlock Text="{loc:Loc Key=LocalScan.Issues}" FontWeight="SemiBold" />
+                <arc:ScrollArea MaxHeight="60"><TextBlock Classes="secondary" Text="{Binding IssuesText}" TextWrapping="Wrap" /></arc:ScrollArea>
+            </StackPanel>
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
+                <StackPanel VerticalAlignment="Center" Spacing="4">
+                    <TextBlock Classes="secondary" Text="{Binding ProgressText}" />
+                    <arc:Progress Minimum="0" Maximum="{Binding Total}" Value="{Binding Completed}" IsVisible="{Binding !IsScanning}" IsValueVisible="False" />
+                </StackPanel>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="{arc:ArcDesignTokenResource Space3}">
+                    <arc:Button Content="{loc:Loc Key=LocalScan.Match}" Command="{Binding MatchSelectedCommand}" IsEnabled="{Binding IsIdle}" Variant="Secondary" />
+                    <arc:Button Content="{loc:Loc Key=LocalScan.Retry}" Command="{Binding RetryCommand}" IsEnabled="{Binding IsIdle}" Variant="Secondary" />
+                    <arc:Button Content="{loc:Loc Key=Dialog.Action.Cancel}" Command="{Binding CancelCommand}" IsEnabled="{Binding IsBusy}" Variant="Secondary" />
+                    <arc:Button Name="SaveLocalLyricsButton" Content="{loc:Loc Key=LocalScan.Save}" Command="{Binding SaveSelectedCommand}" IsEnabled="{Binding IsIdle}" />
+                </StackPanel>
+            </Grid>
+        </StackPanel>
+    </Grid>
+</UserControl>

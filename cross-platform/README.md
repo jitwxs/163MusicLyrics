@@ -7,7 +7,7 @@
 
 - `MusicLyricApp/Program.cs` → `App.axaml.cs` → `Views/MainWindow.axaml.cs`：应用启动和主窗口。`Program.cs` 中的 `UseArc(...)` 注册 TKCode.Arc 控件、主题与字体。
 - `Views/`、`ViewModels/`：单窗口界面。`MainWindow` 是带侧边栏的 `ArcWindow`，按 `MainWindowViewModel.CurrentPageKey` 切换四个页面：
-  `SearchView`（歌词搜索，模糊搜索结果 `BlurSearchView` 在页内显示）、`BatchSearchView`（批量任务）、`FormatConvertView`（格式转换）、`SettingView`（设置）。
+  `SearchView`（在线歌词，模糊搜索结果 `BlurSearchView` 在页内显示）、`BatchSearchView`（批量任务）、`FormatConvertView`（格式转换）、`LocalMusicScanView`（本地搜索）、`SettingView`（设置）。
   对话框与提示统一使用 Arc 的 `Dialog`（`Core/DialogHelper.cs`）和 Toast；颜色、字号、圆角取自 Arc 设计令牌，不写固定色值。
 - `Core/Service/`：搜索、文件保存、本地缓存、更新检查；`Music/` 对接网易云和 QQ 音乐，`Translate/` 对接翻译服务。
 - `Core/Utils/`、`Models/`：歌词处理、时间戳转换、网络工具与数据模型。
@@ -18,6 +18,21 @@
 ## 界面语言
 
 支持简体中文（`zh-CN`）、繁体中文（`zh-TW`）和英文（`en-US`）。在设置的「外观与语言」中切换后立即生效，重启后保留选择。界面文案位于 `MusicLyricApp/Resources/Localization/`，新增文案时需同步维护三种语言及其占位符。
+
+## 本地搜索：扫描本地音乐并匹配歌词
+
+侧边栏的「本地搜索」页（快捷键 ⌘4 / Ctrl+4）用于为本地音乐文件匹配并保存歌词：
+
+1. 选择音乐目录，按需包含子目录，点击「开始扫描」。支持 MP3、FLAC、M4A、OGG、WAV；优先读取歌名、歌手、专辑和时长标签，缺失标签时从 `歌手 - 歌名` 等文件名补充信息。不会修改音频文件，也不跟随符号链接。
+2. 勾选文件并点击「匹配所选」。可指定网易云或 QQ 音乐为优先来源，必要时尝试另一平台。扫描固定按单曲查询，不受主搜索页的歌单／专辑模式影响。「文件名是歌曲 ID」为显式兼容模式，仅在指定平台按歌曲 ID 查询。
+3. 歌名、歌手以及时长／专辑足够吻合且候选差距明显时，标记为待保存；其余候选需手动选择并确认。点击文件行可修改搜索关键词、重新搜索、预览歌词或打开歌曲页面。Live、伴奏等版本信息参与比较。
+4. 点击「保存已确认歌词」。默认在音乐旁边生成同名 `.lrc`／`.srt`，也可指定输出目录并保留相对目录层级。格式、编码、翻译、逐字歌词和独立输出规则沿用设置页的当前设置（每次扫描、匹配或保存开始时读取）；独立歌词使用 `文件名-0.lrc` 等后缀。
+
+默认跳过目标位置已有的同格式歌词（包括独立输出文件），仅主动勾选覆盖时允许替换。不同本地文件各自保留任务；即使开启覆盖，也不会让两个任务相互覆盖同一歌词路径。写入先生成临时文件，再将完整文件移入目标位置。
+
+扫描、匹配和保存显示进度，支持取消；已完成结果在切换页面后仍然保留。「重试未完成项」会重试查询失败或写入失败的选中项。音乐接口目前是同步请求，取消会停止后续队列，并等待当前有超时限制的请求返回。退出应用时会取消正在执行的任务。任务列表暂不跨重启保留。
+
+实现位于 `Core/Service/LocalMusic/`、`ViewModels/LocalMusicScanViewModel.cs` 和 `Views/LocalMusicScanView.axaml`。音频标签读取使用 [TagLibSharp 2.3.0](https://github.com/mono/taglib-sharp)（LGPL-2.1-only）。加密音频、损坏文件和不可访问目录会显示失败原因或扫描问题。
 
 ## 本地编译与测试
 

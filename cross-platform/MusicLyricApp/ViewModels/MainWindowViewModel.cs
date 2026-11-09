@@ -86,6 +86,7 @@ public partial class MainWindowViewModel : ViewModelBase
     public const string PageSearch = "search";
     public const string PageBatch = "batch";
     public const string PageConvert = "convert";
+    public const string PageLocal = "local";
     /// <summary>Settings sections are sidebar children keyed "settings/&lt;section&gt;" (see <see cref="SettingViewModel"/>).</summary>
     public const string SettingsKeyPrefix = "settings/";
     public const string PageSettings = SettingsKeyPrefix + SettingViewModel.SectionLyrics;
@@ -94,18 +95,22 @@ public partial class MainWindowViewModel : ViewModelBase
 
     /// <summary>Key of the page shown in the main window; bound two-way to the sidebar.</summary>
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsSearchPage), nameof(IsBatchPage), nameof(IsConvertPage), nameof(IsSettingsPage))]
+    [NotifyPropertyChangedFor(nameof(IsSearchPage), nameof(IsBatchPage), nameof(IsConvertPage), nameof(IsLocalPage), nameof(IsSettingsPage))]
     private string _currentPageKey = PageSearch;
 
     public bool IsSearchPage => CurrentPageKey == PageSearch;
     public bool IsBatchPage => CurrentPageKey == PageBatch;
     public bool IsConvertPage => CurrentPageKey == PageConvert;
+    public bool IsLocalPage => CurrentPageKey == PageLocal;
     public bool IsSettingsPage => IsSettingsKey(CurrentPageKey);
 
     public BatchSearchViewModel BatchSearchViewModel => _downloadManagerViewModel;
 
     /// <summary>Created on first visit and kept, so the text being converted survives page switches.</summary>
     [ObservableProperty] private FormatConvertViewModel? _formatConvertViewModel;
+
+    /// <summary>Created on first visit and kept, so scanned files and confirmed matches survive page switches.</summary>
+    [ObservableProperty] private LocalMusicScanViewModel? _localMusicScanViewModel;
 
     /// <summary>
     /// Recreated on entering the settings area (as the old settings window was) and flushed when leaving it;
@@ -144,6 +149,13 @@ public partial class MainWindowViewModel : ViewModelBase
         {
             case PageConvert:
                 FormatConvertViewModel ??= new FormatConvertViewModel(SettingBean);
+                break;
+            case PageLocal:
+                if (LocalMusicScanViewModel == null)
+                {
+                    LocalMusicScanViewModel = new LocalMusicScanViewModel(SettingBean, _searchService.GetMusicApi);
+                    LocalMusicScanViewModel.TipRaised += (message, isError) => TipRaised?.Invoke(message, isError);
+                }
                 break;
             case PageSearch or PageBatch:
                 break;

@@ -53,16 +53,6 @@
                     <Run Text="{Binding BatchInputText}" />
                 </TextBlock>
             </StackPanel>
-            <arc:Button Grid.Column="1"
-                        Name="ScanFolderButton"
-                        Variant="Secondary"
-                        VerticalAlignment="Top"
-                        Command="{Binding ExecuteSelectFolderCommand}">
-                <StackPanel Orientation="Horizontal" Spacing="{arc:ArcDesignTokenResource Space2}">
-                    <arc:ArcGlyph Data="{x:Static arc:ArcIcons.FolderOpen}" />
-                    <TextBlock Text="{loc:Loc Key=Batch.ScanFolder}" VerticalAlignment="Center" />
-                </StackPanel>
-            </arc:Button>
         </Grid>
 
         <!-- Totals for the whole list and for saves made from it. -->

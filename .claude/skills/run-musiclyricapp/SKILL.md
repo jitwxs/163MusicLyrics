@@ -39,7 +39,7 @@ $S/stop.sh                   # stops only our copy
 
 | Target | Point |
 |---|---|
-| Sidebar: 歌词搜索, 下载管理, 格式转换 | (75,112), (75,145), (75,178) |
+| Sidebar: 在线歌词, 下载管理, 格式转换, 本地搜索 | (75,112), (75,145), (75,178), (75,211) |
 | Sidebar: settings sections 歌词定制 … 应用设置 | x 75, y 258 / 289 / 320 / 351 / 382 |
 | Sidebar collapse button | (208,68) |
 | Search: 网易云 / QQ音乐 segment | (300,78) / (372,78) |

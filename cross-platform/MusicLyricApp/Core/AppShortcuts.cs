@@ -41,6 +41,7 @@ public static class AppShortcuts
     public const string GoSearch = "go-search";
     public const string GoBatch = "go-batch";
     public const string GoConvert = "go-convert";
+    public const string GoLocal = "go-local";
     public const string OpenSettings = "open-settings";
     public const string ShowShortcuts = "show-shortcuts";
 
@@ -76,6 +77,7 @@ public static class AppShortcuts
             S(GoSearch, "Shortcuts.GoSearch", ShortcutScope.Global, Key.D1, cmd),
             S(GoBatch, "Shortcuts.GoBatch", ShortcutScope.Global, Key.D2, cmd),
             S(GoConvert, "Shortcuts.GoConvert", ShortcutScope.Global, Key.D3, cmd),
+            S(GoLocal, "Shortcuts.GoLocal", ShortcutScope.Global, Key.D4, cmd),
             S(OpenSettings, "Shortcuts.OpenSettings", ShortcutScope.Global, Key.OemComma, cmd),
             S(ShowShortcuts, "Shortcuts.ShowShortcuts", ShortcutScope.Global, Key.Oem2, cmd)
         ];

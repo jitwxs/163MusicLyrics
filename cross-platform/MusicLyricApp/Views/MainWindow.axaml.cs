@@ -61,6 +61,7 @@ public partial class MainWindow : ArcWindow, IWindowProvider
         Bind(AppShortcuts.GoSearch, vm.ExecuteGoToPageCommand, MainWindowViewModel.PageSearch);
         Bind(AppShortcuts.GoBatch, vm.ExecuteGoToPageCommand, MainWindowViewModel.PageBatch);
         Bind(AppShortcuts.GoConvert, vm.ExecuteGoToPageCommand, MainWindowViewModel.PageConvert);
+        Bind(AppShortcuts.GoLocal, vm.ExecuteGoToPageCommand, MainWindowViewModel.PageLocal);
         Bind(AppShortcuts.OpenSettings, vm.ExecuteGoToPageCommand, MainWindowViewModel.PageSettings);
         Bind(AppShortcuts.ShowShortcuts, new CommunityToolkit.Mvvm.Input.RelayCommand(ShowShortcuts));
     }
@@ -150,6 +151,8 @@ public partial class MainWindow : ArcWindow, IWindowProvider
 
         if (_exitConfirmed || !vm.SettingBean.Config.ConfirmBeforeExit)
         {
+            // Stops a running local scan, match or save; finished results are already on disk.
+            vm.LocalMusicScanViewModel?.Dispose();
             vm.SaveConfig();
             return;
         }

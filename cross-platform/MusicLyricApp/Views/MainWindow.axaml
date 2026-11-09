@@ -29,7 +29,7 @@
             <arc:SidebarSection>
                 <arc:SidebarItem Key="search"
                                  Label="{loc:Loc Key=Nav.Search}"
-                                 Icon="{x:Static arc:ArcIcons.Search}" />
+                                 Icon="{x:Static arc:ArcIcons.Cloud}" />
                 <arc:SidebarItem
                                  Key="batch"
                                  Label="{loc:Loc Key=Nav.Batch}"
@@ -37,6 +37,9 @@
                 <arc:SidebarItem Key="convert"
                                  Label="{loc:Loc Key=Nav.Convert}"
                                  Icon="{x:Static arc:ArcIcons.ArrowDownUp}" />
+                <arc:SidebarItem Key="local"
+                                 Label="{loc:Loc Key=Nav.Local}"
+                                 Icon="{x:Static arc:ArcIcons.Laptop}" />
             </arc:SidebarSection>
             <!-- Settings sections live here rather than in a second navigation inside the page. -->
             <arc:SidebarSection>
@@ -78,6 +81,9 @@
             <views:FormatConvertView Name="ConvertPage"
                                      DataContext="{Binding FormatConvertViewModel}"
                                      IsVisible="{Binding $parent[views:MainWindow].((vm:MainWindowViewModel)DataContext).IsConvertPage}" />
+            <views:LocalMusicScanView Name="LocalPage"
+                                      DataContext="{Binding LocalMusicScanViewModel}"
+                                      IsVisible="{Binding $parent[views:MainWindow].((vm:MainWindowViewModel)DataContext).IsLocalPage}" />
             <views:SettingView Name="SettingsPage"
                                DataContext="{Binding SettingViewModel}"
                                IsVisible="{Binding $parent[views:MainWindow].((vm:MainWindowViewModel)DataContext).IsSettingsPage}" />

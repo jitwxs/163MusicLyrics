@@ -16,7 +16,7 @@ using TKCode.Arc;
 
 namespace MusicLyricApp.Views;
 
-/// <summary>Lyrics search page: query, song details, playback, preview and save.</summary>
+/// <summary>Online lyrics page (在线歌词): query, song details, playback, preview and save.</summary>
 public partial class SearchView : UserControl
 {
     private MainWindowViewModel? _viewModel;
