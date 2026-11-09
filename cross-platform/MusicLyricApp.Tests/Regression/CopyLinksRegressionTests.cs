@@ -1,6 +1,7 @@
 using Avalonia.Controls;
 using Avalonia.Headless.XUnit;
 using Avalonia.Threading;
+using Avalonia.VisualTree;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Moq;
@@ -220,6 +221,95 @@ public class CopyLinksRegressionTests
         scope.VerifyOnlyClipboard(expected);
     }
 
+    [AvaloniaTheory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task ClipboardFailureCanBeRetriedAndClearsThePreviousError(bool cover)
+    {
+        using var scope = new CopyScope();
+        scope.LoadSong();
+        var expected = cover ? CoverUrl : SongUrl;
+        scope.Window.SetupSequence(x => x.SetTextAsync(expected))
+            .ThrowsAsync(new InvalidOperationException("temporary clipboard failure"))
+            .Returns(Task.CompletedTask);
+        var command = scope.Command(cover);
+
+        await command.ExecuteAsync(null);
+        Assert.Contains("temporary clipboard failure", scope.Vm.TipErrorMessage);
+        Assert.Empty(scope.Vm.TipNormalMessage);
+        Assert.True(command.CanExecute(null));
+
+        await command.ExecuteAsync(null);
+
+        Assert.Empty(scope.Vm.TipErrorMessage);
+        Assert.Equal(CopyScope.Success(cover), scope.Vm.TipNormalMessage);
+        scope.Window.Verify(x => x.SetTextAsync(expected), Times.Exactly(2));
+        scope.VerifyOnlyClipboard();
+    }
+
+    [AvaloniaTheory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task SwitchingSongsCopiesTheCurrentUrlWithoutLosingSignedQueryParameters(bool cover)
+    {
+        using var scope = new CopyScope();
+        scope.LoadSong();
+        var firstUrl = cover ? CoverUrl : SongUrl;
+        const string nextUrl = "https://test.invalid/新歌曲?token=a%2Bb&expires=123&name=%E6%AD%8C#part";
+        scope.Window.Setup(x => x.SetTextAsync(firstUrl)).Returns(Task.CompletedTask);
+        scope.Window.Setup(x => x.SetTextAsync(nextUrl)).Returns(Task.CompletedTask);
+        await scope.Command(cover).ExecuteAsync(null);
+
+        var nextSong = TestWorkspace.Song("456");
+        nextSong.SongVo.Pics = nextUrl;
+        scope.Vm.SearchResultViewModel.SaveVoMap = new() { ["456"] = nextSong };
+        scope.Vm.SearchResultViewModel.SongLink = nextUrl;
+        await scope.Command(cover).ExecuteAsync(null);
+
+        scope.Window.Verify(x => x.SetTextAsync(firstUrl), Times.Once);
+        scope.Window.Verify(x => x.SetTextAsync(nextUrl), Times.Once);
+        Assert.Empty(scope.Vm.TipErrorMessage);
+        Assert.Equal(CopyScope.Success(cover), scope.Vm.TipNormalMessage);
+        scope.VerifyOnlyClipboard();
+    }
+
+    [AvaloniaTheory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task CopyCommandRejectsReentryUntilPendingClipboardWriteCompletes(bool cover)
+    {
+        using var scope = new CopyScope();
+        scope.LoadSong();
+        var expected = cover ? CoverUrl : SongUrl;
+        var pending = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        scope.Window.Setup(x => x.SetTextAsync(expected)).Returns(pending.Task);
+        var command = scope.Command(cover);
+        var execution = command.ExecuteAsync(null);
+        try
+        {
+            Assert.False(command.CanExecute(null));
+            Assert.True(command.IsRunning);
+            Assert.False(execution.IsCompleted);
+        }
+        finally
+        {
+            pending.TrySetResult();
+            await execution;
+        }
+        Assert.True(command.CanExecute(null));
+        Assert.False(command.IsRunning);
+        scope.VerifyOnlyClipboard(expected);
+    }
+
+    [AvaloniaFact]
+    public void ApplicationTitleMatchesAssemblyReleaseVersion()
+    {
+        using var scope = new CopyScope();
+        var version = typeof(MainWindowViewModel).Assembly.GetName().Version!;
+        Assert.Equal($"MusicLyricApp v{version.Major}.{version.Minor}", scope.Vm.AppTitle);
+        scope.VerifyOnlyClipboard();
+    }
+
     [AvaloniaFact]
     public void PlaybackContextMenuBindsCopyCommandsAndPreservesSeparateDownloads()
     {
@@ -253,6 +343,8 @@ public class CopyLinksRegressionTests
             Assert.NotSame(copySong.Command, downloadSong.Command);
             Assert.NotSame(copyCover.Command, downloadCover.Command);
             Assert.NotSame(copySong.Command, copyCover.Command);
+            Assert.DoesNotContain(window.GetVisualDescendants().OfType<Button>(),
+                button => ReferenceEquals(button.Command, vm.ExecuteCopySongLinkCommand));
             Assert.False(copySong.IsEnabled);
             Assert.True(copyCover.IsEnabled);
 

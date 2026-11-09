@@ -341,7 +341,7 @@ if (os.environ.get("TEST_CODESIGN_FAIL") == phase or
                 self.assertEqual(self.signing_calls(), [])
 
     def prepare_entrypoints(self):
-        for name in ("app.sh", "build-macos-app.sh"):
+        for name in ("app.sh", "build-macos-app.sh", "publish.sh"):
             shutil.copy2(CROSS_PLATFORM / name, self.script_dir / name)
         for project in ("MusicLyricApp", "MusicLyricApp.Tests"):
             assets = self.script_dir / project / "obj/project.assets.json"
@@ -382,6 +382,9 @@ elif (len(args) == 5 and args[0] == "msbuild" and
     if version is None:
         version = ET.parse(args[1]).findtext("PropertyGroup/Version", default="")
     print(version)
+    if os.environ.get("TEST_VERSION_QUERY_FAIL") == "1":
+        print("intentional version query failure", file=sys.stderr)
+        sys.exit(94)
 elif args and args[0] in ("build", "run"):
     print("DOTNET_" + args[0].upper() + "_STUB")
 elif args and args[0] == "publish":
@@ -715,6 +718,233 @@ else:
         self.assertIn("BUNDLE_HOST_MARKER", result.stdout.splitlines())
         bundle, _ = self.bundle_paths()
         self.assertIn(str((bundle / "Contents/MacOS").resolve()), result.stdout.splitlines())
+
+    def snapshot_tree(self, root):
+        """Include empty directories, link targets and modes, without following links."""
+        snapshot = {}
+        for path in root.rglob("*"):
+            mode = stat.S_IMODE(path.lstat().st_mode)
+            if path.is_symlink():
+                value = ("link", os.readlink(path), mode)
+            elif path.is_dir():
+                value = ("directory", mode)
+            else:
+                value = ("file", path.read_bytes(), mode)
+            snapshot[path.relative_to(root).as_posix()] = value
+        return snapshot
+
+    def test_app_dist_via_sh_packages_five_targets_with_evaluated_version(self):
+        self.prepare_entrypoints()
+        version = "10.8.338-preview.2"
+        result = self.run_entrypoint(
+            "app.sh", "dist", shell="sh",
+            env={"BASH_VERSION": "", "TEST_PROJECT_VERSION": version + "\r",
+                 "APP_VERSION": "99.99.99"},
+        )
+        self.assert_success(result)
+        publishes = [args for args in self.dotnet_calls() if args[0] == "publish"]
+        rids = ("win-x86", "win-x64", "linux-x64", "osx-x64", "osx-arm64")
+        self.assertEqual([args[args.index("-r") + 1] for args in publishes], list(rids))
+        self.assertEqual(self.dotnet_calls(),
+                         [["--list-sdks"], self.version_query(), *publishes])
+        for args, rid in zip(publishes, rids):
+            self.assertEqual(args[args.index("-o") + 1], str(self.output / version / rid))
+            suffix = ".zip" if rid.startswith("win-") else ".tar.gz"
+            self.assertTrue((self.output / f"MusicLyricApp-{version}-{rid}{suffix}").is_file())
+        for rid in ("osx-x64", "osx-arm64"):
+            self.assert_bundle(rid, version)
+        self.assertFalse((self.output / VERSION).exists())
+        self.assertFalse(any("99.99.99" in path.name for path in self.output.iterdir()))
+        self.assertIn("全部 5 个分发包已生成", result.stdout)
+        self.assertNotIn("BUNDLE_HOST_MARKER", result.stdout)
+
+    def test_two_successful_dist_runs_remove_old_zip_members_and_directories(self):
+        self.prepare_entrypoints()
+        old_name = "retired directory/obsolete.bin"
+        first_payload = {**self.payload, old_name: b"first release only"}
+        self.assert_success(self.run_entrypoint("app.sh", "dist", env={
+            "TEST_PUBLISH_PAYLOAD": json.dumps({
+                name: content.hex() for name, content in first_payload.items()
+            }),
+        }))
+        zip_path = self.output / f"MusicLyricApp-{VERSION}-win-x86.zip"
+        with zipfile.ZipFile(zip_path) as archive:
+            self.assertIn(old_name, archive.namelist())
+        old_directory = self.output / "obsolete-version/empty directory"
+        old_directory.mkdir(parents=True)
+        hidden = self.output / ".retired-release"
+        hidden.write_bytes(b"obsolete")
+        project_marker = self.project_file.parent / "do-not-clean.txt"
+        project_marker.write_bytes(b"project source")
+        project_before = self.snapshot_tree(self.project_file.parent)
+        outside_publish = self.cwd / "publish"
+        outside_publish.mkdir()
+        (outside_publish / "keep.zip").write_bytes(b"unrelated publish")
+
+        self.assert_success(self.run_entrypoint("app.sh", "dist"))
+        self.assertFalse(old_directory.parent.exists())
+        self.assertFalse(hidden.exists())
+        self.assertFalse(any(path.name == "obsolete.bin" for path in self.output.rglob("*")))
+        self.assertFalse(any(path.name == "retired directory" for path in self.output.rglob("*")))
+        for archive_path in self.output.glob("*.zip"):
+            with zipfile.ZipFile(archive_path) as archive:
+                self.assertFalse(any("retired directory" in name for name in archive.namelist()))
+                self.assertEqual(archive.read("NLog.config"), self.payload["NLog.config"])
+        for archive_path in self.output.glob("*.tar.gz"):
+            with tarfile.open(archive_path) as archive:
+                self.assertFalse(any("retired directory" in name for name in archive.getnames()))
+        self.assertEqual(self.snapshot_tree(self.project_file.parent), project_before)
+        self.assertEqual((outside_publish / "keep.zip").read_bytes(), b"unrelated publish")
+        self.assertEqual(len([args for args in self.dotnet_calls() if args[0] == "publish"]), 10)
+
+    def test_dist_invalid_versions_and_arguments_preserve_complete_publish_tree(self):
+        self.prepare_entrypoints()
+        self.assert_success(self.run_entrypoint("app.sh", "package", "osx-arm64"))
+        (self.output / ".hidden/empty directory").mkdir(parents=True)
+        before_tree = self.snapshot_tree(self.output)
+        for arguments, env in (
+            (("osx-x64",), {}),
+            ((), {"TEST_PROJECT_VERSION": "bad version"}),
+            ((), {"TEST_PROJECT_VERSION": "../escape"}),
+            ((), {"TEST_PROJECT_VERSION": "7.4/338"}),
+        ):
+            with self.subTest(arguments=arguments, env=env):
+                before_calls = len(self.dotnet_calls())
+                before_signing = self.signing_calls()
+                result = self.run_entrypoint("app.sh", "dist", *arguments, env=env)
+                self.assertNotEqual(result.returncode, 0)
+                self.assertEqual(self.snapshot_tree(self.output), before_tree)
+                self.assertFalse(any(args[0] in ("publish", "build", "run")
+                                     for args in self.dotnet_calls()[before_calls:]))
+                self.assertEqual(self.signing_calls(), before_signing)
+
+    def test_version_query_nonzero_with_valid_stdout_prevents_cleanup_and_publish(self):
+        self.prepare_entrypoints()
+        self.assert_success(self.run_entrypoint("app.sh", "package", "osx-arm64"))
+        before_tree = self.snapshot_tree(self.output)
+        for command in ("dist", "package", "all", "run-package"):
+            with self.subTest(command=command):
+                before = len(self.dotnet_calls())
+                signing = self.signing_calls()
+                result = self.run_entrypoint("app.sh", command,
+                                             env={"TEST_VERSION_QUERY_FAIL": "1"})
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn("intentional version query failure", result.stderr)
+                self.assertEqual(self.dotnet_calls()[before:],
+                                 [["--list-sdks"], self.version_query()])
+                self.assertEqual(self.snapshot_tree(self.output), before_tree)
+                self.assertEqual(self.signing_calls(), signing)
+                self.assertNotIn("BUNDLE_HOST_MARKER", result.stdout)
+
+    def test_helper_failures_preserve_previous_valid_bundle_and_archive(self):
+        self.assert_success(self.run_helper())
+        before = self.snapshot_tree(self.output)
+        # A failed replacement must not silently overwrite the old payload.
+        (self.publish / "NLog.config").write_bytes(b"replacement config")
+        for phase, expected_calls in (("sign", 1), ("verify", 2), ("archive-verify", 3)):
+            with self.subTest(phase=phase):
+                count = len(self.signing_calls())
+                result = self.run_helper(env={"TEST_CODESIGN_FAIL": phase})
+                self.assertNotEqual(result.returncode, 0)
+                self.assertEqual(len(self.signing_calls()) - count, expected_calls)
+                self.assertEqual(self.snapshot_tree(self.output), before)
+                self.assertFalse(list(self.output.glob(".macos-package.*")))
+        # Validation failures must also leave already-published artifacts alone.
+        (self.publish / "NLog.config").unlink()
+        result = self.run_helper()
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(self.snapshot_tree(self.output), before)
+
+    def test_archive_disables_appledouble_and_does_not_leak_staging(self):
+        real_tar = shutil.which("tar", path=os.defpath)
+        self.assertIsNotNone(real_tar)
+        # Model macOS metadata handling even on hosts without copyfile support;
+        # still delegate archive creation and extraction to the real tar binary.
+        self.env["TEST_REAL_TAR"] = real_tar
+        self.write_stub("tar", '''import os
+import subprocess
+import sys
+if "-czf" in sys.argv and os.environ.get("COPYFILE_DISABLE") != "1":
+    print("AppleDouble metadata was not disabled", file=sys.stderr)
+    sys.exit(95)
+sys.exit(subprocess.call([os.environ["TEST_REAL_TAR"], *sys.argv[1:]]))
+''')
+        xattr = shutil.which("xattr", path=os.defpath)
+        if sys.platform == "darwin" and xattr:
+            self.assert_success(subprocess.run(
+                [xattr, "-w", "com.apple.test-packaging", "metadata",
+                 str(self.publish / "NLog.config")],
+                capture_output=True, text=True, timeout=10, check=False,
+            ))
+        self.assert_success(self.run_helper(env={"COPYFILE_DISABLE": "0"}))
+        self.assert_bundle("osx-arm64")
+        bundle, archive = self.bundle_paths()
+        self.assertEqual(set(self.output.iterdir()), {bundle, archive})
+        with tarfile.open(archive) as tar:
+            for member in tar.getmembers():
+                parts = PurePosixPath(member.name).parts
+                self.assertFalse(any(part.startswith("._") or part == "__MACOSX"
+                                     for part in parts), member.name)
+                self.assertFalse(any(part.startswith(".macos-package.") or part == "verify"
+                                     for part in parts), member.name)
+                if member.issym():
+                    self.assertNotIn(str(self.root), member.linkname)
+
+    def test_legacy_corrupt_tar_preserves_input_and_cleans_extraction_directory(self):
+        self.prepare_entrypoints()
+        archive = self.output / f"MusicLyricApp-{VERSION}-osx-x64-mid.tar.gz"
+        archive.write_bytes(b"not a gzip or tar archive\x00")
+        before = self.snapshot_tree(self.output)
+        result = self.run_entrypoint("build-macos-app.sh", VERSION)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(self.snapshot_tree(self.output), before)
+        self.assertEqual(self.signing_calls(), [])
+        self.assertEqual(self.dotnet_calls(), [])
+        self.assertNotIn("Final macOS apps and archives are available", result.stdout)
+
+    def test_publish_script_macos_uses_shared_helper_and_nonmac_retains_mid_archives(self):
+        self.prepare_entrypoints()
+        # publish.sh copies the source icon over the dotnet fixture's icon.
+        self.fallback_icon.write_bytes(self.payload["Resources/app-logo.icns"])
+        # Make the legacy Python zip fallback deterministic without requiring
+        # a separate Python installation in the restricted stub PATH.
+        self.write_stub("python3", '''import os
+import sys
+os.execv(sys.executable, [sys.executable, *sys.argv[1:]])
+''')
+        for host in ("Darwin", "Linux"):
+            with self.subTest(host=host):
+                before = len(self.dotnet_calls())
+                signing_count = len(self.signing_calls())
+                result = self.run_entrypoint("publish.sh", VERSION,
+                                             env={"TEST_UNAME_OS": host})
+                self.assert_success(result)
+                calls = self.dotnet_calls()[before:]
+                self.assertEqual([args[0] for args in calls], ["publish"] * 5)
+                self.assertEqual([args[args.index("-r") + 1] for args in calls],
+                                 ["win-x86", "win-x64", "linux-x64", "osx-x64", "osx-arm64"])
+                for rid in ("osx-x64", "osx-arm64"):
+                    bundle, archive = self.bundle_paths(rid)
+                    mid = self.output / f"MusicLyricApp-{VERSION}-{rid}-mid.tar.gz"
+                    self.assertFalse((self.output / rid).exists())
+                    if host == "Darwin":
+                        self.assert_bundle(rid)
+                        self.assertFalse(mid.exists())
+                    else:
+                        self.assertFalse(bundle.exists())
+                        self.assertFalse(archive.exists())
+                        with tarfile.open(mid) as tar:
+                            members = {str(PurePosixPath(member.name)): member
+                                       for member in tar.getmembers()}
+                            for name in ("MusicLyricApp", "NLog.config", "Resources/app-logo.icns"):
+                                with tar.extractfile(members[name]) as stream:
+                                    self.assertEqual(stream.read(), self.payload[name])
+                            self.assertFalse(any(".app/" in name for name in members))
+                self.assertEqual(len(self.signing_calls()) - signing_count,
+                                 6 if host == "Darwin" else 0)
+                self.assertFalse(list(self.output.glob(".macos-package.*")))
+                self.assertNotIn("BUNDLE_HOST_MARKER", result.stdout)
+                self.assertFalse((self.cwd / "publish").exists())
 
     def test_legacy_entrypoint_packages_both_mid_archives_from_script_directory(self):
         self.prepare_entrypoints()
