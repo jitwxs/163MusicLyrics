@@ -443,6 +443,39 @@ public partial class MainWindowViewModel : ViewModelBase
     }
 
     [RelayCommand]
+    private async Task ExecuteCopySongPicAsync()
+    {
+        if (SearchResultViewModel.SaveVoMap.Count == 0)
+        {
+            SetTip(ErrorMsgConst.MUST_SEARCH_BEFORE_GET_SONG_PIC, true);
+            return;
+        }
+
+        if (SearchResultViewModel.SaveVoMap.Count != 1)
+        {
+            SetTip(LocalizationService.Get("Status.Main.SingleSongRequired"), true);
+            return;
+        }
+
+        var link = SearchResultViewModel.SaveVoMap.Values.Single().SongVo.Pics;
+        if (string.IsNullOrWhiteSpace(link))
+        {
+            SetTip(ErrorMsgConst.SONG_PIC_GET_FAILED, true);
+            return;
+        }
+
+        try
+        {
+            await _windowProvider.SetTextAsync(link);
+            SetTip(ErrorMsgConst.SONG_PIC_GET_SUCCESS, false);
+        }
+        catch (Exception ex)
+        {
+            SetTip(LocalizationService.Format("Status.Main.CopyCoverUrlFailed", ex.Message), true);
+        }
+    }
+
+    [RelayCommand]
     private async Task ExecuteSongLinkAsync()
     {
         try
