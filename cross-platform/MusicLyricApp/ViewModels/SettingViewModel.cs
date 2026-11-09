@@ -79,8 +79,11 @@ public partial class SettingViewModel : ViewModelBase
     
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
+    /// <summary>Sign-in state of the cookies on the extensions section; null when the page is used on its own.</summary>
+    public LoginStatusViewModel? Login { get; }
+
     public SettingViewModel(SettingBean settingBean, IWindowProvider? windowProvider = null,
-        Action<string>? openDirectory = null)
+        Action<string>? openDirectory = null, LoginStatusViewModel? login = null)
     {
         _settingBean = settingBean;
         _windowProvider = windowProvider;
@@ -90,6 +93,19 @@ public partial class SettingViewModel : ViewModelBase
         });
         LocalSongCacheService.EnsureConfigDefaults(_settingBean);
         SettingParamViewModel.Bind(_settingBean);
+
+        // Subscribed after Bind, so loading the saved cookies does not count as an edit.
+        Login = login;
+        if (Login != null)
+        {
+            SettingParamViewModel.PropertyChanged += (_, e) =>
+            {
+                if (e.PropertyName == nameof(SettingParamViewModel.NetEaseCookie))
+                    Login.ScheduleCheck(SearchSourceEnum.NET_EASE_MUSIC);
+                else if (e.PropertyName == nameof(SettingParamViewModel.QqMusicCookie))
+                    Login.ScheduleCheck(SearchSourceEnum.QQ_MUSIC);
+            };
+        }
 
         InitLyricsTypes();
     }

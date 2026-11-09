@@ -118,7 +118,11 @@ public partial class MainWindow : ArcWindow, IWindowProvider
             return;
         }
 
-        Dispatcher.UIThread.Post(() => Toast.Show(this, message, isError ? ToastKind.Error : ToastKind.Info));
+        // "Needs login" errors offer the way to fix them: the cookie fields in settings.
+        var action = MainWindowViewModel.IsNeedLoginMessage(message) && DataContext is MainWindowViewModel vm
+            ? new ToastAction(LocalizationService.Get("Login.OpenSettings"), () => vm.ExecuteOpenCookieSettingsCommand.Execute(null))
+            : null;
+        Dispatcher.UIThread.Post(() => Toast.Show(this, message, isError ? ToastKind.Error : ToastKind.Info, action: action));
     }
 
     private void BatchItemsOnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e) => UpdateBatchBadge();

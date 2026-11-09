@@ -39,6 +39,14 @@ public class NetEaseMusicNativeApi : BaseNativeApi
         return "https://music.163.com/";
     }
 
+    /// <summary>
+    /// Raw account response for the current cookie: <c>profile</c> is null when the cookie is not signed in.
+    /// </summary>
+    public string GetLoginAccount()
+    {
+        return SendPost("https://music.163.com/api/nuser/account/get", new Dictionary<string, string>());
+    }
+
     public ResultVo<SearchResult> Search(string keyword, SearchTypeEnum searchType)
     {
         const string url = "https://music.163.com/weapi/cloudsearch/get/web";

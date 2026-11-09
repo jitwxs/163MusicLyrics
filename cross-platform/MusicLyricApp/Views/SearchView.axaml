@@ -25,6 +25,16 @@
             <Setter Property="Foreground" Value="{arc:ArcDesignTokenResource TextSecondary}" />
             <Setter Property="FontSize" Value="{arc:ArcDesignTokenResource TypeSM}" />
         </Style>
+        <!-- The sign-in icon takes the state's color, so a broken cookie stands out beside the source. -->
+        <Style Selector="arc|ArcGlyph.login-valid">
+            <Setter Property="Foreground" Value="{arc:ArcDesignTokenResource Success}" />
+        </Style>
+        <Style Selector="arc|ArcGlyph.login-uncertain">
+            <Setter Property="Foreground" Value="{arc:ArcDesignTokenResource Warning}" />
+        </Style>
+        <Style Selector="arc|ArcGlyph.login-invalid">
+            <Setter Property="Foreground" Value="{arc:ArcDesignTokenResource Danger}" />
+        </Style>
     </UserControl.Styles>
 
     <!-- Key bindings come from Core/AppShortcuts and are added in code-behind. -->
@@ -52,6 +62,23 @@
                     <arc:SegmentedOption Value="{x:Static models:SearchTypeEnum.PLAYLIST_ID}"
                                          Label="{loc:Loc Key=Enum.SearchTypeEnum.PLAYLIST_ID}" />
                 </arc:SegmentedControl>
+                <!-- Sign-in state of the picked source; opens the cookie settings. -->
+                <arc:Button Name="LoginStatusButton"
+                            Variant="Ghost"
+                            Size="Small"
+                            VerticalAlignment="Center"
+                            Command="{Binding ExecuteOpenCookieSettingsCommand}"
+                            ToolTip.Tip="{Binding CurrentLogin.Detail}"
+                            AutomationProperties.Name="{Binding CurrentLogin.SourceLabel}">
+                    <StackPanel Orientation="Horizontal" Spacing="{arc:ArcDesignTokenResource Space2}">
+                        <arc:ArcGlyph Name="LoginStatusIcon" Data="{Binding CurrentLogin.Icon}" Size="14" VerticalAlignment="Center"
+                                      Classes.login-valid="{Binding CurrentLogin.IsValid}"
+                                      Classes.login-uncertain="{Binding CurrentLogin.IsUncertain}"
+                                      Classes.login-invalid="{Binding CurrentLogin.IsInvalid}" />
+                        <TextBlock Name="LoginStatusText" Text="{Binding CurrentLogin.SourceLabel}" VerticalAlignment="Center"
+                                   MaxWidth="260" TextTrimming="CharacterEllipsis" />
+                    </StackPanel>
+                </arc:Button>
             </WrapPanel>
 
             <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="{arc:ArcDesignTokenResource Space4}">

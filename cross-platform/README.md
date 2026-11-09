@@ -19,6 +19,17 @@
 
 支持简体中文（`zh-CN`）、繁体中文（`zh-TW`）和英文（`en-US`）。在设置的「外观与语言」中切换后立即生效，重启后保留选择。界面文案位于 `MusicLyricApp/Resources/Localization/`，新增文案时需同步维护三种语言及其占位符。
 
+## 登录 Cookie 与登录状态
+
+在「设置 › 扩展 › 登录 Cookie」中填写网易云和 QQ 音乐的 Cookie。保存时会自动去掉从浏览器复制时常带的引号、`Cookie:` 前缀和换行。停止输入约 0.8 秒后自动检查有效性，也可以点「重新检查」：
+
+- 未填写：以游客身份访问，不发送请求。
+- 格式不正确：网易云缺少 `MUSIC_U`，QQ 音乐缺少 `uin` 和 `qm_keyst`（或 `qqmusic_key`），不发送请求。
+- 已登录 · 昵称 / 已失效：分别由网易云 `api/nuser/account/get` 和 QQ 音乐 `fcg_get_profile_homepage.fcg` 的返回判断。
+- 无法检查：网络或代理错误，或平台返回了意外结果。此时 Cookie 可能仍然可用。
+
+启动时会对已填写的 Cookie 各检查一次。「在线歌词」页在搜索源旁显示当前平台的登录状态，点击可跳到 Cookie 设置。请求返回“需要登录”时，提示里会带「设置 Cookie」按钮，并重新检查已填写的 Cookie。实现位于 `Core/Service/Login/LoginProbe.cs` 和 `ViewModels/LoginStatusViewModel.cs`。
+
 ## 本地搜索：扫描本地音乐并匹配歌词
 
 侧边栏的「本地搜索」页（快捷键 ⌘4 / Ctrl+4）用于为本地音乐文件匹配并保存歌词：

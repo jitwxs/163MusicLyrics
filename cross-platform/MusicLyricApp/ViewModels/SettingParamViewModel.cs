@@ -320,7 +320,8 @@ public partial class SettingParamViewModel : ViewModelBase
     
     partial void OnQqMusicCookieChanged(string value)
     {
-        _settingBean.Config.QQMusicCookie = value;
+        // Saved without the quotes, "Cookie:" prefix and line breaks a copy from the browser often brings.
+        _settingBean.Config.QQMusicCookie = Core.Service.Login.CookieInspector.Normalize(value);
     }
     
     // 20. 网易云 Cookie
@@ -328,7 +329,7 @@ public partial class SettingParamViewModel : ViewModelBase
     
     partial void OnNetEaseCookieChanged(string value)
     {
-        _settingBean.Config.NetEaseCookie = value;
+        _settingBean.Config.NetEaseCookie = Core.Service.Login.CookieInspector.Normalize(value);
     }
     
     // 21. 歌手分隔符

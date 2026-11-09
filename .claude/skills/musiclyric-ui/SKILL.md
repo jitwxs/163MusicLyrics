@@ -20,6 +20,7 @@ Paths below are relative to `cross-platform/MusicLyricApp/`.
 | Online lyrics, 在线歌词 (query row, song strip, preview, fuzzy results, output bar) | `Views/SearchView.axaml(.cs)`, `Views/BlurSearchView.axaml(.cs)`, `ViewModels/SearchResultViewModel.cs`, `BlurSearchViewModel.cs` |
 | Download manager (UI name 下载管理 / Download manager; code name `Batch*`) | `Views/BatchSearchView.axaml(.cs)`, `ViewModels/BatchSearchViewModel.cs`, `BatchSearchItemViewModel.cs` |
 | Format conversion | `Views/FormatConvertView.axaml(.cs)`, `ViewModels/FormatConvertViewModel.cs` |
+| Sign-in state of the cookies (settings rows, online lyrics status button, "needs login" toast action) | `ViewModels/LoginStatusViewModel.cs` (shared `MainWindowViewModel.Login`), `Core/Service/Login/LoginProbe.cs` |
 | Local search, 本地搜索 (scan a folder, match files to songs, save lyrics beside them) | `Views/LocalMusicScanView.axaml(.cs)`, `ViewModels/LocalMusicScanViewModel.cs`, `Core/Service/LocalMusic/` |
 | Settings (5 sections chosen from the sidebar) | `Views/SettingView.axaml(.cs)`, `ViewModels/SettingViewModel.cs`, `SettingParamViewModel.cs`, `Models/SettingBase.cs` |
 | Shortcuts (single source of truth) | `Core/AppShortcuts.cs`, `Views/ShortcutsDialog.cs` |

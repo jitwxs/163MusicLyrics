@@ -26,6 +26,20 @@ public class QQMusicNativeApi(Func<string> cookieFunc) : BaseNativeApi(cookieFun
         return "https://c.y.qq.com/";
     }
 
+    /// <summary>
+    /// Raw profile response for <paramref name="uin"/> using the current cookie: code 1000 means not signed in.
+    /// </summary>
+    public string GetLoginProfile(string uin)
+    {
+        return SendPost("https://c.y.qq.com/rsc/fcgi-bin/fcg_get_profile_homepage.fcg", new Dictionary<string, string>
+        {
+            { "format", "json" },
+            { "cid", "205360838" },
+            { "userid", uin },
+            { "reqfrom", "1" },
+        });
+    }
+
     public QQMusicBean.MusicFcgApiResult Search(string keyword, SearchTypeEnum searchType)
     {
         // 0单曲 2专辑 1歌手 3歌单 7歌词 12mv

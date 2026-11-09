@@ -155,13 +155,53 @@
 
                     <arc:SettingsGroup Header="{loc:Loc Key=Settings.Group.Cookie}"
                                        Description="{loc:Loc Key=Settings.Group.CookieHint}">
-                        <arc:SettingsRow Header="{loc:Loc Key=UI.Extra11}">
-                            <arc:PasswordField Label="{loc:Loc Key=UI.Extra11}"
-                                               Text="{Binding SettingParamViewModel.NetEaseCookie, Mode=TwoWay}" />
+                        <!-- The state below the field is checked shortly after the cookie is edited. -->
+                        <arc:SettingsRow Header="{loc:Loc Key=UI.Extra11}"
+                                         Description="{Binding Login.NetEase.Detail, FallbackValue=''}">
+                            <StackPanel Spacing="{arc:ArcDesignTokenResource Space2}">
+                                <arc:PasswordField Label="{loc:Loc Key=UI.Extra11}"
+                                                   Text="{Binding SettingParamViewModel.NetEaseCookie, Mode=TwoWay}" />
+                                <StackPanel Orientation="Horizontal" Spacing="{arc:ArcDesignTokenResource Space2}"
+                                            IsVisible="{Binding Login, Converter={x:Static ObjectConverters.IsNotNull}}">
+                                    <arc:Badge Name="NetEaseLoginBadge" Size="Small" MaxWidth="190"
+                                               Tone="{Binding Login.NetEase.Tone, FallbackValue=Neutral}"
+                                               ToolTip.Tip="{Binding Login.NetEase.Label, FallbackValue=''}">
+                                        <arc:Badge.Icon>
+                                            <arc:ArcGlyph Data="{Binding Login.NetEase.Icon, FallbackValue={x:Null}}" />
+                                        </arc:Badge.Icon>
+                                        <TextBlock Text="{Binding Login.NetEase.Label, FallbackValue=''}" TextTrimming="CharacterEllipsis" />
+                                    </arc:Badge>
+                                    <arc:Button Name="NetEaseLoginCheckButton" Variant="Ghost" Size="Small"
+                                                Content="{loc:Loc Key=Login.Recheck}"
+                                                IsLoading="{Binding Login.NetEase.IsChecking, FallbackValue=False}"
+                                                Command="{Binding Login.CheckCommand, FallbackValue={x:Null}}"
+                                                CommandParameter="{x:Static models:SearchSourceEnum.NET_EASE_MUSIC}" />
+                                </StackPanel>
+                            </StackPanel>
                         </arc:SettingsRow>
-                        <arc:SettingsRow Header="{loc:Loc Key=UI.Extra12}">
-                            <arc:PasswordField Label="{loc:Loc Key=UI.Extra12}"
-                                               Text="{Binding SettingParamViewModel.QqMusicCookie, Mode=TwoWay}" />
+                        <!-- The state below the field is checked shortly after the cookie is edited. -->
+                        <arc:SettingsRow Header="{loc:Loc Key=UI.Extra12}"
+                                         Description="{Binding Login.QQ.Detail, FallbackValue=''}">
+                            <StackPanel Spacing="{arc:ArcDesignTokenResource Space2}">
+                                <arc:PasswordField Label="{loc:Loc Key=UI.Extra12}"
+                                                   Text="{Binding SettingParamViewModel.QqMusicCookie, Mode=TwoWay}" />
+                                <StackPanel Orientation="Horizontal" Spacing="{arc:ArcDesignTokenResource Space2}"
+                                            IsVisible="{Binding Login, Converter={x:Static ObjectConverters.IsNotNull}}">
+                                    <arc:Badge Name="QqLoginBadge" Size="Small" MaxWidth="190"
+                                               Tone="{Binding Login.QQ.Tone, FallbackValue=Neutral}"
+                                               ToolTip.Tip="{Binding Login.QQ.Label, FallbackValue=''}">
+                                        <arc:Badge.Icon>
+                                            <arc:ArcGlyph Data="{Binding Login.QQ.Icon, FallbackValue={x:Null}}" />
+                                        </arc:Badge.Icon>
+                                        <TextBlock Text="{Binding Login.QQ.Label, FallbackValue=''}" TextTrimming="CharacterEllipsis" />
+                                    </arc:Badge>
+                                    <arc:Button Name="QqLoginCheckButton" Variant="Ghost" Size="Small"
+                                                Content="{loc:Loc Key=Login.Recheck}"
+                                                IsLoading="{Binding Login.QQ.IsChecking, FallbackValue=False}"
+                                                Command="{Binding Login.CheckCommand, FallbackValue={x:Null}}"
+                                                CommandParameter="{x:Static models:SearchSourceEnum.QQ_MUSIC}" />
+                                </StackPanel>
+                            </StackPanel>
                         </arc:SettingsRow>
                     </arc:SettingsGroup>
                 </StackPanel>

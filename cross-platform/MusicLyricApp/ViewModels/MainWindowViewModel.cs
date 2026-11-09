@@ -16,6 +16,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using NAudio.Wave;
 using MusicLyricApp.Core;
 using MusicLyricApp.Core.Service;
+using MusicLyricApp.Core.Service.Login;
 using MusicLyricApp.Core.Utils;
 using MusicLyricApp.Core.Localization;
 using MusicLyricApp.Models;
@@ -106,6 +107,14 @@ public partial class MainWindowViewModel : ViewModelBase
 
     public BatchSearchViewModel BatchSearchViewModel => _downloadManagerViewModel;
 
+    /// <summary>Whether each platform's cookie is signed in; shared by the online lyrics and settings pages.</summary>
+    public LoginStatusViewModel Login { get; }
+
+    /// <summary>The account state of the source picked on the online lyrics page.</summary>
+    public AccountStatusViewModel CurrentLogin => Login.Get(SearchParamViewModel.SelectedSearchSource);
+
+    public const string PageCookieSettings = SettingsKeyPrefix + SettingViewModel.SectionExtensions;
+
     /// <summary>Created on first visit and kept, so the text being converted survives page switches.</summary>
     [ObservableProperty] private FormatConvertViewModel? _formatConvertViewModel;
 
@@ -138,7 +147,7 @@ public partial class MainWindowViewModel : ViewModelBase
 
             if (!wasSettings || SettingViewModel == null)
             {
-                SettingViewModel = new SettingViewModel(SettingBean, _windowProvider);
+                SettingViewModel = new SettingViewModel(SettingBean, _windowProvider, login: Login);
             }
 
             SettingViewModel.CurrentSection = section;
@@ -189,6 +198,7 @@ public partial class MainWindowViewModel : ViewModelBase
         _searchService = new SearchService(_settingBean);
         _windowProvider = new DesignWindowProvider();
         _downloadManagerViewModel = new BatchSearchViewModel(_settingBean, _searchService, new StorageService(), _windowProvider);
+        Login = new LoginStatusViewModel(CookieOf);
         
         SearchParamViewModel.Bind(_settingBean.Param);
         LastSaveFolderPath = _settingBean.Config.LastSaveFolderPath;
@@ -207,7 +217,7 @@ public partial class MainWindowViewModel : ViewModelBase
 
     // Main constructor for runtime use
     public MainWindowViewModel(IWindowProvider windowProvider, StorageService? storageService = null,
-        SearchService? searchService = null)
+        SearchService? searchService = null, ILoginProbe? loginProbe = null)
     {
         _windowProvider = windowProvider;
         _storageService = storageService ?? new StorageService();
@@ -220,6 +230,9 @@ public partial class MainWindowViewModel : ViewModelBase
         
         _storageService.SetSearchService(_searchService);
         _downloadManagerViewModel = new BatchSearchViewModel(_settingBean, _searchService, _storageService, _windowProvider);
+        Login = new LoginStatusViewModel(CookieOf, loginProbe);
+        // One request per platform with a cookie, so the online lyrics page shows whether it still works.
+        _ = Login.CheckAllAsync();
 
         SearchParamViewModel.Bind(_settingBean.Param);
         LastSaveFolderPath = _settingBean.Config.LastSaveFolderPath;
@@ -378,6 +391,11 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private void SearchParamViewModelOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
+        if (e.PropertyName is nameof(SearchParamViewModel.SelectedSearchSourceItem) or nameof(SearchParamViewModel.SearchSourceValue))
+        {
+            OnPropertyChanged(nameof(CurrentLogin));
+        }
+
         if (e.PropertyName == null || !PreviewAffectingParams.Contains(e.PropertyName))
         {
             return;
@@ -993,8 +1011,20 @@ public partial class MainWindowViewModel : ViewModelBase
         BlurResults = null;
     }
 
+    private string CookieOf(SearchSourceEnum source) =>
+        source == SearchSourceEnum.NET_EASE_MUSIC ? SettingBean.Config.NetEaseCookie : SettingBean.Config.QQMusicCookie;
+
+    /// <summary>True for the "needs login" error, which the window shows with a shortcut to the cookie settings.</summary>
+    public static bool IsNeedLoginMessage(string? message) =>
+        !string.IsNullOrEmpty(message) && message.Contains(ErrorMsgConst.NEED_LOGIN, StringComparison.Ordinal);
+
+    [RelayCommand]
+    private void ExecuteOpenCookieSettings() => CurrentPageKey = PageCookieSettings;
+
     private void SetTip(string message, bool isError)
     {
+        if (IsNeedLoginMessage(message)) Login.ReportNeedLogin(SearchParamViewModel.SelectedSearchSource);
+
         TipTimestamp = DateTime.Now.ToString("HH:mm:ss");
         TipNormalMessage = isError ? "" : message;
         TipErrorMessage = isError ? message : "";
