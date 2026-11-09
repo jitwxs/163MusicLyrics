@@ -188,6 +188,11 @@ public class ConfigBean
     /// </summary>
     public string NetEaseCookie = "";
 
+    /// <summary>
+    /// 汽水音乐游客设备号，首次使用时生成，之后一直复用
+    /// </summary>
+    public string SodaMusicDeviceId = "";
+
     public readonly TransConfigBean TransConfig = new();
 
     public List<LyricsTypeEnum> DeserializationOutputLyricsTypes()

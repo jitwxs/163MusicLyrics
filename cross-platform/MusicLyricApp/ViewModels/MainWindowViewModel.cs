@@ -113,6 +113,9 @@ public partial class MainWindowViewModel : ViewModelBase
     /// <summary>The account state of the source picked on the online lyrics page.</summary>
     public AccountStatusViewModel CurrentLogin => Login.Get(SearchParamViewModel.SelectedSearchSource);
 
+    /// <summary>The sign-in button is hidden for sources used without a cookie (Soda Music).</summary>
+    public bool IsCurrentLoginVisible => LoginStatusViewModel.HasAccount(SearchParamViewModel.SelectedSearchSource);
+
     public const string PageCookieSettings = SettingsKeyPrefix + SettingViewModel.SectionExtensions;
 
     /// <summary>Created on first visit and kept, so the text being converted survives page switches.</summary>
@@ -394,6 +397,7 @@ public partial class MainWindowViewModel : ViewModelBase
         if (e.PropertyName is nameof(SearchParamViewModel.SelectedSearchSourceItem) or nameof(SearchParamViewModel.SearchSourceValue))
         {
             OnPropertyChanged(nameof(CurrentLogin));
+            OnPropertyChanged(nameof(IsCurrentLoginVisible));
         }
 
         if (e.PropertyName == null || !PreviewAffectingParams.Contains(e.PropertyName))

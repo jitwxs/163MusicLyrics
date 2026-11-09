@@ -209,6 +209,95 @@ public static partial class VerbatimLyricUtils
         return sb.ToString();
     }
     
+    [GeneratedRegex(@"^\[(\d+),(\d+)\]")]
+    private static partial Regex GetSodaMusicLinePrefixRegex();
+
+    [GeneratedRegex(@"<(\d+),(\d+),\d+>")]
+    private static partial Regex GetSodaMusicWordRegex();
+
+    /// <summary>
+    /// 汽水音乐 KRC 转逐字 LRC。KRC 行形如 <c>[1470,4370]&lt;0,270,0&gt;醉&lt;270,200,0&gt;卧</c>，
+    /// 行首为 [开始,时长]，字标签为 &lt;相对行开始的偏移,时长,0&gt;。输出每个字前加绝对时间戳，行尾加结束时间戳。
+    /// </summary>
+    public static string DealVerbatimLyric4SodaMusic(string? krc)
+    {
+        return ConvertSodaMusicKrc(krc, true);
+    }
+
+    /// <summary>
+    /// 汽水音乐 KRC 转逐行 LRC：去掉字标签，保留行开始时间，并像 QQ 音乐一样追加行结束提示，
+    /// 由"忽略空行"设置决定是否保留。
+    /// </summary>
+    public static string ConvertVerbatimLyricToCommonLyric4SodaMusic(string? krc)
+    {
+        return ConvertSodaMusicKrc(krc, false);
+    }
+
+    private static string ConvertSodaMusicKrc(string? krc, bool verbatim)
+    {
+        if (string.IsNullOrWhiteSpace(krc))
+        {
+            return string.Empty;
+        }
+
+        var defaultParam = new ConfigBean();
+        string Print(long ms) => new LyricTimestamp(ms).PrintTimestamp(defaultParam.LrcTimestampFormat, defaultParam.DotType);
+
+        var sb = new StringBuilder();
+        foreach (var line in LyricUtils.SplitLrc(krc))
+        {
+            var prefix = GetSodaMusicLinePrefixRegex().Match(line);
+            if (!prefix.Success)
+            {
+                // [ti:]、[ar:] 等标签行原样保留
+                sb.Append(line).Append(Environment.NewLine);
+                continue;
+            }
+
+            var start = long.Parse(prefix.Groups[1].Value);
+            var end = start + long.Parse(prefix.Groups[2].Value);
+            var body = line[prefix.Length..];
+
+            if (!verbatim)
+            {
+                var content = GetSodaMusicWordRegex().Replace(body, string.Empty);
+                sb.Append(Print(start)).Append(content).Append(Environment.NewLine);
+                if (end > start && !string.IsNullOrWhiteSpace(content))
+                {
+                    sb.Append(Print(end)).Append(Environment.NewLine);
+                }
+
+                continue;
+            }
+
+            var words = GetSodaMusicWordRegex().Matches(body);
+            if (words.Count == 0)
+            {
+                sb.Append(Print(start)).Append(body).Append(Print(end)).Append(Environment.NewLine);
+                continue;
+            }
+
+            // 第一个字标签前若有文本，挂在行开始时间上
+            var leading = body[..words[0].Index];
+            if (leading.Length > 0)
+            {
+                sb.Append(Print(start)).Append(leading);
+            }
+
+            for (var i = 0; i < words.Count; i++)
+            {
+                var word = words[i];
+                var textStart = word.Index + word.Length;
+                var textEnd = i + 1 < words.Count ? words[i + 1].Index : body.Length;
+                sb.Append(Print(start + long.Parse(word.Groups[1].Value))).Append(body[textStart..textEnd]);
+            }
+
+            sb.Append(Print(end)).Append(Environment.NewLine);
+        }
+
+        return sb.ToString();
+    }
+
     /// <summary>
     /// 将普通逐字 LRC 转为 A2 增强扩展格式
     /// </summary>

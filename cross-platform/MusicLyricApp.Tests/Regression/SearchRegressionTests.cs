@@ -172,6 +172,30 @@ public class SearchRegressionTests
     }
 
     [Fact]
+    public void AggregatedFuzzySearchSkipsAProviderThatIsDown()
+    {
+        using var ws = new TestWorkspace();
+        ws.Settings.Config.AggregatedBlurSearch = true;
+        var net = new Mock<IMusicApi>(MockBehavior.Strict);
+        var qq = new Mock<IMusicApi>(MockBehavior.Strict);
+        var soda = new Mock<IMusicApi>(MockBehavior.Strict);
+        var found = new SearchResultVo();
+        found.SongVos.Add(new() { DisplayId = "123" });
+        net.Setup(x => x.Search("test", SearchTypeEnum.SONG_ID)).Returns(new ResultVo<SearchResultVo>(found));
+        qq.Setup(x => x.Search("test", SearchTypeEnum.SONG_ID)).Returns(new ResultVo<SearchResultVo>(new SearchResultVo()));
+        soda.Setup(x => x.Search("test", SearchTypeEnum.SONG_ID)).Throws(new HttpRequestException("empty response"));
+        var service = new MusicLyricApp.Core.Service.SearchService(ws.Settings, new Dictionary<SearchSourceEnum, IMusicApi>
+        {
+            [SearchSourceEnum.NET_EASE_MUSIC] = net.Object,
+            [SearchSourceEnum.QQ_MUSIC] = qq.Object,
+            [SearchSourceEnum.SODA_MUSIC] = soda.Object
+        });
+
+        Assert.Same(found, Assert.Single(service.BlurSearch(ws.Param("test"), ws.Settings)));
+        soda.VerifyAll();
+    }
+
+    [Fact]
     public void EmptyFuzzyResultHasReadableError()
     {
         using var ws = new TestWorkspace();

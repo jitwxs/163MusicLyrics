@@ -87,6 +87,45 @@ public class LiveServiceTests
         Assert.False(string.IsNullOrWhiteSpace(result.Info.TagName));
     }
 
+    [LiveFact]
+    public void SodaSongMetadataAndLyrics()
+    {
+        AssertSong(new SodaMusicApi(SodaMusicNativeApi.NewDeviceId), "7293547695373273090");
+    }
+
+    [LiveFact]
+    public async Task SodaEndToEndSearchAlbumPlaylistAndShortLink()
+    {
+        var api = new SodaMusicApi(SodaMusicNativeApi.NewDeviceId);
+
+        var search = api.Search("八部众曲", SearchTypeEnum.SONG_ID);
+        Assert.True(search.IsSuccess(), search.ErrorMsg);
+        Assert.NotEmpty(search.Data.SongVos);
+        Assert.All(search.Data.SongVos, s => Assert.Matches("^\\d+$", s.DisplayId));
+
+        var album = api.GetAlbumVo("7144550895936604162");
+        Assert.True(album.IsSuccess(), album.ErrorMsg);
+        Assert.Equal(9, album.Data.SimpleSongVos.Length);
+
+        var playlist = api.GetPlaylistVo("7031082140935145486");
+        Assert.True(playlist.IsSuccess(), playlist.ErrorMsg);
+        // Signed out, only the first page of a playlist is returned (count_tracks); later pages are empty.
+        Assert.NotEmpty(playlist.Data.SimpleSongVos);
+
+        var lyric = api.GetLyricVo("7144550907370276865", "7144550907370276865", false).Assert().Data;
+        Assert.Contains("困在床上", lyric.TranslateLyric);
+        var settings = new SettingBean();
+        settings.Config.VerbatimLyricMode = VerbatimLyricModeEnum.STANDARD_MODE;
+        var verbatim = api.GetLyricVo("7144550907370276865", "7144550907370276865", true).Assert().Data;
+        Assert.NotEmpty(await LyricUtils.GetOutputContent(verbatim, settings));
+
+        var shortLink = GlobalUtils.CheckInputId("https://qishui.douyin.com/s/69HXcAV/", SearchSourceEnum.NET_EASE_MUSIC,
+            SearchTypeEnum.SONG_ID);
+        Assert.Equal(SearchSourceEnum.SODA_MUSIC, shortLink.SearchSource);
+        Assert.Equal(SearchTypeEnum.ALBUM_ID, shortLink.SearchType);
+        Assert.Equal("7144550895936604162", shortLink.QueryId);
+    }
+
     private static void AssertSong(IMusicApi api, string id)
     {
         var result = api.GetSongVo([id]);

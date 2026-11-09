@@ -19,7 +19,8 @@ public enum ShowLrcTypeEnum
 public enum SearchSourceEnum
 {
     NET_EASE_MUSIC = 0,
-    QQ_MUSIC = 1
+    QQ_MUSIC = 1,
+    SODA_MUSIC = 2
 }
 
 // 搜索类型
@@ -154,6 +155,7 @@ public static class ErrorMsgConst
     public static string SONG_NOT_EXIST => T("Error.SONG_NOT_EXIST");
     public static string LRC_NOT_EXIST => T("Error.LRC_NOT_EXIST");
     public static string FUNCTION_NOT_SUPPORT => T("Error.FUNCTION_NOT_SUPPORT");
+    public static string SODA_SEARCH_SONG_ONLY => T("Error.SODA_SEARCH_SONG_ONLY");
     public static string SONG_URL_GET_SUCCESS => T("Error.SONG_URL_GET_SUCCESS");
     public static string SONG_URL_GET_FAILED => T("Error.SONG_URL_GET_FAILED");
     public static string SONG_PIC_GET_SUCCESS => T("Error.SONG_PIC_GET_SUCCESS");

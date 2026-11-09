@@ -127,6 +127,10 @@ public partial class LoginStatusViewModel : ViewModelBase, IDisposable
         LocalizationService.Instance.PropertyChanged += OnLanguageChanged;
     }
 
+    /// <summary>Only NetEase and QQ Music take a cookie; Soda Music is used signed out.</summary>
+    public static bool HasAccount(SearchSourceEnum source) =>
+        source is SearchSourceEnum.NET_EASE_MUSIC or SearchSourceEnum.QQ_MUSIC;
+
     public AccountStatusViewModel Get(SearchSourceEnum source) => source == SearchSourceEnum.NET_EASE_MUSIC ? NetEase : QQ;
 
     private static int Index(SearchSourceEnum source) => source == SearchSourceEnum.NET_EASE_MUSIC ? 0 : 1;
@@ -154,6 +158,7 @@ public partial class LoginStatusViewModel : ViewModelBase, IDisposable
 
     public async Task CheckAsync(SearchSourceEnum source)
     {
+        if (!HasAccount(source)) return;
         var index = Index(source);
         _pending[index]?.Cancel();
         _pending[index] = null;
@@ -174,6 +179,7 @@ public partial class LoginStatusViewModel : ViewModelBase, IDisposable
     /// <summary>Checks after the user stops typing, so each keystroke does not send a request.</summary>
     public void ScheduleCheck(SearchSourceEnum source)
     {
+        if (!HasAccount(source)) return;
         var index = Index(source);
         _pending[index]?.Cancel();
         Interlocked.Increment(ref _versions[index]);
@@ -196,6 +202,7 @@ public partial class LoginStatusViewModel : ViewModelBase, IDisposable
     /// </summary>
     public void ReportNeedLogin(SearchSourceEnum source)
     {
+        if (!HasAccount(source)) return;
         var account = Get(source);
         if (account.State is LoginState.Valid or LoginState.Unknown) _ = CheckAsync(source);
     }

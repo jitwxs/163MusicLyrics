@@ -77,9 +77,10 @@ public partial class BlurSearchView : UserControl
             [
                 Column<BlurSongSearchResult>("UI.BlurGrid.Song", x => x.Title, 3),
                 Column<BlurSongSearchResult>("UI.BlurGrid.Artist", x => x.Author, 2),
-                Column<BlurSongSearchResult>("UI.BlurGrid.Album", x => x.Album, 2),
+                Column<BlurSongSearchResult>("UI.BlurGrid.Album", x => x.Album, 1.5),
                 Column<BlurSongSearchResult>("UI.BlurGrid.Duration", x => x.Duration, 1),
-                Column<BlurSongSearchResult>("UI.BlurGrid.Platform", x => x.SearchSource, 1)
+                // Wide enough for the longest platform name (汽水音乐, NetEase Music) without truncation.
+                Column<BlurSongSearchResult>("UI.BlurGrid.Platform", x => x.SearchSource, 1.5)
             ],
             SearchTypeEnum.ALBUM_ID =>
             [

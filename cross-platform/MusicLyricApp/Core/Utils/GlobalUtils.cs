@@ -32,6 +32,8 @@ public static partial class GlobalUtils
     {
         { SearchSourceEnum.NET_EASE_MUSIC, "163.com" },
         { SearchSourceEnum.QQ_MUSIC, "qq.com" },
+        // qishui.douyin.com/s/ 短链与 music.douyin.com/qishui/share/ 分享页
+        { SearchSourceEnum.SODA_MUSIC, "qishui" },
     };
 
     public static readonly Dictionary<SearchSourceEnum, Dictionary<SearchTypeEnum, string>> SearchTypeKeywordDict =
@@ -51,6 +53,14 @@ public static partial class GlobalUtils
                     { SearchTypeEnum.SONG_ID, "songDetail/" },
                     { SearchTypeEnum.ALBUM_ID, "albumDetail/" },
                     { SearchTypeEnum.PLAYLIST_ID, "playlist/" },
+                }
+            },
+            {
+                SearchSourceEnum.SODA_MUSIC, new Dictionary<SearchTypeEnum, string>
+                {
+                    { SearchTypeEnum.SONG_ID, "track_id=" },
+                    { SearchTypeEnum.ALBUM_ID, "album_id=" },
+                    { SearchTypeEnum.PLAYLIST_ID, "playlist_id=" },
                 }
             }
         };
@@ -86,8 +96,8 @@ public static partial class GlobalUtils
             searchType = pair.Key;
         }
 
-        // 网易云，纯数字，直接通过
-        if (searchSource == SearchSourceEnum.NET_EASE_MUSIC && CheckNum(input))
+        // 网易云、汽水音乐，纯数字，直接通过
+        if (searchSource is SearchSourceEnum.NET_EASE_MUSIC or SearchSourceEnum.SODA_MUSIC && CheckNum(input))
         {
             return new InputSongId(input, searchSource, searchType);
         }
@@ -118,7 +128,8 @@ public static partial class GlobalUtils
 
             var extractedId = sb.ToString();
             if (string.IsNullOrEmpty(extractedId) ||
-                (searchSource == SearchSourceEnum.NET_EASE_MUSIC && !CheckNum(extractedId)))
+                (searchSource is SearchSourceEnum.NET_EASE_MUSIC or SearchSourceEnum.SODA_MUSIC &&
+                 !CheckNum(extractedId)))
             {
                 throw new MusicLyricException(ErrorMsgConst.INPUT_ID_ILLEGAL);
             }
@@ -137,6 +148,21 @@ public static partial class GlobalUtils
             }
         }
         
+        // 汽水音乐短链 qishui.douyin.com/s/xxx，跳转到带 track_id/album_id/playlist_id 的分享页
+        if (searchSource == SearchSourceEnum.SODA_MUSIC && input.Contains("qishui.douyin.com/s/"))
+        {
+            var shortLink = SodaShortLinkRegex().Match(input);
+            if (shortLink.Success)
+            {
+                using var response = HttpUtils.HttpGet0(shortLink.Value);
+                var redirectUrl = response.RequestMessage?.RequestUri?.AbsoluteUri;
+                if (redirectUrl != null && !redirectUrl.Contains("qishui.douyin.com/s/"))
+                {
+                    return CheckInputId(redirectUrl, searchSource, searchType);
+                }
+            }
+        }
+
         Logger.Warn("GlobalUtils#CheckInputId INPUT_ID_ILLEGAL, input: " + input);
 
         throw new MusicLyricException(ErrorMsgConst.INPUT_ID_ILLEGAL);
@@ -423,6 +449,9 @@ public static partial class GlobalUtils
     [GeneratedRegex("^\\d+$", RegexOptions.Compiled)]
     private static partial Regex NumberRegex();
     
+    [GeneratedRegex(@"https?://qishui\.douyin\.com/s/[A-Za-z0-9]+/?")]
+    private static partial Regex SodaShortLinkRegex();
+
     [GeneratedRegex(@"\$fillLength\([^\)]*\)")]
     private static partial Regex FillLengthRegex();
 }

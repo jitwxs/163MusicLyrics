@@ -128,6 +128,29 @@ public class SearchPageRegressionTests
     }
 
     [AvaloniaFact]
+    public void SodaMusicSourceIsOfferedAndHidesTheSignInButton()
+    {
+        using var scope = new Scope();
+        var source = scope.Find<SegmentedControl>("SourceSegment");
+        var login = scope.Find<TKCode.Arc.Button>("LoginStatusButton");
+        Assert.True(login.IsEffectivelyVisible);
+
+        var soda = Assert.Single(source.Items.OfType<SegmentedOption>(),
+            o => Equals(o.Value, SearchSourceEnum.SODA_MUSIC));
+        Assert.Equal(LocalizationService.Get("Enum.SearchSourceEnum.SODA_MUSIC"), soda.Label);
+
+        source.SelectedValue = SearchSourceEnum.SODA_MUSIC;
+        Dispatcher.UIThread.RunJobs();
+        Assert.Equal(SearchSourceEnum.SODA_MUSIC, scope.Vm.SearchParamViewModel.SelectedSearchSource);
+        // Soda Music needs no cookie, so there is no sign-in state to show.
+        Assert.False(login.IsEffectivelyVisible);
+
+        source.SelectedValue = SearchSourceEnum.QQ_MUSIC;
+        Dispatcher.UIThread.RunJobs();
+        Assert.True(login.IsEffectivelyVisible);
+    }
+
+    [AvaloniaFact]
     public void SegmentedControlsAndViewModelStayInSync()
     {
         using var scope = new Scope();

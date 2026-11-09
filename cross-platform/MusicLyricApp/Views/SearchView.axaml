@@ -51,6 +51,8 @@
                                          Label="{loc:Loc Key=Enum.SearchSourceEnum.NET_EASE_MUSIC}" />
                     <arc:SegmentedOption Value="{x:Static models:SearchSourceEnum.QQ_MUSIC}"
                                          Label="{loc:Loc Key=Enum.SearchSourceEnum.QQ_MUSIC}" />
+                    <arc:SegmentedOption Value="{x:Static models:SearchSourceEnum.SODA_MUSIC}"
+                                         Label="{loc:Loc Key=Enum.SearchSourceEnum.SODA_MUSIC}" />
                 </arc:SegmentedControl>
                 <arc:SegmentedControl Name="TypeSegment"
                                       AutomationProperties.Name="{loc:Loc Key=UI.SearchType}"
@@ -68,6 +70,7 @@
                             Size="Small"
                             VerticalAlignment="Center"
                             Command="{Binding ExecuteOpenCookieSettingsCommand}"
+                            IsVisible="{Binding IsCurrentLoginVisible}"
                             ToolTip.Tip="{Binding CurrentLogin.Detail}"
                             AutomationProperties.Name="{Binding CurrentLogin.SourceLabel}">
                     <StackPanel Orientation="Horizontal" Spacing="{arc:ArcDesignTokenResource Space2}">

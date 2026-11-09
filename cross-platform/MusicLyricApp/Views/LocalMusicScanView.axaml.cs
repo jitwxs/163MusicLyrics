@@ -37,8 +37,12 @@ public partial class LocalMusicScanView : UserControl
     {
         if (DataContext is not LocalMusicScanViewModel vm || vm.SelectedItem?.Candidate is not { } candidate) return;
         var id = Uri.EscapeDataString(candidate.Id);
-        var url = candidate.Source == SearchSourceEnum.NET_EASE_MUSIC
-            ? $"https://music.163.com/#/song?id={id}" : $"https://y.qq.com/n/ryqq/songDetail/{id}";
+        var url = candidate.Source switch
+        {
+            SearchSourceEnum.NET_EASE_MUSIC => $"https://music.163.com/#/song?id={id}",
+            SearchSourceEnum.SODA_MUSIC => $"https://music.douyin.com/qishui/share/track?track_id={id}",
+            _ => $"https://y.qq.com/n/ryqq/songDetail/{id}"
+        };
         try { Process.Start(new ProcessStartInfo(url) { UseShellExecute = true }); }
         catch (Exception ex) { vm.ReportError(ex.Message); }
     }

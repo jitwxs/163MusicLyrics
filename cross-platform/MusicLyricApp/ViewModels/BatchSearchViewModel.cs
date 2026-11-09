@@ -441,6 +441,7 @@ public partial class BatchSearchViewModel : ViewModelBase
         {
             SearchSourceEnum.NET_EASE_MUSIC => LocalizationService.Get("Status.Search.SourceNetEase"),
             SearchSourceEnum.QQ_MUSIC => LocalizationService.Get("Status.Search.SourceQQ"),
+            SearchSourceEnum.SODA_MUSIC => LocalizationService.Get("Status.Search.SourceSoda"),
             _ => source.ToString()
         };
     }

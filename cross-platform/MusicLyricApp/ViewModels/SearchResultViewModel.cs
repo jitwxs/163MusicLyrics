@@ -65,6 +65,7 @@ public partial class SearchResultViewModel : ViewModelBase
     {
         SearchSourceEnum.NET_EASE_MUSIC => MusicLyricApp.Core.Localization.LocalizationService.Get("Status.Search.SourceNetEase"),
         SearchSourceEnum.QQ_MUSIC => MusicLyricApp.Core.Localization.LocalizationService.Get("Status.Search.SourceQQ"),
+        SearchSourceEnum.SODA_MUSIC => MusicLyricApp.Core.Localization.LocalizationService.Get("Status.Search.SourceSoda"),
         _ => source.ToString()
     };
 

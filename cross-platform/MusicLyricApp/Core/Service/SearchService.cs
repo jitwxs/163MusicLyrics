@@ -26,11 +26,29 @@ public class SearchService : ISearchService
         _api = musicApis ?? new Dictionary<SearchSourceEnum, IMusicApi>
         {
             { SearchSourceEnum.QQ_MUSIC, new QQMusicApi(() => settingBean.Config.QQMusicCookie) },
-            { SearchSourceEnum.NET_EASE_MUSIC, new NetEaseMusicApi(() => settingBean.Config.NetEaseCookie) }
+            { SearchSourceEnum.NET_EASE_MUSIC, new NetEaseMusicApi(() => settingBean.Config.NetEaseCookie) },
+            { SearchSourceEnum.SODA_MUSIC, new SodaMusicApi(() => SodaMusicDeviceId(settingBean)) }
         };
     }
 
     public int LastLocalCacheHitCount { get; private set; }
+
+    private static readonly object SodaDeviceIdLock = new();
+
+    /// <summary>汽水音乐设备号：配置里没有时生成一个，随设置一起保存。</summary>
+    public static string SodaMusicDeviceId(SettingBean settingBean)
+    {
+        lock (SodaDeviceIdLock)
+        {
+            var config = settingBean.Config;
+            if (string.IsNullOrWhiteSpace(config.SodaMusicDeviceId) || !GlobalUtils.CheckNum(config.SodaMusicDeviceId))
+            {
+                config.SodaMusicDeviceId = SodaMusicNativeApi.NewDeviceId();
+            }
+
+            return config.SodaMusicDeviceId;
+        }
+    }
 
     public IMusicApi GetMusicApi(SearchSourceEnum searchSource)
     {
@@ -220,9 +238,21 @@ public class SearchService : ISearchService
         var searchType = settingBean.Param.SearchType;
         if (settingBean.Config.AggregatedBlurSearch)
         {
-            foreach (var searchSource in Enum.GetValues<SearchSourceEnum>())
+            foreach (var searchSource in Enum.GetValues<SearchSourceEnum>().Where(_api.ContainsKey))
             {
-                var one = GetMusicApi(searchSource).Search(keyword, searchType);
+                ResultVo<SearchResultVo> one;
+                try
+                {
+                    one = GetMusicApi(searchSource).Search(keyword, searchType);
+                }
+                catch (Exception ex) when (ex is WebException or System.Net.Http.HttpRequestException
+                                               or TaskCanceledException or Newtonsoft.Json.JsonException)
+                {
+                    // One provider being down (Soda Music uses unofficial endpoints) must not fail the others.
+                    _logger.Warn(ex, "Aggregated fuzzy search skipped {Source}", searchSource);
+                    continue;
+                }
+
                 if (one.IsSuccess())
                 {
                     resultVoList.Add(one.Data);

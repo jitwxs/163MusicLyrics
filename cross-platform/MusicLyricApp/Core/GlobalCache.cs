@@ -113,6 +113,11 @@ public enum CacheType
     QQ_MUSIC_SONG,
 
     /// <summary>
+    /// 汽水音乐歌曲详情（含歌词）
+    /// </summary>
+    SODA_MUSIC_TRACK,
+
+    /// <summary>
     /// 歌曲
     /// </summary>
     SONG_VO,

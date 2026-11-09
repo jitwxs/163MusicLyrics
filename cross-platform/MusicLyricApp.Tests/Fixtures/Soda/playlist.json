@@ -1,0 +1,251 @@
+{
+ "status_info": {},
+ "next_cursor": "48",
+ "playlist": {
+  "id": "7031082140935145486",
+  "title": "吉他伴奏｜一个浪漫雨天的咖啡馆",
+  "url_cover": {
+   "uri": "ies-music/63FFEF83-7B3B-403F-B1E9-B91ACC6A314E_1_201_a.jpeg",
+   "urls": [
+    "https://p3-luna.douyinpic.com/img/",
+    "https://p6-luna.douyinpic.com/img/"
+   ],
+   "template_prefix": "tplv-b829550vbb"
+  },
+  "desc": "你被黑暗敲打，恰恰说明你是光明本身。",
+  "count_tracks": 2,
+  "create_time": 1663679146,
+  "update_time": 1794238914,
+  "review_status": "Accept",
+  "type": 3,
+  "from_feed": false,
+  "resource_cnt": {
+   "track_cnt": 45
+  },
+  "current_sort_type": 1,
+  "public_title": "吉他伴奏｜一个浪漫雨天的咖啡馆"
+ },
+ "media_resources": [
+  {
+   "id": "7102080149947942926",
+   "type": "track",
+   "entity": {
+    "track_wrapper": {
+     "track": {
+      "id": "7102080149947942926",
+      "album": {
+       "id": "7102079888069003295",
+       "name": "Acoustic Joys",
+       "release_date": 1301270400,
+       "url_cover": {
+        "uri": "tos-cn-v-2774c002/6cd07c58fdf747d0942c0f5a181aee9a",
+        "urls": [
+         "https://p3-luna.douyinpic.com/img/",
+         "https://p6-luna.douyinpic.com/img/"
+        ],
+        "template_prefix": "tplv-b829550vbb"
+       },
+       "playing_wave_color": null,
+       "paused_wave_color": null
+      },
+      "artists": [
+       {
+        "id": "6893382724518676481",
+        "name": "Elsa Kopf",
+        "state": {
+         "blocked_by_me": false
+        },
+        "simple_display_name": "Elsa Kopf",
+        "user_artist_type": 1
+       }
+      ],
+      "duration": 185913,
+      "name": "Candy Street",
+      "state": {},
+      "vid": "v02ad6g10000ca7qggrc77u7p0e2uli0",
+      "sim_id": 6814535155940591618,
+      "song_maker_team": {
+       "composers": [
+        {
+         "name": "Elsa Kopf"
+        }
+       ],
+       "lyricists": [
+        {
+         "name": "Elsa Kopf"
+        }
+       ]
+      },
+      "media_type": "track",
+      "chorus": {
+       "duration": 0,
+       "start": 154560
+      },
+      "vocal": 1,
+      "lang_codes": [
+       "EN"
+      ],
+      "first_vocal": {
+       "duration": 137856,
+       "start": 16704
+      },
+      "sharable_platforms": [
+       "link",
+       "aweme",
+       "aweme_publish",
+       "wechat_zone",
+       "wechat",
+       "weibo",
+       "qq_zone",
+       "qq"
+      ],
+      "sim_id_v3": 208551170,
+      "plug_status": {
+       "can_plug": false,
+       "is_plugged": false
+      },
+      "nodes": [
+       {
+        "type": 1,
+        "start": 16704,
+        "duration": 137856,
+        "priority": 1,
+        "opacity": 0.5
+       },
+       {
+        "type": 2,
+        "start": 154560,
+        "duration": 0,
+        "priority": 2,
+        "opacity": 1
+       }
+      ],
+      "is_support_bell": true
+     }
+    }
+   },
+   "collect_info": {
+    "source_app_id": 8478
+   },
+   "index": "0"
+  },
+  {
+   "id": "7102079997967337508",
+   "type": "track",
+   "entity": {
+    "track_wrapper": {
+     "track": {
+      "id": "7102079997967337508",
+      "album": {
+       "id": "7102079888069003295",
+       "name": "Acoustic Joys",
+       "release_date": 1301270400,
+       "url_cover": {
+        "uri": "tos-cn-v-2774c002/6cd07c58fdf747d0942c0f5a181aee9a",
+        "urls": [
+         "https://p3-luna.douyinpic.com/img/",
+         "https://p6-luna.douyinpic.com/img/"
+        ],
+        "template_prefix": "tplv-b829550vbb"
+       },
+       "playing_wave_color": null,
+       "paused_wave_color": null
+      },
+      "artists": [
+       {
+        "id": "6893382724518676481",
+        "name": "Elsa Kopf",
+        "state": {
+         "blocked_by_me": false
+        },
+        "simple_display_name": "Elsa Kopf",
+        "user_artist_type": 1
+       }
+      ],
+      "duration": 186906,
+      "name": "Larmes de caramel",
+      "state": {},
+      "vid": "v02ad6g10000ca7qg83c77u4rjjcancg",
+      "sim_id": 6814694435423520769,
+      "song_maker_team": {
+       "composers": [
+        {
+         "name": "Elsa Kopf"
+        }
+       ],
+       "lyricists": [
+        {
+         "name": "Elsa Kopf"
+        }
+       ]
+      },
+      "media_type": "track",
+      "chorus": {
+       "duration": 0,
+       "start": 158208
+      },
+      "vocal": 1,
+      "lang_codes": [
+       "FR"
+      ],
+      "first_vocal": {
+       "duration": 138240,
+       "start": 19968
+      },
+      "sharable_platforms": [
+       "link",
+       "aweme",
+       "aweme_publish",
+       "wechat_zone",
+       "wechat",
+       "weibo",
+       "qq_zone",
+       "qq"
+      ],
+      "sim_id_v3": 208551170,
+      "plug_status": {
+       "can_plug": false,
+       "is_plugged": false
+      },
+      "fragments": [
+       {
+        "type": "mute_tail",
+        "start_time": 183870,
+        "end_time": 186900
+       }
+      ],
+      "nodes": [
+       {
+        "type": 3,
+        "start": 28036,
+        "duration": 0,
+        "priority": 2,
+        "opacity": 1
+       },
+       {
+        "type": 1,
+        "start": 19968,
+        "duration": 138240,
+        "priority": 1,
+        "opacity": 0.5
+       },
+       {
+        "type": 2,
+        "start": 158208,
+        "duration": 0,
+        "priority": 3,
+        "opacity": 1
+       }
+      ],
+      "is_support_bell": true
+     }
+    }
+   },
+   "collect_info": {
+    "source_app_id": 8478
+   },
+   "index": "0"
+  }
+ ],
+ "session_id": ""
+}

@@ -24,6 +24,11 @@
     </ItemGroup>
 
     <ItemGroup>
+        <!-- Recorded API responses, trimmed, for offline parsing tests. -->
+        <None Include="Fixtures\**\*.json" CopyToOutputDirectory="PreserveNewest" />
+    </ItemGroup>
+
+    <ItemGroup>
       <ProjectReference Include="..\MusicLyricApp\MusicLyricApp.csproj" />
     </ItemGroup>
 

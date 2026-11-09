@@ -1,0 +1,245 @@
+{
+ "data": {
+  "result_groups": [
+   {
+    "data": [
+     {
+      "entity": {
+       "album": {},
+       "artist": {},
+       "deeplink": {},
+       "id": "7601885734266718244",
+       "item_type": "track",
+       "playlist": {},
+       "scene_mode": {},
+       "search_segment": {},
+       "track": {
+        "base_info": {
+         "duration_ms": 479960,
+         "explicit": false,
+         "id": "7601885734266718244",
+         "item_type": "track",
+         "limiter": {
+          "background_play": false,
+          "can_plug": false,
+          "download_status": 0,
+          "sharable_platforms": [],
+          "share_status": 1
+         },
+         "name": "太上感应篇",
+         "relation_media": "",
+         "song_maker_team": {
+          "composers": [
+           {
+            "name": "人间留白"
+           }
+          ],
+          "lyricists": [
+           {
+            "name": "人间留白"
+           }
+          ]
+         },
+         "sub_name": "",
+         "time_published": 0
+        },
+        "related_info": {
+         "album_link": {
+          "id": "7601885734266685476",
+          "name": "太上感应篇",
+          "release_date": 1769990402
+         },
+         "artist_links": [
+          {
+           "count_tracks": 0,
+           "id": "7576213648856844351",
+           "name": "鹿北 林深见鹿",
+           "simple_display_name": "鹿北 林深见鹿",
+           "state": {
+            "blocked_by_me": false
+           },
+           "user_artist_type": 1
+          }
+         ]
+        }
+       },
+       "video": {}
+      },
+      "meta": {
+       "activity_match": {},
+       "display_style": {},
+       "doc_id": "2b4caa5a7908904b-fbb005ecf9f1911b",
+       "item_type": "track",
+       "lyrics_match": {
+        "match_end_index": 0,
+        "match_start_index": 0,
+        "snippet": ""
+       },
+       "track_match": {}
+      }
+     },
+     {
+      "entity": {
+       "album": {},
+       "artist": {},
+       "deeplink": {},
+       "id": "7058740993641695234",
+       "item_type": "track",
+       "playlist": {},
+       "scene_mode": {},
+       "search_segment": {},
+       "track": {
+        "base_info": {
+         "duration_ms": 251834,
+         "explicit": false,
+         "id": "7058740993641695234",
+         "item_type": "track",
+         "limiter": {
+          "background_play": false,
+          "can_plug": false,
+          "download_status": 0,
+          "sharable_platforms": [],
+          "share_status": 1
+         },
+         "name": "囍",
+         "relation_media": "",
+         "song_maker_team": {
+          "composers": [
+           {
+            "name": "肇群"
+           }
+          ],
+          "lyricists": [
+           {
+            "name": "肇群"
+           }
+          ]
+         },
+         "sub_name": "",
+         "time_published": 0
+        },
+        "related_info": {
+         "album_link": {
+          "id": "7058740993265846273",
+          "name": "囍",
+          "release_date": 1480262400
+         },
+         "artist_links": [
+          {
+           "count_tracks": 0,
+           "id": "7130906654463232001",
+           "name": "肇群",
+           "simple_display_name": "肇群",
+           "state": {
+            "blocked_by_me": false
+           },
+           "user_artist_type": 1
+          }
+         ]
+        }
+       },
+       "video": {}
+      },
+      "meta": {
+       "activity_match": {},
+       "display_style": {},
+       "doc_id": "1f08e5228811d7f1-a4dcbaf871f420e5",
+       "item_type": "track",
+       "lyrics_match": {
+        "match_end_index": 12,
+        "match_start_index": 2,
+        "snippet": "一首曲哼不成调等了音符众里寻他千百度终成眷属"
+       },
+       "track_match": {}
+      }
+     },
+     {
+      "entity": {
+       "album": {},
+       "artist": {},
+       "deeplink": {},
+       "id": "7510449042662475814",
+       "item_type": "track",
+       "playlist": {},
+       "scene_mode": {},
+       "search_segment": {},
+       "track": {
+        "base_info": {
+         "duration_ms": 165408,
+         "explicit": false,
+         "id": "7510449042662475814",
+         "item_type": "track",
+         "limiter": {
+          "background_play": false,
+          "can_plug": false,
+          "download_status": 0,
+          "sharable_platforms": [],
+          "share_status": 1
+         },
+         "name": "天龙诀",
+         "relation_media": "",
+         "song_maker_team": {
+          "composers": [
+           {
+            "name": "佚名"
+           }
+          ],
+          "lyricists": [
+           {
+            "name": "佚名"
+           }
+          ]
+         },
+         "sub_name": "",
+         "time_published": 0
+        },
+        "related_info": {
+         "album_link": {
+          "id": "7510449042662361126",
+          "name": "香港电视剧主题曲集（一）",
+          "release_date": 492624000
+         },
+         "artist_links": [
+          {
+           "count_tracks": 0,
+           "id": "6867827542124922881",
+           "name": "佚名",
+           "simple_display_name": "佚名",
+           "state": {
+            "blocked_by_me": false
+           },
+           "user_artist_type": 1
+          }
+         ]
+        }
+       },
+       "video": {}
+      },
+      "meta": {
+       "activity_match": {},
+       "display_style": {},
+       "doc_id": "20a70b966356b2ad-e13dac46ccfd1423",
+       "item_type": "track",
+       "lyrics_match": {
+        "match_end_index": 0,
+        "match_start_index": 0,
+        "snippet": ""
+       },
+       "track_match": {}
+      }
+     }
+    ],
+    "description": "",
+    "display_title": "",
+    "display_type": "",
+    "display_view_all": false,
+    "has_more": true,
+    "id": "tracks",
+    "next_cursor": "20"
+   }
+  ]
+ },
+ "err_msg": "",
+ "err_no": 0,
+ "now": 1794240755
+}
