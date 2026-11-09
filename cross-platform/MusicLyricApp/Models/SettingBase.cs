@@ -94,6 +94,11 @@ public class ConfigBean
     public bool ConfirmBeforeExit = true;
 
     /// <summary>
+    /// 是否写入文件日志
+    /// </summary>
+    public bool EnableFileLogging = true;
+
+    /// <summary>
     /// 保存时跳过纯音乐
     /// </summary>
     public bool IgnorePureMusicInSave = true;

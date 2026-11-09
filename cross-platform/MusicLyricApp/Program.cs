@@ -1,13 +1,13 @@
 ﻿using Avalonia;
 using System;
+using System.IO;
+using MusicLyricApp.Core.Service;
 using NLog;
 
 namespace MusicLyricApp;
 
 sealed class Program
 {
-    private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
-    
     // Initialization code. Don't use any Avalonia, third-party APIs or any
     // SynchronizationContext-reliant code before AppMain is called: things aren't initialized
     // yet and stuff might break.
@@ -16,14 +16,16 @@ sealed class Program
     {
         try
         {
-            LogManager.LoadConfiguration("NLog.config");
-            Logger.Info("Application starting...");
+            var settings = new StorageService().ReadAppConfig();
+            LoggingService.Initialize(Path.Combine(AppContext.BaseDirectory, "NLog.config"),
+                settings.Config.EnableFileLogging);
+            LogManager.GetCurrentClassLogger().Info("Application starting...");
             
             BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
         }
         catch (Exception ex)
         {
-            Logger.Error(ex, "App will be crash, message: {ErrorMsg}", ex.Message);
+            LogManager.GetCurrentClassLogger().Error(ex, "App will be crash, message: {ErrorMsg}", ex.Message);
         }
         finally
         {

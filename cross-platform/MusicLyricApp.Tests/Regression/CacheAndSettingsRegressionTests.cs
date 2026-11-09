@@ -34,6 +34,7 @@ public class CacheAndSettingsRegressionTests
         using var ws = new TestWorkspace();
         var config = ws.Storage().ReadAppConfig();
         Assert.Equal(ThemeModeEnum.FOLLOW_SYSTEM, config.Config.ThemeMode);
+        Assert.True(config.Config.EnableFileLogging);
         Assert.Equal(128, config.Config.SearchCacheMaxSizeMb);
         Assert.False(string.IsNullOrWhiteSpace(config.Config.SearchCacheFolderPath));
         Assert.False(File.Exists(ws.ConfigPath));
@@ -48,6 +49,7 @@ public class CacheAndSettingsRegressionTests
         Assert.Equal(" & ", settings.Config.SingerSeparator);
         Assert.Equal(SearchSourceEnum.QQ_MUSIC, settings.Param.SearchSource);
         Assert.True(settings.Config.ConfirmBeforeExit);
+        Assert.True(settings.Config.EnableFileLogging);
         Assert.Equal(128, settings.Config.SearchCacheMaxSizeMb);
     }
 

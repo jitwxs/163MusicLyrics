@@ -323,6 +323,9 @@
                                     <CheckBox Content="{loc:Loc Key=UI.Extra26}"
                                               IsChecked="{Binding SettingParamViewModel.AutoCheckUpdate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                               Margin="0,0,12,8" />
+                                    <CheckBox Content="{loc:Loc Key=UI.EnableFileLogging}"
+                                              IsChecked="{Binding SettingParamViewModel.EnableFileLogging, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                              Margin="0,0,12,8" />
                                     <CheckBox Content="{loc:Loc Key=UI.Extra27}"
                                               IsChecked="{Binding SettingParamViewModel.ConfirmBeforeExit, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                               Margin="0,0,12,8" />

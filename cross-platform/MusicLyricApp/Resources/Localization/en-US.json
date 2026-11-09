@@ -4,6 +4,7 @@
   "UI.Feedback": "Feedback",
   "UI.FormatConvert": "Format Conversion",
   "UI.Settings": "Settings",
+  "UI.EnableFileLogging": "Enable file logging",
   "UI.SearchSource": "Source",
   "UI.LyricFormat": "Lyric Format",
   "UI.SearchType": "Search Type",
