@@ -2,113 +2,137 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:viewModels="clr-namespace:MusicLyricApp.ViewModels"
+             xmlns:arc="https://github.com/AIDotNet/TKCode.Arc"
+             xmlns:vm="using:MusicLyricApp.ViewModels"
              xmlns:loc="using:MusicLyricApp.Core.Localization"
              mc:Ignorable="d"
              x:Name="Root"
              x:Class="MusicLyricApp.Views.BatchSearchView"
-             x:DataType="viewModels:BatchSearchViewModel"
+             x:DataType="vm:BatchSearchViewModel"
              d:DesignWidth="900" d:DesignHeight="640">
 
     <UserControl.Styles>
-        <Style Selector="Button">
-            <Setter Property="HorizontalContentAlignment" Value="Center" />
-            <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Style Selector="Border.pane">
+            <Setter Property="Background" Value="{arc:ArcDesignTokenResource Surface}" />
+            <Setter Property="BorderBrush" Value="{arc:ArcDesignTokenResource BorderSubtle}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="{arc:ArcDesignTokenResource RadiusSurface}" />
+        </Style>
+        <Style Selector="Border.stat">
+            <Setter Property="Padding" Value="16,12" />
+            <Setter Property="MinWidth" Value="132" />
+        </Style>
+        <Style Selector="TextBlock.stat-value">
+            <Setter Property="FontSize" Value="{arc:ArcDesignTokenResource Type2XL}" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="{arc:ArcDesignTokenResource Foreground}" />
+        </Style>
+        <Style Selector="TextBlock.secondary">
+            <Setter Property="FontSize" Value="{arc:ArcDesignTokenResource TypeSM}" />
+            <Setter Property="Foreground" Value="{arc:ArcDesignTokenResource TextSecondary}" />
         </Style>
     </UserControl.Styles>
 
-    <Grid RowDefinitions="Auto,*,Auto,Auto" Margin="12" RowSpacing="10">
-        <Grid Grid.Row="0" ColumnDefinitions="*,Auto" ColumnSpacing="8">
-            <TextBox Text="{Binding BatchInputText}"
-                     Height="60"
-                     AcceptsReturn="True"
-                     TextWrapping="Wrap"
-                     IsReadOnly="True" />
-            <Button Grid.Column="1"
-                    Content="{loc:Loc Key=UI.LocalScan}"
-                    Width="130"
-                    Command="{Binding ExecuteSelectFolderCommand}" />
+    <Grid Margin="24,16,24,24" RowDefinitions="Auto,Auto,*,Auto" RowSpacing="{arc:ArcDesignTokenResource Space4}">
+
+        <!-- Header: what this page is, where the rows came from, and how to add more. -->
+        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{arc:ArcDesignTokenResource Space4}">
+            <StackPanel Spacing="{arc:ArcDesignTokenResource Space1}">
+                <TextBlock Text="{loc:Loc Key=Nav.Batch}"
+                           FontSize="{arc:ArcDesignTokenResource TypeXL}"
+                           FontWeight="SemiBold"
+                           Foreground="{arc:ArcDesignTokenResource Foreground}" />
+                <TextBlock Classes="secondary" Text="{loc:Loc Key=Batch.Description}" TextWrapping="Wrap" />
+                <TextBlock Name="InputSourceText"
+                           Classes="secondary"
+                           TextTrimming="PathSegmentEllipsis"
+                           IsVisible="{Binding BatchInputText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                           ToolTip.Tip="{Binding BatchInputText}">
+                    <Run Text="{loc:Loc Key=Batch.InputSource}" />
+                    <Run Text=": " />
+                    <Run Text="{Binding BatchInputText}" />
+                </TextBlock>
+            </StackPanel>
+            <arc:Button Grid.Column="1"
+                        Name="ScanFolderButton"
+                        Variant="Secondary"
+                        VerticalAlignment="Top"
+                        Command="{Binding ExecuteSelectFolderCommand}">
+                <StackPanel Orientation="Horizontal" Spacing="{arc:ArcDesignTokenResource Space2}">
+                    <arc:ArcGlyph Data="{x:Static arc:ArcIcons.FolderOpen}" />
+                    <TextBlock Text="{loc:Loc Key=Batch.ScanFolder}" VerticalAlignment="Center" />
+                </StackPanel>
+            </arc:Button>
         </Grid>
 
-        <DataGrid Grid.Row="1"
-                  ItemsSource="{Binding Items}"
-                  AutoGenerateColumns="False"
-                  CanUserReorderColumns="False"
-                  CanUserSortColumns="True"
-                  RowHeight="30"
-                  BorderThickness="1">
-            <DataGrid.Styles>
-                <Style Selector="DataGridRow">
-                    <Setter Property="ContextMenu">
-                        <ContextMenu>
-                            <MenuItem Header="{loc:Loc Key=UI.Save}"
-                                      Command="{Binding #Root.DataContext.ExecuteContextSaveCommand}"
-                                      CommandParameter="{Binding}" />
-                            <MenuItem Header="{loc:Loc Key=UI.ViewDetails}"
-                                      Command="{Binding #Root.DataContext.ExecuteViewDetailCommand}"
-                                      CommandParameter="{Binding}" />
-                        </ContextMenu>
-                    </Setter>
-                </Style>
-            </DataGrid.Styles>
-            <DataGrid.Columns>
-                <DataGridTemplateColumn Header="" Width="40" CanUserSort="False">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <CheckBox IsChecked="{Binding IsSelected}" HorizontalAlignment="Center" />
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-                <DataGridTextColumn Header="{loc:Loc Key=UI.SongSource}" Binding="{Binding SongSource}" Width="90" />
-                <DataGridTextColumn Header="{loc:Loc Key=UI.SongId}" Binding="{Binding SongId}" Width="120" />
-                <DataGridTextColumn Header="{loc:Loc Key=UI.SongName}" Binding="{Binding SongName}" Width="*" />
-                <DataGridTextColumn Header="{loc:Loc Key=UI.Singer}" Binding="{Binding Singer}" Width="180" />
-                <DataGridTextColumn Header="{loc:Loc Key=UI.Album}" Binding="{Binding Album}" Width="200" />
-                <DataGridTemplateColumn Header="{loc:Loc Key=UI.Extra01}" Width="120" CanUserSort="False">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding Status}" VerticalAlignment="Center" />
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-                <DataGridTemplateColumn Header="{loc:Loc Key=UI.Extra02}" Width="260" CanUserSort="False">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding Error}"
-                                       Foreground="#B42318"
-                                       TextTrimming="CharacterEllipsis"
-                                       ToolTip.Tip="{Binding Error}"
-                                       VerticalAlignment="Center" />
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-            </DataGrid.Columns>
-        </DataGrid>
+        <!-- Totals for the whole list and for saves made from it. -->
+        <WrapPanel Grid.Row="1"
+                   ItemSpacing="{arc:ArcDesignTokenResource Space3}"
+                   LineSpacing="{arc:ArcDesignTokenResource Space3}">
+            <Border Classes="pane stat">
+                <StackPanel Spacing="{arc:ArcDesignTokenResource Space1}">
+                    <TextBlock Name="TotalCountText" Classes="stat-value" Text="{Binding TotalSongsCount}" />
+                    <TextBlock Classes="secondary" Text="{loc:Loc Key=Batch.Stat.Total}" />
+                </StackPanel>
+            </Border>
+            <Border Classes="pane stat">
+                <StackPanel Spacing="{arc:ArcDesignTokenResource Space1}">
+                    <TextBlock Classes="stat-value" Text="{Binding SongsWithLyricsCount}" />
+                    <TextBlock Classes="secondary" Text="{loc:Loc Key=Batch.Stat.WithLyrics}" />
+                </StackPanel>
+            </Border>
+            <Border Classes="pane stat">
+                <StackPanel Spacing="{arc:ArcDesignTokenResource Space1}">
+                    <TextBlock Classes="stat-value" Text="{Binding SaveSuccessCount}" />
+                    <TextBlock Classes="secondary" Text="{loc:Loc Key=Batch.Stat.Saved}" />
+                </StackPanel>
+            </Border>
+            <Border Classes="pane stat">
+                <StackPanel Spacing="{arc:ArcDesignTokenResource Space1}">
+                    <TextBlock Classes="stat-value" Text="{Binding SaveFailedCount}" />
+                    <TextBlock Classes="secondary" Text="{loc:Loc Key=Batch.Stat.Failed}" />
+                </StackPanel>
+            </Border>
+        </WrapPanel>
 
-        <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
-            <Button Content="{loc:Loc Key=UI.SelectAll}" Width="110" Command="{Binding ExecuteSelectAllCommand}" />
-            <Button Content="{loc:Loc Key=UI.ClearSelection}" Width="130" Command="{Binding ExecuteClearSelectedCommand}" />
-            <Button Content="{loc:Loc Key=UI.SaveSelected}" Width="130" Command="{Binding ExecuteSaveSelectedCommand}" />
-            <Button Content="{loc:Loc Key=UI.DeleteSelected}" Width="130" Command="{Binding ExecuteDeleteSelectedCommand}" />
-        </StackPanel>
+        <Border Grid.Row="2" Classes="pane" Padding="4">
+            <Panel>
+                <arc:Table Name="BatchTable"
+                           ItemsSource="{Binding Items}"
+                           IsVisible="{Binding HasItems}"
+                           IsSelectable="True"
+                           SelectsOnRowClick="False"
+                           IsStriped="True"
+                           Caption="{loc:Loc Key=Nav.Batch}"
+                           EmptyMessage="{loc:Loc Key=Batch.EmptyTitle}"
+                           ItemNameOne="{loc:Loc Key=Batch.ItemOne}"
+                           ItemNameOther="{loc:Loc Key=Batch.ItemOther}"
+                           SelectedNoun="{loc:Loc Key=Table.Selected}"
+                           SelectAllLabel="{loc:Loc Key=Table.SelectAll}"
+                           ClearSelectionLabel="{loc:Loc Key=Table.ClearSelection}" />
 
-        <Border Grid.Row="3" Padding="8" BorderBrush="#D0D7DE" BorderThickness="1" CornerRadius="6" Background="#FAFBFC">
-            <TextBlock TextTrimming="CharacterEllipsis">
-                <Run Text="{loc:Loc Key=UI.Extra03}" Foreground="#344054" />
-                <Run Text="[" Foreground="#98A2B3" />
-                <Run Text="{Binding TipTimestamp}" Foreground="#98A2B3" />
-                <Run Text="] " Foreground="#98A2B3" />
-                <Run Text="{Binding TipNormalMessage}" Foreground="#667085" />
-                <Run Text="{Binding TipErrorMessage}" Foreground="IndianRed" />
-                <Run Text="{loc:Loc Key=UI.Extra04}" Foreground="#344054" />
-                <Run Text="{Binding TotalSongsCount}" Foreground="#344054" />
-                <Run Text="{loc:Loc Key=UI.Extra05}" Foreground="#344054" />
-                <Run Text="{Binding SongsWithLyricsCount}" Foreground="#344054" />
-                <Run Text="{loc:Loc Key=UI.Extra06}" Foreground="#344054" />
-                <Run Text="{Binding SaveSuccessCount}" Foreground="#2E7D32" />
-                <Run Text="{loc:Loc Key=UI.Extra07}" Foreground="#344054" />
-                <Run Text="{Binding SaveFailedCount}" Foreground="IndianRed" />
-            </TextBlock>
+                <arc:EmptyState Name="BatchEmptyState"
+                                IsVisible="{Binding !HasItems}"
+                                Icon="{x:Static arc:ArcIcons.ListChecks}"
+                                Title="{loc:Loc Key=Batch.EmptyTitle}"
+                                Description="{loc:Loc Key=Batch.EmptyDescription}" />
+            </Panel>
         </Border>
+
+        <!-- Bulk actions on the selected rows; saving is the page's single primary action. -->
+        <StackPanel Grid.Row="3"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Right"
+                    Spacing="{arc:ArcDesignTokenResource Space3}"
+                    IsVisible="{Binding HasItems}">
+            <arc:Button Name="RemoveSelectedButton"
+                        Variant="Danger"
+                        Content="{loc:Loc Key=Batch.RemoveSelected}"
+                        Command="{Binding ExecuteDeleteSelectedCommand}" />
+            <arc:Button Name="SaveSelectedButton"
+                        Variant="Primary"
+                        Content="{loc:Loc Key=Batch.SaveSelected}"
+                        Command="{Binding ExecuteSaveSelectedCommand}" />
+        </StackPanel>
     </Grid>
 </UserControl>

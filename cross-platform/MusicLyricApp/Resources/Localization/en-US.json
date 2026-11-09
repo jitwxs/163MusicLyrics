@@ -343,5 +343,22 @@
   "Table.Selected": "selected",
   "Table.SelectAll": "Select all rows",
   "Table.ClearSelection": "Clear selection",
-  "Table.Empty": "No results"
+  "Table.Empty": "No results",
+  "Status.Batch.Ready": "Ready",
+  "Status.Batch.Failed": "Failed",
+  "Batch.Description": "Results of multi-song searches gather here so you can save their lyrics together.",
+  "Batch.ScanFolder": "Scan local folder",
+  "Batch.InputSource": "Source",
+  "Batch.EmptyTitle": "No batch tasks yet",
+  "Batch.EmptyDescription": "Search several IDs, an album or a playlist, or scan a local folder, and the results appear here.",
+  "Batch.Stat.Total": "Songs",
+  "Batch.Stat.WithLyrics": "With lyrics",
+  "Batch.Stat.Saved": "Saved",
+  "Batch.Stat.Failed": "Failed to save",
+  "Batch.Actions": "Actions",
+  "Batch.SaveRow": "Save this song's lyrics",
+  "Batch.SaveSelected": "Save selected lyrics",
+  "Batch.RemoveSelected": "Remove selected from list",
+  "Batch.ItemOne": "song",
+  "Batch.ItemOther": "songs"
 }

@@ -343,5 +343,22 @@
   "Table.Selected": "已选",
   "Table.SelectAll": "全选",
   "Table.ClearSelection": "清除选择",
-  "Table.Empty": "没有结果"
+  "Table.Empty": "没有结果",
+  "Status.Batch.Ready": "已就绪",
+  "Status.Batch.Failed": "查询失败",
+  "Batch.Description": "多首歌曲的搜索结果会汇总在这里，可以一起保存歌词。",
+  "Batch.ScanFolder": "扫描本地文件夹",
+  "Batch.InputSource": "来源",
+  "Batch.EmptyTitle": "还没有批量任务",
+  "Batch.EmptyDescription": "在歌词搜索中输入多个 ID、搜索专辑或歌单，或扫描本地文件夹，结果会出现在这里。",
+  "Batch.Stat.Total": "歌曲",
+  "Batch.Stat.WithLyrics": "有歌词",
+  "Batch.Stat.Saved": "保存成功",
+  "Batch.Stat.Failed": "保存失败",
+  "Batch.Actions": "操作",
+  "Batch.SaveRow": "保存这首歌的歌词",
+  "Batch.SaveSelected": "保存所选歌词",
+  "Batch.RemoveSelected": "从列表移除所选",
+  "Batch.ItemOne": "首",
+  "Batch.ItemOther": "首"
 }

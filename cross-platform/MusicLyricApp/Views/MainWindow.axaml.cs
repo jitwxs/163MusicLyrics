@@ -33,6 +33,7 @@ public partial class MainWindow : ArcWindow, IWindowProvider
 
         viewModel.BatchSearchViewModel.Items.CollectionChanged += BatchItemsOnCollectionChanged;
         viewModel.TipRaised += ShowTip;
+        viewModel.BatchSearchViewModel.TipRaised += ShowTip;
         UpdateBatchBadge();
     }
 

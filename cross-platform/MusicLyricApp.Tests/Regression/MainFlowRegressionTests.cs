@@ -258,6 +258,8 @@ public class MainFlowRegressionTests
             var skipped = vm.Items.Single(x => x.SongId == "456");
             Assert.Equal(LocalizationService.Get("Status.Batch.Saved"), saved.Status);
             Assert.Equal(LocalizationService.Get("Status.Batch.Skipped"), skipped.Status);
+            Assert.Equal(BatchItemStateEnum.SAVED, saved.State);
+            Assert.Equal(BatchItemStateEnum.SKIPPED, skipped.State);
             Assert.Equal(100, saved.Progress);
             Assert.Equal(0, skipped.Progress);
             Assert.Empty(saved.Error);

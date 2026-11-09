@@ -55,13 +55,16 @@ public class ViewModelRegressionTests
         vm.AddSearchResults(results, input, "123,456");
         Assert.Equal(2, vm.TotalSongsCount);
         Assert.Equal(1, vm.SongsWithLyricsCount);
-        Assert.Equal("Failed", vm.Items[1].Status);
+        Assert.Equal(LocalizationService.Get("Status.Batch.Failed"), vm.Items[1].Status);
+        Assert.Equal(BatchItemStateEnum.FAILED, vm.Items[1].State);
+        Assert.True(vm.Items[1].HasError);
         vm.AddSearchResults(results, input);
         Assert.Equal(2, vm.Items.Count);
         results["456"] = new(TestWorkspace.Song("456"));
         vm.AddSearchResults(results, input);
         Assert.Equal(2, vm.SongsWithLyricsCount);
-        Assert.Equal("Ready", vm.Items[1].Status);
+        Assert.Equal(LocalizationService.Get("Status.Batch.Ready"), vm.Items[1].Status);
+        Assert.Equal(BatchItemStateEnum.READY, vm.Items[1].State);
         vm.CacheSongLink("123", "https://test.invalid/audio");
         Assert.True(vm.TryGetCachedSongLink("123", out var link));
         Assert.Equal("https://test.invalid/audio", link);
@@ -99,7 +102,8 @@ public class ViewModelRegressionTests
             Assert.Equal(LocalizationService.Get("Status.Batch.Saved"), saved.Status);
             Assert.Equal(100, saved.Progress);
             Assert.Empty(saved.Error);
-            Assert.Equal("Ready", vm.Items.Single(x => x.SongId == "123").Status);
+            Assert.Equal(LocalizationService.Get("Status.Batch.Ready"), vm.Items.Single(x => x.SongId == "123").Status);
+            Assert.Equal(BatchItemStateEnum.SAVED, saved.State);
             Assert.Equal(0, vm.SaveFailedCount);
         }
         finally
@@ -152,8 +156,8 @@ public class ViewModelRegressionTests
             window.Show();
             vm.AddSearchResults(new() { ["123"] = new(TestWorkspace.Song()) }, [TestWorkspace.Input()]);
             Dispatcher.UIThread.RunJobs();
-            var grid = Assert.Single(window.GetVisualDescendants().OfType<DataGrid>());
-            Assert.Same(vm.Items, grid.ItemsSource);
+            var table = Assert.Single(window.GetVisualDescendants().OfType<TKCode.Arc.Table>());
+            Assert.Same(vm.Items, table.ItemsSource);
             Assert.Single(vm.Items);
         }
         finally { window.Close(); }

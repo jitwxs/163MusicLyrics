@@ -37,6 +37,11 @@ public partial class BatchSearchViewModel : ViewModelBase
     [ObservableProperty] private int _saveSuccessCount;
     [ObservableProperty] private int _saveFailedCount;
 
+    /// <summary>Raised for every status message; the window shows it as a toast. Args: message, isError.</summary>
+    public event System.Action<string, bool>? TipRaised;
+
+    public bool HasItems => Items.Count > 0;
+
     public BatchSearchViewModel(
         SettingBean settingBean,
         SearchService searchService,
@@ -47,7 +52,7 @@ public partial class BatchSearchViewModel : ViewModelBase
         _settingBean = settingBean;
         _searchService = searchService;
         _windowProvider = windowProvider;
-
+        Items.CollectionChanged += (_, _) => OnPropertyChanged(nameof(HasItems));
     }
 
     public void AddSearchResults(Dictionary<string, ResultVo<SaveVo>> resDict, List<InputSongId> inputSongIds, string? inputText = null)
@@ -86,7 +91,8 @@ public partial class BatchSearchViewModel : ViewModelBase
                 item.SourceEnum = input.SearchSource;
                 item.Singer = string.Join(_settingBean.Config.SingerSeparator, saveVo.SongVo.Singer);
                 item.Album = saveVo.SongVo.Album;
-                item.Status = "Ready";
+                item.State = BatchItemStateEnum.READY;
+                item.Status = LocalizationService.Get("Status.Batch.Ready");
                 item.Error = saveVo.LyricVo.IsEmpty() ? ErrorMsgConst.LRC_NOT_EXIST : "";
                 item.Progress = 100;
             }
@@ -100,7 +106,8 @@ public partial class BatchSearchViewModel : ViewModelBase
                 item.SourceEnum = input.SearchSource;
                 item.Singer = "";
                 item.Album = "";
-                item.Status = "Failed";
+                item.State = BatchItemStateEnum.FAILED;
+                item.Status = LocalizationService.Get("Status.Batch.Failed");
                 item.Error = result.ErrorMsg;
                 item.Progress = 0;
             }
@@ -214,6 +221,7 @@ public partial class BatchSearchViewModel : ViewModelBase
             {
                 var skipReason = StorageService.IsSkipStorage(saveMap[item.SongId], _settingBean);
                 var saved = skipReason == null;
+                item.State = saved ? BatchItemStateEnum.SAVED : BatchItemStateEnum.SKIPPED;
                 item.Status = LocalizationService.Get(saved ? "Status.Batch.Saved" : "Status.Batch.Skipped");
                 item.Error = skipReason ?? "";
                 item.Progress = saved ? 100 : 0;
@@ -258,8 +266,8 @@ public partial class BatchSearchViewModel : ViewModelBase
             target.IsSelected = true;
         }
 
+        // The main view model switches back to the search page to show the song.
         WeakReferenceMessenger.Default.Send(new OpenSongDetailMessage(new SongDetailRequest(target.SongId, target.SourceEnum)));
-        WeakReferenceMessenger.Default.Send(new CloseWindowMessage("BatchSearchWindow"));
     }
 
     private async Task RunBatchSearchAsync(string inputText)
@@ -291,6 +299,7 @@ public partial class BatchSearchViewModel : ViewModelBase
         TipTimestamp = System.DateTime.Now.ToString("HH:mm:ss");
         TipNormalMessage = isError ? "" : message;
         TipErrorMessage = isError ? message : "";
+        TipRaised?.Invoke(message, isError);
     }
 
     private static (int success, int failed) ParseSaveMessage(string message)
