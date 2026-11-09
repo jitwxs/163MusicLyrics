@@ -33,7 +33,14 @@ public partial class MainWindowViewModel : ViewModelBase
     
     public SignalLampViewModel LampVm { get; } = new();
 
-    [ObservableProperty] private string _appTitle = "MusicLyricApp v7.5";
+    /// <summary>"MusicLyricApp v{major}.{minor}", from the assembly version set in the project file.</summary>
+    [ObservableProperty] private string _appTitle = BuildAppTitle();
+
+    private static string BuildAppTitle()
+    {
+        var version = typeof(MainWindowViewModel).Assembly.GetName().Version ?? new Version(0, 0);
+        return $"MusicLyricApp v{version.Major}.{version.Minor}";
+    }
 
     [ObservableProperty] private string _lastSaveFolderPath = "";
     [ObservableProperty] private string _tipTimestamp = "";

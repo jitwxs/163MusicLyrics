@@ -44,7 +44,7 @@ dotnet test MusicLyricApp.sln -c Debug --no-build
 ./app.sh all                    # 编译、打包并启动当前平台发布版
 ```
 
-版本统一通过 MSBuild 读取 `MusicLyricApp/MusicLyricApp.csproj` 的 `<Version>`，不需要传版本参数，也不使用 `APP_VERSION` 环境变量。当前配置为 `7.5.0`（界面显示 v7.5）。可以使用 `bash app.sh ...` 或 `sh app.sh ...`，后者会在需要时自动切换到 Bash。
+版本统一通过 MSBuild 读取 `MusicLyricApp/MusicLyricApp.csproj` 的 `<Version>`，不需要传版本参数，也不使用 `APP_VERSION` 环境变量。当前配置为 `8.0.0`（界面显示 v8.0）。可以使用 `bash app.sh ...` 或 `sh app.sh ...`，后者会在需要时自动切换到 Bash。
 
 原始发布文件放在 `publish/<版本>/<RID>/`，并在 `publish/` 下生成归档：Windows 使用 `.zip`，Linux 使用 `.tar.gz`。macOS 额外生成 `publish/MusicLyricApp-<版本>-<RID>.app`，最终 `.tar.gz` 中包含完整 `.app`，可解压后放入“应用程序”目录；`./app.sh run-package` 从该应用包启动。
 
@@ -85,11 +85,11 @@ sh app.sh dist
 该命令通过版本、参数和运行环境检查后，会先删除并重建整个 `publish/` 目录（包含所有旧版本产物），再自动使用项目版本依次发布 Windows x86/x64、Linux x64、macOS x64/arm64 共五个包，不会启动应用；macOS 包额外完成 `.app` 封装、签名及解压后验签。完整分发命令必须在 Mac 上运行，以完成 macOS 签名。当前项目版本对应以下可上传文件：
 
 ```text
-publish/MusicLyricApp-7.5.0-win-x86.zip
-publish/MusicLyricApp-7.5.0-win-x64.zip
-publish/MusicLyricApp-7.5.0-linux-x64.tar.gz
-publish/MusicLyricApp-7.5.0-osx-x64.tar.gz
-publish/MusicLyricApp-7.5.0-osx-arm64.tar.gz
+publish/MusicLyricApp-8.0.0-win-x86.zip
+publish/MusicLyricApp-8.0.0-win-x64.zip
+publish/MusicLyricApp-8.0.0-linux-x64.tar.gz
+publish/MusicLyricApp-8.0.0-osx-x64.tar.gz
+publish/MusicLyricApp-8.0.0-osx-arm64.tar.gz
 ```
 
 只打当前平台包使用 `sh app.sh package`；只打指定平台包使用 `sh app.sh package osx-arm64` 或 `sh app.sh package osx-x64`；验证当前平台发布版使用 `sh app.sh run-package`。
