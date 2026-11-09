@@ -41,7 +41,9 @@ APP_VERSION=7.4.0 ./app.sh package  # 打当前平台独立包
 APP_VERSION=7.4.0 ./app.sh all      # 编译、打包并启动发布版
 ```
 
-包会放在 `publish/<版本>/<RID>/`，并在 `publish/` 下生成归档：Windows 使用 `.zip`，其他平台使用 `.tar.gz`。默认 RID 自动按当前操作系统和 CPU 架构选择；也可手动指定，例如 `./app.sh package win-x64`。跨平台发布目标为 `osx-arm64`、`osx-x64`、`win-x64`、`win-x86`、`win-arm64`、`linux-x64` 和 `linux-arm64`。
+原始发布文件放在 `publish/<版本>/<RID>/`，并在 `publish/` 下生成归档：Windows 使用 `.zip`，Linux 使用 `.tar.gz`。macOS 额外生成 `publish/MusicLyricApp-<版本>-<RID>.app`，最终 `.tar.gz` 中包含完整 `.app`，可解压后放入“应用程序”目录；`./app.sh run-package` 从该应用包启动。
+
+默认 RID 自动按当前操作系统和 CPU 架构选择；也可手动指定，例如 `./app.sh package win-x64`。跨平台发布目标为 `osx-arm64`、`osx-x64`、`win-x64`、`win-x86`、`win-arm64`、`linux-x64` 和 `linux-arm64`。macOS 应用包封装必须在 Mac 上完成，并安装 Xcode Command Line Tools（提供 `codesign`）。
 
 ## 启动
 
@@ -69,8 +71,21 @@ cd publish/osx-arm64
 ./MusicLyricApp
 ```
 
-现有 `publish.sh <version>` 用于发布全部目标平台，并清理已有 `publish/` 输出。
-`build-macos-app.sh <version>` 将其生成的 macOS 中间压缩包包装为 `.app`、执行临时签名并压缩；它不是日常开发启动脚本。
+以上 `dotnet publish` 命令只生成原始发布文件；正式发布 macOS 版本请使用 `app.sh package`。
+
+`publish.sh <version>` 用于发布全部目标平台，并清理已有 `publish/` 输出。在 Mac 上会直接生成完整 `.app` 及最终压缩包；在其他系统上，macOS 目标只生成 `-mid.tar.gz` 中间包。将这些中间包放入 Mac 上本项目的 `cross-platform/publish/`，然后执行 `bash build-macos-app.sh <version>` 完成封装。
+
+两个入口共用 `package-macos-app.sh`，统一生成应用元数据、复制图标、设置执行权限及进行 ad-hoc 签名。可执行文件和动态库放在 `Contents/MacOS`，其他资源放在 `Contents/Resources`，并通过相对符号链接保留原有查找路径，避免非代码文件的签名依赖扩展属性。最终归档会再次解压并验签，全部成功后才输出。正式 Release 只能上传包含 `.app` 的最终压缩包，不能将原始发布目录或 `-mid.tar.gz` 当作最终 macOS 资产。ad-hoc 签名不是 Apple Developer ID 签名或公证，下载后仍可能遇到 Gatekeeper 提示。
+
+## macOS 打包回归
+
+从本目录执行（仅依赖 Python 3 和 Bash，无需 .NET 发布或联网）：
+
+```sh
+PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -p 'test_macos_packaging.py' -v
+```
+
+测试使用模拟的 `uname` 和 `codesign`，检查打包结构、文件权限、元数据和失败处理；实际发布仍需在 Mac 上验证真实签名及应用启动。
 
 ## 功能回归
 

@@ -74,7 +74,10 @@ publish_app() {
         -p:IncludeNativeLibrariesForSelfExtract=true \
         -o "$output_dir"
 
-    if [[ "$rid" == win-* ]]; then
+    if [[ "$rid" == osx-* ]]; then
+        archive="$OUTPUT_ROOT/MusicLyricApp-$APP_VERSION-$rid.tar.gz"
+        bash "$SCRIPT_DIR/package-macos-app.sh" "$APP_VERSION" "$rid" "$output_dir" "$OUTPUT_ROOT"
+    elif [[ "$rid" == win-* ]]; then
         archive="$OUTPUT_ROOT/MusicLyricApp-$APP_VERSION-$rid.zip"
         (cd "$output_dir" && zip -qr "$archive" .)
     else
@@ -101,7 +104,10 @@ run_published_app() {
     local output_dir="$OUTPUT_ROOT/$APP_VERSION/$rid"
     local executable="$output_dir/MusicLyricApp"
 
-    if [[ "$rid" == win-* ]]; then
+    if [[ "$rid" == osx-* ]]; then
+        output_dir="$OUTPUT_ROOT/MusicLyricApp-$APP_VERSION-$rid.app/Contents/MacOS"
+        executable="$output_dir/MusicLyricApp"
+    elif [[ "$rid" == win-* ]]; then
         executable="$output_dir/MusicLyricApp.exe"
     fi
     if [[ ! -x "$executable" ]]; then
@@ -118,7 +124,7 @@ usage() {
 命令：
   run [RID]       编译 Debug 并启动开发版（默认）
   build           编译 Release 版本
-  package [RID]   发布当前平台的独立程序并生成 tar.gz 包
+  package [RID]   发布并打包（macOS 生成 .app 的 tar.gz；Windows 生成 zip）
   run-package [RID] 启动已经发布的独立程序
   all [RID]       编译 Release、打包，然后启动发布版
 
