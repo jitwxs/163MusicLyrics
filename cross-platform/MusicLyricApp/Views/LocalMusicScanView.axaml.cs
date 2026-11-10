@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Avalonia.Controls;
@@ -9,6 +8,7 @@ using MusicLyricApp.Core.Localization;
 using MusicLyricApp.Models;
 using MusicLyricApp.ViewModels;
 using MusicLyricApp.Core;
+using MusicLyricApp.Core.Service;
 
 namespace MusicLyricApp.Views;
 
@@ -25,10 +25,8 @@ public partial class LocalMusicScanView : UserControl
         if (DataContext is not LocalMusicScanViewModel vm || vm.IsBusy || TopLevel.GetTopLevel(this) is not { } top) return;
         try
         {
-            var folders = await top.StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
-            { Title = LocalizationService.Get(output ? "LocalScan.OutputFolder" : "LocalScan.Folder"), AllowMultiple = false });
-            var path = folders.FirstOrDefault()?.TryGetLocalPath();
-            if (string.IsNullOrWhiteSpace(path)) return;
+            var path = (await top.StorageProvider.PickFolderAsync(output ? "LocalScan.OutputFolder" : "LocalScan.Folder")).LocalPath();
+            if (path == null) return;
             if (output) vm.OutputFolder = path; else vm.FolderPath = path;
         }
         catch (Exception ex) { vm.ReportError(ex.Message); }
@@ -38,7 +36,7 @@ public partial class LocalMusicScanView : UserControl
     {
         if (DataContext is not LocalMusicScanViewModel vm || vm.SelectedItem?.Candidate is not { } candidate) return;
         var url = MusicSources.Get(candidate.Source).SongPageUrl(candidate.Id);
-        try { Process.Start(new ProcessStartInfo(url) { UseShellExecute = true }); }
+        try { ShellLauncher.Open(url); }
         catch (Exception ex) { vm.ReportError(ex.Message); }
     }
 }

@@ -343,7 +343,7 @@ public class StorageService : IStorageService
 
     public async Task<IStorageFolder?> SelectFolderAndRememberAsync(SettingBean settingBean, IWindowProvider windowProvider)
     {
-        var folder = await PickFolderAsync(windowProvider);
+        var folder = await windowProvider.PickFolderAsync("Dialog.Folder.Output");
         if (folder != null)
         {
             RememberFolder(settingBean, folder);
@@ -359,7 +359,7 @@ public class StorageService : IStorageService
             return cached;
         }
 
-        var picked = await PickFolderAsync(windowProvider)
+        var picked = await windowProvider.PickFolderAsync("Dialog.Folder.Output")
             ?? throw new MusicLyricException(ErrorMsgConst.STORAGE_FOLDER_ERROR);
         RememberFolder(settingBean, picked);
         return picked;
@@ -376,21 +376,10 @@ public class StorageService : IStorageService
         return await windowProvider.TryGetFolderFromPathAsync(path);
     }
 
-    private static async Task<IStorageFolder?> PickFolderAsync(IWindowProvider windowProvider)
-    {
-        var folders = await windowProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
-        {
-            Title = LocalizationService.Get("Dialog.Folder.Output"),
-            AllowMultiple = false
-        });
-
-        return folders.Count == 0 ? null : folders[0];
-    }
-
     private void RememberFolder(SettingBean settingBean, IStorageFolder folder)
     {
-        var path = folder.Path?.LocalPath ?? folder.Path?.ToString();
-        if (string.IsNullOrWhiteSpace(path))
+        var path = folder.LocalPath();
+        if (path == null)
         {
             return;
         }

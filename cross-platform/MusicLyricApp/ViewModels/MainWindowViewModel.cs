@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.ComponentModel;
@@ -35,13 +34,7 @@ public partial class MainWindowViewModel : ViewModelBase
     public SignalLampViewModel LampVm { get; } = new();
 
     /// <summary>"MusicLyricApp v{major}.{minor}", from the assembly version set in the project file.</summary>
-    [ObservableProperty] private string _appTitle = BuildAppTitle();
-
-    private static string BuildAppTitle()
-    {
-        var version = typeof(MainWindowViewModel).Assembly.GetName().Version ?? new Version(0, 0);
-        return $"MusicLyricApp v{version.Major}.{version.Minor}";
-    }
+    [ObservableProperty] private string _appTitle = AppInfo.Title;
 
     [ObservableProperty] private string _lastSaveFolderPath = "";
     [ObservableProperty] private string _tipTimestamp = "";
@@ -870,14 +863,7 @@ public partial class MainWindowViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private static void ExecuteHome()
-    {
-        Process.Start(new ProcessStartInfo
-        {
-            FileName = "https://github.com/jitwxs/163MusicLyrics",
-            UseShellExecute = true
-        });
-    }
+    private static void ExecuteHome() => ShellLauncher.Open(AppInfo.HomeUrl);
 
     [RelayCommand]
     private void ExecuteFormatConvert()
@@ -886,24 +872,10 @@ public partial class MainWindowViewModel : ViewModelBase
     }
     
     [RelayCommand]
-    private static void ExecuteWiki()
-    {
-        Process.Start(new ProcessStartInfo
-        {
-            FileName = "https://github.com/jitwxs/163MusicLyrics/wiki",
-            UseShellExecute = true
-        });
-    }
+    private static void ExecuteWiki() => ShellLauncher.Open(AppInfo.WikiUrl);
     
     [RelayCommand]
-    private static void ExecuteIssue()
-    {
-        Process.Start(new ProcessStartInfo
-        {
-            FileName = "https://github.com/jitwxs/163MusicLyrics/issues",
-            UseShellExecute = true
-        });
-    }
+    private static void ExecuteIssue() => ShellLauncher.Open(AppInfo.IssuesUrl);
 
     /// <summary>Opens a page by sidebar key; settings keep the section already open, if any.</summary>
     [RelayCommand]
@@ -930,36 +902,17 @@ public partial class MainWindowViewModel : ViewModelBase
     
     private bool _inCheckVersion;
     
-    private bool _showMessageIfNotExistLatestVersion;
-    
     private async Task DoVersionCheck(bool showMessageIfNotExistLatestVersion)
     {
-        _showMessageIfNotExistLatestVersion = showMessageIfNotExistLatestVersion;
-        
         if (_inCheckVersion)
         {
             return;
         }
-        
+
         _inCheckVersion = true;
-        
         try
         {
-            var checkResult = _updateCheckService.CheckLatestVersion(AppTitle);
-            if (checkResult.HasUpdate)
-            {
-                var content = UpdateCheckService.BuildReleaseDescription(checkResult.Info);
-                
-                if (await DialogHelper.ShowReleaseNotesAsync(content))
-                {
-                    Process.Start(new ProcessStartInfo
-                    {
-                        FileName = UpdateCheckService.ReleasePageUrl,
-                        UseShellExecute = true
-                    });
-                }
-            }
-            else if (_showMessageIfNotExistLatestVersion)
+            if (!await _updateCheckService.OfferUpdateAsync() && showMessageIfNotExistLatestVersion)
             {
                 SetTip(ErrorMsgConst.THIS_IS_LATEST_VERSION, false);
             }

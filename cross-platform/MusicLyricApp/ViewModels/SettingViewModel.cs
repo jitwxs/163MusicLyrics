@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -87,10 +86,7 @@ public partial class SettingViewModel : ViewModelBase
     {
         _settingBean = settingBean;
         _windowProvider = windowProvider;
-        _openDirectory = openDirectory ?? (path =>
-        {
-            using var _ = Process.Start(new ProcessStartInfo { FileName = path, UseShellExecute = true });
-        });
+        _openDirectory = openDirectory ?? ShellLauncher.Open;
         LocalSongCacheService.EnsureConfigDefaults(_settingBean);
         SettingParamViewModel.Bind(_settingBean);
 
@@ -188,11 +184,7 @@ public partial class SettingViewModel : ViewModelBase
         
         try
         {
-            using var _ = Process.Start(new ProcessStartInfo
-            {
-                FileName = folder,
-                UseShellExecute = true
-            });
+            _openDirectory(folder);
         }
         catch (Exception ex)
         {
@@ -256,14 +248,8 @@ public partial class SettingViewModel : ViewModelBase
 
         try
         {
-            var folder = await _storageService.SelectFolderAndRememberAsync(_settingBean, _windowProvider);
-            if (folder == null)
-            {
-                return;
-            }
-
-            var localPath = folder.Path?.LocalPath ?? folder.Path?.ToString();
-            if (string.IsNullOrWhiteSpace(localPath))
+            var localPath = (await _storageService.SelectFolderAndRememberAsync(_settingBean, _windowProvider)).LocalPath();
+            if (localPath == null)
             {
                 return;
             }
@@ -311,19 +297,8 @@ public partial class SettingViewModel : ViewModelBase
 
         try
         {
-            var folders = await _windowProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
-            {
-                Title = LocalizationService.Get("Dialog.Folder.Cache"),
-                AllowMultiple = false
-            });
-
-            if (folders.Count == 0)
-            {
-                return;
-            }
-
-            var path = folders[0].Path?.LocalPath ?? folders[0].Path?.ToString();
-            if (string.IsNullOrWhiteSpace(path))
+            var path = (await _windowProvider.PickFolderAsync("Dialog.Folder.Cache")).LocalPath();
+            if (path == null)
             {
                 return;
             }
@@ -344,20 +319,7 @@ public partial class SettingViewModel : ViewModelBase
     {
         try
         {
-            var checkResult = _updateCheckService.CheckLatestVersion(GetCurrentVersionTitle());
-            if (checkResult.HasUpdate)
-            {
-                var content = UpdateCheckService.BuildReleaseDescription(checkResult.Info);
-                if (await DialogHelper.ShowReleaseNotesAsync(content))
-                {
-                    Process.Start(new ProcessStartInfo
-                    {
-                        FileName = UpdateCheckService.ReleasePageUrl,
-                        UseShellExecute = true
-                    });
-                }
-            }
-            else
+            if (!await _updateCheckService.OfferUpdateAsync())
             {
                 SettingTips = ErrorMsgConst.THIS_IS_LATEST_VERSION;
             }
@@ -366,18 +328,6 @@ public partial class SettingViewModel : ViewModelBase
         {
             SettingTips = ex.Message;
         }
-    }
-
-    private static string GetCurrentVersionTitle()
-    {
-        if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop &&
-            desktop.MainWindow != null &&
-            !string.IsNullOrWhiteSpace(desktop.MainWindow.Title))
-        {
-            return desktop.MainWindow.Title;
-        }
-
-        return "MusicLyricApp v0.0";
     }
 
     [RelayCommand]
@@ -392,11 +342,7 @@ public partial class SettingViewModel : ViewModelBase
         try
         {
             Directory.CreateDirectory(path);
-            using var _ = Process.Start(new ProcessStartInfo
-            {
-                FileName = path,
-                UseShellExecute = true
-            });
+            _openDirectory(path);
         }
         catch (Exception ex)
         {

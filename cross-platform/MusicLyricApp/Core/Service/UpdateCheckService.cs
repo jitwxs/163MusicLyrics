@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using MusicLyricApp.Core.Service.Music;
 using MusicLyricApp.Core.Utils;
 using MusicLyricApp.Models;
@@ -17,7 +18,24 @@ public partial class UpdateCheckService
     {
         _fetchLatest = fetchLatest ?? FetchLatest;
     }
-    public const string ReleasePageUrl = "https://github.com/jitwxs/163MusicLyrics/releases";
+    public const string ReleasePageUrl = AppInfo.ReleasesUrl;
+
+    /// <summary>
+    /// Checks for a newer release of the running version; when there is one, shows its notes and opens the release
+    /// page if the user asks to. Throws when the check fails.
+    /// </summary>
+    /// <returns>False when the running version is the latest.</returns>
+    public async Task<bool> OfferUpdateAsync(Func<string, Task<bool>>? showReleaseNotes = null, Action<string>? open = null)
+    {
+        var result = CheckLatestVersion(AppInfo.Title);
+        if (!result.HasUpdate) return false;
+        if (await (showReleaseNotes ?? DialogHelper.ShowReleaseNotesAsync)(BuildReleaseDescription(result.Info)))
+        {
+            (open ?? ShellLauncher.Open)(ReleasePageUrl);
+        }
+
+        return true;
+    }
 
     public UpdateCheckResult CheckLatestVersion(string currentVersionText)
     {
@@ -27,7 +45,7 @@ public partial class UpdateCheckService
     }
 
     private static GitHubInfo? FetchLatest() => HttpUtils.HttpGet<GitHubInfo>(
-            "https://api.github.com/repos/jitwxs/163MusicLyrics/releases/latest",
+            AppInfo.LatestReleaseApiUrl,
             "application/json",
             new Dictionary<string, string>
             {
