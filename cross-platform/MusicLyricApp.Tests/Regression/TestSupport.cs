@@ -59,6 +59,26 @@ public class TestWorkspace : IDisposable
             .Returns(Task.CompletedTask);
     }
 
+    /// <summary>
+    /// Runs <paramref name="action"/> in <paramref name="language"/> and restores the language and UI culture after.
+    /// Use it from <c>[AvaloniaFact]</c> tests: a switch notifies controls, which belong to the UI thread.
+    /// </summary>
+    public static void WithLanguage(string language, Action action)
+    {
+        var original = MusicLyricApp.Core.Localization.LocalizationService.Instance.Language;
+        var culture = System.Globalization.CultureInfo.CurrentUICulture;
+        try
+        {
+            MusicLyricApp.Core.Localization.LocalizationService.Instance.SetLanguage(language);
+            action();
+        }
+        finally
+        {
+            MusicLyricApp.Core.Localization.LocalizationService.Instance.SetLanguage(original);
+            System.Globalization.CultureInfo.CurrentUICulture = culture;
+        }
+    }
+
     /// <summary>Hosts a page view in a bare window, the way the main window hosts it.</summary>
     public static Avalonia.Controls.Window Host(Avalonia.Controls.Control view, object dataContext) =>
         new() { Width = 1000, Height = 700, DataContext = dataContext, Content = view };

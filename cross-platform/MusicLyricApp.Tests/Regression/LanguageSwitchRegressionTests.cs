@@ -17,21 +17,6 @@ namespace MusicLyricAppTest.Regression;
 /// </summary>
 public class LanguageSwitchRegressionTests
 {
-    private static void WithLanguage(string language, Action action)
-    {
-        var original = LocalizationService.Instance.Language;
-        var culture = System.Globalization.CultureInfo.CurrentUICulture;
-        try
-        {
-            LocalizationService.Instance.SetLanguage(language);
-            action();
-        }
-        finally
-        {
-            LocalizationService.Instance.SetLanguage(original);
-            System.Globalization.CultureInfo.CurrentUICulture = culture;
-        }
-    }
 
     private sealed class Probe
     {
@@ -41,7 +26,7 @@ public class LanguageSwitchRegressionTests
     }
 
     [AvaloniaFact]
-    public void ContentObserversRunBeforeViewObserversWhateverTheOrderTheySubscribedIn() => WithLanguage("zh-CN", () =>
+    public void ContentObserversRunBeforeViewObserversWhateverTheOrderTheySubscribedIn() => TestWorkspace.WithLanguage("zh-CN", () =>
     {
         var probe = new Probe();
         // The view subscribes first, like the window does before the settings page exists.
@@ -56,7 +41,7 @@ public class LanguageSwitchRegressionTests
     });
 
     [AvaloniaFact]
-    public void ObserversDoNotKeepTheirOwnerAlive() => WithLanguage("zh-CN", () =>
+    public void ObserversDoNotKeepTheirOwnerAlive() => TestWorkspace.WithLanguage("zh-CN", () =>
     {
         var calls = new StrongBox<int>();
         var owner = Subscribe(calls);
@@ -85,7 +70,7 @@ public class LanguageSwitchRegressionTests
     }
 
     [AvaloniaFact]
-    public void LocalizedObjectBindingsFollowTheLanguage() => WithLanguage("zh-CN", () =>
+    public void LocalizedObjectBindingsFollowTheLanguage() => TestWorkspace.WithLanguage("zh-CN", () =>
     {
         var item = EnumDisplayHelper.GetEnumDisplayCollection<DotTypeEnum>().First();
         var text = new TextBlock { DataContext = item };
@@ -103,7 +88,7 @@ public class LanguageSwitchRegressionTests
     });
 
     [AvaloniaFact]
-    public void DownloadManagerRowsFollowTheLanguage() => WithLanguage("zh-CN", () =>
+    public void DownloadManagerRowsFollowTheLanguage() => TestWorkspace.WithLanguage("zh-CN", () =>
     {
         var row = new BatchSearchItemViewModel { SourceEnum = SearchSourceEnum.QQ_MUSIC, State = BatchItemStateEnum.SAVED };
         var changed = new List<string?>();
@@ -133,7 +118,7 @@ public class LanguageSwitchRegressionTests
     private static string SourceFile([CallerFilePath] string path = "") => path;
 
     [AvaloniaFact]
-    public void SelectsInSectionsNotShownYetFollowALanguageSwitch() => WithLanguage("en-US", () =>
+    public void SelectsInSectionsNotShownYetFollowALanguageSwitch() => TestWorkspace.WithLanguage("en-US", () =>
     {
         using var ws = new TestWorkspace();
         ws.Settings.Config.ConfirmBeforeExit = false;

@@ -202,20 +202,7 @@ public partial class MainWindowViewModel : ViewModelBase
         _windowProvider = new DesignWindowProvider();
         _downloadManagerViewModel = new BatchSearchViewModel(_settingBean, _searchService, new StorageService(), _windowProvider);
         Login = new LoginStatusViewModel(CookieOf);
-        
-        SearchParamViewModel.Bind(_settingBean.Param);
-        LastSaveFolderPath = _settingBean.Config.LastSaveFolderPath;
-        SearchParamViewModel.PropertyChanged += SearchParamViewModelOnPropertyChanged;
-
-        SearchResultViewModel.PropertyChanged += (_, e) =>
-        {
-            if (e.PropertyName == nameof(SearchResultViewModel.SongLink))
-            {
-                RefreshSongLinkState();
-            }
-        };
-
-        _playbackTimer.Tick += (_, _) => UpdatePlaybackProgress();
+        WireSearchState();
     }
 
     // Main constructor for runtime use
@@ -236,20 +223,7 @@ public partial class MainWindowViewModel : ViewModelBase
         Login = new LoginStatusViewModel(CookieOf, loginProbe);
         // One request per platform with a cookie, so the online lyrics page shows whether it still works.
         _ = Login.CheckAllAsync();
-
-        SearchParamViewModel.Bind(_settingBean.Param);
-        LastSaveFolderPath = _settingBean.Config.LastSaveFolderPath;
-        SearchParamViewModel.PropertyChanged += SearchParamViewModelOnPropertyChanged;
-
-        SearchResultViewModel.PropertyChanged += (_, e) =>
-        {
-            if (e.PropertyName == nameof(SearchResultViewModel.SongLink))
-            {
-                RefreshSongLinkState();
-            }
-        };
-
-        _playbackTimer.Tick += (_, _) => UpdatePlaybackProgress();
+        WireSearchState();
         
         WeakReferenceMessenger.Default.Register<BlurSearchResultsMessage>(this, (r, m) =>
         {
@@ -275,6 +249,24 @@ public partial class MainWindowViewModel : ViewModelBase
         {
             ThreadPool.QueueUserWorkItem(p => _ = DoVersionCheck(false));
         }
+    }
+
+    /// <summary>State both constructors share: search parameters, the song link and the playback clock.</summary>
+    private void WireSearchState()
+    {
+        SearchParamViewModel.Bind(SettingBean.Param);
+        LastSaveFolderPath = SettingBean.Config.LastSaveFolderPath;
+        SearchParamViewModel.PropertyChanged += SearchParamViewModelOnPropertyChanged;
+
+        SearchResultViewModel.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(SearchResultViewModel.SongLink))
+            {
+                RefreshSongLinkState();
+            }
+        };
+
+        _playbackTimer.Tick += (_, _) => UpdatePlaybackProgress();
     }
 
     private async Task ProcessBlurSearchResults(string ids)

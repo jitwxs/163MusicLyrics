@@ -22,21 +22,6 @@ public class DownloadManagerCacheRegressionTests
     private static void Cache(TestWorkspace ws, string id, SearchSourceEnum source = SearchSourceEnum.NET_EASE_MUSIC) =>
         LocalSongCacheService.SaveCache(ws.Settings, source, id, TestWorkspace.Song(id, source: source));
 
-    private static void WithLanguage(string language, Action action)
-    {
-        var original = LocalizationService.Instance.Language;
-        var culture = System.Globalization.CultureInfo.CurrentUICulture;
-        try
-        {
-            LocalizationService.Instance.SetLanguage(language);
-            action();
-        }
-        finally
-        {
-            LocalizationService.Instance.SetLanguage(original);
-            System.Globalization.CultureInfo.CurrentUICulture = culture;
-        }
-    }
 
     [AvaloniaTheory]
     [InlineData(0, 0)]
@@ -175,8 +160,8 @@ public class DownloadManagerCacheRegressionTests
     public void CacheIsFoundAfterSwitchingLanguage()
     {
         using var ws = new TestWorkspace();
-        WithLanguage("zh-CN", () => Cache(ws, "1", SearchSourceEnum.QQ_MUSIC));
-        WithLanguage("en-US", () =>
+        TestWorkspace.WithLanguage("zh-CN", () => Cache(ws, "1", SearchSourceEnum.QQ_MUSIC));
+        TestWorkspace.WithLanguage("en-US", () =>
             Assert.True(LocalSongCacheService.TryLoadSaveVo(ws.Settings, SearchSourceEnum.QQ_MUSIC, "1", out _)));
         Assert.Equal(["QQ_MUSIC_1.json"], Directory.GetFiles(ws.Settings.Config.SearchCacheFolderPath).Select(Path.GetFileName));
     }
@@ -194,7 +179,7 @@ public class DownloadManagerCacheRegressionTests
 
         foreach (var language in new[] { "zh-CN", "en-US" })
         {
-            WithLanguage(language, () =>
+            TestWorkspace.WithLanguage(language, () =>
             {
                 Assert.True(LocalSongCacheService.TryLoadSaveVo(ws.Settings, SearchSourceEnum.NET_EASE_MUSIC, "7", out _));
                 Assert.True(LocalSongCacheService.TryLoadSongLink(ws.Settings, SearchSourceEnum.NET_EASE_MUSIC, "7", out var link));

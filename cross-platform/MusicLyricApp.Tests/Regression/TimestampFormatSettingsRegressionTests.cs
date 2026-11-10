@@ -14,21 +14,6 @@ namespace MusicLyricAppTest.Regression;
 /// <summary>LRC and SRT timestamp formats: presets, custom formats with token buttons, preview and validation.</summary>
 public class TimestampFormatSettingsRegressionTests
 {
-    private static void WithLanguage(string language, Action action)
-    {
-        var original = LocalizationService.Instance.Language;
-        var culture = System.Globalization.CultureInfo.CurrentUICulture;
-        try
-        {
-            LocalizationService.Instance.SetLanguage(language);
-            action();
-        }
-        finally
-        {
-            LocalizationService.Instance.SetLanguage(original);
-            System.Globalization.CultureInfo.CurrentUICulture = culture;
-        }
-    }
 
     [Theory]
     [InlineData("[mm:ss.SSS]", true, null, null)]
@@ -88,7 +73,7 @@ public class TimestampFormatSettingsRegressionTests
     }
 
     [AvaloniaFact]
-    public void InvalidCustomFormatIsShownButNotSaved() => WithLanguage("zh-CN", () =>
+    public void InvalidCustomFormatIsShownButNotSaved() => TestWorkspace.WithLanguage("zh-CN", () =>
     {
         using var ws = new TestWorkspace();
         var vm = new SettingParamViewModel();
@@ -110,7 +95,7 @@ public class TimestampFormatSettingsRegressionTests
     });
 
     [AvaloniaFact]
-    public void RoundingRuleFollowsTheFormatsAndThePreview() => WithLanguage("zh-CN", () =>
+    public void RoundingRuleFollowsTheFormatsAndThePreview() => TestWorkspace.WithLanguage("zh-CN", () =>
     {
         using var ws = new TestWorkspace();
         var vm = new SettingParamViewModel();
