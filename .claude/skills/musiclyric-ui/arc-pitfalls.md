@@ -19,7 +19,10 @@ one is wrong.
 - **`Select` caches each item's text.** After a language change the trigger keeps the old words. Assigning the same
   `TextSelector` again is not a change, because the delegates are equal. Clear it and set it again
   (`select.TextSelector = null; select.TextSelector = Label;`). `Views/SelectLocalization.cs` does this for every
-  `Select` in the window.
+  `Select` in the window. It walks the logical tree as well as the visual one: a section that has never been shown
+  has no template yet, so its selects are missing from the visual tree, yet they cached their text when their
+  `SelectedItem` was bound. Walking only the visual tree left them in the old language (start in English, switch to
+  Chinese on 应用设置, then open 歌词定制). Headless tests see the stale text through `Select.SelectedText`.
 - **`Table` does not filter.** Filter in the view model and pass the filtered collection as `ItemsSource`; the
   download manager uses `VisibleItems`. Selection follows the row object. Use `SelectsOnRowClick="False"` when rows
   have their own action buttons.

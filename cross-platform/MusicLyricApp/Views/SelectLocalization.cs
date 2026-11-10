@@ -1,5 +1,6 @@
 using System.Linq;
 using Avalonia.Controls;
+using Avalonia.LogicalTree;
 using Avalonia.VisualTree;
 using MusicLyricApp.Core.Localization;
 using TKCode.Arc;
@@ -14,6 +15,8 @@ namespace MusicLyricApp.Views;
 /// after a language switch the trigger kept the old language. Changing <see cref="Select.TextSelector"/> makes it
 /// recompute every label. Delegates to the same method compare equal, so it is cleared first: otherwise only the
 /// first switch is seen as a change. Options' <c>ToString()</c> returns their localized display name.
+/// Selects are looked up in the logical tree as well as the visual one: a section that has never been shown has
+/// no template yet, so its selects are not in the visual tree, but they already cached their text.
 /// </remarks>
 public static class SelectLocalization
 {
@@ -24,7 +27,9 @@ public static class SelectLocalization
     {
         void Refresh()
         {
-            foreach (var select in root.GetVisualDescendants().OfType<Select>())
+            var selects = root.GetLogicalDescendants().OfType<Select>()
+                .Union(root.GetVisualDescendants().OfType<Select>());
+            foreach (var select in selects)
             {
                 select.TextSelector = null;
                 select.TextSelector = Label;

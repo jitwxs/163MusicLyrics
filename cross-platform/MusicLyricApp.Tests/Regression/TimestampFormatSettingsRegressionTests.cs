@@ -167,4 +167,36 @@ public class TimestampFormatSettingsRegressionTests
         button.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
         Dispatcher.UIThread.RunJobs();
     }
+
+    [AvaloniaFact]
+    public void SelectsInSectionsNotShownYetFollowALanguageSwitch() => WithLanguage("en-US", () =>
+    {
+        using var ws = new TestWorkspace();
+        ws.Settings.Config.ConfirmBeforeExit = false;
+        ws.Settings.Config.Language = "en-US";
+        ws.Storage().SaveConfig(ws.Settings);
+        var window = new MainWindow(ws.Storage(), ws.Search(new(Moq.MockBehavior.Strict)));
+        var vm = Assert.IsType<MainWindowViewModel>(window.DataContext);
+        try
+        {
+            window.Show();
+            Dispatcher.UIThread.RunJobs();
+            // Open settings straight on Application: the Lyrics section exists but has never been laid out, so its
+            // selects are not in the visual tree yet when the language changes.
+            vm.CurrentPageKey = MainWindowViewModel.SettingsKeyPrefix + SettingViewModel.SectionApplication;
+            Dispatcher.UIThread.RunJobs();
+            var settings = vm.SettingViewModel!.SettingParamViewModel;
+            settings.SelectedLanguage = settings.Languages.Single(l => l.Code == "zh-CN");
+            Dispatcher.UIThread.RunJobs();
+
+            vm.CurrentPageKey = MainWindowViewModel.SettingsKeyPrefix + SettingViewModel.SectionLyrics;
+            Dispatcher.UIThread.RunJobs();
+            var view = window.FindControl<SettingView>("SettingsPage")!;
+            var selects = view.FindControl<StackPanel>("LyricsSection")!.GetVisualDescendants().OfType<TKCode.Arc.Select>().ToList();
+            Assert.NotEmpty(selects);
+            Assert.All(selects.Where(s => s.SelectedItem != null),
+                select => Assert.Equal(select.SelectedItem!.ToString(), select.SelectedText));
+        }
+        finally { window.Close(); CommunityToolkit.Mvvm.Messaging.WeakReferenceMessenger.Default.UnregisterAll(vm); }
+    });
 }
