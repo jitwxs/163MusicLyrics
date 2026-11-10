@@ -69,7 +69,7 @@ public class SearchService : ISearchService
         foreach (var input in inputs)
         {
             var searchSong =
-                GlobalUtils.CheckInputId(input, searchParam.SelectedSearchSource, searchParam.SelectedSearchType);
+                GlobalUtils.CheckInputId(input, searchParam.SearchSource.Value, searchParam.SearchType.Value);
             var musicApi = GetMusicApi(searchSong.SearchSource);
 
             switch (searchSong.SearchType)
@@ -282,8 +282,8 @@ public class SearchService : ISearchService
         // 判断是否是目录
         if (Directory.Exists(inputText))
         {
-            var searchSource = searchParamView.SelectedSearchSource;
-            var searchType = searchParamView.SelectedSearchType;
+            var searchSource = searchParamView.SearchSource.Value;
+            var searchType = searchParamView.SearchType.Value;
 
             foreach (var filePath in Directory.EnumerateFiles(inputText))
             {

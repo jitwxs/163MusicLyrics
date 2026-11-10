@@ -104,10 +104,10 @@ public partial class MainWindowViewModel : ViewModelBase
     public LoginStatusViewModel Login { get; }
 
     /// <summary>The account state of the source picked on the online lyrics page.</summary>
-    public AccountStatusViewModel CurrentLogin => Login.Get(SearchParamViewModel.SelectedSearchSource);
+    public AccountStatusViewModel CurrentLogin => Login.Get(SearchParamViewModel.SearchSource.Value);
 
     /// <summary>The sign-in button is hidden for sources used without a cookie (Soda Music).</summary>
-    public bool IsCurrentLoginVisible => LoginStatusViewModel.HasAccount(SearchParamViewModel.SelectedSearchSource);
+    public bool IsCurrentLoginVisible => LoginStatusViewModel.HasAccount(SearchParamViewModel.SearchSource.Value);
 
     public const string PageCookieSettings = SettingsKeyPrefix + SettingViewModel.SectionExtensions;
 
@@ -293,15 +293,10 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         ++_previewRevision;
         IsBlurSearch = false;
-        var sourceItem = SearchParamViewModel.SearchSources.FirstOrDefault(x => x.Value == request.SearchSource);
-        if (sourceItem != null)
-        {
-            SearchParamViewModel.SelectedSearchSourceItem = sourceItem;
-        }
+        SearchParamViewModel.SearchSource.Value = request.SearchSource;
 
         // Download-manager rows always identify a song, even if the previous search was a playlist or album.
-        SearchParamViewModel.SelectedSearchTypeItem = SearchParamViewModel.SearchTypes
-            .First(x => x.Value == SearchTypeEnum.SONG_ID);
+        SearchParamViewModel.SearchType.Value = SearchTypeEnum.SONG_ID;
         BlurResults = null;
         SearchParamViewModel.SearchText = request.SongId;
         CurrentPageKey = PageSearch;
@@ -372,14 +367,14 @@ public partial class MainWindowViewModel : ViewModelBase
     /// <summary>Options that change how the lyrics are rendered; the preview follows them at once.</summary>
     private static readonly HashSet<string> PreviewAffectingParams =
     [
-        nameof(SearchParamViewModel.SelectedOutputFormatItem),
-        nameof(SearchParamViewModel.SelectedLrcTypeItem),
+        nameof(SearchParamViewModel.OutputFormat),
+        nameof(SearchParamViewModel.LrcType),
         nameof(SearchParamViewModel.LrcMergeSeparator)
     ];
 
     private void SearchParamViewModelOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (e.PropertyName is nameof(SearchParamViewModel.SelectedSearchSourceItem) or nameof(SearchParamViewModel.SearchSourceValue))
+        if (e.PropertyName is nameof(SearchParamViewModel.SearchSource))
         {
             OnPropertyChanged(nameof(CurrentLogin));
             OnPropertyChanged(nameof(IsCurrentLoginVisible));
@@ -971,7 +966,7 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private void SetTip(string message, bool isError)
     {
-        if (IsNeedLoginMessage(message)) Login.ReportNeedLogin(SearchParamViewModel.SelectedSearchSource);
+        if (IsNeedLoginMessage(message)) Login.ReportNeedLogin(SearchParamViewModel.SearchSource.Value);
 
         TipTimestamp = DateTime.Now.ToString("HH:mm:ss");
         TipNormalMessage = isError ? "" : message;

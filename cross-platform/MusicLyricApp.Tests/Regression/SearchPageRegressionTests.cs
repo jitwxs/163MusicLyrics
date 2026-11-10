@@ -61,21 +61,21 @@ public class SearchPageRegressionTests
 
         // Drive the actual controls to cover their two-way bindings as well as the renderer.
         scope.Find<Select>("LrcTypeSelect").SelectedItem =
-            vm.SearchParamViewModel.LrcTypes.Single(x => x.Value == ShowLrcTypeEnum.MERGE);
+            vm.SearchParamViewModel.LrcType.Items.Single(x => x.Value == ShowLrcTypeEnum.MERGE);
         vm.SearchParamViewModel.LrcMergeSeparator = " / ";
         Dispatcher.UIThread.RunJobs();
         Assert.Equal("[00:01.000]hello / 你好", scope.Find<CodeBlock>("LyricPreview").Code);
 
         scope.Find<Select>("OutputFormatSelect").SelectedItem =
-            vm.SearchParamViewModel.OutputFormats.Single(x => x.Value == OutputFormatEnum.SRT);
+            vm.SearchParamViewModel.OutputFormat.Items.Single(x => x.Value == OutputFormatEnum.SRT);
         Dispatcher.UIThread.RunJobs();
         Assert.Contains("00:00:01,000 -->", scope.Find<CodeBlock>("LyricPreview").Code);
         Assert.Contains("hello / 你好", vm.SearchResultViewModel.ConsoleOutput);
 
         scope.Find<Select>("OutputFormatSelect").SelectedItem =
-            vm.SearchParamViewModel.OutputFormats.Single(x => x.Value == OutputFormatEnum.LRC);
+            vm.SearchParamViewModel.OutputFormat.Items.Single(x => x.Value == OutputFormatEnum.LRC);
         scope.Find<Select>("LrcTypeSelect").SelectedItem =
-            vm.SearchParamViewModel.LrcTypes.Single(x => x.Value == ShowLrcTypeEnum.STAGGER);
+            vm.SearchParamViewModel.LrcType.Items.Single(x => x.Value == ShowLrcTypeEnum.STAGGER);
         Dispatcher.UIThread.RunJobs();
         Assert.Equal(string.Join(Environment.NewLine, "[00:01.000]hello", "[00:01.000]你好"),
             scope.Find<CodeBlock>("LyricPreview").Code);
@@ -141,7 +141,7 @@ public class SearchPageRegressionTests
 
         source.SelectedValue = SearchSourceEnum.SODA_MUSIC;
         Dispatcher.UIThread.RunJobs();
-        Assert.Equal(SearchSourceEnum.SODA_MUSIC, scope.Vm.SearchParamViewModel.SelectedSearchSource);
+        Assert.Equal(SearchSourceEnum.SODA_MUSIC, scope.Vm.SearchParamViewModel.SearchSource.Value);
         // Soda Music needs no cookie, so there is no sign-in state to show.
         Assert.False(login.IsEffectivelyVisible);
 
@@ -158,17 +158,17 @@ public class SearchPageRegressionTests
         var type = scope.Find<SegmentedControl>("TypeSegment");
         var param = scope.Vm.SearchParamViewModel;
 
-        Assert.Equal(param.SelectedSearchSource, source.SelectedValue);
-        Assert.Equal(param.SelectedSearchType, type.SelectedValue);
+        Assert.Equal(param.SearchSource.Value, source.SelectedValue);
+        Assert.Equal(param.SearchType.Value, type.SelectedValue);
 
         source.SelectedValue = SearchSourceEnum.QQ_MUSIC;
         type.SelectedValue = SearchTypeEnum.PLAYLIST_ID;
         Dispatcher.UIThread.RunJobs();
-        Assert.Equal(SearchSourceEnum.QQ_MUSIC, param.SelectedSearchSource);
-        Assert.Equal(SearchTypeEnum.PLAYLIST_ID, param.SelectedSearchType);
+        Assert.Equal(SearchSourceEnum.QQ_MUSIC, param.SearchSource.Value);
+        Assert.Equal(SearchTypeEnum.PLAYLIST_ID, param.SearchType.Value);
         Assert.Equal(SearchSourceEnum.QQ_MUSIC, scope.Vm.SettingBean.Param.SearchSource);
 
-        param.SelectedSearchSourceItem = param.SearchSources.Single(x => x.Value == SearchSourceEnum.NET_EASE_MUSIC);
+        param.SearchSource.Value = SearchSourceEnum.NET_EASE_MUSIC;
         Dispatcher.UIThread.RunJobs();
         Assert.Equal(SearchSourceEnum.NET_EASE_MUSIC, source.SelectedValue);
     }
@@ -274,14 +274,14 @@ public class SearchPageRegressionTests
             window.Show();
             Dispatcher.UIThread.RunJobs();
             var select = Assert.Single(window.GetVisualDescendants().OfType<Select>(), s => s.Name == "LrcTypeSelect");
-            Assert.NotNull(vm.SearchParamViewModel.SelectedLrcTypeItem);
-            Assert.Equal(vm.SearchParamViewModel.SelectedLrcTypeItem.DisplayName, select.SelectedText);
+            Assert.NotNull(vm.SearchParamViewModel.LrcType.Selected);
+            Assert.Equal(vm.SearchParamViewModel.LrcType.Selected.DisplayName, select.SelectedText);
             vm.SearchResultViewModel.SetSongSource(SearchSourceEnum.QQ_MUSIC);
             var english = vm.SearchResultViewModel.SongSource;
 
             LocalizationService.Instance.SetLanguage("zh-CN");
             Dispatcher.UIThread.RunJobs();
-            Assert.Equal(LocalizationService.Get("Enum.ShowLrcTypeEnum." + vm.SearchParamViewModel.SelectedLrcType), select.SelectedText);
+            Assert.Equal(LocalizationService.Get("Enum.ShowLrcTypeEnum." + vm.SearchParamViewModel.LrcType.Value), select.SelectedText);
             Assert.Equal(LocalizationService.Get("Enum.SearchSourceEnum.QQ_MUSIC"), vm.SearchResultViewModel.SongSource);
             Assert.NotEqual(english, vm.SearchResultViewModel.SongSource);
 
@@ -291,7 +291,7 @@ public class SearchPageRegressionTests
             {
                 LocalizationService.Instance.SetLanguage(language);
                 Dispatcher.UIThread.RunJobs();
-                Assert.Equal(LocalizationService.Get("Enum.ShowLrcTypeEnum." + vm.SearchParamViewModel.SelectedLrcType), select.SelectedText);
+                Assert.Equal(LocalizationService.Get("Enum.ShowLrcTypeEnum." + vm.SearchParamViewModel.LrcType.Value), select.SelectedText);
             }
         }
         finally

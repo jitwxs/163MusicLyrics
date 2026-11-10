@@ -196,15 +196,15 @@ public partial class SettingViewModel : ViewModelBase
     [RelayCommand]
     private async Task TestProxyAsync()
     {
-        if (SettingParamViewModel.SelectedNetworkProxyModeItem?.Value != NetworkProxyModeEnum.HTTP_PROXY)
+        if (SettingParamViewModel.NetworkProxyMode.Selected?.Value != NetworkProxyModeEnum.HTTP_PROXY)
         {
             SettingTips = LocalizationService.Get("Status.Settings.ProxyModeRequired");
             return;
         }
 
-        if (!string.IsNullOrWhiteSpace(SettingParamViewModel.ProxyPortError))
+        if (!string.IsNullOrWhiteSpace(SettingParamViewModel.ProxyPort.Error))
         {
-            SettingTips = SettingParamViewModel.ProxyPortError;
+            SettingTips = SettingParamViewModel.ProxyPort.Error;
             return;
         }
 

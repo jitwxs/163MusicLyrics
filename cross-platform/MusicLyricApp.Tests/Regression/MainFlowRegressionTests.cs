@@ -57,7 +57,7 @@ public class MainFlowRegressionTests
                 Dispatcher.UIThread.RunJobs();
             }
             Assert.True(vm.HasSongLink);
-            Assert.Equal(SearchTypeEnum.SONG_ID, vm.SearchParamViewModel.SelectedSearchType);
+            Assert.Equal(SearchTypeEnum.SONG_ID, vm.SearchParamViewModel.SearchType.Value);
             Assert.Equal(SearchTypeEnum.SONG_ID, vm.SettingBean.Param.SearchType);
             Assert.Equal("186008", vm.SearchParamViewModel.SearchText);
             Assert.Equal("园游会", vm.SearchResultViewModel.SongName);
@@ -95,7 +95,7 @@ public class MainFlowRegressionTests
             Assert.Equal("[00:01.000]测试歌词", File.ReadAllText(Assert.Single(ws.CreatedFiles)));
             Assert.Contains("成功 1", vm.TipNormalMessage);
             // An output-format change must not erase the loaded song or its playable link.
-            vm.SearchParamViewModel.SelectedOutputFormatItem = vm.SearchParamViewModel.OutputFormats.Single(x => x.Value == OutputFormatEnum.SRT);
+            vm.SearchParamViewModel.OutputFormat.Value = OutputFormatEnum.SRT;
             Dispatcher.UIThread.RunJobs();
             Assert.Contains("00:00:01,000 -->", vm.SearchResultViewModel.ConsoleOutput);
             Assert.Equal("测试歌曲123", vm.SearchResultViewModel.SongName);
@@ -251,7 +251,7 @@ public class MainFlowRegressionTests
 
             async Task<string> Preview(ShowLrcTypeEnum type)
             {
-                param.SelectedLrcTypeItem = param.LrcTypes.Single(x => x.Value == type);
+                param.LrcType.Value = type;
                 var deadline = DateTime.UtcNow.AddSeconds(4);
                 var before = vm.SearchResultViewModel.ConsoleOutput;
                 while (DateTime.UtcNow < deadline && vm.SearchResultViewModel.ConsoleOutput == before)
@@ -318,8 +318,8 @@ public class MainFlowRegressionTests
         using var ws = new TestWorkspace();
         var vm = new SettingParamViewModel();
         vm.Bind(ws.Settings);
-        vm.ProxyPortText = value;
-        Assert.Equal(valid, string.IsNullOrEmpty(vm.ProxyPortError));
+        vm.ProxyPort.Text = value;
+        Assert.Equal(valid, string.IsNullOrEmpty(vm.ProxyPort.Error));
         Assert.Equal(valid ? int.Parse(value) : 80, ws.Settings.Config.ProxyPort);
     }
 
@@ -334,8 +334,8 @@ public class MainFlowRegressionTests
         using var ws = new TestWorkspace();
         var vm = new SettingParamViewModel();
         vm.Bind(ws.Settings);
-        vm.SearchCacheMaxSizeMbText = value;
-        Assert.Equal(valid, string.IsNullOrEmpty(vm.SearchCacheSizeError));
+        vm.SearchCacheMaxSizeMb.Text = value;
+        Assert.Equal(valid, string.IsNullOrEmpty(vm.SearchCacheMaxSizeMb.Error));
         Assert.Equal(valid ? int.Parse(value) : 128, ws.Settings.Config.SearchCacheMaxSizeMb);
     }
 

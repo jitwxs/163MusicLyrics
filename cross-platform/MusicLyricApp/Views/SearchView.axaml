@@ -46,7 +46,7 @@
             <WrapPanel ItemSpacing="{arc:ArcDesignTokenResource Space3}" LineSpacing="{arc:ArcDesignTokenResource Space2}">
                 <arc:SegmentedControl Name="SourceSegment"
                                       AutomationProperties.Name="{loc:Loc Key=UI.SearchSource}"
-                                      SelectedValue="{Binding SearchParamViewModel.SearchSourceValue, Mode=TwoWay}">
+                                      SelectedValue="{Binding SearchParamViewModel.SearchSource.SelectedValue, Mode=TwoWay}">
                     <arc:SegmentedOption Value="{x:Static models:SearchSourceEnum.NET_EASE_MUSIC}"
                                          Label="{loc:Loc Key=Enum.SearchSourceEnum.NET_EASE_MUSIC}" />
                     <arc:SegmentedOption Value="{x:Static models:SearchSourceEnum.QQ_MUSIC}"
@@ -56,7 +56,7 @@
                 </arc:SegmentedControl>
                 <arc:SegmentedControl Name="TypeSegment"
                                       AutomationProperties.Name="{loc:Loc Key=UI.SearchType}"
-                                      SelectedValue="{Binding SearchParamViewModel.SearchTypeValue, Mode=TwoWay}">
+                                      SelectedValue="{Binding SearchParamViewModel.SearchType.SelectedValue, Mode=TwoWay}">
                     <arc:SegmentedOption Value="{x:Static models:SearchTypeEnum.SONG_ID}"
                                          Label="{loc:Loc Key=Enum.SearchTypeEnum.SONG_ID}" />
                     <arc:SegmentedOption Value="{x:Static models:SearchTypeEnum.ALBUM_ID}"
@@ -337,24 +337,24 @@
                             MinWidth="132"
                             Size="Small"
                             Label="{loc:Loc Key=UI.LyricFormat}"
-                            ItemsSource="{Binding SearchParamViewModel.LrcTypes}"
-                            SelectedItem="{Binding SearchParamViewModel.SelectedLrcTypeItem}"
+                            ItemsSource="{Binding SearchParamViewModel.LrcType.Items}"
+                            SelectedItem="{Binding SearchParamViewModel.LrcType.Selected}"
                             DisplayMemberBinding="{ReflectionBinding DisplayName}" />
                 <arc:Select Grid.Column="1"
                             Name="OutputFormatSelect"
                             MinWidth="112"
                             Size="Small"
                             Label="{loc:Loc Key=UI.OutputFormat}"
-                            ItemsSource="{Binding SearchParamViewModel.OutputFormats}"
-                            SelectedItem="{Binding SearchParamViewModel.SelectedOutputFormatItem}"
+                            ItemsSource="{Binding SearchParamViewModel.OutputFormat.Items}"
+                            SelectedItem="{Binding SearchParamViewModel.OutputFormat.Selected}"
                             DisplayMemberBinding="{ReflectionBinding DisplayName}" />
                 <arc:Select Grid.Column="2"
                             Name="EncodingSelect"
                             MinWidth="132"
                             Size="Small"
                             Label="{loc:Loc Key=UI.Encoding}"
-                            ItemsSource="{Binding SearchParamViewModel.OutputEncodings}"
-                            SelectedItem="{Binding SearchParamViewModel.SelectedOutputEncodingItem}"
+                            ItemsSource="{Binding SearchParamViewModel.OutputEncoding.Items}"
+                            SelectedItem="{Binding SearchParamViewModel.OutputEncoding.Selected}"
                             DisplayMemberBinding="{ReflectionBinding DisplayName}" />
 
                 <StackPanel Grid.Column="3"

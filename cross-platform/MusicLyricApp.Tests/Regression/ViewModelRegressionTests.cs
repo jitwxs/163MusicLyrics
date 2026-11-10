@@ -21,11 +21,11 @@ public class ViewModelRegressionTests
     {
         using var ws = new TestWorkspace();
         var vm = ws.Param("query");
-        vm.SelectedSearchSourceItem = vm.SearchSources.Single(x => x.Value == SearchSourceEnum.QQ_MUSIC);
-        vm.SelectedSearchTypeItem = vm.SearchTypes.Single(x => x.Value == SearchTypeEnum.ALBUM_ID);
-        vm.SelectedOutputFormatItem = vm.OutputFormats.Single(x => x.Value == OutputFormatEnum.SRT);
-        vm.SelectedOutputEncodingItem = vm.OutputEncodings.Single(x => x.Value == OutputEncodingEnum.UNICODE);
-        vm.SelectedLrcTypeItem = vm.LrcTypes.Single(x => x.Value == ShowLrcTypeEnum.MERGE);
+        vm.SearchSource.Value = SearchSourceEnum.QQ_MUSIC;
+        vm.SearchType.Value = SearchTypeEnum.ALBUM_ID;
+        vm.OutputFormat.Value = OutputFormatEnum.SRT;
+        vm.OutputEncoding.Value = OutputEncodingEnum.UNICODE;
+        vm.LrcType.Value = ShowLrcTypeEnum.MERGE;
         vm.LrcMergeSeparator = " | ";
         Assert.Equal(SearchSourceEnum.QQ_MUSIC, ws.Settings.Param.SearchSource);
         Assert.Equal(SearchTypeEnum.ALBUM_ID, ws.Settings.Param.SearchType);

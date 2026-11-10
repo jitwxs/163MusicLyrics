@@ -219,11 +219,11 @@ public class LoginStatusRegressionTests
             Dispatcher.UIThread.RunJobs();
             var text = window.GetVisualDescendants().OfType<TextBlock>().Single(t => t.Name == "LoginStatusText");
             Assert.True(text.IsEffectivelyVisible);
-            Assert.Equal(vm.Login.Get(vm.SearchParamViewModel.SelectedSearchSource).SourceLabel, text.Text);
+            Assert.Equal(vm.Login.Get(vm.SearchParamViewModel.SearchSource.Value).SourceLabel, text.Text);
             Assert.Contains(LocalizationService.Get("Login.State.NotConfigured"), text.Text);
 
-            var other = vm.SearchParamViewModel.SearchSources.First(x => !Equals(x.Value, vm.SearchParamViewModel.SelectedSearchSource));
-            vm.SearchParamViewModel.SelectedSearchSourceItem = other;
+            var other = vm.SearchParamViewModel.SearchSource.Items.First(x => !Equals(x.Value, vm.SearchParamViewModel.SearchSource.Value));
+            vm.SearchParamViewModel.SearchSource.Selected = other;
             Dispatcher.UIThread.RunJobs();
             Assert.Contains(other.Value.ToDescription(), text.Text);
 

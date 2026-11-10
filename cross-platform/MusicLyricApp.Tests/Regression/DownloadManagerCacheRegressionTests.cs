@@ -59,9 +59,9 @@ public class DownloadManagerCacheRegressionTests
         using var ws = new TestWorkspace();
         var vm = new SettingParamViewModel();
         vm.Bind(ws.Settings);
-        Assert.Equal("500", vm.SearchCacheStartupLoadLimitText);
-        vm.SearchCacheStartupLoadLimitText = value;
-        Assert.Equal(valid, string.IsNullOrEmpty(vm.SearchCacheStartupLoadLimitError));
+        Assert.Equal("500", vm.SearchCacheStartupLoadLimit.Text);
+        vm.SearchCacheStartupLoadLimit.Text = value;
+        Assert.Equal(valid, string.IsNullOrEmpty(vm.SearchCacheStartupLoadLimit.Error));
         Assert.Equal(valid ? int.Parse(value) : 500, ws.Settings.Config.SearchCacheStartupLoadLimit);
     }
 

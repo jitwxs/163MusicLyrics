@@ -73,9 +73,12 @@ preview, fuzzy results, the download manager table and the conversion output.
 
 **Settings rows.** Each setting is an `arc:SettingsRow` inside an `arc:SettingsGroup`, with `Description` for a real
 constraint. Inputs, selects and number fields are 280 wide so every section lines up. Path rows use
-`Classes="path"`, which always stacks, with `Width="NaN"` on the input. A numeric setting follows the existing
-pattern: a `...Text` property, a `...Error` property bound to `ErrorMessage`, range validation in the `On...Changed`
-partial, and the value written to `SettingBean` only when it is valid. Add the field with a default to
+`Classes="path"`, which always stacks, with `Width="NaN"` on the input. An enum setting is an `EnumChoice<T>`
+(`ItemsSource="{Binding X.Items}" SelectedItem="{Binding X.Selected}"`, or `SelectedValue="{Binding X.SelectedValue}"`
+on a segmented control) and a whole-number setting a `NumberSetting` (`Text="{Binding X.Text}"
+ErrorMessage="{Binding X.Error}"`, range and messages in its constructor). Both take an `apply` callback that writes
+the setting (and raises anything listeners need); load a saved value with `X.Value = ...` or `X.Load(...)`. A
+`NumberSetting` writes only valid numbers, and its error follows language switches. Add the field with a default to
 `Models/SettingBase.cs`; old config files then get the default. Edits apply to the in-memory `SettingBean` at once.
 Leaving the settings area only finishes applying them (lyric type order, theme, preview refresh) and writes nothing.
 The config file is written when the window closes (after the exit confirmation), and also right away by 应用代理 and

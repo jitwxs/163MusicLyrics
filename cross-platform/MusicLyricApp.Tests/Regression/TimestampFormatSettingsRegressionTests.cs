@@ -109,7 +109,7 @@ public class TimestampFormatSettingsRegressionTests
         Assert.True(vm.IsDotTypeApplicable);
         Assert.Equal("1:23.456 显示为 [01:23.45]", vm.LrcTimestamp.Preview);
 
-        vm.SelectedDotTypeItem = vm.DotTypes.Single(x => x.Value == DotTypeEnum.HALF_UP);
+        vm.DotType.Value = DotTypeEnum.HALF_UP;
         Assert.Equal("1:23.456 显示为 [01:23.46]", vm.LrcTimestamp.Preview);
     });
 

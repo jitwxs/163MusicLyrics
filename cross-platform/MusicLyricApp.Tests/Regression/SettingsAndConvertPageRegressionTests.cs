@@ -304,11 +304,11 @@ public class SettingsAndConvertPageRegressionTests
         {
             window.Show();
             var port = Assert.IsType<Input>(view.FindControl<Input>("ProxyPortInput"));
-            vm.SettingParamViewModel.ProxyPortText = "70000";
+            vm.SettingParamViewModel.ProxyPort.Text = "70000";
             Dispatcher.UIThread.RunJobs();
             Assert.False(string.IsNullOrEmpty(port.ErrorMessage));
             Assert.True(port.IsInvalid);
-            vm.SettingParamViewModel.ProxyPortText = "8080";
+            vm.SettingParamViewModel.ProxyPort.Text = "8080";
             Dispatcher.UIThread.RunJobs();
             Assert.True(string.IsNullOrEmpty(port.ErrorMessage));
         }

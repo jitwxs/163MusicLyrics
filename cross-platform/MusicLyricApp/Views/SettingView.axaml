@@ -74,18 +74,18 @@
                 <StackPanel Spacing="{arc:ArcDesignTokenResource Space6}">
                     <arc:SettingsGroup Header="{loc:Loc Key=Settings.Group.General}">
                         <arc:SettingsRow Header="{loc:Loc Key=UI.ChineseProcessing}">
-                            <arc:Select ItemsSource="{Binding SettingParamViewModel.ChineseProcessRules}"
-                                        SelectedItem="{Binding SettingParamViewModel.SelectedChineseProcessRuleItem}"
+                            <arc:Select ItemsSource="{Binding SettingParamViewModel.ChineseProcessRule.Items}"
+                                        SelectedItem="{Binding SettingParamViewModel.ChineseProcessRule.Selected}"
                                         DisplayMemberBinding="{ReflectionBinding DisplayName}" />
                         </arc:SettingsRow>
                         <arc:SettingsRow Header="{loc:Loc Key=UI.VerbatimLyrics}">
-                            <arc:Select ItemsSource="{Binding SettingParamViewModel.VerbatimLyricMode}"
-                                        SelectedItem="{Binding SettingParamViewModel.SelectedVerbatimLyricModeItem}"
+                            <arc:Select ItemsSource="{Binding SettingParamViewModel.VerbatimLyricMode.Items}"
+                                        SelectedItem="{Binding SettingParamViewModel.VerbatimLyricMode.Selected}"
                                         DisplayMemberBinding="{ReflectionBinding DisplayName}" />
                         </arc:SettingsRow>
                         <arc:SettingsRow Header="{loc:Loc Key=UI.MissingTranslation}">
-                            <arc:Select ItemsSource="{Binding SettingParamViewModel.TransLyricLostRules}"
-                                        SelectedItem="{Binding SettingParamViewModel.SelectedTransLyricLostRuleItem}"
+                            <arc:Select ItemsSource="{Binding SettingParamViewModel.TransLyricLostRule.Items}"
+                                        SelectedItem="{Binding SettingParamViewModel.TransLyricLostRule.Selected}"
                                         DisplayMemberBinding="{ReflectionBinding DisplayName}" />
                         </arc:SettingsRow>
                         <arc:SettingsRow Header="{loc:Loc Key=UI.MatchPrecision}">
@@ -168,8 +168,8 @@
                                          Description="{Binding SettingParamViewModel.DotTypeHint}">
                             <arc:Select Name="DotTypeSelect"
                                         IsEnabled="{Binding SettingParamViewModel.IsDotTypeApplicable}"
-                                        ItemsSource="{Binding SettingParamViewModel.DotTypes}"
-                                        SelectedItem="{Binding SettingParamViewModel.SelectedDotTypeItem}"
+                                        ItemsSource="{Binding SettingParamViewModel.DotType.Items}"
+                                        SelectedItem="{Binding SettingParamViewModel.DotType.Selected}"
                                         DisplayMemberBinding="{ReflectionBinding DisplayName}" />
                         </arc:SettingsRow>
                     </arc:SettingsGroup>
@@ -274,8 +274,8 @@
                 <arc:SettingsGroup Header="{loc:Loc Key=UI.ProxySettings}"
                                    Description="{loc:Loc Key=UI.ProxyHelp}">
                     <arc:SettingsRow Header="{loc:Loc Key=UI.Type}">
-                        <arc:Select ItemsSource="{Binding SettingParamViewModel.NetworkProxyModes}"
-                                    SelectedItem="{Binding SettingParamViewModel.SelectedNetworkProxyModeItem}"
+                        <arc:Select ItemsSource="{Binding SettingParamViewModel.NetworkProxyMode.Items}"
+                                    SelectedItem="{Binding SettingParamViewModel.NetworkProxyMode.Selected}"
                                     DisplayMemberBinding="{ReflectionBinding DisplayName}" />
                     </arc:SettingsRow>
                     <arc:SettingsRow Header="{loc:Loc Key=UI.Address}">
@@ -287,8 +287,8 @@
                         <arc:Input Name="ProxyPortInput"
                                    Label="{loc:Loc Key=UI.Port}"
                                    IsEnabled="{Binding SettingParamViewModel.IsHttpProxySelected}"
-                                   ErrorMessage="{Binding SettingParamViewModel.ProxyPortError}"
-                                   Text="{Binding SettingParamViewModel.ProxyPortText, Mode=TwoWay}" />
+                                   ErrorMessage="{Binding SettingParamViewModel.ProxyPort.Error}"
+                                   Text="{Binding SettingParamViewModel.ProxyPort.Text, Mode=TwoWay}" />
                     </arc:SettingsRow>
                     <arc:SettingsRow Header="{loc:Loc Key=UI.Username}">
                         <arc:Input Label="{loc:Loc Key=UI.Username}"
@@ -360,8 +360,8 @@
                                              Value="{Binding SettingParamViewModel.SingerCountLimit, Mode=TwoWay}" />
                         </arc:SettingsRow>
                         <arc:SettingsRow Header="{loc:Loc Key=UI.Extra14}">
-                            <arc:Select ItemsSource="{Binding SettingParamViewModel.FileConflictStrategies}"
-                                        SelectedItem="{Binding SettingParamViewModel.SelectedFileConflictStrategyItem}"
+                            <arc:Select ItemsSource="{Binding SettingParamViewModel.FileConflictStrategy.Items}"
+                                        SelectedItem="{Binding SettingParamViewModel.FileConflictStrategy.Selected}"
                                         DisplayMemberBinding="{ReflectionBinding DisplayName}" />
                         </arc:SettingsRow>
                         <arc:SettingsRow Header="{loc:Loc Key=UI.Extra15}" Description="{loc:Loc Key=UI.Extra16}">
@@ -405,15 +405,15 @@
                         <arc:SettingsRow Header="{loc:Loc Key=UI.Extra23}">
                             <arc:Input Name="CacheSizeInput"
                                        Label="{loc:Loc Key=UI.Extra23}"
-                                       ErrorMessage="{Binding SettingParamViewModel.SearchCacheSizeError}"
-                                       Text="{Binding SettingParamViewModel.SearchCacheMaxSizeMbText, Mode=TwoWay}" />
+                                       ErrorMessage="{Binding SettingParamViewModel.SearchCacheMaxSizeMb.Error}"
+                                       Text="{Binding SettingParamViewModel.SearchCacheMaxSizeMb.Text, Mode=TwoWay}" />
                         </arc:SettingsRow>
                         <arc:SettingsRow Header="{loc:Loc Key=Settings.StartupLoadLimit}"
                                          Description="{loc:Loc Key=Settings.StartupLoadLimitHint}">
                             <arc:Input Name="StartupLoadLimitInput"
                                        Label="{loc:Loc Key=Settings.StartupLoadLimit}"
-                                       ErrorMessage="{Binding SettingParamViewModel.SearchCacheStartupLoadLimitError}"
-                                       Text="{Binding SettingParamViewModel.SearchCacheStartupLoadLimitText, Mode=TwoWay}" />
+                                       ErrorMessage="{Binding SettingParamViewModel.SearchCacheStartupLoadLimit.Error}"
+                                       Text="{Binding SettingParamViewModel.SearchCacheStartupLoadLimit.Text, Mode=TwoWay}" />
                         </arc:SettingsRow>
                     </arc:SettingsGroup>
                 </StackPanel>
@@ -425,8 +425,8 @@
                 <StackPanel Spacing="{arc:ArcDesignTokenResource Space6}">
                     <arc:SettingsGroup Header="{loc:Loc Key=Settings.Group.Appearance}">
                         <arc:SettingsRow Header="{loc:Loc Key=UI.Extra28}">
-                            <arc:Select ItemsSource="{Binding SettingParamViewModel.ThemeModeRules}"
-                                        SelectedItem="{Binding SettingParamViewModel.SelectedThemeModeRuleItem}"
+                            <arc:Select ItemsSource="{Binding SettingParamViewModel.ThemeMode.Items}"
+                                        SelectedItem="{Binding SettingParamViewModel.ThemeMode.Selected}"
                                         DisplayMemberBinding="{ReflectionBinding DisplayName}" />
                         </arc:SettingsRow>
                         <arc:SettingsRow Header="{loc:Loc Key=UI.Language}" Description="{loc:Loc Key=UI.LanguageRestart}">
