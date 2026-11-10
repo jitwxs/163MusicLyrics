@@ -11,7 +11,7 @@ public partial class LyricsTypeEnumModel : ObservableObject
     public LyricsTypeEnumModel(LyricsTypeEnum type)
     {
         _type = type;
-        MusicLyricApp.Core.Localization.LocalizationService.Instance.PropertyChanged += (_, _) => OnPropertyChanged(nameof(Name));
+        MusicLyricApp.Core.Localization.LocalizationService.Observe(this, static model => model.OnPropertyChanged(nameof(Name)));
     }
 
     [ObservableProperty] private bool _isSelected;

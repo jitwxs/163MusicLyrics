@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using MusicLyricApp.Core.Localization;
 using MusicLyricApp.Models;
 
 namespace MusicLyricApp.ViewModels;
@@ -12,11 +13,20 @@ public enum BatchItemStateEnum
     SKIPPED
 }
 
-public partial class BatchSearchItemViewModel : ObservableObject
+/// <summary>A download manager row. Its source and status text are derived from enums, so they follow the UI language.</summary>
+public partial class BatchSearchItemViewModel : LocalizedObject
 {
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsReady), nameof(IsFailed), nameof(IsSaved), nameof(IsSkipped))]
+    [NotifyPropertyChangedFor(nameof(IsReady), nameof(IsFailed), nameof(IsSaved), nameof(IsSkipped), nameof(Status))]
     private BatchItemStateEnum _state;
+
+    public string Status => LocalizationService.Get(State switch
+    {
+        BatchItemStateEnum.FAILED => "Status.Batch.Failed",
+        BatchItemStateEnum.SAVED => "Status.Batch.Saved",
+        BatchItemStateEnum.SKIPPED => "Status.Batch.Skipped",
+        _ => "Status.Batch.Ready",
+    });
 
     public bool IsReady => State == BatchItemStateEnum.READY;
     public bool IsFailed => State == BatchItemStateEnum.FAILED;
@@ -30,12 +40,14 @@ public partial class BatchSearchItemViewModel : ObservableObject
     public bool HasError => !string.IsNullOrWhiteSpace(Error);
 
     [ObservableProperty] private bool _isSelected;
-    [ObservableProperty] private string _songSource = "";
     [ObservableProperty] private string _songId = "";
     [ObservableProperty] private string _songName = "";
     [ObservableProperty] private string _singer = "";
     [ObservableProperty] private string _album = "";
-    [ObservableProperty] private SearchSourceEnum _sourceEnum;
-    [ObservableProperty] private string _status = "";
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(SongSource))]
+    private SearchSourceEnum _sourceEnum;
+
+    public string SongSource => SearchResultViewModel.SourceLabel(SourceEnum);
     [ObservableProperty] private int _progress;
 }

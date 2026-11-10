@@ -30,7 +30,7 @@ public partial class BatchSearchView : UserControl
     {
         AvaloniaXamlLoader.Load(this);
         Table.SelectionChanged += OnTableSelectionChanged;
-        LocalizationService.Instance.PropertyChanged += (_, _) => RebuildColumns();
+        LocalizationService.Observe(this, static view => view.RebuildColumns(), LanguageChangePhase.View);
         RebuildColumns();
     }
 

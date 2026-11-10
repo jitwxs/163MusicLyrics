@@ -40,9 +40,22 @@ the same change. XAML uses `{loc:Loc Key=...}` and code uses `LocalizationServic
 `Alert` and `Dialog` button texts. Use `Table.*` and `Search.Clear` where they fit. Chinese copy is plain and short:
 浅色/深色, 删除所选, 保存歌词. Do not mix registers (亮色 next to 暗黑).
 
-**Language changes.** Bound `{loc:Loc}` text updates by itself. Text built in code must be rebuilt: table columns
-are rebuilt on `LocalizationService.Instance.PropertyChanged`, and labels computed in a view model raise
-`OnPropertyChanged`. `Select` triggers are relabelled by `SelectLocalization.Attach` (see pitfalls).
+**Language changes.** Bound `{loc:Loc}` text updates by itself. Any other localized text follows a switch in
+exactly one of these ways (`Core/Localization/`):
+
+- **Options and list items** (Select options, table rows, chips) derive from `LocalizedObject` and compute their
+  text in a getter from an enum or key (`public string Status => LocalizationService.Get(...)`). Never store
+  localized text in a field: it freezes in the language it was built in. A switch reports every property as changed.
+- **View models** with computed labels call `LocalizationService.Observe(this, static vm => vm.OnPropertyChanged(...))`.
+- **Views** that build text in code or cache it (table columns, shortcut hints, Select triggers through
+  `SelectLocalization`) call `Observe(this, static v => v.Rebuild(), LanguageChangePhase.View)`.
+
+A switch runs every `Content` observer, then every `View` observer, then the `{loc:Loc}` bindings, once each, so a
+view always reads text that is already updated. Observers are held weakly, so a view model that is thrown away (the
+settings page builds a new one on each visit) is neither kept alive nor called. The callback must be a `static`
+lambda working on its argument; a delegate bound to the owner throws. Never subscribe to
+`LocalizationService.Instance.PropertyChanged` directly: `LanguageSwitchRegressionTests` fails the build if
+anything does. Tests that switch language are `[AvaloniaFact]`, because observers touch controls.
 
 **Shortcuts.** Add or change a shortcut only in `AppShortcuts` (id, scope, gesture, label key). Key bindings,
 tooltips, placeholder hints and the shortcuts dialog all read from it. Show keys the way the platform does: ⌘ on

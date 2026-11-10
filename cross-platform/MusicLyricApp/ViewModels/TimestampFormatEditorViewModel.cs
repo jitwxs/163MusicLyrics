@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
@@ -10,7 +10,7 @@ using MusicLyricApp.Models;
 namespace MusicLyricApp.ViewModels;
 
 /// <summary>One choice in the timestamp format select: a ready-made format, or "Custom…" when <see cref="Format"/> is null.</summary>
-public sealed class TimestampPreset(string? format) : INotifyPropertyChanged
+public sealed class TimestampPreset(string? format) : LocalizedObject
 {
     public string? Format { get; } = format;
 
@@ -18,29 +18,17 @@ public sealed class TimestampPreset(string? format) : INotifyPropertyChanged
 
     public string DisplayName => Format ?? LocalizationService.Get("Settings.Timestamp.Custom");
 
-    public event PropertyChangedEventHandler? PropertyChanged;
-
     public override string ToString() => DisplayName;
-
-    public void Refresh() => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(DisplayName)));
 }
 
 /// <summary>A button that inserts one format token (HH, mm, ss, SSS, SS, S) into a custom format.</summary>
-public sealed class TimestampToken(string token) : INotifyPropertyChanged
+public sealed class TimestampToken(string token) : LocalizedObject
 {
     public string Token { get; } = token;
 
     public string Label => LocalizationService.Get("Settings.Timestamp.Token." + Token);
 
     public string Tip => LocalizationService.Get("Settings.Timestamp.TokenTip." + Token);
-
-    public event PropertyChangedEventHandler? PropertyChanged;
-
-    public void Refresh()
-    {
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Label)));
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Tip)));
-    }
 }
 
 /// <summary>
@@ -101,7 +89,7 @@ public partial class TimestampFormatEditorViewModel : ObservableObject
                 new(null),
             ];
 
-        LocalizationService.Instance.PropertyChanged += (_, _) => RefreshTexts();
+        LocalizationService.Observe(this, static editor => editor.Evaluate(commit: false));
     }
 
     /// <summary>Shows a saved format: its preset when one matches exactly, otherwise "Custom…" with the text.</summary>
@@ -157,12 +145,5 @@ public partial class TimestampFormatEditorViewModel : ObservableObject
             ? string.Empty
             : LocalizationService.Format("Settings.Timestamp.Preview",
                 new LyricTimestamp(SampleMilliseconds).PrintTimestamp(shown, _dotType()));
-    }
-
-    private void RefreshTexts()
-    {
-        foreach (var preset in Presets) preset.Refresh();
-        foreach (var token in Tokens) token.Refresh();
-        Evaluate(commit: false);
     }
 }

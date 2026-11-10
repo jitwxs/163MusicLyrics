@@ -11,13 +11,11 @@ namespace MusicLyricApp.ViewModels;
 
 public partial class SettingParamViewModel : ViewModelBase
 {
-    public sealed class LanguageOption(string code, string resourceKey) : INotifyPropertyChanged
+    public sealed class LanguageOption(string code, string resourceKey) : LocalizedObject
     {
         public string Code { get; } = code;
         public string DisplayName => LocalizationService.Get(resourceKey);
-        public event PropertyChangedEventHandler? PropertyChanged;
         public override string ToString() => DisplayName;
-        public void RefreshDisplayName() => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(DisplayName)));
     }
 
     public ObservableCollection<LanguageOption> Languages { get; } =
@@ -466,12 +464,8 @@ public partial class SettingParamViewModel : ViewModelBase
             _settingBean.Config.SrtTimestampFormat = format;
             OnTimestampFormatCommitted();
         });
-        LocalizationService.Instance.PropertyChanged += (_, _) => OnPropertyChanged(nameof(DotTypeHint));
+        LocalizationService.Observe(this, static vm => vm.OnPropertyChanged(nameof(DotTypeHint)));
 
-        foreach (var language in Languages)
-        {
-            LocalizationService.Instance.PropertyChanged += (_, _) => language.RefreshDisplayName();
-        }
     }
 
     public void Bind(SettingBean settingBean)

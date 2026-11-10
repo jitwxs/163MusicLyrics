@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Media;
@@ -124,7 +124,7 @@ public partial class LoginStatusViewModel : ViewModelBase, IDisposable
         _probe = probe ?? new NativeLoginProbe();
         _debounce = debounce ?? TimeSpan.FromMilliseconds(800);
         foreach (var account in new[] { NetEase, QQ }) ApplyLocal(account);
-        LocalizationService.Instance.PropertyChanged += OnLanguageChanged;
+        LocalizationService.Observe(this, static vm => vm.OnLanguageChanged());
     }
 
     /// <summary>Only NetEase and QQ Music take a cookie; Soda Music is used signed out.</summary>
@@ -135,7 +135,7 @@ public partial class LoginStatusViewModel : ViewModelBase, IDisposable
 
     private static int Index(SearchSourceEnum source) => source == SearchSourceEnum.NET_EASE_MUSIC ? 0 : 1;
 
-    private void OnLanguageChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    private void OnLanguageChanged()
     {
         NetEase.RefreshLanguage();
         QQ.RefreshLanguage();
@@ -210,6 +210,5 @@ public partial class LoginStatusViewModel : ViewModelBase, IDisposable
     public void Dispose()
     {
         foreach (var pending in _pending) pending?.Cancel();
-        LocalizationService.Instance.PropertyChanged -= OnLanguageChanged;
     }
 }

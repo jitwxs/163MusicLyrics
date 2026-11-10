@@ -49,10 +49,10 @@ public partial class SearchResultViewModel : ViewModelBase
     public SearchResultViewModel()
     {
         // The source label is derived from the enum, so it follows UI language switches.
-        MusicLyricApp.Core.Localization.LocalizationService.Instance.PropertyChanged += (_, _) =>
+        MusicLyricApp.Core.Localization.LocalizationService.Observe(this, static vm =>
         {
-            if (_songSourceEnum is { } source) SongSource = SourceLabel(source);
-        };
+            if (vm._songSourceEnum is { } source) vm.SongSource = SourceLabel(source);
+        });
     }
 
     public void SetSongSource(SearchSourceEnum source)

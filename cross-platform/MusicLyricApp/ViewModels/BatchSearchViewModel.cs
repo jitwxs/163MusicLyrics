@@ -80,11 +80,11 @@ public partial class BatchSearchViewModel : ViewModelBase
             OnPropertyChanged(nameof(HasItems));
             RefreshVisibleItems();
         };
-        LocalizationService.Instance.PropertyChanged += (_, _) =>
+        LocalizationService.Observe(this, static vm =>
         {
-            OnPropertyChanged(nameof(FilterCountText));
-            OnPropertyChanged(nameof(TableEmptyMessage));
-        };
+            vm.OnPropertyChanged(nameof(FilterCountText));
+            vm.OnPropertyChanged(nameof(TableEmptyMessage));
+        });
     }
 
     partial void OnFilterTextChanged(string value)
@@ -190,12 +190,10 @@ public partial class BatchSearchViewModel : ViewModelBase
                 LocalSongCacheService.SaveCache(_settingBean, input.SearchSource, input.SongId, saveVo);
 
                 item.SongName = saveVo.SongVo.Name;
-                item.SongSource = GetSourceName(input.SearchSource);
                 item.SourceEnum = input.SearchSource;
                 item.Singer = string.Join(_settingBean.Config.SingerSeparator, saveVo.SongVo.Singer);
                 item.Album = saveVo.SongVo.Album;
                 item.State = BatchItemStateEnum.READY;
-                item.Status = LocalizationService.Get("Status.Batch.Ready");
                 item.Error = saveVo.LyricVo.IsEmpty() ? ErrorMsgConst.LRC_NOT_EXIST : "";
                 item.Progress = 100;
             }
@@ -205,12 +203,10 @@ public partial class BatchSearchViewModel : ViewModelBase
                 _songLinkMap.Remove(input.SongId);
 
                 item.SongName = "";
-                item.SongSource = GetSourceName(input.SearchSource);
                 item.SourceEnum = input.SearchSource;
                 item.Singer = "";
                 item.Album = "";
                 item.State = BatchItemStateEnum.FAILED;
-                item.Status = LocalizationService.Get("Status.Batch.Failed");
                 item.Error = result.ErrorMsg;
                 item.Progress = 0;
             }
@@ -262,12 +258,10 @@ public partial class BatchSearchViewModel : ViewModelBase
                 {
                     SongId = song.SongId,
                     SongName = saveVo.SongVo.Name,
-                    SongSource = GetSourceName(song.Source),
                     SourceEnum = song.Source,
                     Singer = string.Join(_settingBean.Config.SingerSeparator, saveVo.SongVo.Singer),
                     Album = saveVo.SongVo.Album,
                     State = BatchItemStateEnum.READY,
-                    Status = LocalizationService.Get("Status.Batch.Ready"),
                     Error = saveVo.LyricVo.IsEmpty() ? ErrorMsgConst.LRC_NOT_EXIST : "",
                     Progress = 100
                 });
@@ -373,7 +367,6 @@ public partial class BatchSearchViewModel : ViewModelBase
                 var skipReason = StorageService.IsSkipStorage(saveMap[item.SongId], _settingBean);
                 var saved = skipReason == null;
                 item.State = saved ? BatchItemStateEnum.SAVED : BatchItemStateEnum.SKIPPED;
-                item.Status = LocalizationService.Get(saved ? "Status.Batch.Saved" : "Status.Batch.Skipped");
                 item.Error = skipReason ?? "";
                 item.Progress = saved ? 100 : 0;
             }
@@ -435,16 +428,6 @@ public partial class BatchSearchViewModel : ViewModelBase
         return (0, 0);
     }
 
-    private static string GetSourceName(SearchSourceEnum source)
-    {
-        return source switch
-        {
-            SearchSourceEnum.NET_EASE_MUSIC => LocalizationService.Get("Status.Search.SourceNetEase"),
-            SearchSourceEnum.QQ_MUSIC => LocalizationService.Get("Status.Search.SourceQQ"),
-            SearchSourceEnum.SODA_MUSIC => LocalizationService.Get("Status.Search.SourceSoda"),
-            _ => source.ToString()
-        };
-    }
 
     public bool TryGetCachedSaveVo(string songId, out SaveVo saveVo)
     {

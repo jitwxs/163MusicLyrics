@@ -1,4 +1,4 @@
-using System.Linq;
+﻿using System.Linq;
 using Avalonia.Controls;
 using Avalonia.LogicalTree;
 using Avalonia.VisualTree;
@@ -25,18 +25,19 @@ public static class SelectLocalization
     /// <summary>Applies the selector to every Select under <paramref name="root"/> and refreshes on language change.</summary>
     public static void Attach(Control root)
     {
-        void Refresh()
-        {
-            var selects = root.GetLogicalDescendants().OfType<Select>()
-                .Union(root.GetVisualDescendants().OfType<Select>());
-            foreach (var select in selects)
-            {
-                select.TextSelector = null;
-                select.TextSelector = Label;
-            }
-        }
+        root.AttachedToVisualTree += (_, _) => Refresh(root);
+        // View phase: options relabel themselves first, so the selects read the new text.
+        LocalizationService.Observe(root, static r => Refresh(r), LanguageChangePhase.View);
+    }
 
-        root.AttachedToVisualTree += (_, _) => Refresh();
-        LocalizationService.Instance.PropertyChanged += (_, _) => Refresh();
+    private static void Refresh(Control root)
+    {
+        var selects = root.GetLogicalDescendants().OfType<Select>()
+            .Union(root.GetVisualDescendants().OfType<Select>());
+        foreach (var select in selects)
+        {
+            select.TextSelector = null;
+            select.TextSelector = Label;
+        }
     }
 }

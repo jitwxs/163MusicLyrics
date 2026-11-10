@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -77,7 +77,7 @@ public partial class LocalMusicScanViewModel : ViewModelBase, IDisposable
     public ObservableCollection<LocalScanItemViewModel> Items { get; } = [];
     public ObservableCollection<string> Issues { get; } = [];
     public ObservableCollection<EnumDisplayHelper.EnumDisplayItem<SearchSourceEnum>> Sources { get; } = new(Enum.GetValues<SearchSourceEnum>().Select(source =>
-        new EnumDisplayHelper.EnumDisplayItem<SearchSourceEnum> { Value = source, Description = source.ToDescription() }));
+        new EnumDisplayHelper.EnumDisplayItem<SearchSourceEnum> { Value = source }));
     [ObservableProperty] private EnumDisplayHelper.EnumDisplayItem<SearchSourceEnum>? _preferredSource;
     [ObservableProperty] private string _folderPath = "";
     [ObservableProperty] private string _outputFolder = "";
@@ -117,12 +117,11 @@ public partial class LocalMusicScanViewModel : ViewModelBase, IDisposable
         OutputFolder = settings.Config.LastSaveFolderPath;
         Items.CollectionChanged += (_, _) => OnPropertyChanged(nameof(HasItems));
         Issues.CollectionChanged += (_, _) => { OnPropertyChanged(nameof(HasIssues)); OnPropertyChanged(nameof(IssuesText)); };
-        LocalizationService.Instance.PropertyChanged += OnLanguageChanged;
+        LocalizationService.Observe(this, static vm => vm.OnLanguageChanged());
     }
 
-    private void OnLanguageChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    private void OnLanguageChanged()
     {
-        foreach (var source in Sources) source.Description = source.Value.ToDescription();
         foreach (var item in Items) item.RefreshLanguage();
         RefreshSummary();
         OnPropertyChanged(nameof(ProgressText));
@@ -347,6 +346,5 @@ public partial class LocalMusicScanViewModel : ViewModelBase, IDisposable
     public void Dispose()
     {
         _cancellation?.Cancel();
-        LocalizationService.Instance.PropertyChanged -= OnLanguageChanged;
     }
 }

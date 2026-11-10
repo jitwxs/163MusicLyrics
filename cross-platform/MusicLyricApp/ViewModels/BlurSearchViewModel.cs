@@ -23,9 +23,6 @@ public partial class BlurSearchViewModel(List<SearchResultVo> searchResList) : V
     /// <summary>Kind of the loaded results (song, album or playlist); decides the table columns.</summary>
     [ObservableProperty] private SearchTypeEnum _searchType;
 
-    /// <summary>Raised after the UI language changes so the view can rebuild its column headers.</summary>
-    public event Action? LanguageChanged;
-
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(DownloadSelectedCommand))]
     private IList _selectedItems = new List<object>();
@@ -41,13 +38,12 @@ public partial class BlurSearchViewModel(List<SearchResultVo> searchResList) : V
         {
             _countNotificationsAttached = true;
             SearchResults.CollectionChanged += (_, _) => OnPropertyChanged(nameof(SearchResultCountText));
-            LocalizationService.Instance.PropertyChanged += (_, _) =>
+            LocalizationService.Observe(this, static vm =>
             {
-                foreach (var item in SearchResults) item.RefreshLocalizedSource();
-                OnPropertyChanged(nameof(SearchResultCountText));
-                OnPropertyChanged(nameof(SelectedItemsCountText));
-                LanguageChanged?.Invoke();
-            };
+                foreach (var item in vm.SearchResults) item.RefreshLocalizedSource();
+                vm.OnPropertyChanged(nameof(SearchResultCountText));
+                vm.OnPropertyChanged(nameof(SelectedItemsCountText));
+            });
         }
 
         SearchType = searchResList[0].SearchType;

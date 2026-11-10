@@ -24,6 +24,8 @@ public partial class BlurSearchView : UserControl
         AvaloniaXamlLoader.Load(this);
         Table.SelectionChanged += OnSelectionChanged;
         this.FindControl<TKCode.Arc.Button>("BackButton")!.Click += (_, _) => BackRequested?.Invoke(this, EventArgs.Empty);
+        // Column headers are built in code, so they are rebuilt after a language switch.
+        LocalizationService.Observe(this, static view => view.RebuildColumns(), LanguageChangePhase.View);
     }
 
     public Table Table => this.FindControl<Table>("ResultsTable")!;
@@ -31,19 +33,7 @@ public partial class BlurSearchView : UserControl
     protected override void OnDataContextChanged(EventArgs e)
     {
         base.OnDataContextChanged(e);
-
-        if (_viewModel != null)
-        {
-            _viewModel.LanguageChanged -= RebuildColumns;
-        }
-
         _viewModel = DataContext as BlurSearchViewModel;
-
-        if (_viewModel != null)
-        {
-            _viewModel.LanguageChanged += RebuildColumns;
-        }
-
         RebuildColumns();
     }
 

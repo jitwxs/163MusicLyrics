@@ -29,7 +29,7 @@ public partial class SearchView : UserControl
             _viewModel?.ExecuteCloseBlurResultsCommand.Execute(null);
 
         ApplyShortcutTexts();
-        LocalizationService.Instance.PropertyChanged += (_, _) => ApplyShortcutTexts();
+        LocalizationService.Observe(this, static view => view.ApplyShortcutTexts(), LanguageChangePhase.View);
     }
 
     /// <summary>Search page shortcuts only apply while focus is inside the page.</summary>
