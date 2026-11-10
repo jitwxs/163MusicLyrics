@@ -146,7 +146,10 @@ public partial class SettingParamViewModel : ViewModelBase
     
     partial void OnSelectedDotTypeItemChanged(EnumDisplayHelper.EnumDisplayItem<DotTypeEnum>? value)
     {
-        if (value != null) _settingBean.Config.DotType = value.Value;
+        if (value == null) return;
+        _settingBean.Config.DotType = value.Value;
+        LrcTimestamp.RefreshPreview();
+        SrtTimestamp.RefreshPreview();
     }
     
     // 2. 译文缺省规则
@@ -195,20 +198,24 @@ public partial class SettingParamViewModel : ViewModelBase
         if (newValue != null) _settingBean.Config.ThemeMode = newValue.Value;
     }
     
-    // 5. LRC 时间戳
-    [ObservableProperty] private string _lrcTimestampFormat = string.Empty;
-    
-    partial void OnLrcTimestampFormatChanged(string value)
+    // 5, 6. LRC and SRT timestamp formats
+    public TimestampFormatEditorViewModel LrcTimestamp { get; }
+
+    public TimestampFormatEditorViewModel SrtTimestamp { get; }
+
+    /// <summary>The rounding rule only matters when a format keeps one or two millisecond digits (S, SS).</summary>
+    public bool IsDotTypeApplicable =>
+        TimestampFormatValidator.MillisecondDigits(_settingBean.Config.LrcTimestampFormat) < 3 ||
+        TimestampFormatValidator.MillisecondDigits(_settingBean.Config.SrtTimestampFormat) < 3;
+
+    public string DotTypeHint => LocalizationService.Get(IsDotTypeApplicable
+        ? "Settings.Timestamp.Rounding.Applies"
+        : "Settings.Timestamp.Rounding.Inactive");
+
+    private void OnTimestampFormatCommitted()
     {
-        _settingBean.Config.LrcTimestampFormat = value;
-    }
-    
-    // 6. SRT 时间戳
-    [ObservableProperty] private string _srtTimestampFormat = string.Empty;
-    
-    partial void OnSrtTimestampFormatChanged(string value)
-    {
-        _settingBean.Config.SrtTimestampFormat = value;
+        OnPropertyChanged(nameof(IsDotTypeApplicable));
+        OnPropertyChanged(nameof(DotTypeHint));
     }
     
     // 7. SRT 时间戳
@@ -449,6 +456,18 @@ public partial class SettingParamViewModel : ViewModelBase
 
     public SettingParamViewModel()
     {
+        LrcTimestamp = new TimestampFormatEditorViewModel(true, () => _settingBean.Config.DotType, format =>
+        {
+            _settingBean.Config.LrcTimestampFormat = format;
+            OnTimestampFormatCommitted();
+        });
+        SrtTimestamp = new TimestampFormatEditorViewModel(false, () => _settingBean.Config.DotType, format =>
+        {
+            _settingBean.Config.SrtTimestampFormat = format;
+            OnTimestampFormatCommitted();
+        });
+        LocalizationService.Instance.PropertyChanged += (_, _) => OnPropertyChanged(nameof(DotTypeHint));
+
         foreach (var language in Languages)
         {
             LocalizationService.Instance.PropertyChanged += (_, _) => language.RefreshDisplayName();
@@ -476,8 +495,9 @@ public partial class SettingParamViewModel : ViewModelBase
         SelectedTransLyricLostRuleItem = TransLyricLostRules.First(item => Equals(item.Value, _settingBean.Config.TransConfig.LostRule));
         SelectedChineseProcessRuleItem = ChineseProcessRules.First(item => Equals(item.Value, _settingBean.Config.ChineseProcessRule));
         SelectedThemeModeRuleItem = ThemeModeRules.First(item => Equals(item.Value, _settingBean.Config.ThemeMode));
-        LrcTimestampFormat = _settingBean.Config.LrcTimestampFormat;
-        SrtTimestampFormat = _settingBean.Config.SrtTimestampFormat;
+        LrcTimestamp.Load(_settingBean.Config.LrcTimestampFormat);
+        SrtTimestamp.Load(_settingBean.Config.SrtTimestampFormat);
+        OnTimestampFormatCommitted();
         IgnoreEmptyLyric = _settingBean.Config.IgnoreEmptyLyric;
         SelectedVerbatimLyricModeItem = VerbatimLyricMode.First(item => Equals(item.Value, _settingBean.Config.VerbatimLyricMode));
         MatchPrecisionDeviation = _settingBean.Config.TransConfig.MatchPrecisionDeviation;

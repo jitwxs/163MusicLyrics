@@ -241,7 +241,7 @@ public class SettingsAndConvertPageRegressionTests
             Dispatcher.UIThread.RunJobs();
             Assert.False(vm.HasSettingTips);
 
-            vm.TimestampTipsCommand.Execute(null);
+            vm.OutputTipsCommand.Execute(null);
             Dispatcher.UIThread.RunJobs();
             Assert.True(alert.IsOpen);
         }
@@ -329,7 +329,7 @@ public class SettingsAndConvertPageRegressionTests
             vm.SettingTips = "";
             Dispatcher.UIThread.RunJobs();
             Assert.False(alert.IsOpen);
-            vm.TimestampTipsCommand.Execute(null);
+            vm.OutputTipsCommand.Execute(null);
             Dispatcher.UIThread.RunJobs();
             Assert.True(alert.IsOpen);
             Assert.Contains(alert.GetVisualDescendants().OfType<TextBlock>(), t => t.Text == vm.SettingTips);

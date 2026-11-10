@@ -173,12 +173,6 @@ public partial class SettingViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private void TimestampTips()
-    {
-        SettingTips = Constants.HelpTips.GetContent(Constants.HelpTips.TypeEnum.TIME_STAMP_SETTING);
-    }
-
-    [RelayCommand]
     private void OutputTips()
     {
         SettingTips = Constants.HelpTips.GetContent(Constants.HelpTips.TypeEnum.OUTPUT_SETTING);

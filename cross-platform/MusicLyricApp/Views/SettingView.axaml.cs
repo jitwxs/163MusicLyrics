@@ -2,6 +2,9 @@
 using System.ComponentModel;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Interactivity;
+using Avalonia.VisualTree;
+using MusicLyricApp.Core.Utils;
 using MusicLyricApp.Models;
 using MusicLyricApp.ViewModels;
 
@@ -47,5 +50,22 @@ public partial class SettingView : UserControl
         {
             SectionScroller.Offset = new Vector(0, 0);
         }
+    }
+
+    /// <summary>
+    /// A token button inserts its token at the caret of the custom format input (replacing a selection, or the
+    /// existing millisecond run for S, SS and SSS), then gives focus back to the input to keep typing.
+    /// </summary>
+    private void OnTimestampTokenClick(object? sender, RoutedEventArgs e)
+    {
+        if (sender is not Control { DataContext: TimestampToken token } button) return;
+        var tokens = button.FindAncestorOfType<ItemsControl>();
+        if (tokens?.Tag is not string inputName || this.FindControl<TextBox>(inputName) is not { } input) return;
+
+        var (text, caret) = TimestampFormatValidator.InsertToken(input.Text, token.Token,
+            input.SelectionStart, input.SelectionEnd);
+        input.Text = text;
+        input.Focus();
+        input.SelectionStart = input.SelectionEnd = input.CaretIndex = caret;
     }
 }

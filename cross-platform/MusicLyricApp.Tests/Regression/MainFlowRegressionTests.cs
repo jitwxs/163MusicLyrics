@@ -271,7 +271,8 @@ public class MainFlowRegressionTests
 
             // Leaving settings re-renders too, e.g. after a timestamp format change.
             vm.CurrentPageKey = MainWindowViewModel.PageSettings;
-            vm.SettingViewModel!.SettingParamViewModel.LrcTimestampFormat = "[mm:ss.SS]";
+            var lrcTimestamp = vm.SettingViewModel!.SettingParamViewModel.LrcTimestamp;
+            lrcTimestamp.SelectedPreset = lrcTimestamp.Presets.Single(p => p.Format == "[mm:ss.SS]");
             var beforeLeave = vm.SearchResultViewModel.ConsoleOutput;
             vm.CurrentPageKey = MainWindowViewModel.PageSearch;
             var until = DateTime.UtcNow.AddSeconds(4);

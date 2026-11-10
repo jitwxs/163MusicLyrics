@@ -140,8 +140,8 @@ public class ViewModelRegressionTests
             vm.MoveUpCommand.Execute(null);
             vm.OnClosing();
             Assert.Equal("1,0", ws.Settings.Config.OutputLyricTypes);
-            vm.TimestampTipsCommand.Execute(null);
-            Assert.Contains("毫秒", vm.SettingTips);
+            vm.OutputTipsCommand.Execute(null);
+            Assert.Contains(MusicLyricApp.Core.Localization.LocalizationService.Get("Help.Output.Intro"), vm.SettingTips);
         }
         finally { window.Close(); }
     }

@@ -63,8 +63,11 @@ constraint. Inputs, selects and number fields are 280 wide so every section line
 `Classes="path"`, which always stacks, with `Width="NaN"` on the input. A numeric setting follows the existing
 pattern: a `...Text` property, a `...Error` property bound to `ErrorMessage`, range validation in the `On...Changed`
 partial, and the value written to `SettingBean` only when it is valid. Add the field with a default to
-`Models/SettingBase.cs`; old config files then get the default. Settings are saved when the user leaves the settings
-area or quits, so killing the process does not save them.
+`Models/SettingBase.cs`; old config files then get the default. Edits apply to the in-memory `SettingBean` at once.
+Leaving the settings area only finishes applying them (lyric type order, theme, preview refresh) and writes nothing.
+The config file is written when the window closes (after the exit confirmation), and also right away by 应用代理 and
+by picking the cache or save folder. Each write saves the whole in-memory `SettingBean`, so killing the process
+saves nothing.
 
 **Download manager.** `Items` is the full list, newest first. New and re-searched songs move to the top in the
 order they were asked for. The table binds to `VisibleItems` (filtered by `FilterText`), and rows the filter hides

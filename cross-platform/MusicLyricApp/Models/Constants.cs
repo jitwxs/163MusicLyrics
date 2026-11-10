@@ -53,11 +53,6 @@ public static class Constants
             DEFAULT,
 
             /// <summary>
-            /// 时间戳设置
-            /// </summary>
-            TIME_STAMP_SETTING,
-
-            /// <summary>
             /// 输出设置
             /// </summary>
             OUTPUT_SETTING
@@ -69,16 +64,6 @@ public static class Constants
 
             switch (typeEnum)
             {
-                case TypeEnum.TIME_STAMP_SETTING:
-                    list.Add("Help.Timestamp.Intro");
-                    list.Add("Help.Timestamp.Hours");
-                    list.Add("Help.Timestamp.Minutes");
-                    list.Add("Help.Timestamp.Seconds");
-                    list.Add("Help.Timestamp.MillisecondsOne");
-                    list.Add("Help.Timestamp.MillisecondsTwo");
-                    list.Add("Help.Timestamp.MillisecondsThree");
-                    list.Add("Help.Timestamp.Rounding");
-                    break;
                 case TypeEnum.OUTPUT_SETTING:
                     list.Add("Help.Output.Intro");
                     list.Add("Help.Output.Id");

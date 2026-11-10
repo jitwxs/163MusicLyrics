@@ -11,6 +11,17 @@
              x:Class="MusicLyricApp.Views.SettingView"
              x:DataType="viewModels:SettingViewModel">
 
+    <UserControl.Resources>
+        <!-- Inserts one token at the caret of the custom format input named by the ItemsControl's Tag. -->
+        <DataTemplate x:Key="TimestampTokenTemplate" x:DataType="viewModels:TimestampToken">
+            <arc:Button Variant="Secondary" Size="Small"
+                        Content="{Binding Label}"
+                        ToolTip.Tip="{Binding Tip}"
+                        AutomationProperties.Name="{Binding Tip}"
+                        Click="OnTimestampTokenClick" />
+        </DataTemplate>
+    </UserControl.Resources>
+
     <UserControl.Styles>
         <!-- Field controls inside rows carry their label in the row header, so hide their own. -->
         <!-- Keep label and control on one line down to a narrow content column (sidebar plus section nav). -->
@@ -93,21 +104,71 @@
                     </arc:SettingsGroup>
 
                     <arc:SettingsGroup Header="{loc:Loc Key=UI.TimestampFormat}">
-                        <arc:SettingsGroup.HeaderActions>
-                            <arc:Button Variant="Ghost" Size="Small"
-                                        Content="{loc:Loc Key=Settings.ShowHelp}"
-                                        Command="{Binding TimestampTipsCommand}" />
-                        </arc:SettingsGroup.HeaderActions>
-                        <arc:SettingsRow Header="{loc:Loc Key=UI.LrcTimestamp}">
-                            <arc:Input Label="{loc:Loc Key=UI.LrcTimestamp}"
-                                       Text="{Binding SettingParamViewModel.LrcTimestampFormat, Mode=TwoWay}" />
+                        <arc:SettingsRow Header="{loc:Loc Key=UI.LrcTimestamp}"
+                                         Description="{Binding SettingParamViewModel.LrcTimestamp.Preview}">
+                            <arc:Select Name="LrcTimestampPresetSelect"
+                                        ItemsSource="{Binding SettingParamViewModel.LrcTimestamp.Presets}"
+                                        SelectedItem="{Binding SettingParamViewModel.LrcTimestamp.SelectedPreset}"
+                                        DisplayMemberBinding="{ReflectionBinding DisplayName}" />
                         </arc:SettingsRow>
-                        <arc:SettingsRow Header="{loc:Loc Key=UI.SrtTimestamp}">
-                            <arc:Input Label="{loc:Loc Key=UI.SrtTimestamp}"
-                                       Text="{Binding SettingParamViewModel.SrtTimestampFormat, Mode=TwoWay}" />
+                        <arc:SettingsRow Classes="path"
+                                         Header="{loc:Loc Key=Settings.Timestamp.CustomLrc}"
+                                         IsVisible="{Binding SettingParamViewModel.LrcTimestamp.IsCustom}">
+                            <StackPanel Spacing="{arc:ArcDesignTokenResource Space2}">
+                                <arc:Input Name="LrcTimestampInput"
+                                           Width="NaN"
+                                           Label="{loc:Loc Key=Settings.Timestamp.CustomLrc}"
+                                           Description="{Binding SettingParamViewModel.LrcTimestamp.Warning}"
+                                           ErrorMessage="{Binding SettingParamViewModel.LrcTimestamp.Error}"
+                                           Text="{Binding SettingParamViewModel.LrcTimestamp.Text, Mode=TwoWay}" />
+                                <ItemsControl Name="LrcTimestampTokens"
+                                              Tag="LrcTimestampInput"
+                                              ItemsSource="{Binding SettingParamViewModel.LrcTimestamp.Tokens}"
+                                              ItemTemplate="{StaticResource TimestampTokenTemplate}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <WrapPanel ItemSpacing="{arc:ArcDesignTokenResource Space2}"
+                                                       LineSpacing="{arc:ArcDesignTokenResource Space2}" />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                </ItemsControl>
+                            </StackPanel>
                         </arc:SettingsRow>
-                        <arc:SettingsRow Header="{loc:Loc Key=UI.MillisecondRule}">
-                            <arc:Select ItemsSource="{Binding SettingParamViewModel.DotTypes}"
+                        <arc:SettingsRow Header="{loc:Loc Key=UI.SrtTimestamp}"
+                                         Description="{Binding SettingParamViewModel.SrtTimestamp.Preview}">
+                            <arc:Select Name="SrtTimestampPresetSelect"
+                                        ItemsSource="{Binding SettingParamViewModel.SrtTimestamp.Presets}"
+                                        SelectedItem="{Binding SettingParamViewModel.SrtTimestamp.SelectedPreset}"
+                                        DisplayMemberBinding="{ReflectionBinding DisplayName}" />
+                        </arc:SettingsRow>
+                        <arc:SettingsRow Classes="path"
+                                         Header="{loc:Loc Key=Settings.Timestamp.CustomSrt}"
+                                         IsVisible="{Binding SettingParamViewModel.SrtTimestamp.IsCustom}">
+                            <StackPanel Spacing="{arc:ArcDesignTokenResource Space2}">
+                                <arc:Input Name="SrtTimestampInput"
+                                           Width="NaN"
+                                           Label="{loc:Loc Key=Settings.Timestamp.CustomSrt}"
+                                           Description="{Binding SettingParamViewModel.SrtTimestamp.Warning}"
+                                           ErrorMessage="{Binding SettingParamViewModel.SrtTimestamp.Error}"
+                                           Text="{Binding SettingParamViewModel.SrtTimestamp.Text, Mode=TwoWay}" />
+                                <ItemsControl Name="SrtTimestampTokens"
+                                              Tag="SrtTimestampInput"
+                                              ItemsSource="{Binding SettingParamViewModel.SrtTimestamp.Tokens}"
+                                              ItemTemplate="{StaticResource TimestampTokenTemplate}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <WrapPanel ItemSpacing="{arc:ArcDesignTokenResource Space2}"
+                                                       LineSpacing="{arc:ArcDesignTokenResource Space2}" />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                </ItemsControl>
+                            </StackPanel>
+                        </arc:SettingsRow>
+                        <arc:SettingsRow Header="{loc:Loc Key=UI.MillisecondRule}"
+                                         Description="{Binding SettingParamViewModel.DotTypeHint}">
+                            <arc:Select Name="DotTypeSelect"
+                                        IsEnabled="{Binding SettingParamViewModel.IsDotTypeApplicable}"
+                                        ItemsSource="{Binding SettingParamViewModel.DotTypes}"
                                         SelectedItem="{Binding SettingParamViewModel.SelectedDotTypeItem}"
                                         DisplayMemberBinding="{ReflectionBinding DisplayName}" />
                         </arc:SettingsRow>

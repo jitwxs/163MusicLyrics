@@ -70,9 +70,11 @@ fuzzy search needs a valid login cookie. Without one it fails with "本请求需
   NetEase and QQ Music cookies. Never print it, `cat` it or show it in a screenshot of the 扩展 section with secrets
   revealed. Read single fields only:
   `python3 -c "import json;c=json.load(open('<path>',encoding='utf-8-sig'));print(c['Config']['ThemeMode'])"`.
-- **Changes persist.** Settings are written when the user leaves the settings area or quits through the exit dialog
-  (a kill does not save). If you change the theme, language, search source or any setting during a walk-through,
-  set it back the same way and confirm the saved field afterwards.
+- **Changes persist.** The config file is written when the window closes (through the exit dialog), and at once by
+  应用代理 and by picking the cache or save folder. Each write saves every in-memory change made so far. Leaving the
+  settings area writes nothing (it only applies the theme and refreshes the preview), and a kill (`stop.sh`) saves
+  nothing. To try a setting without keeping it, change it, look, then stop with `stop.sh`, and do not trigger any of
+  those writes first. Otherwise set every changed setting back before the write. Confirm the saved fields afterwards.
 - **Real data.** 删除所选 in the download manager deletes the user's local cache files, and saving writes `.lrc`
   files to their save folder (usually `~/Downloads`). Open the delete dialog only to look at it and cancel it with
   Escape. Tell the user which files a save created.
