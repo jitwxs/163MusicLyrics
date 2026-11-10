@@ -9,6 +9,7 @@ using MusicLyricApp.Core.Service.Login;
 using MusicLyricApp.Core.Utils;
 using MusicLyricApp.Models;
 using TKCode.Arc;
+using MusicLyricApp.Core;
 
 namespace MusicLyricApp.ViewModels;
 
@@ -127,9 +128,8 @@ public partial class LoginStatusViewModel : ViewModelBase, IDisposable
         LocalizationService.Observe(this, static vm => vm.OnLanguageChanged());
     }
 
-    /// <summary>Only NetEase and QQ Music take a cookie; Soda Music is used signed out.</summary>
-    public static bool HasAccount(SearchSourceEnum source) =>
-        source is SearchSourceEnum.NET_EASE_MUSIC or SearchSourceEnum.QQ_MUSIC;
+    /// <summary>Whether the source signs in with a cookie (see <see cref="MusicSources"/>).</summary>
+    public static bool HasAccount(SearchSourceEnum source) => MusicSources.Get(source).HasAccount;
 
     public AccountStatusViewModel Get(SearchSourceEnum source) => source == SearchSourceEnum.NET_EASE_MUSIC ? NetEase : QQ;
 

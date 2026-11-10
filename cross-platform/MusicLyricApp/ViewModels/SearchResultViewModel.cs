@@ -61,13 +61,7 @@ public partial class SearchResultViewModel : ViewModelBase
         SongSource = SourceLabel(source);
     }
 
-    public static string SourceLabel(SearchSourceEnum source) => source switch
-    {
-        SearchSourceEnum.NET_EASE_MUSIC => MusicLyricApp.Core.Localization.LocalizationService.Get("Status.Search.SourceNetEase"),
-        SearchSourceEnum.QQ_MUSIC => MusicLyricApp.Core.Localization.LocalizationService.Get("Status.Search.SourceQQ"),
-        SearchSourceEnum.SODA_MUSIC => MusicLyricApp.Core.Localization.LocalizationService.Get("Status.Search.SourceSoda"),
-        _ => source.ToString()
-    };
+    public static string SourceLabel(SearchSourceEnum source) => MusicLyricApp.Core.MusicSources.Get(source).Name;
 
     public void ResetConsoleOutput(string consoleOutput)
     {

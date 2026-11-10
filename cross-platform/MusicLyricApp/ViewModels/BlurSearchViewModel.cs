@@ -40,7 +40,6 @@ public partial class BlurSearchViewModel(List<SearchResultVo> searchResList) : V
             SearchResults.CollectionChanged += (_, _) => OnPropertyChanged(nameof(SearchResultCountText));
             LocalizationService.Observe(this, static vm =>
             {
-                foreach (var item in vm.SearchResults) item.RefreshLocalizedSource();
                 vm.OnPropertyChanged(nameof(SearchResultCountText));
                 vm.OnPropertyChanged(nameof(SelectedItemsCountText));
             });

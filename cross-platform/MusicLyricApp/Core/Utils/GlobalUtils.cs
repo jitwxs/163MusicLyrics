@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -28,43 +28,6 @@ public static partial class GlobalUtils
         return date.ToString("yyyy-MM-dd HH:mm:ss");
     }
 
-    public static readonly Dictionary<SearchSourceEnum, string> SearchSourceKeywordDict = new()
-    {
-        { SearchSourceEnum.NET_EASE_MUSIC, "163.com" },
-        { SearchSourceEnum.QQ_MUSIC, "qq.com" },
-        // qishui.douyin.com/s/ 短链与 music.douyin.com/qishui/share/ 分享页
-        { SearchSourceEnum.SODA_MUSIC, "qishui" },
-    };
-
-    public static readonly Dictionary<SearchSourceEnum, Dictionary<SearchTypeEnum, string>> SearchTypeKeywordDict =
-        new()
-        {
-            {
-                SearchSourceEnum.NET_EASE_MUSIC, new Dictionary<SearchTypeEnum, string>
-                {
-                    { SearchTypeEnum.SONG_ID, "song?id=" },
-                    { SearchTypeEnum.ALBUM_ID, "album?id=" },
-                    { SearchTypeEnum.PLAYLIST_ID, "playlist?id=" },
-                }
-            },
-            {
-                SearchSourceEnum.QQ_MUSIC, new Dictionary<SearchTypeEnum, string>
-                {
-                    { SearchTypeEnum.SONG_ID, "songDetail/" },
-                    { SearchTypeEnum.ALBUM_ID, "albumDetail/" },
-                    { SearchTypeEnum.PLAYLIST_ID, "playlist/" },
-                }
-            },
-            {
-                SearchSourceEnum.SODA_MUSIC, new Dictionary<SearchTypeEnum, string>
-                {
-                    { SearchTypeEnum.SONG_ID, "track_id=" },
-                    { SearchTypeEnum.ALBUM_ID, "album_id=" },
-                    { SearchTypeEnum.PLAYLIST_ID, "playlist_id=" },
-                }
-            }
-        };
-
     /// <summary>
     /// 输入参数校验
     /// </summary>
@@ -83,15 +46,15 @@ public static partial class GlobalUtils
         }
 
         // 自动识别音乐提供商
-        foreach (var pair in SearchSourceKeywordDict.Where(pair => input.Contains(pair.Value)))
+        foreach (var source in MusicSources.All.Where(source => input.Contains(source.LinkHost)))
         {
-            searchSource = pair.Key;
+            searchSource = source.Source;
         }
 
         input = ConvertSearchWithShareLink(searchSource, input);
 
         // 自动识别搜索类型
-        foreach (var pair in SearchTypeKeywordDict[searchSource].Where(pair => input.Contains(pair.Value)))
+        foreach (var pair in MusicSources.Get(searchSource).LinkKeywords.Where(pair => input.Contains(pair.Value)))
         {
             searchType = pair.Key;
         }
@@ -109,7 +72,7 @@ public static partial class GlobalUtils
         }
 
         // URL 关键字提取
-        var urlKeyword = SearchTypeKeywordDict[searchSource][searchType];
+        var urlKeyword = MusicSources.Get(searchSource).LinkKeywords[searchType];
         var index = input.IndexOf(urlKeyword, StringComparison.Ordinal);
         if (index != -1)
         {
@@ -178,7 +141,7 @@ public static partial class GlobalUtils
             if (songIdMatch.Success)
             {
                 var songId = songIdMatch.Groups[1].Value;
-                var replacement = SearchTypeKeywordDict[searchSource][SearchTypeEnum.SONG_ID];
+                var replacement = MusicSources.Get(searchSource).LinkKeywords[SearchTypeEnum.SONG_ID];
                 return Regex.Replace(input, @"playsong\.html\?songid=[^&]*(&.*)?$", replacement + songId);
             }
 
@@ -187,7 +150,7 @@ public static partial class GlobalUtils
             if (albumIdMatch1.Success)
             {
                 var albumId = albumIdMatch1.Groups[1].Value;
-                var replacement = SearchTypeKeywordDict[searchSource][SearchTypeEnum.ALBUM_ID];
+                var replacement = MusicSources.Get(searchSource).LinkKeywords[SearchTypeEnum.ALBUM_ID];
                 return Regex.Replace(input, @"album\.html\?albummid=[^&]*(&.*)?$", replacement + albumId);
             }
             
@@ -196,7 +159,7 @@ public static partial class GlobalUtils
             if (albumIdMatch2.Success)
             {
                 var albumId = albumIdMatch2.Groups[2].Value;
-                var replacement = SearchTypeKeywordDict[searchSource][SearchTypeEnum.ALBUM_ID];
+                var replacement = MusicSources.Get(searchSource).LinkKeywords[SearchTypeEnum.ALBUM_ID];
                 // 构建替换部分，保留?后albumId前的参数，然后替换为albumDetail页面
                 return Regex.Replace(input, @"album\.html\?.*albumId=[^&]*(&.*)?$", replacement + albumId + "$1");
             }
@@ -206,7 +169,7 @@ public static partial class GlobalUtils
             if (playlistIdMatch.Success)
             {
                 var playlistId = playlistIdMatch.Groups[1].Value;
-                var replacement = SearchTypeKeywordDict[searchSource][SearchTypeEnum.PLAYLIST_ID];
+                var replacement = MusicSources.Get(searchSource).LinkKeywords[SearchTypeEnum.PLAYLIST_ID];
                 return Regex.Replace(input, @"taoge\.html\?id=[^&]*(&.*)?$", replacement + playlistId);
             }
         }

@@ -282,7 +282,7 @@ public class SearchPageRegressionTests
             LocalizationService.Instance.SetLanguage("zh-CN");
             Dispatcher.UIThread.RunJobs();
             Assert.Equal(LocalizationService.Get("Enum.ShowLrcTypeEnum." + vm.SearchParamViewModel.SelectedLrcType), select.SelectedText);
-            Assert.Equal(LocalizationService.Get("Status.Search.SourceQQ"), vm.SearchResultViewModel.SongSource);
+            Assert.Equal(LocalizationService.Get("Enum.SearchSourceEnum.QQ_MUSIC"), vm.SearchResultViewModel.SongSource);
             Assert.NotEqual(english, vm.SearchResultViewModel.SongSource);
 
             // Repeated switches while the page is hidden (as from the settings page) keep following.

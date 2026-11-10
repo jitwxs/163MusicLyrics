@@ -1007,8 +1007,7 @@ public partial class MainWindowViewModel : ViewModelBase
         BlurResults = null;
     }
 
-    private string CookieOf(SearchSourceEnum source) =>
-        source == SearchSourceEnum.NET_EASE_MUSIC ? SettingBean.Config.NetEaseCookie : SettingBean.Config.QQMusicCookie;
+    private string CookieOf(SearchSourceEnum source) => MusicSources.Get(source).Cookie?.Invoke(SettingBean.Config) ?? "";
 
     /// <summary>True for the "needs login" error, which the window shows with a shortcut to the cookie settings.</summary>
     public static bool IsNeedLoginMessage(string? message) =>

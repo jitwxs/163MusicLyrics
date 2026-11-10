@@ -1,23 +1,24 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
-using MusicLyricApp.Core.Utils;
+using MusicLyricApp.Core;
+using MusicLyricApp.Core.Localization;
 
 namespace MusicLyricApp.Models;
 
-public abstract partial class BlurSearchResultBase : ObservableObject
+public abstract partial class BlurSearchResultBase : LocalizedObject
 {
-    private SearchSourceEnum _source;
+    private SearchSourceEnum? _source;
     [ObservableProperty] private string? _id;
     [ObservableProperty] private string? _title;
     [ObservableProperty] private string? _author;
-    [ObservableProperty] private string? _searchSource;
+
+    /// <summary>Name of the source in the current UI language.</summary>
+    public string? SearchSource => _source is { } source ? MusicSources.Get(source).Name : null;
 
     public void SetSource(SearchSourceEnum source)
     {
         _source = source;
-        SearchSource = _source.ToDescription();
+        OnPropertyChanged(nameof(SearchSource));
     }
-
-    public void RefreshLocalizedSource() => SearchSource = _source.ToDescription();
 }
 
 public partial class BlurSongSearchResult : BlurSearchResultBase
@@ -27,8 +28,7 @@ public partial class BlurSongSearchResult : BlurSearchResultBase
 
     public BlurSongSearchResult(SearchSourceEnum searchSource, SearchResultVo.SongSearchResultVo resultVo)
     {
-        var idPrefix = GlobalUtils.SearchSourceKeywordDict[searchSource] + "/" +
-                       GlobalUtils.SearchTypeKeywordDict[searchSource][SearchTypeEnum.SONG_ID];
+        var idPrefix = MusicSources.Get(searchSource).LinkPrefix(SearchTypeEnum.SONG_ID);
 
         Id = idPrefix + resultVo.DisplayId;
         Title = resultVo.Title;
@@ -46,8 +46,7 @@ public partial class BlurAlbumSearchResult : BlurSearchResultBase
 
     public BlurAlbumSearchResult(SearchSourceEnum searchSource, SearchResultVo.AlbumSearchResultVo resultVo)
     {
-        var idPrefix = GlobalUtils.SearchSourceKeywordDict[searchSource] + "/" +
-                       GlobalUtils.SearchTypeKeywordDict[searchSource][SearchTypeEnum.ALBUM_ID];
+        var idPrefix = MusicSources.Get(searchSource).LinkPrefix(SearchTypeEnum.ALBUM_ID);
 
         Id = idPrefix + resultVo.DisplayId;
         Title = resultVo.AlbumName;
@@ -66,8 +65,7 @@ public partial class BlurPlaylistSearchResult : BlurSearchResultBase
 
     public BlurPlaylistSearchResult(SearchSourceEnum searchSource, SearchResultVo.PlaylistResultVo resultVo)
     {
-        var idPrefix = GlobalUtils.SearchSourceKeywordDict[searchSource] + "/" +
-                       GlobalUtils.SearchTypeKeywordDict[searchSource][SearchTypeEnum.PLAYLIST_ID];
+        var idPrefix = MusicSources.Get(searchSource).LinkPrefix(SearchTypeEnum.PLAYLIST_ID);
 
         Id = idPrefix + resultVo.DisplayId;
         Title = resultVo.PlaylistName;

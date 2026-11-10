@@ -8,6 +8,7 @@ using Avalonia.Platform.Storage;
 using MusicLyricApp.Core.Localization;
 using MusicLyricApp.Models;
 using MusicLyricApp.ViewModels;
+using MusicLyricApp.Core;
 
 namespace MusicLyricApp.Views;
 
@@ -36,13 +37,7 @@ public partial class LocalMusicScanView : UserControl
     private void OpenSongPage(object? sender, RoutedEventArgs e)
     {
         if (DataContext is not LocalMusicScanViewModel vm || vm.SelectedItem?.Candidate is not { } candidate) return;
-        var id = Uri.EscapeDataString(candidate.Id);
-        var url = candidate.Source switch
-        {
-            SearchSourceEnum.NET_EASE_MUSIC => $"https://music.163.com/#/song?id={id}",
-            SearchSourceEnum.SODA_MUSIC => $"https://music.douyin.com/qishui/share/track?track_id={id}",
-            _ => $"https://y.qq.com/n/ryqq/songDetail/{id}"
-        };
+        var url = MusicSources.Get(candidate.Source).SongPageUrl(candidate.Id);
         try { Process.Start(new ProcessStartInfo(url) { UseShellExecute = true }); }
         catch (Exception ex) { vm.ReportError(ex.Message); }
     }
