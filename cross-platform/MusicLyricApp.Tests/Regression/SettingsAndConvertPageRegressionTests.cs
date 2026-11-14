@@ -64,6 +64,53 @@ public class SettingsAndConvertPageRegressionTests
     }
 
     [AvaloniaFact]
+    public void ShortcutsAreASettingsSectionListingEveryShortcut()
+    {
+        using var ws = new TestWorkspace();
+        ws.Settings.Config.ConfirmBeforeExit = false;
+        ws.Storage().SaveConfig(ws.Settings);
+        var window = new MainWindow(ws.Storage(), ws.Search(new(Moq.MockBehavior.Strict)));
+        var vm = Assert.IsType<MainWindowViewModel>(window.DataContext);
+        try
+        {
+            window.Show();
+            Dispatcher.UIThread.RunJobs();
+            var sidebar = Assert.Single(window.GetVisualDescendants().OfType<Sidebar>());
+            var settings = sidebar.Sections.SelectMany(s => s.Items).Single(i => i.Key == "settings");
+            Assert.Equal("settings/shortcuts", settings.Items.Last().Key);
+
+            // ⌘/ opens the section; it is a page, not a dialog.
+            var gesture = MusicLyricApp.Core.AppShortcuts.Get(MusicLyricApp.Core.AppShortcuts.ShowShortcuts).Gesture;
+            var raw = gesture.KeyModifiers.HasFlag(Avalonia.Input.KeyModifiers.Meta)
+                ? Avalonia.Input.RawInputModifiers.Meta : Avalonia.Input.RawInputModifiers.Control;
+            Avalonia.Headless.HeadlessWindowExtensions.KeyPress(window, gesture.Key, raw, Avalonia.Input.PhysicalKey.None, null);
+            Avalonia.Headless.HeadlessWindowExtensions.KeyRelease(window, gesture.Key, raw, Avalonia.Input.PhysicalKey.None, null);
+            Dispatcher.UIThread.RunJobs();
+            Assert.Equal(MainWindowViewModel.PageShortcuts, vm.CurrentPageKey);
+            Assert.True(vm.SettingViewModel!.IsShortcutsSection);
+            Assert.Empty(Avalonia.Controls.Primitives.OverlayLayer.GetOverlayLayer(window)!
+                .GetVisualDescendants().OfType<TKCode.Arc.Dialog>());
+
+            // One settings group per scope and one row per shortcut, from the single shortcut table.
+            var section = window.GetVisualDescendants().OfType<Control>().Single(c => c.Name == "ShortcutsSection");
+            Assert.True(section.IsEffectivelyVisible);
+            var groups = section.GetVisualDescendants().OfType<SettingsGroup>().ToList();
+            Assert.Equal(3, groups.Count);
+            var rows = section.GetVisualDescendants().OfType<SettingsRow>().Select(r => r.Header).ToList();
+            Assert.Equal(MusicLyricApp.Core.AppShortcuts.All.Select(s => s.Label).Order(), rows.Order());
+
+            // The rows follow a language switch.
+            TestWorkspace.WithLanguage("en-US", () =>
+            {
+                Dispatcher.UIThread.RunJobs();
+                var english = section.GetVisualDescendants().OfType<SettingsRow>().Select(r => r.Header).ToList();
+                Assert.Contains(LocalizationService.Get("Shortcuts.Save"), english);
+            });
+        }
+        finally { window.Close(); CommunityToolkit.Mvvm.Messaging.WeakReferenceMessenger.Default.UnregisterAll(vm); }
+    }
+
+    [AvaloniaFact]
     public void HelpActionsLiveInTheSidebarAndDoNotChangePage()
     {
         using var ws = new TestWorkspace();
@@ -80,17 +127,9 @@ public class SettingsAndConvertPageRegressionTests
             Assert.Null(window.TitleBar!.RightContent);
             var sidebar = Assert.Single(window.GetVisualDescendants().OfType<Sidebar>());
             var help = sidebar.Sections.Single(s => Equals(s.Header, LocalizationService.Get("UI.Help")));
-            Assert.Equal(new[] { "help/home", "help/wiki", "help/issue", "help/shortcuts" }, help.Items.Select(i => i.Key));
+            Assert.Equal(new[] { "help/home", "help/wiki", "help/issue" }, help.Items.Select(i => i.Key));
             Assert.All(help.Items, i => Assert.True(i.IsAction));
-
-            var shortcuts = help.Items.Single(i => i.Key == "help/shortcuts");
-            sidebar.RaiseEvent(new SidebarItemInvokedEventArgs(Sidebar.ItemInvokedEvent, shortcuts));
-            Dispatcher.UIThread.RunJobs();
             Assert.Equal(MainWindowViewModel.PageSearch, vm.CurrentPageKey);
-            var layer = Avalonia.Controls.Primitives.OverlayLayer.GetOverlayLayer(window)!;
-            // The dialog lists every shortcut from the single shortcut table.
-            var texts = layer.GetVisualDescendants().OfType<TextBlock>().Select(t => t.Text).ToList();
-            Assert.All(MusicLyricApp.Core.AppShortcuts.All, sc => Assert.Contains(sc.Label, texts));
         }
         finally
         {

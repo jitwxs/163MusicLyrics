@@ -52,10 +52,11 @@
                     <arc:SidebarItem Key="settings/network" Label="{loc:Loc Key=UI.Network}" />
                     <arc:SidebarItem Key="settings/download" Label="{loc:Loc Key=UI.DownloadCache}" />
                     <arc:SidebarItem Key="settings/application" Label="{loc:Loc Key=UI.Application}" />
+                    <arc:SidebarItem Key="settings/shortcuts" Label="{loc:Loc Key=UI.Shortcuts}" />
                 </arc:SidebarItem>
             </arc:SidebarSection>
 
-            <!-- Help: actions that open links or show shortcuts, without changing the page. -->
+            <!-- Help: actions that open links, without changing the page. -->
             <arc:SidebarSection Header="{loc:Loc Key=UI.Help}">
                 <arc:SidebarItem Key="help/home" IsAction="True"
                                  Label="{loc:Loc Key=UI.ProjectHome}"
@@ -66,9 +67,6 @@
                 <arc:SidebarItem Key="help/issue" IsAction="True"
                                  Label="{loc:Loc Key=UI.Feedback}"
                                  Icon="{x:Static arc:ArcIcons.MessageSquare}" />
-                <arc:SidebarItem Key="help/shortcuts" IsAction="True"
-                                 Label="{loc:Loc Key=UI.Shortcuts}"
-                                 Icon="{x:Static arc:ArcIcons.Keyboard}" />
             </arc:SidebarSection>
         </arc:Sidebar>
 

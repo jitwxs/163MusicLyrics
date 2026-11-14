@@ -472,13 +472,15 @@ public class LyricEditorRegressionTests
     });
 
     [AvaloniaFact]
-    public void ShortcutsDialogListsTheLyricsKeysInTheirOwnGroup()
+    public void ShortcutListShowsTheLyricsKeysInTheirOwnGroup()
     {
-        var texts = Avalonia.LogicalTree.LogicalExtensions.GetLogicalDescendants(ShortcutsDialog.Build())
-            .OfType<TextBlock>().Select(t => t.Text ?? string.Empty).ToList();
-        Assert.Contains(LocalizationService.Get("Shortcuts.Group.Editor"), texts);
-        Assert.Contains(LocalizationService.Get("Shortcuts.FindInLyrics"), texts);
-        Assert.Contains(LocalizationService.Get("Shortcuts.ReplaceInLyrics"), texts);
-        Assert.Contains(LocalizationService.Get("Shortcuts.EditLyrics"), texts);
+        var groups = Avalonia.LogicalTree.LogicalExtensions.GetLogicalDescendants(ShortcutList.Build())
+            .OfType<SettingsGroup>().ToList();
+        var lyrics = Assert.Single(groups, g => Equals(g.Header, LocalizationService.Get("Shortcuts.Group.Editor")));
+        var rows = lyrics.Items.OfType<SettingsRow>().Select(r => r.Header).ToList();
+        Assert.Contains(LocalizationService.Get("Shortcuts.FindInLyrics"), rows);
+        Assert.Contains(LocalizationService.Get("Shortcuts.ReplaceInLyrics"), rows);
+        var search = Assert.Single(groups, g => Equals(g.Header, LocalizationService.Get("Shortcuts.Group.Search")));
+        Assert.Contains(LocalizationService.Get("Shortcuts.EditLyrics"), search.Items.OfType<SettingsRow>().Select(r => r.Header));
     }
 }

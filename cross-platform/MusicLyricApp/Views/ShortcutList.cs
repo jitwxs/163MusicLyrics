@@ -9,35 +9,32 @@ using TKCode.Arc.DesignTokens;
 
 namespace MusicLyricApp.Views;
 
-/// <summary>Body of the keyboard shortcuts dialog, built from <see cref="AppShortcuts"/>.</summary>
-public static class ShortcutsDialog
+/// <summary>
+/// The 快捷键 settings section, built from <see cref="AppShortcuts"/>: one settings group per scope, one row per
+/// shortcut, so a longer list scrolls with the page instead of outgrowing a dialog.
+/// </summary>
+public static class ShortcutList
 {
     public static Control Build()
     {
-        var root = new StackPanel { MinWidth = 360 };
-        ArcTokens.Bind(root, StackPanel.SpacingProperty, ArcDesignTokenKind.Space5);
+        var root = new StackPanel();
+        ArcTokens.Bind(root, StackPanel.SpacingProperty, ArcDesignTokenKind.Space6);
+        root.Children.Add(Group("Shortcuts.Group.Global", "Shortcuts.Group.GlobalHint", ShortcutScope.Global));
         root.Children.Add(Group("Shortcuts.Group.Search", "Shortcuts.Group.SearchHint", ShortcutScope.Search));
         root.Children.Add(Group("Shortcuts.Group.Editor", "Shortcuts.Group.EditorHint", ShortcutScope.Editor));
-        root.Children.Add(Group("Shortcuts.Group.Global", "Shortcuts.Group.GlobalHint", ShortcutScope.Global));
         return root;
     }
 
     private static Control Group(string titleKey, string hintKey, ShortcutScope scope)
     {
-        var group = new StackPanel();
-        ArcTokens.Bind(group, StackPanel.SpacingProperty, ArcDesignTokenKind.Space2);
-
-        var title = new TextBlock { Text = LocalizationService.Get(titleKey), FontWeight = FontWeight.SemiBold };
-        ArcTokens.Bind(title, TextBlock.ForegroundProperty, ArcDesignTokenKind.Foreground);
-        var hint = new TextBlock { Text = LocalizationService.Get(hintKey), TextWrapping = TextWrapping.Wrap };
-        ArcTokens.Bind(hint, TextBlock.ForegroundProperty, ArcDesignTokenKind.TextSecondary);
-        ArcTokens.Bind(hint, TextBlock.FontSizeProperty, ArcDesignTokenKind.TypeSM);
-        group.Children.Add(title);
-        group.Children.Add(hint);
-
+        var group = new SettingsGroup
+        {
+            Header = LocalizationService.Get(titleKey),
+            Description = LocalizationService.Get(hintKey)
+        };
         foreach (var shortcut in AppShortcuts.InScope(scope))
         {
-            group.Children.Add(Row(shortcut));
+            group.Items.Add(Row(shortcut));
         }
 
         return group;
@@ -45,19 +42,14 @@ public static class ShortcutsDialog
 
     private static Control Row(AppShortcut shortcut)
     {
-        var row = new Grid { ColumnDefinitions = new ColumnDefinitions("*,Auto"), Margin = new Thickness(0, 2) };
-        var label = new TextBlock { Text = shortcut.Label, VerticalAlignment = VerticalAlignment.Center };
-        ArcTokens.Bind(label, TextBlock.ForegroundProperty, ArcDesignTokenKind.Foreground);
-        row.Children.Add(label);
-
-        var keys = new StackPanel { Orientation = Orientation.Horizontal, [Grid.ColumnProperty] = 1 };
+        var keys = new StackPanel { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Center };
         ArcTokens.Bind(keys, StackPanel.SpacingProperty, ArcDesignTokenKind.Space1);
         foreach (var key in shortcut.Keys)
         {
             keys.Children.Add(KeyCap(key));
         }
 
-        row.Children.Add(keys);
+        var row = new SettingsRow { Header = shortcut.Label, Content = keys };
         AutomationExtensions(row, shortcut);
         return row;
     }

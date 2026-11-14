@@ -3,6 +3,7 @@ using System.ComponentModel;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using Avalonia.Threading;
 using Avalonia.VisualTree;
 using MusicLyricApp.Core;
 using MusicLyricApp.Core.Localization;
@@ -25,6 +26,11 @@ public partial class SettingView : UserControl
     {
         InitializeComponent();
 
+        // The shortcut rows carry their own texts, so they are built again after a language switch.
+        ShortcutListHost.Content = ShortcutList.Build();
+        LocalizationService.Observe(this, static view => view.ShortcutListHost.Content = ShortcutList.Build(),
+            LanguageChangePhase.View);
+
         // Screen readers announce lyric types by name while they are moved.
         LyricTypesList.ItemTitleSelector = item => (item as LyricsTypeEnumModel)?.Name ?? item?.ToString() ?? "";
     }
@@ -43,6 +49,7 @@ public partial class SettingView : UserControl
         if (_viewModel != null)
         {
             _viewModel.PropertyChanged += OnViewModelPropertyChanged;
+            FocusPendingCookie();
             _viewModel.ConfirmDeleteOldLogsAsync = usage => DialogHelper.ConfirmOnAsync(this,
                 LocalizationService.Get("Settings.DeleteOldLogs.Title"),
                 LocalizationService.Format("Settings.DeleteOldLogs.Message", usage.OldFiles,
@@ -58,6 +65,29 @@ public partial class SettingView : UserControl
         {
             SectionScroller.Offset = new Vector(0, 0);
         }
+        else if (e.PropertyName == nameof(SettingViewModel.PendingCookieFocus))
+        {
+            FocusPendingCookie();
+        }
+    }
+
+    /// <summary>
+    /// Brings the cookie group into view and puts the caret in the requested source's field, once the section is
+    /// laid out (it may have just become visible).
+    /// </summary>
+    private void FocusPendingCookie()
+    {
+        if (_viewModel?.PendingCookieFocus is not { } source) return;
+
+        Dispatcher.UIThread.Post(() =>
+        {
+            if (_viewModel?.PendingCookieFocus != source) return;
+            _viewModel.PendingCookieFocus = null;
+
+            var field = this.FindControl<Control>(source == SearchSourceEnum.QQ_MUSIC ? "QqCookieField" : "NetEaseCookieField");
+            this.FindControl<Control>("CookieGroup")?.BringIntoView();
+            field?.Focus();
+        }, DispatcherPriority.Loaded);
     }
 
     /// <summary>

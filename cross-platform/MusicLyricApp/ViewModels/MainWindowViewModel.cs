@@ -117,6 +117,7 @@ public partial class MainWindowViewModel : ViewModelBase
     public bool IsCurrentLoginVisible => LoginStatusViewModel.HasAccount(SearchParamViewModel.SearchSource.Value);
 
     public const string PageCookieSettings = SettingsKeyPrefix + SettingViewModel.SectionExtensions;
+    public const string PageShortcuts = SettingsKeyPrefix + SettingViewModel.SectionShortcuts;
 
     /// <summary>Created on first visit and kept, so the text being converted survives page switches.</summary>
     [ObservableProperty] private FormatConvertViewModel? _formatConvertViewModel;
@@ -1021,8 +1022,13 @@ public partial class MainWindowViewModel : ViewModelBase
     public static bool IsNeedLoginMessage(string? message) =>
         !string.IsNullOrEmpty(message) && message.Contains(ErrorMsgConst.NEED_LOGIN, StringComparison.Ordinal);
 
+    /// <summary>Opens the cookie settings at the field of the source picked on the online lyrics page.</summary>
     [RelayCommand]
-    private void ExecuteOpenCookieSettings() => CurrentPageKey = PageCookieSettings;
+    private void ExecuteOpenCookieSettings()
+    {
+        CurrentPageKey = PageCookieSettings;
+        SettingViewModel?.RequestCookieFocus(SearchParamViewModel.SearchSource.Value);
+    }
 
     private void SetTip(string message, bool isError)
     {

@@ -84,8 +84,11 @@ public partial class MainWindow : ArcWindow, IWindowProvider
         }, DispatcherPriority.Input);
     }
 
-    public void ShowShortcuts() =>
-        _ = DialogHelper.ShowContentAsync(LocalizationService.Get("UI.Shortcuts"), ShortcutsDialog.Build());
+    /// <summary>Opens the 快捷键 settings section.</summary>
+    public void ShowShortcuts()
+    {
+        if (DataContext is MainWindowViewModel vm) vm.CurrentPageKey = MainWindowViewModel.PageShortcuts;
+    }
 
     /// <summary>Help rows are actions: SidebarItem has no DataContext, so they are mapped to commands here.</summary>
     private void OnSidebarItemInvoked(object? sender, SidebarItemInvokedEventArgs e)
@@ -100,7 +103,6 @@ public partial class MainWindow : ArcWindow, IWindowProvider
             "help/home" => vm.ExecuteHomeCommand,
             "help/wiki" => vm.ExecuteWikiCommand,
             "help/issue" => vm.ExecuteIssueCommand,
-            "help/shortcuts" => new CommunityToolkit.Mvvm.Input.RelayCommand(ShowShortcuts),
             _ => null
         };
 

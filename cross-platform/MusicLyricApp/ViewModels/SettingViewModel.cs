@@ -25,14 +25,15 @@ public partial class SettingViewModel : ViewModelBase
     public const string SectionNetwork = "network";
     public const string SectionDownload = "download";
     public const string SectionApplication = "application";
+    public const string SectionShortcuts = "shortcuts";
 
     public static readonly IReadOnlyList<string> Sections =
-        [SectionLyrics, SectionExtensions, SectionNetwork, SectionDownload, SectionApplication];
+        [SectionLyrics, SectionExtensions, SectionNetwork, SectionDownload, SectionApplication, SectionShortcuts];
 
     /// <summary>The section the settings page shows; the main sidebar picks it.</summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsLyricsSection), nameof(IsExtensionsSection), nameof(IsNetworkSection),
-        nameof(IsDownloadSection), nameof(IsApplicationSection))]
+        nameof(IsDownloadSection), nameof(IsApplicationSection), nameof(IsShortcutsSection))]
     private string _currentSection = SectionLyrics;
 
     public bool IsLyricsSection => CurrentSection == SectionLyrics;
@@ -40,6 +41,7 @@ public partial class SettingViewModel : ViewModelBase
     public bool IsNetworkSection => CurrentSection == SectionNetwork;
     public bool IsDownloadSection => CurrentSection == SectionDownload;
     public bool IsApplicationSection => CurrentSection == SectionApplication;
+    public bool IsShortcutsSection => CurrentSection == SectionShortcuts;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasSettingTips), nameof(IsTipsOpen))]
@@ -67,6 +69,18 @@ public partial class SettingViewModel : ViewModelBase
     [ObservableProperty] private LyricsTypeEnumModel? _selectedLyricsTypeItem;
     
     [ObservableProperty] private string _configPath = Constants.GetConfigFilePath();
+
+    /// <summary>
+    /// The cookie field to scroll to and focus, set when the online lyrics page's sign-in state is clicked; the view
+    /// takes it and clears it.
+    /// </summary>
+    [ObservableProperty] private SearchSourceEnum? _pendingCookieFocus;
+
+    public void RequestCookieFocus(SearchSourceEnum source)
+    {
+        PendingCookieFocus = null;
+        PendingCookieFocus = LoginStatusViewModel.HasAccount(source) ? source : SearchSourceEnum.NET_EASE_MUSIC;
+    }
 
     /// <summary>Folder the daily log files are written to; see <see cref="Constants.GetLogFolderPath"/>.</summary>
     public string LogFolderPath { get; }

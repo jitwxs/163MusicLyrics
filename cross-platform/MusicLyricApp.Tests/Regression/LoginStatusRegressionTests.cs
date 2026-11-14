@@ -227,18 +227,33 @@ public class LoginStatusRegressionTests
             Dispatcher.UIThread.RunJobs();
             Assert.Contains(other.Value.ToDescription(), text.Text);
 
+            // An expired cookie reads 未登录 here, tinted as worth a look rather than red; settings keep 已失效.
             vm.Login.NetEase.Apply(new(LoginState.Invalid));
             vm.Login.QQ.Apply(new(LoginState.Invalid));
             Dispatcher.UIThread.RunJobs();
-            Assert.Contains(LocalizationService.Get("Login.State.Invalid"), text.Text);
+            Assert.Equal(LocalizationService.Format("Login.SourceState", other.Value.ToDescription(),
+                LocalizationService.Get("Login.State.NotConfigured")), text.Text);
+            Assert.DoesNotContain(LocalizationService.Get("Login.State.Invalid"), text.Text);
+            Assert.Equal(LocalizationService.Get("Login.State.Invalid"), vm.Login.QQ.Label);
             var icon = window.GetVisualDescendants().OfType<TKCode.Arc.ArcGlyph>().Single(g => g.Name == "LoginStatusIcon");
-            Assert.Contains("login-invalid", icon.Classes);
-
+            Assert.Contains("login-uncertain", icon.Classes);
+            Assert.DoesNotContain("login-invalid", icon.Classes);
+            Assert.Same(TKCode.Arc.ArcIcons.User, icon.Data);
             var button = window.GetVisualDescendants().OfType<TKCode.Arc.Button>().Single(b => b.Name == "LoginStatusButton");
+            var tip = Assert.IsType<string>(ToolTip.GetTip(button));
+            Assert.Contains(LocalizationService.Get("Login.Detail.Invalid"), tip);
+            Assert.Contains(LocalizationService.Get("Login.ClickToSettings"), tip);
+
+            // A click opens the cookie settings at the picked source's field, scrolled into view and focused.
             button.Command!.Execute(null);
             Dispatcher.UIThread.RunJobs();
             Assert.Equal(MainWindowViewModel.PageCookieSettings, vm.CurrentPageKey);
             Assert.Same(vm.Login, vm.SettingViewModel!.Login);
+            var field = window.GetVisualDescendants().OfType<Control>().Single(c =>
+                c.Name == (Equals(other.Value, SearchSourceEnum.QQ_MUSIC) ? "QqCookieField" : "NetEaseCookieField"));
+            Assert.True(field.IsEffectivelyVisible);
+            Assert.True(field.IsKeyboardFocusWithin);
+            Assert.Null(vm.SettingViewModel.PendingCookieFocus);
         }
         finally { window.Close(); WeakReferenceMessenger.Default.UnregisterAll(vm); }
     }

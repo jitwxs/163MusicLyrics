@@ -26,15 +26,12 @@
             <Setter Property="Foreground" Value="{arc:ArcDesignTokenResource TextSecondary}" />
             <Setter Property="FontSize" Value="{arc:ArcDesignTokenResource TypeSM}" />
         </Style>
-        <!-- The sign-in icon takes the state's color, so a broken cookie stands out beside the source. -->
+        <!-- The sign-in icon takes the state's color, so a cookie that needs a look stands out beside the source. -->
         <Style Selector="arc|ArcGlyph.login-valid">
             <Setter Property="Foreground" Value="{arc:ArcDesignTokenResource Success}" />
         </Style>
         <Style Selector="arc|ArcGlyph.login-uncertain">
             <Setter Property="Foreground" Value="{arc:ArcDesignTokenResource Warning}" />
-        </Style>
-        <Style Selector="arc|ArcGlyph.login-invalid">
-            <Setter Property="Foreground" Value="{arc:ArcDesignTokenResource Danger}" />
         </Style>
     </UserControl.Styles>
 
@@ -72,13 +69,13 @@
                             VerticalAlignment="Center"
                             Command="{Binding ExecuteOpenCookieSettingsCommand}"
                             IsVisible="{Binding IsCurrentLoginVisible}"
-                            ToolTip.Tip="{Binding CurrentLogin.Detail}"
+                            ToolTip.Tip="{Binding CurrentLogin.PageTip}"
                             AutomationProperties.Name="{Binding CurrentLogin.SourceLabel}">
+                    <!-- An expired cookie reads 未登录 here, tinted to ask for a look rather than red as if broken. -->
                     <StackPanel Orientation="Horizontal" Spacing="{arc:ArcDesignTokenResource Space2}">
-                        <arc:ArcGlyph Name="LoginStatusIcon" Data="{Binding CurrentLogin.Icon}" Size="14" VerticalAlignment="Center"
+                        <arc:ArcGlyph Name="LoginStatusIcon" Data="{Binding CurrentLogin.PageIcon}" Size="14" VerticalAlignment="Center"
                                       Classes.login-valid="{Binding CurrentLogin.IsValid}"
-                                      Classes.login-uncertain="{Binding CurrentLogin.IsUncertain}"
-                                      Classes.login-invalid="{Binding CurrentLogin.IsInvalid}" />
+                                      Classes.login-uncertain="{Binding CurrentLogin.NeedsLookOnPage}" />
                         <TextBlock Name="LoginStatusText" Text="{Binding CurrentLogin.SourceLabel}" VerticalAlignment="Center"
                                    MaxWidth="260" TextTrimming="CharacterEllipsis" />
                     </StackPanel>

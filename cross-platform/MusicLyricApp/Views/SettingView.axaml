@@ -214,13 +214,14 @@
                         </arc:SettingsRow>
                     </arc:SettingsGroup>
 
-                    <arc:SettingsGroup Header="{loc:Loc Key=Settings.Group.Cookie}"
+                    <arc:SettingsGroup Name="CookieGroup" Header="{loc:Loc Key=Settings.Group.Cookie}"
                                        Description="{loc:Loc Key=Settings.Group.CookieHint}">
                         <!-- The state below the field is checked shortly after the cookie is edited. -->
                         <arc:SettingsRow Header="{loc:Loc Key=UI.Extra11}"
                                          Description="{Binding Login.NetEase.Detail, FallbackValue=''}">
                             <StackPanel Spacing="{arc:ArcDesignTokenResource Space2}">
-                                <arc:PasswordField Label="{loc:Loc Key=UI.Extra11}"
+                                <arc:PasswordField Name="NetEaseCookieField"
+                                                   Label="{loc:Loc Key=UI.Extra11}"
                                                    Text="{Binding SettingParamViewModel.NetEaseCookie, Mode=TwoWay}" />
                                 <StackPanel Orientation="Horizontal" Spacing="{arc:ArcDesignTokenResource Space2}"
                                             IsVisible="{Binding Login, Converter={x:Static ObjectConverters.IsNotNull}}">
@@ -244,7 +245,8 @@
                         <arc:SettingsRow Header="{loc:Loc Key=UI.Extra12}"
                                          Description="{Binding Login.QQ.Detail, FallbackValue=''}">
                             <StackPanel Spacing="{arc:ArcDesignTokenResource Space2}">
-                                <arc:PasswordField Label="{loc:Loc Key=UI.Extra12}"
+                                <arc:PasswordField Name="QqCookieField"
+                                                   Label="{loc:Loc Key=UI.Extra12}"
                                                    Text="{Binding SettingParamViewModel.QqMusicCookie, Mode=TwoWay}" />
                                 <StackPanel Orientation="Horizontal" Spacing="{arc:ArcDesignTokenResource Space2}"
                                             IsVisible="{Binding Login, Converter={x:Static ObjectConverters.IsNotNull}}">
@@ -492,6 +494,12 @@
                         </arc:SettingsRow>
                     </arc:SettingsGroup>
                 </StackPanel>
+            </StackPanel>
+
+            <!-- 6. Shortcuts: built from Core/AppShortcuts in code-behind. -->
+            <StackPanel Name="ShortcutsSection" IsVisible="{Binding IsShortcutsSection}" Spacing="{arc:ArcDesignTokenResource Space5}">
+                <TextBlock Classes="section-title" Text="{loc:Loc Key=UI.Shortcuts}" />
+                <ContentControl Name="ShortcutListHost" />
             </StackPanel>
             </Panel>
         </ScrollViewer>

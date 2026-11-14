@@ -20,19 +20,20 @@ public partial class AccountStatusViewModel(SearchSourceEnum source) : ViewModel
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(Label), nameof(SourceLabel), nameof(Detail), nameof(Tone), nameof(Icon),
-        nameof(IsChecking), nameof(NeedsAttention), nameof(IsValid), nameof(IsInvalid), nameof(IsUncertain))]
+        nameof(IsChecking), nameof(NeedsAttention), nameof(IsValid), nameof(IsInvalid), nameof(IsUncertain),
+        nameof(PageIcon), nameof(NeedsLookOnPage), nameof(PageTip))]
     private LoginState _state = LoginState.NotConfigured;
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(Label), nameof(SourceLabel), nameof(Detail))]
+    [NotifyPropertyChangedFor(nameof(Label), nameof(SourceLabel), nameof(Detail), nameof(PageTip))]
     private string _nickname = "";
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(Detail))]
+    [NotifyPropertyChangedFor(nameof(Detail), nameof(PageTip))]
     private string _error = "";
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(Detail))]
+    [NotifyPropertyChangedFor(nameof(Detail), nameof(PageTip))]
     private DateTime? _checkedAt;
 
     public bool IsChecking => State == LoginState.Checking;
@@ -49,8 +50,22 @@ public partial class AccountStatusViewModel(SearchSourceEnum source) : ViewModel
         ? LocalizationService.Format("Login.State.ValidAs", Nickname)
         : LocalizationService.Get("Login.State." + State);
 
-    /// <summary>The state with the platform name, for the online lyrics page, e.g. "网易云：已登录 · 昵称".</summary>
-    public string SourceLabel => LocalizationService.Format("Login.SourceState", Source.ToDescription(), Label);
+    /// <summary>
+    /// The state with the platform name, for the online lyrics page, e.g. "网易云：已登录 · 昵称". An expired cookie
+    /// reads 未登录 there: searching still works as a guest, and "已失效" read as if the feature itself were broken.
+    /// The settings page keeps the exact state.
+    /// </summary>
+    public string SourceLabel => LocalizationService.Format("Login.SourceState", Source.ToDescription(),
+        IsInvalid ? LocalizationService.Get("Login.State.NotConfigured") : Label);
+
+    /// <summary>On the online lyrics page an expired cookie shows the signed-out icon, tinted to ask for a look.</summary>
+    public Geometry PageIcon => IsInvalid ? ArcIcons.User : Icon;
+
+    /// <summary>Tinted as worth a look on the online lyrics page (never red there, see <see cref="SourceLabel"/>).</summary>
+    public bool NeedsLookOnPage => IsUncertain || IsInvalid;
+
+    /// <summary>Tooltip on the online lyrics page: what the state means, and that a click opens the cookie settings.</summary>
+    public string PageTip => Detail + Environment.NewLine + LocalizationService.Get("Login.ClickToSettings");
 
     /// <summary>What the state means for the user and what to do about it.</summary>
     public string Detail
@@ -101,6 +116,7 @@ public partial class AccountStatusViewModel(SearchSourceEnum source) : ViewModel
         OnPropertyChanged(nameof(Label));
         OnPropertyChanged(nameof(SourceLabel));
         OnPropertyChanged(nameof(Detail));
+        OnPropertyChanged(nameof(PageTip));
     }
 }
 
