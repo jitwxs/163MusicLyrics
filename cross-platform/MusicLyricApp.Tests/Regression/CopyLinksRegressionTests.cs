@@ -1,4 +1,4 @@
-using Avalonia.Controls;
+﻿using Avalonia.Controls;
 using Avalonia.Headless.XUnit;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
@@ -325,12 +325,13 @@ public class CopyLinksRegressionTests
         {
             window.Show();
             Dispatcher.UIThread.RunJobs();
-            var panel = Assert.IsType<Border>(window.FindControl<Border>("SongPlaybackPanel"));
-            var menu = Assert.IsType<ContextMenu>(panel.ContextMenu);
+            var panel = Assert.Single(window.GetVisualDescendants().OfType<Border>(), x => x.Name == "SongPlaybackPanel");
+            var menu = Assert.IsType<TKCode.Arc.MenuSurface>(TKCode.Arc.ContextMenu.GetMenu(panel));
+            // Entries bind against the page's view model once the surface opens on the panel.
             menu.Open(panel);
             Dispatcher.UIThread.RunJobs();
-            var items = menu.Items.OfType<MenuItem>().ToList();
-            MenuItem Item(string key) => Assert.Single(items, x => Equals(x.Header, LocalizationService.Get(key)));
+            var items = menu.Items.OfType<TKCode.Arc.MenuEntry>().ToList();
+            TKCode.Arc.MenuEntry Item(string key) => Assert.Single(items, x => Equals(x.Header, LocalizationService.Get(key)));
             var copySong = Item("UI.CopySongLink");
             var copyCover = Item("UI.CopyCoverLink");
             var downloadSong = Item("UI.DownloadLink");
@@ -361,7 +362,8 @@ public class CopyLinksRegressionTests
         }
         finally
         {
-            window.FindControl<Border>("SongPlaybackPanel")?.ContextMenu?.Close();
+            var panel = window.GetVisualDescendants().OfType<Border>().FirstOrDefault(x => x.Name == "SongPlaybackPanel");
+            if (panel != null) TKCode.Arc.ContextMenu.GetMenu(panel)?.Close(returnFocus: false);
             window.Close();
             WeakReferenceMessenger.Default.UnregisterAll(vm);
         }

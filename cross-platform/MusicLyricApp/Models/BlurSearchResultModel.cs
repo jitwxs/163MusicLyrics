@@ -1,27 +1,24 @@
-﻿using System.Collections.Generic;
-using Avalonia.Controls;
-using Avalonia.Data;
-using CommunityToolkit.Mvvm.ComponentModel;
-using MusicLyricApp.Core.Utils;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using MusicLyricApp.Core;
 using MusicLyricApp.Core.Localization;
 
 namespace MusicLyricApp.Models;
 
-public abstract partial class BlurSearchResultBase : ObservableObject
+public abstract partial class BlurSearchResultBase : LocalizedObject
 {
-    private SearchSourceEnum _source;
+    private SearchSourceEnum? _source;
     [ObservableProperty] private string? _id;
     [ObservableProperty] private string? _title;
     [ObservableProperty] private string? _author;
-    [ObservableProperty] private string? _searchSource;
+
+    /// <summary>Name of the source in the current UI language.</summary>
+    public string? SearchSource => _source is { } source ? MusicSources.Get(source).Name : null;
 
     public void SetSource(SearchSourceEnum source)
     {
         _source = source;
-        SearchSource = _source.ToDescription();
+        OnPropertyChanged(nameof(SearchSource));
     }
-
-    public void RefreshLocalizedSource() => SearchSource = _source.ToDescription();
 }
 
 public partial class BlurSongSearchResult : BlurSearchResultBase
@@ -31,8 +28,7 @@ public partial class BlurSongSearchResult : BlurSearchResultBase
 
     public BlurSongSearchResult(SearchSourceEnum searchSource, SearchResultVo.SongSearchResultVo resultVo)
     {
-        var idPrefix = GlobalUtils.SearchSourceKeywordDict[searchSource] + "/" +
-                       GlobalUtils.SearchTypeKeywordDict[searchSource][SearchTypeEnum.SONG_ID];
+        var idPrefix = MusicSources.Get(searchSource).LinkPrefix(SearchTypeEnum.SONG_ID);
 
         Id = idPrefix + resultVo.DisplayId;
         Title = resultVo.Title;
@@ -40,42 +36,6 @@ public partial class BlurSongSearchResult : BlurSearchResultBase
         Album = resultVo.AlbumName;
         Duration = new LyricTimestamp(resultVo.Duration).PrintTimestamp("mm:ss", DotTypeEnum.DOWN);
         SetSource(searchSource);
-    }
-
-    public static List<DataGridTextColumn> GetDataGridColumns()
-    {
-        return
-        [
-            new DataGridTextColumn
-            {
-                Header = LocalizationService.Get("UI.BlurGrid.Song"), Binding = new Binding(nameof(Title)),
-                Width = new DataGridLength(3, DataGridLengthUnitType.Star)
-            },
-
-            new DataGridTextColumn
-            {
-                Header = LocalizationService.Get("UI.BlurGrid.Artist"), Binding = new Binding(nameof(Author)),
-                Width = new DataGridLength(1, DataGridLengthUnitType.Star)
-            },
-
-            new DataGridTextColumn
-            {
-                Header = LocalizationService.Get("UI.BlurGrid.Album"), Binding = new Binding(nameof(Album)),
-                Width = new DataGridLength(2, DataGridLengthUnitType.Star)
-            },
-
-            new DataGridTextColumn
-            {
-                Header = LocalizationService.Get("UI.BlurGrid.Duration"), Binding = new Binding(nameof(Duration)),
-                Width = new DataGridLength(1, DataGridLengthUnitType.Star)
-            },
-
-            new DataGridTextColumn
-            {
-                Header = LocalizationService.Get("UI.BlurGrid.Platform"), Binding = new Binding(nameof(SearchSource)),
-                Width = new DataGridLength(1, DataGridLengthUnitType.Star)
-            }
-        ];
     }
 }
 
@@ -86,8 +46,7 @@ public partial class BlurAlbumSearchResult : BlurSearchResultBase
 
     public BlurAlbumSearchResult(SearchSourceEnum searchSource, SearchResultVo.AlbumSearchResultVo resultVo)
     {
-        var idPrefix = GlobalUtils.SearchSourceKeywordDict[searchSource] + "/" +
-                       GlobalUtils.SearchTypeKeywordDict[searchSource][SearchTypeEnum.ALBUM_ID];
+        var idPrefix = MusicSources.Get(searchSource).LinkPrefix(SearchTypeEnum.ALBUM_ID);
 
         Id = idPrefix + resultVo.DisplayId;
         Title = resultVo.AlbumName;
@@ -95,42 +54,6 @@ public partial class BlurAlbumSearchResult : BlurSearchResultBase
         SongCount = resultVo.SongCount.ToString();
         PublishTime = resultVo.PublishTime;
         SetSource(searchSource);
-    }
-
-    public static List<DataGridTextColumn> GetDataGridColumns()
-    {
-        return
-        [
-            new DataGridTextColumn
-            {
-                Header = LocalizationService.Get("UI.BlurGrid.Album"), Binding = new Binding(nameof(Title)),
-                Width = new DataGridLength(3, DataGridLengthUnitType.Star)
-            },
-
-            new DataGridTextColumn
-            {
-                Header = LocalizationService.Get("UI.BlurGrid.Artist"), Binding = new Binding(nameof(Author)),
-                Width = new DataGridLength(2, DataGridLengthUnitType.Star)
-            },
-
-            new DataGridTextColumn
-            {
-                Header = LocalizationService.Get("UI.BlurGrid.SongCount"), Binding = new Binding(nameof(SongCount)),
-                Width = new DataGridLength(1, DataGridLengthUnitType.Star)
-            },
-
-            new DataGridTextColumn
-            {
-                Header = LocalizationService.Get("UI.BlurGrid.ReleaseDate"), Binding = new Binding(nameof(PublishTime)),
-                Width = new DataGridLength(1, DataGridLengthUnitType.Star)
-            },
-
-            new DataGridTextColumn
-            {
-                Header = LocalizationService.Get("UI.BlurGrid.Platform"), Binding = new Binding(nameof(SearchSource)),
-                Width = new DataGridLength(1, DataGridLengthUnitType.Star)
-            }
-        ];
     }
 }
 
@@ -142,8 +65,7 @@ public partial class BlurPlaylistSearchResult : BlurSearchResultBase
 
     public BlurPlaylistSearchResult(SearchSourceEnum searchSource, SearchResultVo.PlaylistResultVo resultVo)
     {
-        var idPrefix = GlobalUtils.SearchSourceKeywordDict[searchSource] + "/" +
-                       GlobalUtils.SearchTypeKeywordDict[searchSource][SearchTypeEnum.PLAYLIST_ID];
+        var idPrefix = MusicSources.Get(searchSource).LinkPrefix(SearchTypeEnum.PLAYLIST_ID);
 
         Id = idPrefix + resultVo.DisplayId;
         Title = resultVo.PlaylistName;
@@ -152,47 +74,5 @@ public partial class BlurPlaylistSearchResult : BlurSearchResultBase
         SongCount = resultVo.SongCount.ToString();
         PlayCount = resultVo.PlayCount.ToString();
         SetSource(searchSource);
-    }
-
-    public static List<DataGridTextColumn> GetDataGridColumns()
-    {
-        return
-        [
-            new DataGridTextColumn
-            {
-                Header = LocalizationService.Get("UI.BlurGrid.Playlist"), Binding = new Binding(nameof(Title)),
-                Width = new DataGridLength(2, DataGridLengthUnitType.Star)
-            },
-
-            new DataGridTextColumn
-            {
-                Header = LocalizationService.Get("UI.BlurGrid.Creator"), Binding = new Binding(nameof(Author)),
-                Width = new DataGridLength(1, DataGridLengthUnitType.Star)
-            },
-
-            new DataGridTextColumn
-            {
-                Header = LocalizationService.Get("UI.BlurGrid.Description"), Binding = new Binding(nameof(Description)),
-                Width = new DataGridLength(3, DataGridLengthUnitType.Star)
-            },
-
-            new DataGridTextColumn
-            {
-                Header = LocalizationService.Get("UI.BlurGrid.SongCount"), Binding = new Binding(nameof(SongCount)),
-                Width = new DataGridLength(1, DataGridLengthUnitType.Star)
-            },
-
-            new DataGridTextColumn
-            {
-                Header = LocalizationService.Get("UI.BlurGrid.PlayCount"), Binding = new Binding(nameof(PlayCount)),
-                Width = new DataGridLength(1, DataGridLengthUnitType.Star)
-            },
-
-            new DataGridTextColumn
-            {
-                Header = LocalizationService.Get("UI.BlurGrid.Platform"), Binding = new Binding(nameof(SearchSource)),
-                Width = new DataGridLength(1, DataGridLengthUnitType.Star)
-            }
-        ];
     }
 }

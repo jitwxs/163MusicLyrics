@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Text;
 using System.Xml;
@@ -25,7 +26,21 @@ public class QQMusicNativeApi(Func<string> cookieFunc) : BaseNativeApi(cookieFun
         return "https://c.y.qq.com/";
     }
 
-    public QQMusicBean.MusicFcgApiResult Search(string keyword, SearchTypeEnum searchType)
+    /// <summary>
+    /// Raw profile response for <paramref name="uin"/> using the current cookie: code 1000 means not signed in.
+    /// </summary>
+    public string GetLoginProfile(string uin)
+    {
+        return SendPost("https://c.y.qq.com/rsc/fcgi-bin/fcg_get_profile_homepage.fcg", new Dictionary<string, string>
+        {
+            { "format", "json" },
+            { "cid", "205360838" },
+            { "userid", uin },
+            { "reqfrom", "1" },
+        });
+    }
+
+    public virtual QQMusicBean.MusicFcgApiResult Search(string keyword, SearchTypeEnum searchType)
     {
         // 0单曲 2专辑 1歌手 3歌单 7歌词 12mv
         int type;
@@ -292,9 +307,13 @@ public class QQMusicNativeApi(Func<string> cookieFunc) : BaseNativeApi(cookieFun
         var res = resp.ToEntity<QQMusicBean.MusicFcgApiResult>();
 
         var link = "";
-        if (res.Code == 0 && res.Req.Code == 0 && res.Req_0.Code == 0)
+        if (res.Code == 0 && res.Req is { Code: 0, Data: { } hostData } &&
+            res.Req_0 is { Code: 0, Data: { } urlData })
         {
-            link = res.Req.Data.Sip[0] + res.Req_0.Data.Midurlinfo[0].Purl;
+            var host = hostData.Sip?.FirstOrDefault();
+            var path = urlData.Midurlinfo?.FirstOrDefault()?.Purl;
+            if (!string.IsNullOrWhiteSpace(host) && !string.IsNullOrWhiteSpace(path))
+                link = host + path;
         }
 
         return new ResultVo<string>(link);

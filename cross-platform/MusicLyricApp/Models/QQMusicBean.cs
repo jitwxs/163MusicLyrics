@@ -12,29 +12,29 @@ public class QQMusicBean
 
         public long StartTs { get; set; }
 
-        public string Traceid { get; set; }
+        public string Traceid { get; set; } = string.Empty;
 
-        public MusicFcgReq Req { get; set; }
+        public MusicFcgReq? Req { get; set; }
 
-        public MusicFcgReq0 Req_0 { get; set; }
+        public MusicFcgReq0? Req_0 { get; set; }
 
-        public MusicFcgReq1 Req_1 { get; set; }
+        public MusicFcgReq1? Req_1 { get; set; }
 
         public class MusicFcgReq
         {
             public long Code { get; set; }
 
-            public MusicFcgReqData Data { get; set; }
+            public MusicFcgReqData? Data { get; set; }
 
             public class MusicFcgReqData
             {
-                public string[] Sip { get; set; }
+                public string[] Sip { get; set; } = [];
 
-                public string Keepalivefile { get; set; }
+                public string Keepalivefile { get; set; } = string.Empty;
 
-                public string Testfile2g { get; set; }
+                public string Testfile2g { get; set; } = string.Empty;
 
-                public string Testfilewifi { get; set; }
+                public string Testfilewifi { get; set; } = string.Empty;
             }
         }
 
@@ -42,24 +42,24 @@ public class QQMusicBean
         {
             public long Code { get; set; }
 
-            public MusicFcgReq0Data Data { get; set; }
+            public MusicFcgReq0Data? Data { get; set; }
 
             public class MusicFcgReq0Data
             {
-                public string[] Sip { get; set; }
+                public string[] Sip { get; set; } = [];
 
-                public string Testfile2g { get; set; }
+                public string Testfile2g { get; set; } = string.Empty;
 
-                public string Testfilewifi { get; set; }
+                public string Testfilewifi { get; set; } = string.Empty;
 
-                public MusicFcgReq0DataMidurlinfo[] Midurlinfo { get; set; }
+                public MusicFcgReq0DataMidurlinfo[] Midurlinfo { get; set; } = [];
             }
 
             public class MusicFcgReq0DataMidurlinfo
             {
-                public string Songmid { get; set; }
+                public string Songmid { get; set; } = string.Empty;
 
-                public string Purl { get; set; }
+                public string Purl { get; set; } = string.Empty;
             }
         }
 
@@ -67,7 +67,7 @@ public class QQMusicBean
         {
             public long Code { get; set; }
 
-            public MusicFcgReq1Data Data { get; set; }
+            public MusicFcgReq1Data? Data { get; set; }
 
             public class MusicFcgReq1Data
             {
@@ -75,101 +75,101 @@ public class QQMusicBean
 
                 public long Ver { get; set; }
 
-                public MusicFcgReq1DataBody Body { get; set; }
+                public MusicFcgReq1DataBody? Body { get; set; }
 
-                public MusicFcgReq1DataMeta Meta { get; set; }
+                public MusicFcgReq1DataMeta? Meta { get; set; }
 
                 public class MusicFcgReq1DataBody
                 {
                     /// <summary>
                     /// 专辑查询结果
                     /// </summary>
-                    public MusicFcgReq1DataBodyAlbum Album { get; set; }
+                    public MusicFcgReq1DataBodyAlbum? Album { get; set; }
 
                     /// <summary>
                     /// 单曲查询结果
                     /// </summary>
-                    public MusicFcgReq1DataBodySong Song { get; set; }
-                        
+                    public MusicFcgReq1DataBodySong? Song { get; set; }
+
                     /// <summary>
                     /// 歌单查询结果
                     /// </summary>
-                    public MusicFcgReq1DataBodyPlayList Songlist { get; set; }
+                    public MusicFcgReq1DataBodyPlayList? Songlist { get; set; }
 
                     public class MusicFcgReq1DataBodyAlbum
                     {
-                        public MusicFcgReq1DataBodyAlbumInfo[] List { get; set; }
-                            
+                        public MusicFcgReq1DataBodyAlbumInfo[] List { get; set; } = [];
+
                         public class MusicFcgReq1DataBodyAlbumInfo
                         {
                             public long AlbumID { get; set; }
 
-                            public string AlbumMID { get; set; }
+                            public string AlbumMID { get; set; } = string.Empty;
 
                             /// <summary>
                             /// 专辑名
                             /// </summary>
-                            public string AlbumName { get; set; }            
-                                
+                            public string AlbumName { get; set; } = string.Empty;
+
                             public long Song_count { get; set; }
-                                
+
                             /// <summary>
                             /// 发布时间 eg 2011-04-27
                             /// </summary>
-                            public string PublicTime { get; set; }
+                            public string PublicTime { get; set; } = string.Empty;
 
-                            public Singer[] Singer_list { get; set; }
+                            public Singer[] Singer_list { get; set; } = [];
                         }
                     }
 
                     public class MusicFcgReq1DataBodySong
                     {
-                        public Song[] List { get; set; }
+                        public Song[] List { get; set; } = [];
                     }
-                        
+
                     public class MusicFcgReq1DataBodyPlayList
                     {
-                        public MusicFcgReq1DataBodyPlayListInfo[] List { get; set; }
-                            
+                        public MusicFcgReq1DataBodyPlayListInfo[] List { get; set; } = [];
+
                         public class MusicFcgReq1DataBodyPlayListInfo
                         {
                             /// <summary>
                             /// 歌单 ID
                             /// </summary>
-                            public string Dissid { get; set; }
+                            public string Dissid { get; set; } = string.Empty;
 
                             /// <summary>
                             /// 歌单名
                             /// </summary>
-                            public string Dissname { get; set; }
-                                
+                            public string Dissname { get; set; } = string.Empty;
+
                             /// <summary>
                             /// 歌单封面
                             /// </summary>
-                            public string Imgurl { get; set; }
-                                
+                            public string Imgurl { get; set; } = string.Empty;
+
                             /// <summary>
                             /// 歌单介绍
                             /// </summary>
-                            public string Introduction { get; set; }
-                                
+                            public string Introduction { get; set; } = string.Empty;
+
                             /// <summary>
                             /// 歌单数量
                             /// </summary>
                             public long Song_Count { get; set; }
-                                
+
                             /// <summary>
                             /// 歌单播放量
                             /// </summary>
                             public long Listennum { get; set; }
-                                
-                            public MusicFcgReq1DataBodyPlayListCreator Creator { get; set; }
+
+                            public MusicFcgReq1DataBodyPlayListCreator? Creator { get; set; }
                         }
 
                         public class MusicFcgReq1DataBodyPlayListCreator
                         {
-                            public string Name { get; set; }
-                                
+                            public string Name { get; set; } = string.Empty;
+
                             public long Qq { get; set; }
                         }
                     }
@@ -194,7 +194,7 @@ public class QQMusicBean
                                             DisplayId = song.Id,
                                             Title = song.Title,
                                             AuthorName = song.Singer.Select(e => e.Name).ToArray(),
-                                            AlbumName = song.Album.Name,
+                                            AlbumName = song.Album?.Name ?? string.Empty,
                                             Duration = song.Interval * 1000
                                         });
                                     }
@@ -225,14 +225,14 @@ public class QQMusicBean
                                         {
                                             DisplayId = playlist.Dissid,
                                             PlaylistName = playlist.Dissname,
-                                            AuthorName = playlist.Creator.Name,
+                                            AuthorName = playlist.Creator?.Name ?? string.Empty,
                                             Description = playlist.Introduction,
                                             PlayCount = playlist.Listennum,
                                             SongCount = playlist.Song_Count
                                         });
                                     }
                                 }
-                                
+
                                 break;
                         }
 
@@ -260,7 +260,7 @@ public class QQMusicBean
                     /// <summary>
                     /// 查询关键字
                     /// </summary>
-                    public string Query { get; set; }
+                    public string Query { get; set; } = string.Empty;
 
                     /// <summary>
                     /// 累计数量
@@ -278,19 +278,20 @@ public class QQMusicBean
     {
         public long Code { get; set; }
 
-        public AlbumInfo Data { get; set; }
+        public AlbumInfo? Data { get; set; }
 
-        public string Message { get; set; }
+        public string Message { get; set; } = string.Empty;
 
         public AlbumVo Convert()
         {
+            var data = Data ?? throw new MusicLyricApp.Core.MusicLyricException(ErrorMsgConst.ALBUM_NOT_EXIST);
             return new AlbumVo
             {
-                Name = Data.Name,
-                Company = Data.Company,
-                Desc = Data.Desc,
-                SimpleSongVos = Data.List.Select(e => e.ConvertSimple()).ToArray(),
-                TimePublic = Data.ADate
+                Name = data.Name,
+                Company = data.Company,
+                Desc = data.Desc,
+                SimpleSongVos = data.List.Select(e => e.ConvertSimple()).ToArray(),
+                TimePublic = data.ADate
             };
         }
     }
@@ -302,7 +303,7 @@ public class QQMusicBean
     {
         public long Code { get; set; }
 
-        public Playlist[] Cdlist { get; set; }
+        public Playlist[] Cdlist { get; set; } = [];
 
         public PlaylistVo Convert()
         {
@@ -331,7 +332,7 @@ public class QQMusicBean
     {
         public long Code { get; set; }
 
-        public Song[] Data { get; set; }
+        public Song[] Data { get; set; } = [];
 
         public bool IsIllegal()
         {
@@ -346,11 +347,11 @@ public class QQMusicBean
     {
         public long Code { get; set; }
 
-        public string Lyric { get; set; }
+        public string Lyric { get; set; } = string.Empty;
 
-        public string Trans { get; set; }
-        
-        public string Roma { get; set; }
+        public string Trans { get; set; } = string.Empty;
+
+        public string Roma { get; set; } = string.Empty;
     }
 
     public class Playlist
@@ -358,32 +359,32 @@ public class QQMusicBean
         /// <summary>
         /// 歌单 ID
         /// </summary>
-        public string Disstid { get; set; }
+        public string Disstid { get; set; } = string.Empty;
 
         /// <summary>
         /// 歌单名
         /// </summary>
-        public string Dissname { get; set; }
+        public string Dissname { get; set; } = string.Empty;
 
         /// <summary>
         /// 作者名
         /// </summary>
-        public string Nickname { get; set; }
+        public string Nickname { get; set; } = string.Empty;
 
         /// <summary>
         /// 歌单封面
         /// </summary>
-        public string Logo { get; set; }
+        public string Logo { get; set; } = string.Empty;
 
         /// <summary>
         /// 歌单描述
         /// </summary>
-        public string Desc { get; set; }
+        public string Desc { get; set; } = string.Empty;
 
         /// <summary>
         /// 标签
         /// </summary>
-        public Tag[] Tags { get; set; }
+        public Tag[] Tags { get; set; } = [];
 
         /// <summary>
         /// 歌曲数量
@@ -393,12 +394,12 @@ public class QQMusicBean
         /// <summary>
         /// 歌曲 ID 列表，使用英文逗号分割
         /// </summary>
-        public string Songids { get; set; }
+        public string Songids { get; set; } = string.Empty;
 
         /// <summary>
         /// 歌曲列表
         /// </summary>
-        public Song[] SongList { get; set; }
+        public Song[] SongList { get; set; } = [];
 
         /// <summary>
         /// 播放量
@@ -415,7 +416,7 @@ public class QQMusicBean
     {
         public long Id { get; set; }
 
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
 
         public long Pid { get; set; }
     }
@@ -425,54 +426,54 @@ public class QQMusicBean
         /// <summary>
         /// 所属专辑
         /// </summary>
-        public SongAlbum Album { get; set; }
+        public SongAlbum? Album { get; set; }
 
-        public string Id { get; set; }
+        public string Id { get; set; } = string.Empty;
 
         /// <summary>
         /// 时长，单位 s
         /// </summary>
         public int Interval { get; set; }
 
-        public string Mid { get; set; }
+        public string Mid { get; set; } = string.Empty;
 
         /// <summary>
         /// 歌曲名
         /// </summary>
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
 
         /// <summary>
         /// 歌曲描述
         /// </summary>
-        public string Desc { get; set; }
+        public string Desc { get; set; } = string.Empty;
 
-        public Singer[] Singer { get; set; }
+        public Singer[] Singer { get; set; } = [];
 
         /// <summary>
         /// 标题
         /// </summary>
-        public string Title { get; set; }
+        public string Title { get; set; } = string.Empty;
 
         /// <summary>
         /// 发布时间，eg: 2005-07-08
         /// </summary>
-        public string Time_public { get; set; }
+        public string Time_public { get; set; } = string.Empty;
 
         public class SongAlbum
         {
             public long Id { get; set; }
 
-            public string Mid { get; set; }
+            public string Mid { get; set; } = string.Empty;
 
-            public string Pmid { get; set; }
-            
-            public string Name { get; set; }
+            public string Pmid { get; set; } = string.Empty;
 
-            public string Title { get; set; }
-            
-            public string Subtitle { get; set; }
+            public string Name { get; set; } = string.Empty;
+
+            public string Title { get; set; } = string.Empty;
+
+            public string Subtitle { get; set; } = string.Empty;
         }
-            
+
         public SimpleSongVo ConvertSimple()
         {
             return new SimpleSongVo
@@ -490,54 +491,54 @@ public class QQMusicBean
         /// <summary>
         /// 专辑时间，eg 2022-03-28
         /// </summary>
-        public string ADate { get; set; }
+        public string ADate { get; set; } = string.Empty;
 
         /// <summary>
         /// 发行公司
         /// </summary>
-        public string Company { get; set; }
+        public string Company { get; set; } = string.Empty;
 
         /// <summary>
         /// 专辑描述
         /// </summary>
-        public string Desc { get; set; }
+        public string Desc { get; set; } = string.Empty;
 
         public long Id { get; set; }
 
-        public string Mid { get; set; }
+        public string Mid { get; set; } = string.Empty;
 
         /// <summary>
         /// 专辑语言，eg 韩语
         /// </summary>
-        public string Lan { get; set; }
+        public string Lan { get; set; } = string.Empty;
 
-        public AlbumSong[] List { get; set; }
+        public AlbumSong[] List { get; set; } = [];
 
         /// <summary>
         /// 专辑名
         /// </summary>
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
 
         public long Singerid { get; set; }
 
-        public string Singermid { get; set; }
+        public string Singermid { get; set; } = string.Empty;
 
-        public string Singername { get; set; }
+        public string Singername { get; set; } = string.Empty;
 
         /// <summary>
         /// 包含的歌曲数量
         /// </summary>
         public int Total { get; set; }
-            
+
         public class AlbumSong
         {
-            public Singer[] singer { get; set; }
+            public Singer[] singer { get; set; } = [];
 
             public long Songid { get; set; }
 
-            public string Songmid { get; set; }
+            public string Songmid { get; set; } = string.Empty;
 
-            public string Songname { get; set; }
+            public string Songname { get; set; } = string.Empty;
 
             public SimpleSongVo ConvertSimple()
             {
@@ -556,13 +557,13 @@ public class QQMusicBean
     {
         public long Id { get; set; }
 
-        public string Mid { get; set; }
+        public string Mid { get; set; } = string.Empty;
 
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
 
-        public string Pmid { get; set; }
+        public string Pmid { get; set; } = string.Empty;
 
-        public string Title { get; set; }
+        public string Title { get; set; } = string.Empty;
 
         public int Type { get; set; }
 

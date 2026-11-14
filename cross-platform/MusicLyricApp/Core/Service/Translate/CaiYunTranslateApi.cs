@@ -57,7 +57,7 @@ public class CaiYunTranslateApi : TranslateCacheableApi
 
             var result = JsonConvert.DeserializeObject<CaiYunTranslateResult>(resultStr);
 
-            if (result.Target == null)
+            if (result?.Target == null || result.Target.Length != input.Length)
             {
                 return ResultVo<string[]>.Failure(ErrorMsgConst.CAIYUN_TRANSLATE_AUTH_FAILED);
             }

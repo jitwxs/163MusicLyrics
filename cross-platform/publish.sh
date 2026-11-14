@@ -4,16 +4,24 @@ set -e
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$script_dir"
 
-echo "🧹 Cleaning previous publish output..."
-rm -rf publish/*
-
 if [ -z "$1" ]; then
   echo "❌ Usage: $0 <version>"
-  echo "👉 Example: ./build-all.sh 1.2.3"
+  echo "👉 Example: ./publish.sh 8.0.0"
   exit 1
 fi
 
-version="$1"
+version="${1#v}"
+# The version is stamped into the app (window title, update check) as well as the archive names, so it must be a
+# plain version number the project file can take.
+if [[ ! "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+  echo "❌ Version must look like 8.0.0, got: $1"
+  exit 1
+fi
+
+# Only clean once the arguments are known to be good, so a typo does not delete the last build.
+echo "🧹 Cleaning previous publish output..."
+rm -rf publish/*
+
 app_name="MusicLyricApp"
 project_path="./MusicLyricApp/MusicLyricApp.csproj"
 output_root="publish"
@@ -93,6 +101,7 @@ for target in "${targets[@]}"; do
     -p:PublishSingleFile=true \
     -p:ApplicationIcon=Resources\\app-logo.ico \
     -p:IncludeNativeLibrariesForSelfExtract=true \
+    -p:Version="$version" \
     -o "$output_dir"
 
   if [[ "$target" == win-* ]]; then

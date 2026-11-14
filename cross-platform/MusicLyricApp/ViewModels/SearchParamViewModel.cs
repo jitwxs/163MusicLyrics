@@ -9,75 +9,30 @@ namespace MusicLyricApp.ViewModels;
 
 public partial class SearchParamViewModel : ViewModelBase
 {
-    // 1. 音乐提供商
-    public ObservableCollection<EnumDisplayHelper.EnumDisplayItem<SearchSourceEnum>> SearchSources { get; } =
-        EnumDisplayHelper.GetEnumDisplayCollection<SearchSourceEnum>();
+    // 1-5. Choices; each change is written to the saved parameters and raised under the choice's name.
+    public EnumChoice<SearchSourceEnum> SearchSource { get; }
 
-    [ObservableProperty] private EnumDisplayHelper.EnumDisplayItem<SearchSourceEnum> _selectedSearchSourceItem;
+    public EnumChoice<ShowLrcTypeEnum> LrcType { get; }
 
-    public SearchSourceEnum SelectedSearchSource => SelectedSearchSourceItem?.Value ?? default;
+    public EnumChoice<SearchTypeEnum> SearchType { get; }
 
-    partial void OnSelectedSearchSourceItemChanged(EnumDisplayHelper.EnumDisplayItem<SearchSourceEnum>? value)
+    public EnumChoice<OutputFormatEnum> OutputFormat { get; }
+
+    public EnumChoice<OutputEncodingEnum> OutputEncoding { get; }
+
+    public SearchParamViewModel()
     {
-        if (value != null) _paramBean.SearchSource = value.Value;
-    }
-
-    // 2. 歌词格式
-    public ObservableCollection<EnumDisplayHelper.EnumDisplayItem<ShowLrcTypeEnum>> LrcTypes { get; } =
-        EnumDisplayHelper.GetEnumDisplayCollection<ShowLrcTypeEnum>();
-
-    [ObservableProperty] private EnumDisplayHelper.EnumDisplayItem<ShowLrcTypeEnum> _selectedLrcTypeItem;
-
-    public ShowLrcTypeEnum SelectedLrcType => SelectedLrcTypeItem?.Value ?? default;
-
-    partial void OnSelectedLrcTypeItemChanged(EnumDisplayHelper.EnumDisplayItem<ShowLrcTypeEnum>? value)
-    {
-        if (value != null) _paramBean.ShowLrcType = value.Value;
-    }
-
-    // 3. 搜索类型
-    public ObservableCollection<EnumDisplayHelper.EnumDisplayItem<SearchTypeEnum>> SearchTypes { get; } =
-        EnumDisplayHelper.GetEnumDisplayCollection<SearchTypeEnum>();
-
-    [ObservableProperty] private EnumDisplayHelper.EnumDisplayItem<SearchTypeEnum> _selectedSearchTypeItem;
-
-    public SearchTypeEnum SelectedSearchType => SelectedSearchTypeItem?.Value ?? default;
-
-    partial void OnSelectedSearchTypeItemChanged(EnumDisplayHelper.EnumDisplayItem<SearchTypeEnum>? value)
-    {
-        if (value != null) _paramBean.SearchType = value.Value;
-    }
-
-    // 4. 输出格式
-    public ObservableCollection<EnumDisplayHelper.EnumDisplayItem<OutputFormatEnum>> OutputFormats { get; } =
-        EnumDisplayHelper.GetEnumDisplayCollection<OutputFormatEnum>();
-
-    [ObservableProperty] private EnumDisplayHelper.EnumDisplayItem<OutputFormatEnum> _selectedOutputFormatItem;
-
-    public OutputFormatEnum SelectedOutputFormat => SelectedOutputFormatItem?.Value ?? default;
-
-    partial void OnSelectedOutputFormatItemChanged(EnumDisplayHelper.EnumDisplayItem<OutputFormatEnum>? value)
-    {
-        if (value != null) _paramBean.OutputFileFormat = value.Value;
-    }
-
-    // 5. 输出编码
-    public ObservableCollection<EnumDisplayHelper.EnumDisplayItem<OutputEncodingEnum>> OutputEncodings { get; } =
-        EnumDisplayHelper.GetEnumDisplayCollection<OutputEncodingEnum>();
-
-    [ObservableProperty] private EnumDisplayHelper.EnumDisplayItem<OutputEncodingEnum> _selectedOutputEncodingItem;
-
-    public OutputEncodingEnum SelectedOutputEncoding => SelectedOutputEncodingItem?.Value ?? default;
-
-    partial void OnSelectedOutputEncodingItemChanged(EnumDisplayHelper.EnumDisplayItem<OutputEncodingEnum>? value)
-    {
-        if (value != null) _paramBean.Encoding = value.Value;
+        SearchSource = new(value => { _paramBean.SearchSource = value; OnPropertyChanged(nameof(SearchSource)); });
+        LrcType = new(value => { _paramBean.ShowLrcType = value; OnPropertyChanged(nameof(LrcType)); });
+        SearchType = new(value => { _paramBean.SearchType = value; OnPropertyChanged(nameof(SearchType)); });
+        OutputFormat = new(value => { _paramBean.OutputFileFormat = value; OnPropertyChanged(nameof(OutputFormat)); });
+        OutputEncoding = new(value => { _paramBean.Encoding = value; OnPropertyChanged(nameof(OutputEncoding)); });
     }
 
     // 6. 歌词合并符
     [ObservableProperty] private string _lrcMergeSeparator = "";
 
-    partial void OnLrcMergeSeparatorChanged(string? value)
+    partial void OnLrcMergeSeparatorChanged(string value)
     {
         _paramBean.LrcMergeSeparator = value ?? string.Empty;
     }
@@ -90,17 +45,17 @@ public partial class SearchParamViewModel : ViewModelBase
     /// </summary>
     public readonly List<InputSongId> SongIds = [];
 
-    private PersistParamBean _paramBean;
+    private PersistParamBean _paramBean = new();
 
     public void Bind(PersistParamBean paramBean)
     {
         _paramBean = paramBean;
 
-        SelectedSearchSourceItem = SearchSources.First(item => Equals(item.Value, _paramBean.SearchSource));
-        SelectedLrcTypeItem = LrcTypes.First(item => Equals(item.Value, _paramBean.ShowLrcType));
-        SelectedSearchTypeItem = SearchTypes.First(item => Equals(item.Value, _paramBean.SearchType));
-        SelectedOutputFormatItem = OutputFormats.First(item => Equals(item.Value, _paramBean.OutputFileFormat));
-        SelectedOutputEncodingItem = OutputEncodings.First(item => Equals(item.Value, _paramBean.Encoding));
+        SearchSource.Value = _paramBean.SearchSource;
+        LrcType.Value = _paramBean.ShowLrcType;
+        SearchType.Value = _paramBean.SearchType;
+        OutputFormat.Value = _paramBean.OutputFileFormat;
+        OutputEncoding.Value = _paramBean.Encoding;
         LrcMergeSeparator = _paramBean.LrcMergeSeparator;
     }
 }

@@ -7,6 +7,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Avalonia.Platform.Storage;
+using MusicLyricApp.Core.Service.Music;
 using MusicLyricApp.Core.Utils;
 using MusicLyricApp.Core.Localization;
 using MusicLyricApp.Models;
@@ -25,7 +26,7 @@ public class StorageService : IStorageService
         _configPath = configPath ?? Constants.GetConfigFilePath;
         _httpClientFactory = httpClientFactory ?? NetworkClientFactory.CreateHttpClient;
     }
-    private ISearchService _searchService;
+    private ISearchService? _searchService;
 
     private readonly Logger _logger = LogManager.GetCurrentClassLogger();
     
@@ -80,14 +81,17 @@ public class StorageService : IStorageService
     public string SaveSongLink(SearchResultViewModel searchResult, SettingBean settingBean,
         IWindowProvider windowProvider)
     {
-        var musicApi = _searchService.GetMusicApi(settingBean.Param.SearchSource);
+        // Each song's own source: the source picked on the page may differ (a pasted link names its source).
+        var searchService = _searchService ?? throw new InvalidOperationException("Search service has not been configured.");
+        IMusicApi ApiOf(SaveVo saveVo) => searchService.GetMusicApi(saveVo.LyricVo.SearchSource);
 
         switch (searchResult.SaveVoMap.Count)
         {
             case 0:
                 throw new MusicLyricException(ErrorMsgConst.MUST_SEARCH_BEFORE_GET_SONG_URL);
             case 1:
-                var link = musicApi.GetSongLink(searchResult.SaveVoMap.Keys.First());
+                var (songKey, single) = searchResult.SaveVoMap.First();
+                var link = ApiOf(single).GetSongLink(songKey);
                 if (link.IsSuccess())
                 {
                     windowProvider.SetTextAsync(link.Data);
@@ -102,10 +106,13 @@ public class StorageService : IStorageService
                 csv.AddColumn("id");
                 csv.AddColumn("songLink");
 
-                foreach (var songId in searchResult.SaveVoMap.Values.Select(saveVo => saveVo.SongVo.DisplayId))
+                foreach (var saveVo in searchResult.SaveVoMap.Values)
                 {
+                    var songId = saveVo.SongVo.DisplayId;
                     csv.AddData(songId);
-                    csv.AddData(musicApi.GetSongLink(songId).Data);
+                    // A song without a link (VIP only, delisted) leaves its cell empty instead of ending the export.
+                    var songLink = ApiOf(saveVo).GetSongLink(songId);
+                    csv.AddData(songLink.IsSuccess() ? songLink.Data : "");
                     csv.NextLine();
                 }
 
@@ -163,7 +170,9 @@ public class StorageService : IStorageService
         var link = searchResult.SongLink;
         if (string.IsNullOrWhiteSpace(link))
         {
-            var musicApi = _searchService.GetMusicApi(settingBean.Param.SearchSource);
+            // The song's own source: the source picked on the page may have changed since the search.
+            var musicApi = (_searchService ?? throw new InvalidOperationException("Search service has not been configured."))
+                .GetMusicApi(saveVo.LyricVo.SearchSource);
             var linkResult = musicApi.GetSongLink(saveVo.SongVo.DisplayId);
             if (!linkResult.IsSuccess())
             {
@@ -179,7 +188,7 @@ public class StorageService : IStorageService
         resp.EnsureSuccessStatusCode();
 
         var ext = ResolveAudioExt(link, resp.Content.Headers.ContentType?.MediaType);
-        var file = await CreateOutputFileAsync(folder, $"{GetSafeFileStem(saveVo.SongVo.Name)}.{ext}", settingBean);
+        var file = await CreateOutputFileAsync(folder, $"{OutputStem(saveVo, settingBean)}.{ext}", settingBean);
         await using var output = await file.OpenWriteAsync();
         await using var input = await resp.Content.ReadAsStreamAsync();
         await input.CopyToAsync(output);
@@ -204,7 +213,7 @@ public class StorageService : IStorageService
 
         var folder = await ResolveSaveFolderAsync(settingBean, windowProvider);
         var ext = GetImageExt(saveVo.SongVo.Pics);
-        var file = await CreateOutputFileAsync(folder, $"{GetSafeFileStem(saveVo.SongVo.Name)}-cover.{ext}", settingBean);
+        var file = await CreateOutputFileAsync(folder, $"{OutputStem(saveVo, settingBean)}-cover.{ext}", settingBean);
 
         using var client = CreateHttpClient();
         var bytes = await client.GetByteArrayAsync(saveVo.SongVo.Pics);
@@ -226,7 +235,8 @@ public class StorageService : IStorageService
             throw new MusicLyricException(preCheck);
         }
 
-        await WriteToFile(await ResolveSaveFolderAsync(settingBean, windowProvider), saveVo, settingBean);
+        await WriteToFile(await ResolveSaveFolderAsync(settingBean, windowProvider), saveVo, settingBean,
+            searchResult.EditedTextForSave);
         await DownloadExtraResourcesIfEnabled(saveVo, settingBean, windowProvider);
 
         return string.Format(ErrorMsgConst.SAVE_COMPLETE, 1, 0);
@@ -276,8 +286,7 @@ public class StorageService : IStorageService
             return;
         }
 
-        var baseName = GlobalUtils.GetOutputName(saveVo, settingBean.Config.OutputFileNameFormat,
-            settingBean.Config.SingerSeparator, settingBean.Config.SingerCountLimit);
+        var baseName = OutputStem(saveVo, settingBean);
 
         try
         {
@@ -341,7 +350,7 @@ public class StorageService : IStorageService
 
     public async Task<IStorageFolder?> SelectFolderAndRememberAsync(SettingBean settingBean, IWindowProvider windowProvider)
     {
-        var folder = await PickFolderAsync(windowProvider);
+        var folder = await windowProvider.PickFolderAsync("Dialog.Folder.Output");
         if (folder != null)
         {
             RememberFolder(settingBean, folder);
@@ -357,7 +366,7 @@ public class StorageService : IStorageService
             return cached;
         }
 
-        var picked = await PickFolderAsync(windowProvider)
+        var picked = await windowProvider.PickFolderAsync("Dialog.Folder.Output")
             ?? throw new MusicLyricException(ErrorMsgConst.STORAGE_FOLDER_ERROR);
         RememberFolder(settingBean, picked);
         return picked;
@@ -374,21 +383,10 @@ public class StorageService : IStorageService
         return await windowProvider.TryGetFolderFromPathAsync(path);
     }
 
-    private static async Task<IStorageFolder?> PickFolderAsync(IWindowProvider windowProvider)
-    {
-        var folders = await windowProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
-        {
-            Title = LocalizationService.Get("Dialog.Folder.Output"),
-            AllowMultiple = false
-        });
-
-        return folders.Count == 0 ? null : folders[0];
-    }
-
     private void RememberFolder(SettingBean settingBean, IStorageFolder folder)
     {
-        var path = folder.Path?.LocalPath ?? folder.Path?.ToString();
-        if (string.IsNullOrWhiteSpace(path))
+        var path = folder.LocalPath();
+        if (path == null)
         {
             return;
         }
@@ -397,17 +395,13 @@ public class StorageService : IStorageService
         SaveConfig(settingBean);
     }
 
-    private static string GetSafeFileStem(string name)
-    {
-        if (string.IsNullOrWhiteSpace(name))
-        {
-            return "song";
-        }
-
-        var invalid = Path.GetInvalidFileNameChars();
-        var chars = name.Select(c => invalid.Contains(c) ? '_' : c).ToArray();
-        return new string(chars);
-    }
+    /// <summary>
+    /// The file name, without extension, that a song's lyrics, audio and cover share: the 保存文件名 format from the
+    /// settings, e.g. "晴天 - 周杰伦" for "晴天 - 周杰伦.lrc", ".mp3" and "-cover.jpg".
+    /// </summary>
+    internal static string OutputStem(SaveVo saveVo, SettingBean settingBean) =>
+        GlobalUtils.GetOutputName(saveVo, settingBean.Config.OutputFileNameFormat,
+            settingBean.Config.SingerSeparator, settingBean.Config.SingerCountLimit);
 
     private static string GetImageExt(string url)
     {
@@ -445,14 +439,18 @@ public class StorageService : IStorageService
         };
     }
 
-    private static async Task WriteToFile(IStorageFolder folder, SaveVo saveVo, SettingBean settingBean)
+    /// <param name="editedContent">The lyrics as edited on the online lyrics page, written as they are instead of
+    /// being generated again; null to generate them.</param>
+    private static async Task WriteToFile(IStorageFolder folder, SaveVo saveVo, SettingBean settingBean,
+        string? editedContent = null)
     {
         var extension = settingBean.Param.OutputFileFormat.ToDescription().ToLower();
         var encoding = GlobalUtils.GetEncoding(settingBean.Param.Encoding);
-        var filename = GlobalUtils.GetOutputName(saveVo, settingBean.Config.OutputFileNameFormat,
-            settingBean.Config.SingerSeparator, settingBean.Config.SingerCountLimit);
+        var filename = OutputStem(saveVo, settingBean);
 
-        var res = await LyricUtils.GetOutputContent(saveVo.LyricVo, settingBean);
+        var res = editedContent != null
+            ? [editedContent]
+            : await LyricUtils.GetOutputContent(saveVo.LyricVo, settingBean);
 
         var isSingle = res.Count == 1;
 
@@ -472,7 +470,8 @@ public class StorageService : IStorageService
     private static async Task<IStorageFile> CreateOutputFileAsync(IStorageFolder folder, string desiredFileName, SettingBean settingBean)
     {
         var resolvedFileName = ResolveFileNameWithConflict(folder, desiredFileName, settingBean);
-        return await folder.CreateFileAsync(resolvedFileName);
+        return await folder.CreateFileAsync(resolvedFileName)
+               ?? throw new IOException($"Unable to create output file: {resolvedFileName}");
     }
 
     private static string ResolveFileNameWithConflict(IStorageFolder folder, string desiredFileName, SettingBean settingBean)

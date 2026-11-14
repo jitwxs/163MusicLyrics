@@ -13,6 +13,7 @@ public class CacheAndSettingsRegressionTests
     public void ConfigRoundTripPreservesNestedSettings()
     {
         using var ws = new TestWorkspace();
+        ws.Settings.Config.Language = "zh-TW";
         ws.Settings.Config.ThemeMode = ThemeModeEnum.DARK;
         ws.Settings.Config.NetworkProxyMode = NetworkProxyModeEnum.HTTP_PROXY;
         ws.Settings.Config.ProxyHost = "127.0.0.1";
@@ -26,6 +27,25 @@ public class CacheAndSettingsRegressionTests
         var read = ws.Storage().ReadAppConfig();
         Assert.Equal(ws.Settings.ToJson(), read.ToJson());
         Assert.Equal(new[] { LyricsTypeEnum.TRANSLITERATION, LyricsTypeEnum.ORIGIN, LyricsTypeEnum.ORIGIN_TRANS }, read.Config.DeserializationOutputLyricsTypes());
+    }
+
+    [Fact]
+    public void ADataFolderVariableMovesTheSettingsAndCache()
+    {
+        using var ws = new TestWorkspace();
+        var folder = Path.Combine(ws.Root, "profile");
+        var previous = Environment.GetEnvironmentVariable(Constants.DataDirVariable);
+        try
+        {
+            Environment.SetEnvironmentVariable(Constants.DataDirVariable, folder);
+            Assert.Equal(Path.Combine(folder, "MusicLyricAppSetting.json"), Constants.GetConfigFilePath());
+            Assert.Equal(Path.Combine(folder, "cache"), Constants.GetDefaultSearchCacheFolderPath());
+            Assert.True(Directory.Exists(folder));
+
+            Environment.SetEnvironmentVariable(Constants.DataDirVariable, "");
+            Assert.EndsWith(Path.Combine("MusicLyricApp", "MusicLyricAppSetting.json"), Constants.GetConfigFilePath());
+        }
+        finally { Environment.SetEnvironmentVariable(Constants.DataDirVariable, previous); }
     }
 
     [Fact]

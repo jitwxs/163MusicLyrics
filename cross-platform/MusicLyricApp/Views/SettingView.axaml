@@ -2,385 +2,516 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:arc="https://github.com/AIDotNet/TKCode.Arc"
              xmlns:viewModels="clr-namespace:MusicLyricApp.ViewModels"
+             xmlns:models="using:MusicLyricApp.Models"
              xmlns:loc="using:MusicLyricApp.Core.Localization"
              mc:Ignorable="d"
+             d:DesignWidth="900" d:DesignHeight="700"
              x:Class="MusicLyricApp.Views.SettingView"
              x:DataType="viewModels:SettingViewModel">
 
+    <UserControl.Resources>
+        <!-- Inserts one token at the caret of the custom format input named by the ItemsControl's Tag. -->
+        <DataTemplate x:Key="TimestampTokenTemplate" x:DataType="viewModels:TimestampToken">
+            <arc:Button Variant="Secondary" Size="Small"
+                        Content="{Binding Label}"
+                        ToolTip.Tip="{Binding Tip}"
+                        AutomationProperties.Name="{Binding Tip}"
+                        Click="OnTimestampTokenClick" />
+        </DataTemplate>
+    </UserControl.Resources>
+
     <UserControl.Styles>
-        <Style Selector="Button">
-            <Setter Property="HorizontalContentAlignment" Value="Center" />
-            <Setter Property="VerticalContentAlignment" Value="Center" />
+        <!-- Field controls inside rows carry their label in the row header, so hide their own. -->
+        <!-- Keep label and control on one line down to a narrow content column (sidebar plus section nav). -->
+        <Style Selector="TextBlock.section-title">
+            <Setter Property="FontSize" Value="{arc:ArcDesignTokenResource TypeLG}" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="{arc:ArcDesignTokenResource Foreground}" />
         </Style>
-        <Style Selector="Border.settings-card">
-            <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundBaseLowBrush}" />
-            <Setter Property="BorderBrush" Value="{DynamicResource SystemControlBackgroundBaseMediumLowBrush}" />
+        <Style Selector="arc|SettingsRow">
+            <Setter Property="StackWidth" Value="360" />
         </Style>
-        <Style Selector="Border.settings-divider">
-            <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundBaseMediumLowBrush}" />
+        <!-- Rows holding a path always stack, so long paths never squeeze their label. -->
+        <Style Selector="arc|SettingsRow.path">
+            <Setter Property="StackWidth" Value="100000" />
         </Style>
-        <Style Selector="TextBlock.secondary">
-            <Setter Property="Foreground" Value="{DynamicResource SystemControlForegroundBaseMediumBrush}" />
+        <!-- A fixed control width keeps rows aligned and stops long values (cookies) from widening the row. -->
+        <Style Selector="arc|SettingsRow arc|Input, arc|SettingsRow arc|PasswordField, arc|SettingsRow arc|NumberField">
+            <Setter Property="IsLabelVisible" Value="False" />
+            <Setter Property="Size" Value="Small" />
+            <Setter Property="Width" Value="280" />
         </Style>
-        <Style Selector="Button.subtle">
-            <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundBaseLowBrush}" />
-        </Style>
-        <Style Selector="TabControl > TabItem">
-            <Setter Property="FontSize" Value="12" />
-            <Setter Property="FontWeight" Value="Normal" />
-            <Setter Property="Padding" Value="10,4" />
-            <Setter Property="MinHeight" Value="30" />
+        <Style Selector="arc|SettingsRow arc|Select">
+            <Setter Property="Size" Value="Small" />
+            <Setter Property="Width" Value="280" />
         </Style>
     </UserControl.Styles>
 
-    <Grid RowDefinitions="Auto,*,Auto" RowSpacing="10" Margin="12">
-        <TabControl Grid.Row="1" TabStripPlacement="Top">
-            <TabItem Header="{loc:Loc Key=UI.LyricCustomization}">
-                <ScrollViewer HorizontalScrollBarVisibility="Disabled">
-                    <StackPanel Spacing="10" Margin="10">
-                        <Border Padding="12" BorderThickness="1" CornerRadius="8" Classes="settings-card">
-                            <Grid ColumnDefinitions="140,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="10">
-                                <TextBlock Grid.Row="0" Grid.Column="0" Text="{loc:Loc Key=UI.ChineseProcessing}" VerticalAlignment="Center" />
-                                <ComboBox Grid.Row="0" Grid.Column="1"
-                                          ItemsSource="{Binding SettingParamViewModel.ChineseProcessRules}"
-                                          SelectedItem="{Binding SettingParamViewModel.SelectedChineseProcessRuleItem}" />
+    <Grid RowDefinitions="Auto,*" Margin="24,16,24,0" RowSpacing="{arc:ArcDesignTokenResource Space3}">
 
-                                <TextBlock Grid.Row="1" Grid.Column="0" Text="{loc:Loc Key=UI.VerbatimLyrics}" VerticalAlignment="Center" />
-                                <ComboBox Grid.Row="1" Grid.Column="1"
-                                          ItemsSource="{Binding SettingParamViewModel.VerbatimLyricMode}"
-                                          SelectedItem="{Binding SettingParamViewModel.SelectedVerbatimLyricModeItem}" />
+        <!-- Help text and test results from the settings commands. -->
+        <!-- Help and command results; closable, and long help scrolls instead of pushing the section down. -->
+        <arc:Alert Name="SettingTipsAlert"
+                   Tone="Info"
+                   Title="{loc:Loc Key=Dialog.Notice.Title}"
+                   IsDismissible="True"
+                   IsOpen="{Binding IsTipsOpen, Mode=TwoWay}">
+            <ScrollViewer MaxHeight="220" HorizontalScrollBarVisibility="Disabled">
+                <SelectableTextBlock Text="{Binding SettingTips}" TextWrapping="Wrap" />
+            </ScrollViewer>
+        </arc:Alert>
 
-                                <TextBlock Grid.Row="2" Grid.Column="0" Text="{loc:Loc Key=UI.MissingTranslation}" VerticalAlignment="Center" />
-                                <ComboBox Grid.Row="2" Grid.Column="1"
-                                          ItemsSource="{Binding SettingParamViewModel.TransLyricLostRules}"
-                                          SelectedItem="{Binding SettingParamViewModel.SelectedTransLyricLostRuleItem}" />
+        <!-- One section at a time; the main sidebar lists the sections under "settings". -->
+        <ScrollViewer Grid.Row="1" Name="SectionScroller" HorizontalScrollBarVisibility="Disabled">
+            <!-- Every section fills the same width, whatever its content. -->
+            <Panel Name="SectionHost" Margin="0,0,0,24">
 
-                                <TextBlock Grid.Row="3" Grid.Column="0" Text="{loc:Loc Key=UI.MatchPrecision}" VerticalAlignment="Center" />
-                                <TextBox Grid.Row="3" Grid.Column="1"
-                                         Text="{Binding SettingParamViewModel.MatchPrecisionDeviation, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+            <!-- 1. Lyrics -->
+            <StackPanel Name="LyricsSection" IsVisible="{Binding IsLyricsSection}" Spacing="{arc:ArcDesignTokenResource Space5}">
+                <TextBlock Classes="section-title" Text="{loc:Loc Key=UI.LyricCustomization}" />
+                <StackPanel Spacing="{arc:ArcDesignTokenResource Space6}">
+                    <arc:SettingsGroup Header="{loc:Loc Key=Settings.Group.General}">
+                        <arc:SettingsRow Header="{loc:Loc Key=UI.ChineseProcessing}">
+                            <arc:Select ItemsSource="{Binding SettingParamViewModel.ChineseProcessRule.Items}"
+                                        SelectedItem="{Binding SettingParamViewModel.ChineseProcessRule.Selected}"
+                                        DisplayMemberBinding="{ReflectionBinding DisplayName}" />
+                        </arc:SettingsRow>
+                        <arc:SettingsRow Header="{loc:Loc Key=UI.VerbatimLyrics}">
+                            <arc:Select ItemsSource="{Binding SettingParamViewModel.VerbatimLyricMode.Items}"
+                                        SelectedItem="{Binding SettingParamViewModel.VerbatimLyricMode.Selected}"
+                                        DisplayMemberBinding="{ReflectionBinding DisplayName}" />
+                        </arc:SettingsRow>
+                        <arc:SettingsRow Header="{loc:Loc Key=UI.MissingTranslation}">
+                            <arc:Select ItemsSource="{Binding SettingParamViewModel.TransLyricLostRule.Items}"
+                                        SelectedItem="{Binding SettingParamViewModel.TransLyricLostRule.Selected}"
+                                        DisplayMemberBinding="{ReflectionBinding DisplayName}" />
+                        </arc:SettingsRow>
+                        <arc:SettingsRow Header="{loc:Loc Key=UI.MatchPrecision}">
+                            <arc:NumberField Label="{loc:Loc Key=UI.MatchPrecision}"
+                                             Minimum="0" Maximum="100000" Step="10"
+                                             Value="{Binding SettingParamViewModel.MatchPrecisionDeviation, Mode=TwoWay}" />
+                        </arc:SettingsRow>
+                        <arc:SettingsRow Header="{loc:Loc Key=UI.MergeSeparator}">
+                            <arc:Input Label="{loc:Loc Key=UI.MergeSeparator}"
+                                       Text="{Binding SettingParamViewModel.LrcMergeSeparator, Mode=TwoWay}" />
+                        </arc:SettingsRow>
+                        <arc:SettingsRow Header="{loc:Loc Key=UI.SkipEmptyLyrics}">
+                            <arc:Switch AutomationProperties.Name="{loc:Loc Key=UI.SkipEmptyLyrics}"
+                                        IsChecked="{Binding SettingParamViewModel.IgnoreEmptyLyric, Mode=TwoWay}" />
+                        </arc:SettingsRow>
+                    </arc:SettingsGroup>
 
-                                <TextBlock Grid.Row="4" Grid.Column="0" Text="{loc:Loc Key=UI.MergeSeparator}" VerticalAlignment="Center" />
-                                <TextBox Grid.Row="4" Grid.Column="1"
-                                         Text="{Binding SettingParamViewModel.LrcMergeSeparator, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    <arc:SettingsGroup Header="{loc:Loc Key=UI.TimestampFormat}">
+                        <arc:SettingsRow Header="{loc:Loc Key=UI.LrcTimestamp}"
+                                         Description="{Binding SettingParamViewModel.LrcTimestamp.Preview}">
+                            <arc:Select Name="LrcTimestampPresetSelect"
+                                        ItemsSource="{Binding SettingParamViewModel.LrcTimestamp.Presets}"
+                                        SelectedItem="{Binding SettingParamViewModel.LrcTimestamp.SelectedPreset}"
+                                        DisplayMemberBinding="{ReflectionBinding DisplayName}" />
+                        </arc:SettingsRow>
+                        <arc:SettingsRow Classes="path"
+                                         Header="{loc:Loc Key=Settings.Timestamp.CustomLrc}"
+                                         IsVisible="{Binding SettingParamViewModel.LrcTimestamp.IsCustom}">
+                            <StackPanel Spacing="{arc:ArcDesignTokenResource Space2}">
+                                <arc:Input Name="LrcTimestampInput"
+                                           Width="NaN"
+                                           Label="{loc:Loc Key=Settings.Timestamp.CustomLrc}"
+                                           Description="{Binding SettingParamViewModel.LrcTimestamp.Warning}"
+                                           ErrorMessage="{Binding SettingParamViewModel.LrcTimestamp.Error}"
+                                           Text="{Binding SettingParamViewModel.LrcTimestamp.Text, Mode=TwoWay}" />
+                                <ItemsControl Name="LrcTimestampTokens"
+                                              Tag="LrcTimestampInput"
+                                              ItemsSource="{Binding SettingParamViewModel.LrcTimestamp.Tokens}"
+                                              ItemTemplate="{StaticResource TimestampTokenTemplate}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <WrapPanel ItemSpacing="{arc:ArcDesignTokenResource Space2}"
+                                                       LineSpacing="{arc:ArcDesignTokenResource Space2}" />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                </ItemsControl>
+                            </StackPanel>
+                        </arc:SettingsRow>
+                        <arc:SettingsRow Header="{loc:Loc Key=UI.SrtTimestamp}"
+                                         Description="{Binding SettingParamViewModel.SrtTimestamp.Preview}">
+                            <arc:Select Name="SrtTimestampPresetSelect"
+                                        ItemsSource="{Binding SettingParamViewModel.SrtTimestamp.Presets}"
+                                        SelectedItem="{Binding SettingParamViewModel.SrtTimestamp.SelectedPreset}"
+                                        DisplayMemberBinding="{ReflectionBinding DisplayName}" />
+                        </arc:SettingsRow>
+                        <arc:SettingsRow Classes="path"
+                                         Header="{loc:Loc Key=Settings.Timestamp.CustomSrt}"
+                                         IsVisible="{Binding SettingParamViewModel.SrtTimestamp.IsCustom}">
+                            <StackPanel Spacing="{arc:ArcDesignTokenResource Space2}">
+                                <arc:Input Name="SrtTimestampInput"
+                                           Width="NaN"
+                                           Label="{loc:Loc Key=Settings.Timestamp.CustomSrt}"
+                                           Description="{Binding SettingParamViewModel.SrtTimestamp.Warning}"
+                                           ErrorMessage="{Binding SettingParamViewModel.SrtTimestamp.Error}"
+                                           Text="{Binding SettingParamViewModel.SrtTimestamp.Text, Mode=TwoWay}" />
+                                <ItemsControl Name="SrtTimestampTokens"
+                                              Tag="SrtTimestampInput"
+                                              ItemsSource="{Binding SettingParamViewModel.SrtTimestamp.Tokens}"
+                                              ItemTemplate="{StaticResource TimestampTokenTemplate}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <WrapPanel ItemSpacing="{arc:ArcDesignTokenResource Space2}"
+                                                       LineSpacing="{arc:ArcDesignTokenResource Space2}" />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                </ItemsControl>
+                            </StackPanel>
+                        </arc:SettingsRow>
+                        <arc:SettingsRow Header="{loc:Loc Key=UI.MillisecondRule}"
+                                         Description="{Binding SettingParamViewModel.DotTypeHint}">
+                            <arc:Select Name="DotTypeSelect"
+                                        IsEnabled="{Binding SettingParamViewModel.IsDotTypeApplicable}"
+                                        ItemsSource="{Binding SettingParamViewModel.DotType.Items}"
+                                        SelectedItem="{Binding SettingParamViewModel.DotType.Selected}"
+                                        DisplayMemberBinding="{ReflectionBinding DisplayName}" />
+                        </arc:SettingsRow>
+                    </arc:SettingsGroup>
 
-                                <CheckBox Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2"
-                                          Content="{loc:Loc Key=UI.SkipEmptyLyrics}"
-                                          IsChecked="{Binding SettingParamViewModel.IgnoreEmptyLyric, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                            </Grid>
-                        </Border>
+                    <arc:SettingsGroup Header="{loc:Loc Key=Settings.LyricPriority}"
+                                       Description="{loc:Loc Key=Settings.LyricPriorityHint}">
+                        <arc:SettingsGroup.HeaderActions>
+                            <arc:Button Variant="Ghost" Size="Small"
+                                        Content="{loc:Loc Key=Settings.ShowHelp}"
+                                        Command="{Binding OutputTipsCommand}" />
+                        </arc:SettingsGroup.HeaderActions>
+                        <arc:ReorderableList Name="LyricTypesList"
+                                             Label="{loc:Loc Key=Settings.LyricPriority}"
+                                             ItemsSource="{Binding LyricsTypes}">
+                            <arc:ReorderableList.ItemTemplate>
+                                <DataTemplate x:DataType="models:LyricsTypeEnumModel">
+                                    <arc:Checkbox Content="{Binding Name}" IsChecked="{Binding IsSelected, Mode=TwoWay}" />
+                                </DataTemplate>
+                            </arc:ReorderableList.ItemTemplate>
+                        </arc:ReorderableList>
+                    </arc:SettingsGroup>
+                </StackPanel>
+            </StackPanel>
 
-                        <Border Padding="12" BorderThickness="1" CornerRadius="8" Classes="settings-card">
-                            <StackPanel Spacing="10">
-                                <StackPanel Orientation="Horizontal" Spacing="8">
-                                    <TextBlock Text="{loc:Loc Key=UI.TimestampFormat}" FontWeight="SemiBold" VerticalAlignment="Center" />
-                                    <Button Width="22" Height="22" Padding="0" Content="?" Command="{Binding TimestampTipsCommand}" />
+            <!-- 2. Extensions: translation services and sign-in cookies -->
+            <StackPanel Name="ExtensionsSection" IsVisible="{Binding IsExtensionsSection}" Spacing="{arc:ArcDesignTokenResource Space5}">
+                <TextBlock Classes="section-title" Text="{loc:Loc Key=UI.Extensions}" />
+                <StackPanel Spacing="{arc:ArcDesignTokenResource Space6}">
+                    <arc:SettingsGroup Header="{loc:Loc Key=Settings.Group.Translate}"
+                                       Description="{loc:Loc Key=Settings.Group.TranslateHint}">
+                        <arc:SettingsRow Header="{loc:Loc Key=UI.Extra08}">
+                            <arc:Input Label="{loc:Loc Key=UI.Extra08}"
+                                       Text="{Binding SettingParamViewModel.BaiduAppId, Mode=TwoWay}" />
+                        </arc:SettingsRow>
+                        <arc:SettingsRow Header="{loc:Loc Key=UI.Extra09}">
+                            <arc:PasswordField Label="{loc:Loc Key=UI.Extra09}"
+                                               Text="{Binding SettingParamViewModel.BaiduSecret, Mode=TwoWay}" />
+                        </arc:SettingsRow>
+                        <arc:SettingsRow Header="{loc:Loc Key=UI.Extra10}">
+                            <arc:PasswordField Label="{loc:Loc Key=UI.Extra10}"
+                                               Text="{Binding SettingParamViewModel.CaiYunToken, Mode=TwoWay}" />
+                        </arc:SettingsRow>
+                    </arc:SettingsGroup>
+
+                    <arc:SettingsGroup Name="CookieGroup" Header="{loc:Loc Key=Settings.Group.Cookie}"
+                                       Description="{loc:Loc Key=Settings.Group.CookieHint}">
+                        <!-- The state below the field is checked shortly after the cookie is edited. -->
+                        <arc:SettingsRow Header="{loc:Loc Key=UI.Extra11}"
+                                         Description="{Binding Login.NetEase.Detail, FallbackValue=''}">
+                            <StackPanel Spacing="{arc:ArcDesignTokenResource Space2}">
+                                <arc:PasswordField Name="NetEaseCookieField"
+                                                   Label="{loc:Loc Key=UI.Extra11}"
+                                                   Text="{Binding SettingParamViewModel.NetEaseCookie, Mode=TwoWay}" />
+                                <StackPanel Orientation="Horizontal" Spacing="{arc:ArcDesignTokenResource Space2}"
+                                            IsVisible="{Binding Login, Converter={x:Static ObjectConverters.IsNotNull}}">
+                                    <arc:Badge Name="NetEaseLoginBadge" Size="Small" MaxWidth="190"
+                                               Tone="{Binding Login.NetEase.Tone, FallbackValue=Neutral}"
+                                               ToolTip.Tip="{Binding Login.NetEase.Label, FallbackValue=''}">
+                                        <arc:Badge.Icon>
+                                            <arc:ArcGlyph Data="{Binding Login.NetEase.Icon, FallbackValue={x:Null}}" />
+                                        </arc:Badge.Icon>
+                                        <TextBlock Text="{Binding Login.NetEase.Label, FallbackValue=''}" TextTrimming="CharacterEllipsis" />
+                                    </arc:Badge>
+                                    <arc:Button Name="NetEaseLoginCheckButton" Variant="Ghost" Size="Small"
+                                                Content="{loc:Loc Key=Login.Recheck}"
+                                                IsLoading="{Binding Login.NetEase.IsChecking, FallbackValue=False}"
+                                                Command="{Binding Login.CheckCommand, FallbackValue={x:Null}}"
+                                                CommandParameter="{x:Static models:SearchSourceEnum.NET_EASE_MUSIC}" />
+                                    <arc:Button Name="NetEaseWebsiteButton" Variant="Ghost" Size="Small"
+                                                Content="{loc:Loc Key=Login.OpenWebsite}"
+                                                ToolTip.Tip="{loc:Loc Key=Login.OpenWebsiteTip}"
+                                                Command="{Binding OpenSourceWebsiteCommand}"
+                                                CommandParameter="{x:Static models:SearchSourceEnum.NET_EASE_MUSIC}" />
                                 </StackPanel>
-                                <Grid ColumnDefinitions="140,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="8">
-                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="{loc:Loc Key=UI.LrcTimestamp}" VerticalAlignment="Center" />
-                                    <TextBox Grid.Row="0" Grid.Column="1"
-                                             Text="{Binding SettingParamViewModel.LrcTimestampFormat, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                                    <TextBlock Grid.Row="1" Grid.Column="0" Text="{loc:Loc Key=UI.SrtTimestamp}" VerticalAlignment="Center" />
-                                    <TextBox Grid.Row="1" Grid.Column="1"
-                                             Text="{Binding SettingParamViewModel.SrtTimestampFormat, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                                    <TextBlock Grid.Row="2" Grid.Column="0" Text="{loc:Loc Key=UI.MillisecondRule}" VerticalAlignment="Center" />
-                                    <ComboBox Grid.Row="2" Grid.Column="1"
-                                              ItemsSource="{Binding SettingParamViewModel.DotTypes}"
-                                              SelectedItem="{Binding SettingParamViewModel.SelectedDotTypeItem}" />
-                                </Grid>
                             </StackPanel>
-                        </Border>
-
-                        <Border Padding="12" BorderThickness="1" CornerRadius="8" Classes="settings-card">
-                            <StackPanel Spacing="8">
-                                <TextBlock Text="{loc:Loc Key=UI.LyricPriority}" FontWeight="SemiBold" />
-                                <DataGrid ItemsSource="{Binding LyricsTypes}"
-                                          AutoGenerateColumns="False"
-                                          SelectionMode="Single"
-                                          SelectedItem="{Binding SelectedLyricsTypeItem, Mode=TwoWay}"
-                                          CanUserReorderColumns="False"
-                                          BorderThickness="1"
-                                          Height="260">
-                                    <DataGrid.Columns>
-                                        <DataGridTemplateColumn Header="{loc:Loc Key=UI.Enabled}" Width="80" CanUserSort="False">
-                                            <DataGridTemplateColumn.CellTemplate>
-                                                <DataTemplate>
-                                                    <CheckBox IsChecked="{Binding IsSelected}" HorizontalAlignment="Center" />
-                                                </DataTemplate>
-                                            </DataGridTemplateColumn.CellTemplate>
-                                        </DataGridTemplateColumn>
-                                        <DataGridTextColumn Header="{loc:Loc Key=UI.LyricType}" Binding="{Binding Name}" Width="*" CanUserSort="False" />
-                                    </DataGrid.Columns>
-                                    <DataGrid.ContextMenu>
-                                        <ContextMenu>
-                                            <MenuItem Header="{loc:Loc Key=UI.MoveUp}" Command="{Binding MoveUpCommand}" />
-                                            <MenuItem Header="{loc:Loc Key=UI.MoveDown}" Command="{Binding MoveDownCommand}" />
-                                        </ContextMenu>
-                                    </DataGrid.ContextMenu>
-                                </DataGrid>
+                        </arc:SettingsRow>
+                        <!-- The state below the field is checked shortly after the cookie is edited. -->
+                        <arc:SettingsRow Header="{loc:Loc Key=UI.Extra12}"
+                                         Description="{Binding Login.QQ.Detail, FallbackValue=''}">
+                            <StackPanel Spacing="{arc:ArcDesignTokenResource Space2}">
+                                <arc:PasswordField Name="QqCookieField"
+                                                   Label="{loc:Loc Key=UI.Extra12}"
+                                                   Text="{Binding SettingParamViewModel.QqMusicCookie, Mode=TwoWay}" />
+                                <StackPanel Orientation="Horizontal" Spacing="{arc:ArcDesignTokenResource Space2}"
+                                            IsVisible="{Binding Login, Converter={x:Static ObjectConverters.IsNotNull}}">
+                                    <arc:Badge Name="QqLoginBadge" Size="Small" MaxWidth="190"
+                                               Tone="{Binding Login.QQ.Tone, FallbackValue=Neutral}"
+                                               ToolTip.Tip="{Binding Login.QQ.Label, FallbackValue=''}">
+                                        <arc:Badge.Icon>
+                                            <arc:ArcGlyph Data="{Binding Login.QQ.Icon, FallbackValue={x:Null}}" />
+                                        </arc:Badge.Icon>
+                                        <TextBlock Text="{Binding Login.QQ.Label, FallbackValue=''}" TextTrimming="CharacterEllipsis" />
+                                    </arc:Badge>
+                                    <arc:Button Name="QqLoginCheckButton" Variant="Ghost" Size="Small"
+                                                Content="{loc:Loc Key=Login.Recheck}"
+                                                IsLoading="{Binding Login.QQ.IsChecking, FallbackValue=False}"
+                                                Command="{Binding Login.CheckCommand, FallbackValue={x:Null}}"
+                                                CommandParameter="{x:Static models:SearchSourceEnum.QQ_MUSIC}" />
+                                    <arc:Button Name="QqWebsiteButton" Variant="Ghost" Size="Small"
+                                                Content="{loc:Loc Key=Login.OpenWebsite}"
+                                                ToolTip.Tip="{loc:Loc Key=Login.OpenWebsiteTip}"
+                                                Command="{Binding OpenSourceWebsiteCommand}"
+                                                CommandParameter="{x:Static models:SearchSourceEnum.QQ_MUSIC}" />
+                                </StackPanel>
                             </StackPanel>
-                        </Border>
-                    </StackPanel>
-                </ScrollViewer>
-            </TabItem>
+                        </arc:SettingsRow>
+                    </arc:SettingsGroup>
+                </StackPanel>
+            </StackPanel>
 
-            <TabItem Header="{loc:Loc Key=UI.Extensions}">
-                <ScrollViewer HorizontalScrollBarVisibility="Disabled">
-                    <StackPanel Spacing="10" Margin="10">
-                        <Border Padding="12" BorderThickness="1" CornerRadius="8" Classes="settings-card">
-                            <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="140,*" ColumnSpacing="10" RowSpacing="8">
-                                <TextBlock Grid.Row="0" Grid.Column="0" Text="{loc:Loc Key=UI.Extra08}" VerticalAlignment="Center" />
-                                <TextBox Grid.Row="0" Grid.Column="1"
-                                         Text="{Binding SettingParamViewModel.BaiduAppId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                                <TextBlock Grid.Row="1" Grid.Column="0" Text="{loc:Loc Key=UI.Extra09}" VerticalAlignment="Center" />
-                                <TextBox Grid.Row="1" Grid.Column="1"
-                                         Text="{Binding SettingParamViewModel.BaiduSecret, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                                <TextBlock Grid.Row="2" Grid.Column="0" Text="{loc:Loc Key=UI.Extra10}" VerticalAlignment="Center" />
-                                <TextBox Grid.Row="2" Grid.Column="1"
-                                         Text="{Binding SettingParamViewModel.CaiYunToken, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                            </Grid>
-                        </Border>
-
-                        <Border Padding="12" BorderThickness="1" CornerRadius="8" Classes="settings-card">
-                            <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="140,*" ColumnSpacing="10" RowSpacing="8">
-                                <TextBlock Grid.Row="0" Grid.Column="0" Text="{loc:Loc Key=UI.Extra11}" VerticalAlignment="Center" />
-                                <TextBox Grid.Row="0" Grid.Column="1"
-                                         Text="{Binding SettingParamViewModel.NetEaseCookie, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                                <TextBlock Grid.Row="1" Grid.Column="0" Text="{loc:Loc Key=UI.Extra12}" VerticalAlignment="Center" />
-                                <TextBox Grid.Row="1" Grid.Column="1"
-                                         Text="{Binding SettingParamViewModel.QqMusicCookie, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                            </Grid>
-                        </Border>
-                    </StackPanel>
-                </ScrollViewer>
-            </TabItem>
-
-            <TabItem Header="{loc:Loc Key=UI.Network}">
-                <ScrollViewer HorizontalScrollBarVisibility="Disabled">
-                    <StackPanel Spacing="10" Margin="10">
-                        <Border Padding="12" BorderThickness="1" CornerRadius="8" Classes="settings-card">
-                            <StackPanel Spacing="8">
-                                <TextBlock Text="{loc:Loc Key=UI.ProxySettings}" FontWeight="SemiBold" />
-                                <TextBlock Text="{loc:Loc Key=UI.ProxyHelp}" Classes="secondary" TextWrapping="Wrap" />
-                                <Grid ColumnDefinitions="140,*,80,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="8">
-                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="{loc:Loc Key=UI.Type}" VerticalAlignment="Center" />
-                                    <ComboBox Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="3"
-                                              ItemsSource="{Binding SettingParamViewModel.NetworkProxyModes}"
-                                              SelectedItem="{Binding SettingParamViewModel.SelectedNetworkProxyModeItem}" />
-
-                                    <TextBlock Grid.Row="1" Grid.Column="0" Text="{loc:Loc Key=UI.Address}" VerticalAlignment="Center" />
-                                    <TextBox Grid.Row="1" Grid.Column="1"
-                                             IsEnabled="{Binding SettingParamViewModel.IsHttpProxySelected}"
-                                             Text="{Binding SettingParamViewModel.ProxyHost, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                                    <TextBlock Grid.Row="1" Grid.Column="2" Text="{loc:Loc Key=UI.Port}" VerticalAlignment="Center" />
-                                    <TextBox Grid.Row="1" Grid.Column="3"
-                                             IsEnabled="{Binding SettingParamViewModel.IsHttpProxySelected}"
-                                             Text="{Binding SettingParamViewModel.ProxyPortText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-
-                                    <TextBlock Grid.Row="2" Grid.Column="0" Text="{loc:Loc Key=UI.Username}" VerticalAlignment="Center" />
-                                    <TextBox Grid.Row="2" Grid.Column="1"
-                                             IsEnabled="{Binding SettingParamViewModel.IsHttpProxySelected}"
-                                             Text="{Binding SettingParamViewModel.ProxyUsername, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                                    <TextBlock Grid.Row="2" Grid.Column="2" Text="{loc:Loc Key=UI.Password}" VerticalAlignment="Center" />
-                                    <TextBox Grid.Row="2" Grid.Column="3"
-                                             IsEnabled="{Binding SettingParamViewModel.IsHttpProxySelected}"
-                                             PasswordChar="*"
-                                             Text="{Binding SettingParamViewModel.ProxyPassword, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                                </Grid>
-
-                                <TextBlock Text="{Binding SettingParamViewModel.ProxyPortError}" Foreground="IndianRed" />
-
-                                <StackPanel Orientation="Horizontal" Spacing="8">
-                                    <Button Width="90"
-                                            Content="{loc:Loc Key=UI.Test}"
+            <!-- 3. Network proxy -->
+            <StackPanel Name="NetworkSection" IsVisible="{Binding IsNetworkSection}" Spacing="{arc:ArcDesignTokenResource Space5}">
+                <TextBlock Classes="section-title" Text="{loc:Loc Key=UI.Network}" />
+                <arc:SettingsGroup Header="{loc:Loc Key=UI.ProxySettings}"
+                                   Description="{loc:Loc Key=UI.ProxyHelp}">
+                    <arc:SettingsRow Header="{loc:Loc Key=UI.Type}">
+                        <arc:Select ItemsSource="{Binding SettingParamViewModel.NetworkProxyMode.Items}"
+                                    SelectedItem="{Binding SettingParamViewModel.NetworkProxyMode.Selected}"
+                                    DisplayMemberBinding="{ReflectionBinding DisplayName}" />
+                    </arc:SettingsRow>
+                    <arc:SettingsRow Header="{loc:Loc Key=UI.Address}">
+                        <arc:Input Label="{loc:Loc Key=UI.Address}"
+                                   IsEnabled="{Binding SettingParamViewModel.IsHttpProxySelected}"
+                                   Text="{Binding SettingParamViewModel.ProxyHost, Mode=TwoWay}" />
+                    </arc:SettingsRow>
+                    <arc:SettingsRow Header="{loc:Loc Key=UI.Port}">
+                        <arc:Input Name="ProxyPortInput"
+                                   Label="{loc:Loc Key=UI.Port}"
+                                   IsEnabled="{Binding SettingParamViewModel.IsHttpProxySelected}"
+                                   ErrorMessage="{Binding SettingParamViewModel.ProxyPort.Error}"
+                                   Text="{Binding SettingParamViewModel.ProxyPort.Text, Mode=TwoWay}" />
+                    </arc:SettingsRow>
+                    <arc:SettingsRow Header="{loc:Loc Key=UI.Username}">
+                        <arc:Input Label="{loc:Loc Key=UI.Username}"
+                                   IsEnabled="{Binding SettingParamViewModel.IsHttpProxySelected}"
+                                   Text="{Binding SettingParamViewModel.ProxyUsername, Mode=TwoWay}" />
+                    </arc:SettingsRow>
+                    <arc:SettingsRow Header="{loc:Loc Key=UI.Password}">
+                        <arc:PasswordField Label="{loc:Loc Key=UI.Password}"
+                                           IsEnabled="{Binding SettingParamViewModel.IsHttpProxySelected}"
+                                           Text="{Binding SettingParamViewModel.ProxyPassword, Mode=TwoWay}" />
+                    </arc:SettingsRow>
+                    <arc:SettingsGroup.Footer>
+                        <StackPanel Spacing="{arc:ArcDesignTokenResource Space2}">
+                            <StackPanel Orientation="Horizontal" Spacing="{arc:ArcDesignTokenResource Space2}">
+                                <arc:Button Variant="Secondary"
+                                            Content="{loc:Loc Key=Settings.TestProxy}"
                                             Command="{Binding TestProxyCommand}"
                                             IsEnabled="{Binding SettingParamViewModel.IsHttpProxySelected}" />
-                                    <Button Width="90"
-                                            Content="{loc:Loc Key=UI.Apply}"
+                                <arc:Button Variant="Primary"
+                                            Content="{loc:Loc Key=Settings.ApplyProxy}"
                                             Command="{Binding ApplyProxyCommand}" />
-                                    <TextBlock Text="{loc:Loc Key=UI.ProxyRestart}" Classes="secondary" VerticalAlignment="Center" />
-                                </StackPanel>
                             </StackPanel>
-                        </Border>
-                    </StackPanel>
-                </ScrollViewer>
-            </TabItem>
+                            <TextBlock Text="{loc:Loc Key=UI.ProxyRestart}"
+                                       TextWrapping="Wrap"
+                                       FontSize="{arc:ArcDesignTokenResource TypeSM}"
+                                       Foreground="{arc:ArcDesignTokenResource TextSecondary}" />
+                        </StackPanel>
+                    </arc:SettingsGroup.Footer>
+                </arc:SettingsGroup>
+            </StackPanel>
 
-            <TabItem Header="{loc:Loc Key=UI.DownloadCache}">
-                <ScrollViewer HorizontalScrollBarVisibility="Disabled">
-                    <StackPanel Spacing="10" Margin="10">
-                        <Border Padding="12" BorderThickness="1" CornerRadius="8" Classes="settings-card">
-                            <StackPanel Spacing="8">
-                                <StackPanel Orientation="Horizontal" Spacing="8">
-                                    <TextBlock Text="{loc:Loc Key=UI.DownloadBehavior}" FontWeight="SemiBold" VerticalAlignment="Center" />
-                                    <Button Width="22" Height="22" Padding="0" Content="?" Command="{Binding OutputTipsCommand}" />
-                                </StackPanel>
-                                <TextBlock Text="{loc:Loc Key=UI.DownloadHelp}" Classes="secondary" />
-                                <Border Height="1" Margin="0,2,0,2" Classes="settings-divider" />
-                                <WrapPanel>
-                                    <CheckBox Content="{loc:Loc Key=UI.SkipInstrumental}"
-                                              IsChecked="{Binding SettingParamViewModel.IgnorePureMusicInSave, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                              Margin="0,0,12,8" />
-                                    <CheckBox Content="{loc:Loc Key=UI.SeparateIsolated}"
-                                              IsChecked="{Binding SettingParamViewModel.SeparateFileForIsolated, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                              Margin="0,0,12,8" />
-                                    <CheckBox Content="{loc:Loc Key=UI.DownloadExtras}"
-                                              IsChecked="{Binding SettingParamViewModel.DownloadCoverAndSongLinkOnSave, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                              Margin="0,0,12,8" />
-                                </WrapPanel>
-                                <Grid ColumnDefinitions="140,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="8">
-                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="{loc:Loc Key=UI.ArtistSeparator}" VerticalAlignment="Center" />
-                                    <TextBox Grid.Row="0" Grid.Column="1"
-                                             Text="{Binding SettingParamViewModel.SingerSeparator, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                                    <TextBlock Grid.Row="1" Grid.Column="0" Text="{loc:Loc Key=UI.FileName}" VerticalAlignment="Center" />
-                                    <TextBox Grid.Row="1" Grid.Column="1"
-                                             Text="{Binding SettingParamViewModel.OutputFileNameFormat, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                                    <TextBlock Grid.Row="2" Grid.Column="0" Text="{loc:Loc Key=UI.ArtistLimit}" VerticalAlignment="Center" />
-                                    <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Spacing="8">
-                                        <TextBox Width="100"
-                                                 Text="{Binding SettingParamViewModel.SingerCountLimit, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                                        <TextBlock Text="{loc:Loc Key=UI.Extra13}" Classes="secondary" VerticalAlignment="Center" />
-                                    </StackPanel>
-                                </Grid>
-                                <Border Height="1" Margin="0,2,0,2" Classes="settings-divider" />
-                                <Grid ColumnDefinitions="140,*" RowDefinitions="Auto,Auto" ColumnSpacing="10" RowSpacing="8">
-                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="{loc:Loc Key=UI.Extra14}" VerticalAlignment="Center" />
-                                    <ComboBox Grid.Row="0" Grid.Column="1"
-                                              ItemsSource="{Binding SettingParamViewModel.FileConflictStrategies}"
-                                              SelectedItem="{Binding SettingParamViewModel.SelectedFileConflictStrategyItem}" />
-                                    <TextBlock Grid.Row="1" Grid.Column="0" Text="{loc:Loc Key=UI.Extra15}" VerticalAlignment="Center" />
-                                    <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" Spacing="8">
-                                        <TextBox Width="180"
-                                                 IsEnabled="{Binding SettingParamViewModel.IsConflictSuffixEnabled}"
-                                                 Text="{Binding SettingParamViewModel.FileConflictSuffixPattern, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                                        <TextBlock Text="{loc:Loc Key=UI.Extra16}" Classes="secondary" VerticalAlignment="Center" />
-                                    </StackPanel>
-                                </Grid>
-                            </StackPanel>
-                        </Border>
+            <!-- 4. Download and cache -->
+            <StackPanel Name="DownloadSection" IsVisible="{Binding IsDownloadSection}" Spacing="{arc:ArcDesignTokenResource Space5}">
+                <TextBlock Classes="section-title" Text="{loc:Loc Key=UI.DownloadCache}" />
+                <StackPanel Spacing="{arc:ArcDesignTokenResource Space6}">
+                    <arc:SettingsGroup Header="{loc:Loc Key=UI.DownloadBehavior}"
+                                       Description="{loc:Loc Key=UI.DownloadHelp}">
+                        <arc:SettingsGroup.HeaderActions>
+                            <arc:Button Variant="Ghost" Size="Small"
+                                        Content="{loc:Loc Key=Settings.ShowHelp}"
+                                        Command="{Binding OutputTipsCommand}" />
+                        </arc:SettingsGroup.HeaderActions>
+                        <arc:SettingsRow Header="{loc:Loc Key=UI.SkipInstrumental}">
+                            <arc:Switch AutomationProperties.Name="{loc:Loc Key=UI.SkipInstrumental}"
+                                        IsChecked="{Binding SettingParamViewModel.IgnorePureMusicInSave, Mode=TwoWay}" />
+                        </arc:SettingsRow>
+                        <arc:SettingsRow Header="{loc:Loc Key=UI.SeparateIsolated}">
+                            <arc:Switch AutomationProperties.Name="{loc:Loc Key=UI.SeparateIsolated}"
+                                        IsChecked="{Binding SettingParamViewModel.SeparateFileForIsolated, Mode=TwoWay}" />
+                        </arc:SettingsRow>
+                        <arc:SettingsRow Header="{loc:Loc Key=UI.DownloadExtras}">
+                            <arc:Switch AutomationProperties.Name="{loc:Loc Key=UI.DownloadExtras}"
+                                        IsChecked="{Binding SettingParamViewModel.DownloadCoverAndSongLinkOnSave, Mode=TwoWay}" />
+                        </arc:SettingsRow>
+                    </arc:SettingsGroup>
 
-                        <Border Padding="12" BorderThickness="1" CornerRadius="8" Classes="settings-card">
-                            <StackPanel Spacing="8">
-                                <TextBlock Text="{loc:Loc Key=UI.Extra17}" FontWeight="SemiBold" />
-                                <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
-                                    <TextBox Name="SaveFolderPathTextBox" Grid.Column="0"
-                                             Text="{Binding SettingParamViewModel.SaveFolderPath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                                    <Button Grid.Column="1"
-                                            Content="{loc:Loc Key=UI.Extra21}"
-                                            Width="90"
-                                            Classes="subtle"
+                    <arc:SettingsGroup Header="{loc:Loc Key=Settings.Group.Naming}">
+                        <arc:SettingsRow Header="{loc:Loc Key=UI.FileName}">
+                            <arc:Input Label="{loc:Loc Key=UI.FileName}"
+                                       Text="{Binding SettingParamViewModel.OutputFileNameFormat, Mode=TwoWay}" />
+                        </arc:SettingsRow>
+                        <arc:SettingsRow Header="{loc:Loc Key=UI.ArtistSeparator}">
+                            <arc:Input Label="{loc:Loc Key=UI.ArtistSeparator}"
+                                       Text="{Binding SettingParamViewModel.SingerSeparator, Mode=TwoWay}" />
+                        </arc:SettingsRow>
+                        <arc:SettingsRow Header="{loc:Loc Key=UI.ArtistLimit}" Description="{loc:Loc Key=UI.Extra13}">
+                            <arc:NumberField Label="{loc:Loc Key=UI.ArtistLimit}"
+                                             Minimum="-1" Maximum="100" Step="1"
+                                             Value="{Binding SettingParamViewModel.SingerCountLimit, Mode=TwoWay}" />
+                        </arc:SettingsRow>
+                        <arc:SettingsRow Header="{loc:Loc Key=UI.Extra14}">
+                            <arc:Select ItemsSource="{Binding SettingParamViewModel.FileConflictStrategy.Items}"
+                                        SelectedItem="{Binding SettingParamViewModel.FileConflictStrategy.Selected}"
+                                        DisplayMemberBinding="{ReflectionBinding DisplayName}" />
+                        </arc:SettingsRow>
+                        <arc:SettingsRow Header="{loc:Loc Key=UI.Extra15}" Description="{loc:Loc Key=UI.Extra16}">
+                            <arc:Input Label="{loc:Loc Key=UI.Extra15}"
+                                       IsEnabled="{Binding SettingParamViewModel.IsConflictSuffixEnabled}"
+                                       Text="{Binding SettingParamViewModel.FileConflictSuffixPattern, Mode=TwoWay}" />
+                        </arc:SettingsRow>
+                    </arc:SettingsGroup>
+
+                    <arc:SettingsGroup Header="{loc:Loc Key=UI.Extra17}">
+                        <arc:SettingsRow Header="{loc:Loc Key=UI.Extra17}" Classes="path" ContentAlignment="Stretch">
+                            <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="{arc:ArcDesignTokenResource Space2}">
+                                <arc:Input Name="SaveFolderPathTextBox"
+                                           Width="NaN"
+                                           Label="{loc:Loc Key=UI.Extra17}"
+                                           Text="{Binding SettingParamViewModel.SaveFolderPath, Mode=TwoWay}" />
+                                <arc:Button Grid.Column="1" Variant="Secondary" Size="Small"
+                                            Content="{loc:Loc Key=Settings.SelectFolder}"
                                             Command="{Binding SelectSaveFolderCommand}" />
-                                    <Button Name="OpenSaveFolderButton" Grid.Column="2"
-                                            Content="{loc:Loc Key=UI.Extra22}"
-                                            Width="90"
-                                            Classes="subtle"
+                                <arc:Button Grid.Column="2" Name="OpenSaveFolderButton" Variant="Ghost" Size="Small"
+                                            Content="{loc:Loc Key=Settings.OpenFolder}"
                                             Command="{Binding OpenSaveFolderCommand}" />
-                                </Grid>
-                            </StackPanel>
-                        </Border>
-
-                        <Border Padding="12" BorderThickness="1" CornerRadius="8" Classes="settings-card">
-                            <StackPanel Spacing="8">
-                                <TextBlock Text="{loc:Loc Key=UI.Extra19}" FontWeight="SemiBold" />
-                                <Grid ColumnDefinitions="140,*,Auto,Auto" ColumnSpacing="8" RowDefinitions="Auto,Auto" RowSpacing="8">
-                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="{loc:Loc Key=UI.Extra20}" VerticalAlignment="Center" />
-                                    <TextBox Grid.Row="0" Grid.Column="1"
-                                             Text="{Binding SettingParamViewModel.SearchCacheFolderPath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                                    <Button Grid.Row="0" Grid.Column="2"
-                                            Content="{loc:Loc Key=UI.Extra21}"
-                                            Width="90"
-                                            Classes="subtle"
-                                            Command="{Binding SelectSearchCacheFolderCommand}" />
-                                    <Button Grid.Row="0" Grid.Column="3"
-                                            Content="{loc:Loc Key=UI.Extra22}"
-                                            Width="90"
-                                            Classes="subtle"
-                                            Command="{Binding OpenSearchCachePathCommand}" />
-
-                                    <TextBlock Grid.Row="1" Grid.Column="0" Text="{loc:Loc Key=UI.Extra23}" VerticalAlignment="Center" />
-                                    <TextBox Grid.Row="1" Grid.Column="1"
-                                             Width="120"
-                                             HorizontalAlignment="Left"
-                                             Text="{Binding SettingParamViewModel.SearchCacheMaxSizeMbText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                                    <TextBlock Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="2"
-                                               VerticalAlignment="Center"
-                                               Foreground="IndianRed"
-                                               Text="{Binding SettingParamViewModel.SearchCacheSizeError}" />
-                                </Grid>
-                            </StackPanel>
-                        </Border>
-                    </StackPanel>
-                </ScrollViewer>
-            </TabItem>
-
-            <TabItem Header="{loc:Loc Key=UI.Application}">
-                <ScrollViewer HorizontalScrollBarVisibility="Disabled">
-                    <StackPanel Spacing="10" Margin="10">
-                        <Border Padding="12" BorderThickness="1" CornerRadius="8" Classes="settings-card">
-                            <StackPanel Spacing="8">
-                                <WrapPanel>
-                                    <CheckBox Content="{loc:Loc Key=UI.Extra24}"
-                                              IsChecked="{Binding SettingParamViewModel.AggregatedBlurSearch, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                              Margin="0,0,12,8" />
-                                    <CheckBox Content="{loc:Loc Key=UI.Extra25}"
-                                              IsChecked="{Binding SettingParamViewModel.AutoReadClipboard, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                              Margin="0,0,12,8" />
-                                    <CheckBox Content="{loc:Loc Key=UI.Extra26}"
-                                              IsChecked="{Binding SettingParamViewModel.AutoCheckUpdate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                              Margin="0,0,12,8" />
-                                    <CheckBox Content="{loc:Loc Key=UI.EnableFileLogging}"
-                                              IsChecked="{Binding SettingParamViewModel.EnableFileLogging, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                              Margin="0,0,12,8" />
-                                    <CheckBox Content="{loc:Loc Key=UI.Extra27}"
-                                              IsChecked="{Binding SettingParamViewModel.ConfirmBeforeExit, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                              Margin="0,0,12,8" />
-                                </WrapPanel>
-                                <Grid ColumnDefinitions="140,*" ColumnSpacing="10">
-                                    <TextBlock Grid.Column="0" Text="{loc:Loc Key=UI.Extra28}" VerticalAlignment="Center" />
-                                    <ComboBox Grid.Column="1"
-                                              ItemsSource="{Binding SettingParamViewModel.ThemeModeRules}"
-                                              SelectedItem="{Binding SettingParamViewModel.SelectedThemeModeRuleItem}" />
-                                </Grid>
-                                <Grid ColumnDefinitions="140,*" ColumnSpacing="10">
-                                    <TextBlock Grid.Column="0" Text="{loc:Loc Key=UI.Language}" VerticalAlignment="Center" />
-                                    <ComboBox Grid.Column="1" ItemsSource="{Binding SettingParamViewModel.Languages}"
-                                              SelectedItem="{Binding SettingParamViewModel.SelectedLanguage}" />
-                                </Grid>
-                                <TextBlock Text="{loc:Loc Key=UI.LanguageRestart}" Classes="secondary" />
-                                <Button Width="120"
-                                        HorizontalAlignment="Left"
-                                        Content="{loc:Loc Key=UI.Extra29}"
-                                        Command="{Binding CheckUpdateCommand}" />
-                            </StackPanel>
-                        </Border>
-
-                        <Border Padding="12" BorderThickness="1" CornerRadius="8" Classes="settings-card">
-                            <StackPanel Spacing="6">
-                                <TextBlock Text="{loc:Loc Key=UI.Extra30}" FontWeight="SemiBold" />
-                                <TextBlock Classes="secondary">
-                                    <Run Text="{loc:Loc Key=UI.Extra31}" />
-                                    <LineBreak />
-                                    <Run Text="{loc:Loc Key=UI.Extra32}" />
-                                    <LineBreak />
-                                    <Run Text="{loc:Loc Key=UI.Extra33}" />
-                                </TextBlock>
-                            </StackPanel>
-                        </Border>
-
-                        <Border Padding="12" BorderThickness="1" CornerRadius="8" Classes="settings-card">
-                            <Grid ColumnDefinitions="140,*,Auto" ColumnSpacing="10">
-                                <TextBlock Grid.Column="0" Text="{loc:Loc Key=UI.Extra34}" VerticalAlignment="Center" />
-                                <TextBox Grid.Column="1" Text="{Binding ConfigPath}" IsReadOnly="True" VerticalAlignment="Center" />
-                                <Button Grid.Column="2" Content="{loc:Loc Key=UI.Extra35}" Width="70" Command="{Binding OpenConfigPathCommand}" />
                             </Grid>
-                        </Border>
-                    </StackPanel>
-                </ScrollViewer>
-            </TabItem>
-        </TabControl>
+                        </arc:SettingsRow>
+                    </arc:SettingsGroup>
 
-        <Border Grid.Row="2" Padding="8" BorderThickness="1" CornerRadius="6" Classes="settings-card">
-            <TextBox Text="{Binding SettingTips}" IsReadOnly="True" AcceptsReturn="True" Height="120" BorderThickness="0" Background="Transparent" />
-        </Border>
+                    <arc:SettingsGroup Header="{loc:Loc Key=UI.Extra19}">
+                        <arc:SettingsRow Header="{loc:Loc Key=UI.Extra20}" Classes="path" ContentAlignment="Stretch">
+                            <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="{arc:ArcDesignTokenResource Space2}">
+                                <arc:Input Width="NaN"
+                                           Label="{loc:Loc Key=UI.Extra20}"
+                                           Text="{Binding SettingParamViewModel.SearchCacheFolderPath, Mode=TwoWay}" />
+                                <arc:Button Grid.Column="1" Variant="Secondary" Size="Small"
+                                            Content="{loc:Loc Key=Settings.SelectFolder}"
+                                            Command="{Binding SelectSearchCacheFolderCommand}" />
+                                <arc:Button Grid.Column="2" Variant="Ghost" Size="Small"
+                                            Content="{loc:Loc Key=Settings.OpenFolder}"
+                                            Command="{Binding OpenSearchCachePathCommand}" />
+                            </Grid>
+                        </arc:SettingsRow>
+                        <arc:SettingsRow Header="{loc:Loc Key=UI.Extra23}">
+                            <arc:Input Name="CacheSizeInput"
+                                       Label="{loc:Loc Key=UI.Extra23}"
+                                       ErrorMessage="{Binding SettingParamViewModel.SearchCacheMaxSizeMb.Error}"
+                                       Text="{Binding SettingParamViewModel.SearchCacheMaxSizeMb.Text, Mode=TwoWay}" />
+                        </arc:SettingsRow>
+                        <arc:SettingsRow Header="{loc:Loc Key=Settings.StartupLoadLimit}"
+                                         Description="{loc:Loc Key=Settings.StartupLoadLimitHint}">
+                            <arc:Input Name="StartupLoadLimitInput"
+                                       Label="{loc:Loc Key=Settings.StartupLoadLimit}"
+                                       ErrorMessage="{Binding SettingParamViewModel.SearchCacheStartupLoadLimit.Error}"
+                                       Text="{Binding SettingParamViewModel.SearchCacheStartupLoadLimit.Text, Mode=TwoWay}" />
+                        </arc:SettingsRow>
+                    </arc:SettingsGroup>
+                </StackPanel>
+            </StackPanel>
+
+            <!-- 5. Application -->
+            <StackPanel Name="ApplicationSection" IsVisible="{Binding IsApplicationSection}" Spacing="{arc:ArcDesignTokenResource Space5}">
+                <TextBlock Classes="section-title" Text="{loc:Loc Key=UI.Application}" />
+                <StackPanel Spacing="{arc:ArcDesignTokenResource Space6}">
+                    <arc:SettingsGroup Header="{loc:Loc Key=Settings.Group.Appearance}">
+                        <arc:SettingsRow Header="{loc:Loc Key=UI.Extra28}">
+                            <arc:Select ItemsSource="{Binding SettingParamViewModel.ThemeMode.Items}"
+                                        SelectedItem="{Binding SettingParamViewModel.ThemeMode.Selected}"
+                                        DisplayMemberBinding="{ReflectionBinding DisplayName}" />
+                        </arc:SettingsRow>
+                        <arc:SettingsRow Header="{loc:Loc Key=UI.Language}" Description="{loc:Loc Key=UI.LanguageRestart}">
+                            <arc:Select ItemsSource="{Binding SettingParamViewModel.Languages}"
+                                        SelectedItem="{Binding SettingParamViewModel.SelectedLanguage}"
+                                        DisplayMemberBinding="{ReflectionBinding DisplayName}" />
+                        </arc:SettingsRow>
+                    </arc:SettingsGroup>
+
+                    <arc:SettingsGroup Header="{loc:Loc Key=Settings.Group.Behavior}">
+                        <arc:SettingsRow Header="{loc:Loc Key=UI.Extra24}">
+                            <arc:Switch AutomationProperties.Name="{loc:Loc Key=UI.Extra24}"
+                                        IsChecked="{Binding SettingParamViewModel.AggregatedBlurSearch, Mode=TwoWay}" />
+                        </arc:SettingsRow>
+                        <arc:SettingsRow Header="{loc:Loc Key=UI.Extra25}">
+                            <arc:Switch AutomationProperties.Name="{loc:Loc Key=UI.Extra25}"
+                                        IsChecked="{Binding SettingParamViewModel.AutoReadClipboard, Mode=TwoWay}" />
+                        </arc:SettingsRow>
+                        <arc:SettingsRow Header="{loc:Loc Key=UI.Extra27}">
+                            <arc:Switch AutomationProperties.Name="{loc:Loc Key=UI.Extra27}"
+                                        IsChecked="{Binding SettingParamViewModel.ConfirmBeforeExit, Mode=TwoWay}" />
+                        </arc:SettingsRow>
+                        <arc:SettingsRow Header="{loc:Loc Key=UI.Extra26}">
+                            <StackPanel Orientation="Horizontal" Spacing="{arc:ArcDesignTokenResource Space3}">
+                                <arc:Button Variant="Secondary" Size="Small"
+                                            Content="{loc:Loc Key=UI.Extra29}"
+                                            Command="{Binding CheckUpdateCommand}" />
+                                <arc:Switch AutomationProperties.Name="{loc:Loc Key=UI.Extra26}"
+                                            VerticalAlignment="Center"
+                                            IsChecked="{Binding SettingParamViewModel.AutoCheckUpdate, Mode=TwoWay}" />
+                            </StackPanel>
+                        </arc:SettingsRow>
+                    </arc:SettingsGroup>
+
+
+                    <arc:SettingsGroup Header="{loc:Loc Key=Settings.Group.ConfigAndLogs}">
+                        <arc:SettingsRow Header="{loc:Loc Key=UI.Extra34}" Classes="path" ContentAlignment="Stretch">
+                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{arc:ArcDesignTokenResource Space2}">
+                                <arc:Input Width="NaN" Label="{loc:Loc Key=UI.Extra34}" Text="{Binding ConfigPath}" IsReadOnly="True" />
+                                <arc:Button Grid.Column="1" Variant="Ghost" Size="Small"
+                                            Content="{loc:Loc Key=Settings.OpenConfig}"
+                                            Command="{Binding OpenConfigPathCommand}" />
+                            </Grid>
+                        </arc:SettingsRow>
+                        <arc:SettingsRow Header="{loc:Loc Key=UI.EnableFileLogging}"
+                                         Description="{loc:Loc Key=Settings.FileLoggingHint}">
+                            <arc:Switch AutomationProperties.Name="{loc:Loc Key=UI.EnableFileLogging}"
+                                        IsChecked="{Binding SettingParamViewModel.EnableFileLogging, Mode=TwoWay}" />
+                        </arc:SettingsRow>
+                        <arc:SettingsRow Name="LogFolderRow" Header="{loc:Loc Key=Settings.LogFolder}"
+                                         Description="{Binding LogUsageText}"
+                                         Classes="path" ContentAlignment="Stretch">
+                            <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="{arc:ArcDesignTokenResource Space2}">
+                                <arc:Input Name="LogFolderInput" Width="NaN" Label="{loc:Loc Key=Settings.LogFolder}"
+                                           Text="{Binding LogFolderPath, Mode=OneWay}" IsReadOnly="True" />
+                                <arc:Button Grid.Column="1" Variant="Ghost" Size="Small"
+                                            Content="{loc:Loc Key=Settings.OpenFolder}"
+                                            Command="{Binding OpenLogFolderCommand}" />
+                                <arc:Button Name="DeleteOldLogsButton" Grid.Column="2" Variant="Ghost" Size="Small"
+                                            Content="{loc:Loc Key=Settings.DeleteOldLogs}"
+                                            Command="{Binding DeleteOldLogsCommand}" />
+                            </Grid>
+                        </arc:SettingsRow>
+                    </arc:SettingsGroup>
+                </StackPanel>
+            </StackPanel>
+
+            <!-- 6. Shortcuts: built from Core/AppShortcuts in code-behind. -->
+            <StackPanel Name="ShortcutsSection" IsVisible="{Binding IsShortcutsSection}" Spacing="{arc:ArcDesignTokenResource Space5}">
+                <TextBlock Classes="section-title" Text="{loc:Loc Key=UI.Shortcuts}" />
+                <ContentControl Name="ShortcutListHost" />
+            </StackPanel>
+            </Panel>
+        </ScrollViewer>
     </Grid>
 </UserControl>

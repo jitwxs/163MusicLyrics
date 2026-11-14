@@ -60,7 +60,7 @@ public class LyricTimestampTest
     [InlineData("00:00.000")]
     [InlineData("[00:00:00:000]")]
     [InlineData("[abc:def.ghi]")]
-    public void Test_Constructor_With_Invalid_Timestamp_String(string input)
+    public void Test_Constructor_With_Invalid_Timestamp_String(string? input)
     {
         // Act
         var timestamp = new LyricTimestamp(input);

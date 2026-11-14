@@ -1,0 +1,269 @@
+{
+ "status_info": {},
+ "album_info": {
+  "id": "7144550895936604162",
+  "name": "对味",
+  "artists": [
+   {
+    "id": "6761756189907765249",
+    "name": "群星",
+    "state": {
+     "blocked_by_me": false
+    },
+    "simple_display_name": "群星",
+    "user_artist_type": 1
+   }
+  ],
+  "company": "WM China",
+  "count_tracks": 9,
+  "state": {},
+  "url_cover": {
+   "uri": "tos-cn-v-2774c002/20e989ac4f99485d9cfc7f51f4fee82d",
+   "urls": [
+    "https://p3-luna.douyinpic.com/img/",
+    "https://p6-luna.douyinpic.com/img/"
+   ],
+   "template_prefix": "tplv-b829550vbb"
+  },
+  "release_date": 1663718400
+ },
+ "tracks": [
+  {
+   "id": "7144550907370276865",
+   "album": {
+    "id": "7144550895936604162",
+    "name": "对味",
+    "release_date": 1663718400,
+    "url_cover": {
+     "uri": "tos-cn-v-2774c002/20e989ac4f99485d9cfc7f51f4fee82d",
+     "urls": [
+      "https://p3-luna.douyinpic.com/img/",
+      "https://p6-luna.douyinpic.com/img/"
+     ],
+     "template_prefix": "tplv-b829550vbb"
+    },
+    "playing_wave_color": null,
+    "paused_wave_color": null
+   },
+   "artists": [
+    {
+     "id": "7147141772706056194",
+     "name": "EchoDing",
+     "state": {
+      "blocked_by_me": false
+     },
+     "simple_display_name": "EchoDing",
+     "user_artist_type": 1
+    }
+   ],
+   "duration": 228839,
+   "name": "Can We Fall in Love This Autumn",
+   "state": {},
+   "status": 10,
+   "sim_id": 7144551460670277669,
+   "song_maker_team": {
+    "composers": [
+     {
+      "name": "Echo Ding"
+     }
+    ],
+    "lyricists": [
+     {
+      "name": "Echo Ding"
+     }
+    ]
+   },
+   "media_type": "track",
+   "chorus": {
+    "duration": 0,
+    "start": 58752
+   },
+   "vocal": 1,
+   "lang_codes": [
+    "EN"
+   ],
+   "share_status": 1,
+   "first_vocal": {
+    "duration": 58752,
+    "start": 0
+   },
+   "download_status": 1,
+   "sim_id_v3": 76474884098,
+   "plug_status": {
+    "can_plug": false,
+    "is_plugged": false
+   },
+   "nodes": [
+    {
+     "type": 2,
+     "start": 58752,
+     "duration": 0,
+     "opacity": 1
+    }
+   ],
+   "is_support_bell": true
+  },
+  {
+   "id": "7144550908838299650",
+   "album": {
+    "id": "7144550895936604162",
+    "name": "对味",
+    "release_date": 1663718400,
+    "url_cover": {
+     "uri": "tos-cn-v-2774c002/20e989ac4f99485d9cfc7f51f4fee82d",
+     "urls": [
+      "https://p3-luna.douyinpic.com/img/",
+      "https://p6-luna.douyinpic.com/img/"
+     ],
+     "template_prefix": "tplv-b829550vbb"
+    },
+    "playing_wave_color": null,
+    "paused_wave_color": null
+   },
+   "artists": [
+    {
+     "id": "7147142541240961026",
+     "name": "化骨龙",
+     "state": {
+      "blocked_by_me": false
+     },
+     "simple_display_name": "化骨龙",
+     "user_artist_type": 1
+    }
+   ],
+   "duration": 246165,
+   "name": "Good Luck",
+   "state": {},
+   "status": 10,
+   "sim_id": 7144551461416863744,
+   "song_maker_team": {
+    "composers": [
+     {
+      "name": "化骨龙乐队"
+     }
+    ],
+    "lyricists": [
+     {
+      "name": "化骨龙乐队"
+     }
+    ]
+   },
+   "media_type": "track",
+   "chorus": {
+    "duration": 0,
+    "start": 76224
+   },
+   "vocal": 1,
+   "lang_codes": [
+    "ZH"
+   ],
+   "share_status": 1,
+   "first_vocal": {
+    "duration": 45312,
+    "start": 30912
+   },
+   "download_status": 1,
+   "sim_id_v3": 74235109378,
+   "plug_status": {
+    "can_plug": false,
+    "is_plugged": false
+   },
+   "nodes": [
+    {
+     "type": 1,
+     "start": 30912,
+     "duration": 45312,
+     "opacity": 0.5
+    },
+    {
+     "type": 2,
+     "start": 76224,
+     "duration": 0,
+     "opacity": 1
+    }
+   ],
+   "is_support_bell": true
+  },
+  {
+   "id": "7144550897014556673",
+   "album": {
+    "id": "7144550895936604162",
+    "name": "对味",
+    "release_date": 1663718400,
+    "url_cover": {
+     "uri": "tos-cn-v-2774c002/20e989ac4f99485d9cfc7f51f4fee82d",
+     "urls": [
+      "https://p3-luna.douyinpic.com/img/",
+      "https://p6-luna.douyinpic.com/img/"
+     ],
+     "template_prefix": "tplv-b829550vbb"
+    },
+    "playing_wave_color": null,
+    "paused_wave_color": null
+   },
+   "artists": [
+    {
+     "id": "6876347626103506945",
+     "name": "余孟霏Fei",
+     "state": {
+      "blocked_by_me": false
+     },
+     "simple_display_name": "余孟霏Fei",
+     "user_artist_type": 2
+    }
+   ],
+   "duration": 217582,
+   "name": "Don't Call Me Bae",
+   "state": {},
+   "status": 10,
+   "sim_id": 7144551457293862915,
+   "song_maker_team": {
+    "composers": [
+     {
+      "name": "余孟霏"
+     }
+    ],
+    "lyricists": [
+     {
+      "name": "张子涵"
+     }
+    ]
+   },
+   "media_type": "track",
+   "chorus": {
+    "duration": 0,
+    "start": 64319
+   },
+   "vocal": 1,
+   "lang_codes": [
+    "ZH"
+   ],
+   "share_status": 1,
+   "first_vocal": {
+    "duration": 42239,
+    "start": 22080
+   },
+   "download_status": 1,
+   "sim_id_v3": 84114210818,
+   "plug_status": {
+    "can_plug": false,
+    "is_plugged": false
+   },
+   "nodes": [
+    {
+     "type": 1,
+     "start": 22080,
+     "duration": 42239,
+     "opacity": 0.5
+    },
+    {
+     "type": 2,
+     "start": 64319,
+     "duration": 0,
+     "opacity": 1
+    }
+   ],
+   "is_support_bell": true
+  }
+ ]
+}

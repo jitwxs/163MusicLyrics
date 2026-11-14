@@ -14,19 +14,60 @@ public static class Constants
     private const string ConfigFileName = "MusicLyricAppSetting.json";
 
     /// <summary>
+    /// Folder for the settings and the search cache instead of the user's own, when set: a portable copy, a test,
+    /// or screenshots taken with a clean profile.
+    /// </summary>
+    public const string DataDirVariable = "MUSICLYRICAPP_DATA_DIR";
+
+    /// <summary>
     /// 获取用户配置文件的完整路径，确保目录存在。
     /// </summary>
     public static string GetConfigFilePath()
     {
-        string basePath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-
         // macOS/Linux 会自动转换为 ~/Library/Application Support 或 ~/.config
-        string configDir = Path.Combine(basePath, AppFolderName);
+        var configDir = Environment.GetEnvironmentVariable(DataDirVariable) is { Length: > 0 } custom
+            ? Path.GetFullPath(custom)
+            : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), AppFolderName);
 
         // 确保目录存在
         Directory.CreateDirectory(configDir);
 
         return Path.Combine(configDir, ConfigFileName);
+    }
+
+    /// <summary>
+    /// Where file logs go, following each platform's convention instead of the program folder, which may be
+    /// read-only (Program Files, /opt) or a signed .app bundle:
+    /// Windows <c>%LOCALAPPDATA%\MusicLyricApp\logs</c> (logs do not roam with the profile),
+    /// macOS <c>~/Library/Logs/MusicLyricApp</c> (shown by Console.app),
+    /// Linux <c>$XDG_STATE_HOME/MusicLyricApp/logs</c>, falling back to <c>~/.local/state</c>.
+    /// The folder is created by the logger when it first writes.
+    /// </summary>
+    public static string GetLogFolderPath() => ResolveLogFolderPath(
+        OperatingSystem.IsWindows() ? LogPlatform.Windows :
+        OperatingSystem.IsMacOS() ? LogPlatform.MacOS : LogPlatform.Linux,
+        Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+        Environment.GetEnvironmentVariable("XDG_STATE_HOME"));
+
+    public enum LogPlatform { Windows, MacOS, Linux }
+
+    public static string ResolveLogFolderPath(LogPlatform platform, string home, string localAppData,
+        string? xdgStateHome)
+    {
+        switch (platform)
+        {
+            case LogPlatform.Windows:
+                return Path.Combine(localAppData, AppFolderName, "logs");
+            case LogPlatform.MacOS:
+                return Path.Combine(home, "Library", "Logs", AppFolderName);
+            default:
+                // The XDG spec ignores relative values.
+                var stateHome = !string.IsNullOrWhiteSpace(xdgStateHome) && Path.IsPathRooted(xdgStateHome)
+                    ? xdgStateHome
+                    : Path.Combine(home, ".local", "state");
+                return Path.Combine(stateHome, AppFolderName, "logs");
+        }
     }
 
     public static string GetDefaultSearchCacheFolderPath()
@@ -35,17 +76,11 @@ public static class Constants
         return Path.Combine(configDir, "cache");
     }
 
-    public static WindowIcon GetIcon(string name)
-    {
-        var assembly = Assembly.GetExecutingAssembly();
-        var resourceName = "MusicLyricApp.Resources." + name + ".ico";
-
-        using var stream = assembly.GetManifestResourceStream(resourceName);
-        
-        return new WindowIcon(stream);
-    }
-
     public const int BatchQuerySize = 300;
+
+    /// <summary>Default and upper bound for how many cached songs the download manager restores at startup.</summary>
+    public const int DefaultStartupCacheLoadLimit = 500;
+    public const int MaxStartupCacheLoadLimit = 5000;
 
     public const int SleepMsBetweenBatchQuery = 500;
 
@@ -59,11 +94,6 @@ public static class Constants
             DEFAULT,
 
             /// <summary>
-            /// 时间戳设置
-            /// </summary>
-            TIME_STAMP_SETTING,
-
-            /// <summary>
             /// 输出设置
             /// </summary>
             OUTPUT_SETTING
@@ -75,16 +105,6 @@ public static class Constants
 
             switch (typeEnum)
             {
-                case TypeEnum.TIME_STAMP_SETTING:
-                    list.Add("Help.Timestamp.Intro");
-                    list.Add("Help.Timestamp.Hours");
-                    list.Add("Help.Timestamp.Minutes");
-                    list.Add("Help.Timestamp.Seconds");
-                    list.Add("Help.Timestamp.MillisecondsOne");
-                    list.Add("Help.Timestamp.MillisecondsTwo");
-                    list.Add("Help.Timestamp.MillisecondsThree");
-                    list.Add("Help.Timestamp.Rounding");
-                    break;
                 case TypeEnum.OUTPUT_SETTING:
                     list.Add("Help.Output.Intro");
                     list.Add("Help.Output.Id");

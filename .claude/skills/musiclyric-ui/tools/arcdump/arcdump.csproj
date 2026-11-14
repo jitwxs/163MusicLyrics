@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><OutputType>Exe</OutputType><TargetFramework>net10.0</TargetFramework><Nullable>enable</Nullable><ImplicitUsings>enable</ImplicitUsings></PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="TKCode.Arc" Version="1.0.0" />
+    <PackageReference Include="TKCode.Arc.Blocks" Version="1.0.0" />
+    <PackageReference Include="TKCode.Arc.Icons.Lucide" Version="1.0.0" />
+  </ItemGroup>
+</Project>

@@ -1,25 +1,23 @@
 <Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              x:Class="MusicLyricApp.App"
-             xmlns:local="using:MusicLyricApp"
-             RequestedThemeVariant="Default">
-             <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
+             xmlns:local="using:MusicLyricApp">
+    <!-- Arc (registered in Program.UseArc) supplies the theme for every control, shared ones included. -->
+
+    <!-- AvaloniaEdit's control templates only. Its Fluent and Simple themes read resources of themes this app does
+         not load; Views/LyricEditorSetup supplies the few it needs from Arc's tokens, and the find panel has a theme
+         of its own in Arc controls. -->
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceInclude Source="avares://AvaloniaEdit/Themes/Base.xaml" />
+                <!-- After the base templates, so its find panel theme replaces AvaloniaEdit's. -->
+                <ResourceInclude Source="avares://MusicLyricApp/Views/LyricSearchPanelTheme.axaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Application.Resources>
 
     <Application.DataTemplates>
         <local:ViewLocator/>
     </Application.DataTemplates>
-
-    <Application.Resources>
-        <DataTemplate x:Key="LocalizedDisplayNameTemplate">
-            <TextBlock Text="{ReflectionBinding DisplayName}" />
-        </DataTemplate>
-    </Application.Resources>
-  
-    <Application.Styles>
-        <FluentTheme />
-        <Style Selector="ComboBox">
-            <Setter Property="ItemTemplate" Value="{StaticResource LocalizedDisplayNameTemplate}" />
-        </Style>
-        <StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml"/>
-    </Application.Styles>
 </Application>

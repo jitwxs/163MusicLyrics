@@ -1,4 +1,4 @@
-using Avalonia.Controls;
+﻿using Avalonia.Controls;
 using Avalonia.Headless.XUnit;
 using Avalonia.Platform.Storage;
 using Moq;
@@ -7,6 +7,7 @@ using CommunityToolkit.Mvvm.Input;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
 using MusicLyricApp.Core.Localization;
+using MusicLyricApp.Core.Service;
 using MusicLyricApp.ViewModels;
 using MusicLyricApp.Views;
 
@@ -14,19 +15,24 @@ namespace MusicLyricAppTest.Regression;
 
 public class SaveFolderRegressionTests
 {
-    private sealed class PickerSettingWindow(TestWorkspace ws) : SettingWindow(ws.Settings)
+    /// <summary>Stands in for the main window that hosts the settings page and owns its folder pickers.</summary>
+    private sealed class PickerProvider : IWindowProvider
     {
         public int PickerCalls { get; private set; }
         public FolderPickerOpenOptions? PickerOptions { get; private set; }
         public TaskCompletionSource<IReadOnlyList<IStorageFolder>> PickerResult { get; } =
             new(TaskCreationOptions.RunContinuationsAsynchronously);
 
-        public override Task<IReadOnlyList<IStorageFolder>> OpenFolderPickerAsync(FolderPickerOpenOptions options)
+        public Task<IReadOnlyList<IStorageFolder>> OpenFolderPickerAsync(FolderPickerOpenOptions options)
         {
             PickerCalls++;
             PickerOptions = options;
             return PickerResult.Task;
         }
+
+        public Task SetTextAsync(string? text) => Task.CompletedTask;
+
+        public Task<IStorageFolder?> TryGetFolderFromPathAsync(string path) => Task.FromResult<IStorageFolder?>(null);
     }
 
     [AvaloniaTheory]
@@ -36,25 +42,24 @@ public class SaveFolderRegressionTests
     [InlineData(true, "cancelled")]
     [InlineData(false, "error")]
     [InlineData(true, "error")]
-    public async Task BothPickersBelongToSettingsAndCancellationKeepsWindowsOpen(bool cache, string outcome)
+    public async Task BothPickersGoThroughHostAndCancellationKeepsSettingsPageOpen(bool cache, string outcome)
     {
         using var ws = new TestWorkspace();
         ws.Storage().SaveConfig(ws.Settings);
         var before = File.ReadAllBytes(ws.ConfigPath);
-        var owner = new Window();
-        var settings = new PickerSettingWindow(ws);
+        var picker = new PickerProvider();
+        var settings = TestWorkspace.Host(new SettingView(), new SettingViewModel(ws.Settings, picker));
         var closed = false;
         settings.Closed += (_, _) => closed = true;
         try
         {
-            owner.Show();
-            settings.Show(owner);
+            settings.Show();
             var vm = Assert.IsType<SettingViewModel>(settings.DataContext);
             var savePath = vm.SettingParamViewModel.SaveFolderPath;
             var cachePath = vm.SettingParamViewModel.SearchCacheFolderPath;
             var tips = vm.SettingTips;
             var expectedCommand = cache ? vm.SelectSearchCacheFolderCommand : vm.SelectSaveFolderCommand;
-            settings.GetVisualDescendants().OfType<TabControl>().Single().SelectedIndex = 3;
+            ShowDownloadSection(Assert.IsType<SettingView>(settings.Content));
             Dispatcher.UIThread.RunJobs();
             var button = Assert.Single(settings.GetVisualDescendants().OfType<Button>(),
                 x => ReferenceEquals(x.Command, expectedCommand));
@@ -63,29 +68,27 @@ public class SaveFolderRegressionTests
 
             await ExecuteFromUiAsync(command, () =>
             {
-                Assert.Equal(1, settings.PickerCalls);
-                Assert.Same(owner, settings.Owner);
+                Assert.Equal(1, picker.PickerCalls);
                 Assert.True(settings.IsVisible);
                 Assert.True(command.IsRunning);
                 Assert.False(command.CanExecute(null));
                 Assert.False(command.ExecutionTask!.IsCompleted);
-                Assert.NotNull(settings.PickerOptions);
-                Assert.False(settings.PickerOptions.AllowMultiple);
+                Assert.NotNull(picker.PickerOptions);
+                Assert.False(picker.PickerOptions.AllowMultiple);
                 Assert.Equal(LocalizationService.Get(cache ? "Dialog.Folder.Cache" : "Dialog.Folder.Output"),
-                    settings.PickerOptions.Title);
-                if (outcome == "cancelled") settings.PickerResult.SetCanceled();
-                else if (outcome == "error") settings.PickerResult.SetException(new InvalidOperationException("picker unavailable"));
-                else settings.PickerResult.SetResult(Array.Empty<IStorageFolder>());
+                    picker.PickerOptions.Title);
+                if (outcome == "cancelled") picker.PickerResult.SetCanceled();
+                else if (outcome == "error") picker.PickerResult.SetException(new InvalidOperationException("picker unavailable"));
+                else picker.PickerResult.SetResult(Array.Empty<IStorageFolder>());
             });
 
             Assert.True(settings.IsVisible);
-            Assert.True(owner.IsVisible);
             Assert.False(closed);
             Assert.Equal(savePath, vm.SettingParamViewModel.SaveFolderPath);
             Assert.Equal(cachePath, vm.SettingParamViewModel.SearchCacheFolderPath);
             if (outcome == "empty") Assert.Equal(tips, vm.SettingTips);
             else if (outcome == "error") Assert.Equal("picker unavailable", vm.SettingTips);
-            else Assert.Equal(new TaskCanceledException(settings.PickerResult.Task).Message, vm.SettingTips);
+            else Assert.Equal(new TaskCanceledException(picker.PickerResult.Task).Message, vm.SettingTips);
             Assert.Equal(savePath, ws.Settings.Config.LastSaveFolderPath);
             Assert.Equal(cachePath, ws.Settings.Config.SearchCacheFolderPath);
             Assert.Equal(before, File.ReadAllBytes(ws.ConfigPath));
@@ -95,14 +98,13 @@ public class SaveFolderRegressionTests
         }
         finally
         {
-            settings.PickerResult.TrySetResult(Array.Empty<IStorageFolder>());
+            picker.PickerResult.TrySetResult(Array.Empty<IStorageFolder>());
             settings.Close();
-            owner.Close();
         }
     }
 
     [AvaloniaFact]
-    public void MainWindowOpensSettingsWithCorrectOwnerAndReusesIt()
+    public void MainWindowShowsSettingsAsPageAndRecreatesItPerVisit()
     {
         using var ws = new TestWorkspace();
         ws.Settings.Config.ConfirmBeforeExit = false;
@@ -112,31 +114,31 @@ public class SaveFolderRegressionTests
         try
         {
             main.Show();
+            var page = main.FindControl<SettingView>("SettingsPage")!;
             vm.ExecuteSettingCommand.Execute(null);
-            var settings = Assert.IsType<SettingWindow>(Assert.Single(main.OwnedWindows));
-            Assert.Same(main, settings.Owner);
-            Assert.True(settings.IsVisible);
-            vm.ExecuteSettingCommand.Execute(null);
-            Assert.Same(settings, Assert.Single(main.OwnedWindows));
-            var firstViewModel = settings.DataContext;
-            settings.Close();
+            Dispatcher.UIThread.RunJobs();
             Assert.Empty(main.OwnedWindows);
+            Assert.True(page.IsVisible);
+            var firstViewModel = Assert.IsType<SettingViewModel>(page.DataContext);
+
+            // Choosing settings again while it is open keeps the same page state.
+            vm.ExecuteSettingCommand.Execute(null);
+            Assert.Same(firstViewModel, page.DataContext);
+
+            vm.CurrentPageKey = MainWindowViewModel.PageSearch;
+            Dispatcher.UIThread.RunJobs();
+            Assert.False(page.IsVisible);
             Assert.True(main.IsVisible);
 
             vm.ExecuteSettingCommand.Execute(null);
-            var reopened = Assert.IsType<SettingWindow>(Assert.Single(main.OwnedWindows));
-            Assert.NotSame(settings, reopened);
-            Assert.NotSame(firstViewModel, reopened.DataContext);
-            Assert.Same(main, reopened.Owner);
-            Assert.True(reopened.IsVisible);
-            var closed = 0;
-            reopened.Closed += (_, _) => closed++;
+            Dispatcher.UIThread.RunJobs();
+            Assert.True(page.IsVisible);
+            Assert.NotSame(firstViewModel, page.DataContext);
+            Assert.Empty(main.OwnedWindows);
+
             main.Close();
             Dispatcher.UIThread.RunJobs();
-            Assert.Equal(1, closed);
-            Assert.False(reopened.IsVisible);
             Assert.False(main.IsVisible);
-            Assert.Empty(main.OwnedWindows);
         }
         finally
         {
@@ -249,7 +251,7 @@ public class SaveFolderRegressionTests
         Assert.Equal(ws.Root, ws.Storage().ReadAppConfig().Config.LastSaveFolderPath);
         pending.SetResult(new[] { folder.Object });
 
-        Assert.Same(folder.Object, await selection.WaitAsync(TimeSpan.FromSeconds(5)));
+        Assert.Same(folder.Object, await selection.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken));
         Assert.Equal(path, ws.Settings.Config.LastSaveFolderPath);
         Assert.Equal(path, ws.Storage().ReadAppConfig().Config.LastSaveFolderPath);
         Assert.Empty(ws.CreatedFiles);
@@ -327,40 +329,44 @@ public class SaveFolderRegressionTests
     [AvaloniaTheory]
     [InlineData(false)]
     [InlineData(true)]
-    public async Task ClosingOwnerWhilePickerPendingClosesSettingsAndCompletionDoesNotReopenIt(bool cache)
+    public async Task ClosingHostWhilePickerPendingAndCompletionDoesNotReopenIt(bool cache)
     {
         using var ws = new TestWorkspace();
-        var owner = new Window();
-        var settings = new PickerSettingWindow(ws);
+        var picker = new PickerProvider();
+        var settings = TestWorkspace.Host(new SettingView(), new SettingViewModel(ws.Settings, picker));
         var closed = 0;
         settings.Closed += (_, _) => closed++;
         try
         {
-            owner.Show();
-            settings.Show(owner);
+            settings.Show();
             var vm = Assert.IsType<SettingViewModel>(settings.DataContext);
             var tips = vm.SettingTips;
             await ExecuteFromUiAsync(cache ? vm.SelectSearchCacheFolderCommand : vm.SelectSaveFolderCommand, () =>
             {
-                Assert.Equal(1, settings.PickerCalls);
-                owner.Close();
+                Assert.Equal(1, picker.PickerCalls);
+                settings.Close();
                 Assert.Equal(1, closed);
                 Assert.False(settings.IsVisible);
-                settings.PickerResult.SetResult(Array.Empty<IStorageFolder>());
+                picker.PickerResult.SetResult(Array.Empty<IStorageFolder>());
             });
-            Assert.False(owner.IsVisible);
             Assert.False(settings.IsVisible);
-            Assert.Empty(owner.OwnedWindows);
             Assert.Equal(1, closed);
             Assert.Equal(tips, vm.SettingTips);
             Assert.False(File.Exists(ws.ConfigPath));
         }
         finally
         {
-            settings.PickerResult.TrySetResult(Array.Empty<IStorageFolder>());
+            picker.PickerResult.TrySetResult(Array.Empty<IStorageFolder>());
             settings.Close();
-            owner.Close();
         }
+    }
+
+    /// <summary>Shows the "download and cache" section of the settings page, where both folder rows live.</summary>
+    private static void ShowDownloadSection(SettingView view)
+    {
+        Assert.IsType<SettingViewModel>(view.DataContext).CurrentSection = SettingViewModel.SectionDownload;
+        Dispatcher.UIThread.RunJobs();
+        Assert.True(view.FindControl<StackPanel>("DownloadSection")!.IsVisible);
     }
 
     // ICommand.Execute adds an async-void exception-forwarding path that ExecuteAsync alone does not test.
@@ -380,7 +386,7 @@ public class SaveFolderRegressionTests
             completePicker();
             try
             {
-                await execution.WaitAsync(TimeSpan.FromSeconds(5));
+                await execution.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
             }
             finally
             {
@@ -492,16 +498,16 @@ public class SaveFolderRegressionTests
         try
         {
             window.Show();
-            view.GetVisualDescendants().OfType<TabControl>().Single().SelectedIndex = 3;
+            ShowDownloadSection(view);
             Dispatcher.UIThread.RunJobs();
-            var input = Assert.IsType<TextBox>(view.FindControl<TextBox>("SaveFolderPathTextBox"));
-            var button = Assert.IsType<Button>(view.FindControl<Button>("OpenSaveFolderButton"));
+            var input = Assert.IsType<TKCode.Arc.Input>(view.FindControl<TextBox>("SaveFolderPathTextBox"));
+            var button = Assert.IsType<TKCode.Arc.Button>(view.FindControl<Button>("OpenSaveFolderButton"));
             var grid = Assert.IsType<Grid>(input.Parent);
             Assert.Equal(3, grid.ColumnDefinitions.Count);
             Assert.Same(grid, button.Parent);
             Assert.Equal(2, Grid.GetColumn(button));
             Assert.Same(vm.OpenSaveFolderCommand, button.Command);
-            Assert.Equal(LocalizationService.Get("UI.Extra22"), button.Content);
+            Assert.Equal(LocalizationService.Get("Settings.OpenFolder"), button.Content);
             Assert.Equal(ws.Root, input.Text);
             Assert.True(button.Bounds.Width > 0);
             Assert.True(input.Bounds.Width < grid.Bounds.Width - button.Bounds.Width);

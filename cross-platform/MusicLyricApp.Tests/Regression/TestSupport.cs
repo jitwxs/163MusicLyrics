@@ -1,10 +1,11 @@
-using System.Net;
+﻿using System.Net;
 using System.Net.Http;
 using Avalonia;
 using Avalonia.Headless;
 using Avalonia.Headless.XUnit;
 using Avalonia.Platform.Storage;
 using Moq;
+using TKCode.Arc;
 using MusicLyricApp.Core.Service;
 using MusicLyricApp.Core.Service.Music;
 using MusicLyricApp.Models;
@@ -20,7 +21,8 @@ public class TestApp : MusicLyricApp.App
 {
     public override void OnFrameworkInitializationCompleted() { }
     public static AppBuilder BuildAvaloniaApp() => AppBuilder.Configure<TestApp>()
-        .UseHeadless(new AvaloniaHeadlessPlatformOptions());
+        .UseHeadless(new AvaloniaHeadlessPlatformOptions())
+        .UseArc(arc => arc.UseArcControls().UseArcBlocks());
 }
 
 public class TestWorkspace : IDisposable
@@ -56,6 +58,30 @@ public class TestWorkspace : IDisposable
         Window.Setup(x => x.SetTextAsync(It.IsAny<string?>())).Callback((string? value) => Clipboard = value)
             .Returns(Task.CompletedTask);
     }
+
+    /// <summary>
+    /// Runs <paramref name="action"/> in <paramref name="language"/> and restores the language and UI culture after.
+    /// Use it from <c>[AvaloniaFact]</c> tests: a switch notifies controls, which belong to the UI thread.
+    /// </summary>
+    public static void WithLanguage(string language, Action action)
+    {
+        var original = MusicLyricApp.Core.Localization.LocalizationService.Instance.Language;
+        var culture = System.Globalization.CultureInfo.CurrentUICulture;
+        try
+        {
+            MusicLyricApp.Core.Localization.LocalizationService.Instance.SetLanguage(language);
+            action();
+        }
+        finally
+        {
+            MusicLyricApp.Core.Localization.LocalizationService.Instance.SetLanguage(original);
+            System.Globalization.CultureInfo.CurrentUICulture = culture;
+        }
+    }
+
+    /// <summary>Hosts a page view in a bare window, the way the main window hosts it.</summary>
+    public static Avalonia.Controls.Window Host(Avalonia.Controls.Control view, object dataContext) =>
+        new() { Width = 1000, Height = 700, DataContext = dataContext, Content = view };
 
     public StorageService Storage(Func<int, HttpClient>? factory = null) => new(() => ConfigPath, factory);
     public SearchService Search(Mock<IMusicApi> netease, Mock<IMusicApi>? qq = null) => new(Settings,

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -18,11 +18,24 @@ public partial class FormatConvertViewModel : ViewModelBase
         EnumDisplayHelper.GetEnumDisplayCollection<OutputFormatEnum>();
 
     [ObservableProperty] private EnumDisplayHelper.EnumDisplayItem<OutputFormatEnum> _sourceFormatItem;
-    [ObservableProperty] private EnumDisplayHelper.EnumDisplayItem<OutputFormatEnum> _targetFormatItem;
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(OutputLanguage))]
+    private EnumDisplayHelper.EnumDisplayItem<OutputFormatEnum> _targetFormatItem;
+
+    /// <summary>The result's file type beside its title ("lrc" or "srt"), following the output format.</summary>
+    public string OutputLanguage => TargetFormatItem.Value.ToDescription().ToLowerInvariant();
 
     [ObservableProperty] private string _inputText = "";
-    [ObservableProperty] private string _outputText = "";
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasOutput))]
+    private string _outputText = "";
+
     [ObservableProperty] private string _tipMessage = "";
+
+    /// <summary>True when <see cref="TipMessage"/> reports a failed conversion rather than progress.</summary>
+    [ObservableProperty] private bool _isTipError;
+
+    public bool HasOutput => !string.IsNullOrEmpty(OutputText);
 
     private readonly SettingBean _settingBean;
     private readonly DispatcherTimer _debounceTimer = new() { Interval = TimeSpan.FromMilliseconds(200) };
@@ -60,6 +73,7 @@ public partial class FormatConvertViewModel : ViewModelBase
         (SourceFormatItem, TargetFormatItem) = (TargetFormatItem, SourceFormatItem);
         (InputText, OutputText) = (OutputText, InputText);
         RequestDebouncedConvert();
+        IsTipError = false;
         TipMessage = LocalizationService.Get("Status.Format.Swapped");
     }
 
@@ -71,6 +85,7 @@ public partial class FormatConvertViewModel : ViewModelBase
 
     private void TryConvert()
     {
+        IsTipError = false;
         try
         {
             if (string.IsNullOrWhiteSpace(InputText))
@@ -105,6 +120,7 @@ public partial class FormatConvertViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
+            IsTipError = true;
             TipMessage = LocalizationService.Format("Status.Format.Failed", ex.Message);
         }
     }

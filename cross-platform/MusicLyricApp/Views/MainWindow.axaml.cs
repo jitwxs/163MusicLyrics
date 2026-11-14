@@ -1,25 +1,27 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.Linq;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Input;
-using Avalonia.Media.Imaging;
+using Avalonia.Input.Platform;
 using Avalonia.Platform.Storage;
 using Avalonia.Threading;
-using MsBox.Avalonia;
-using MsBox.Avalonia.Enums;
+using MusicLyricApp.Core;
 using MusicLyricApp.Core.Service;
 using MusicLyricApp.ViewModels;
 using MusicLyricApp.Core.Localization;
-using System.IO;
-using System.Linq;
-using System.Net;
+using TKCode.Arc;
 
 namespace MusicLyricApp.Views;
 
-public partial class MainWindow : Window, IWindowProvider
+/// <summary>The single app window: Arc title bar, navigation sidebar and the page host.</summary>
+public partial class MainWindow : ArcWindow, IWindowProvider
 {
+    private bool _exitConfirmed;
+
     public MainWindow() : this(null, null)
     {
     }
@@ -27,52 +29,123 @@ public partial class MainWindow : Window, IWindowProvider
     public MainWindow(StorageService? storageService, SearchService? searchService)
     {
         InitializeComponent();
-        DataContext = new MainWindowViewModel(this, storageService, searchService);
-        
-        SearchTextBox.PointerEntered += SearchTextBox_PointerEntered;
-        
-        // 监听搜索结果变化，更新封面图片
-        var viewModel = (MainWindowViewModel)DataContext;
-        viewModel.SearchResultViewModel.PropertyChanged += async (sender, e) =>
-        {
-            if (e.PropertyName == nameof(viewModel.SearchResultViewModel.SongName) && 
-                viewModel.SearchResultViewModel.SaveVoMap.Count > 0)
-            {
-                await UpdateAlbumCover(viewModel);
-            }
-        };
+        var viewModel = new MainWindowViewModel(this, storageService, searchService);
+        DataContext = viewModel;
+
+        viewModel.BatchSearchViewModel.Items.CollectionChanged += BatchItemsOnCollectionChanged;
+        viewModel.TipRaised += ShowTip;
+        viewModel.BatchSearchViewModel.TipRaised += ShowTip;
+        UpdateBatchBadge();
+        _ = viewModel.BatchSearchViewModel.LoadFromLocalCacheAsync();
+
+        NavSidebar.ItemInvoked += OnSidebarItemInvoked;
+        TitleBarDrag.Attach(this);
+        SelectLocalization.Attach(this);
+        BindGlobalShortcuts(viewModel);
     }
-    
-    private async System.Threading.Tasks.Task UpdateAlbumCover(MainWindowViewModel viewModel)
+
+    /// <summary>Shortcuts that work on every page; search-page ones are bound by <see cref="SearchView"/>.</summary>
+    private void BindGlobalShortcuts(MainWindowViewModel vm)
     {
-        if (viewModel.SearchResultViewModel.SaveVoMap.Count > 0)
+        void Bind(string id, System.Windows.Input.ICommand command, object? parameter = null)
         {
-            var saveVo = viewModel.SearchResultViewModel.SaveVoMap.Values.First();
-            if (!string.IsNullOrWhiteSpace(saveVo.SongVo.Pics))
+            foreach (var gesture in AppShortcuts.Get(id).AllGestures)
             {
-                try
-                {
-                    // 从网络加载封面图片
-                    var client = new WebClient();
-                    NetworkClientFactory.ConfigureWebClient(client);
-                    var imageData = await client.DownloadDataTaskAsync(saveVo.SongVo.Pics);
-                    var stream = new MemoryStream(imageData);
-                    var bitmap = new Bitmap(stream);
-                    AlbumCoverImage.Source = bitmap;
-                }
-                catch (System.Exception)
-                {
-                    // 加载失败，使用默认图片
-                    AlbumCoverImage.Source = null;
-                }
-            }
-            else
-            {
-                AlbumCoverImage.Source = null;
+                var binding = new KeyBinding { Gesture = gesture, Command = command };
+                if (parameter != null) binding.CommandParameter = parameter;
+                KeyBindings.Add(binding);
             }
         }
+
+        Bind(AppShortcuts.FocusSearch, new CommunityToolkit.Mvvm.Input.RelayCommand(FocusSearchBox));
+        Bind(AppShortcuts.GoSearch, vm.ExecuteGoToPageCommand, MainWindowViewModel.PageSearch);
+        Bind(AppShortcuts.GoBatch, vm.ExecuteGoToPageCommand, MainWindowViewModel.PageBatch);
+        Bind(AppShortcuts.GoConvert, vm.ExecuteGoToPageCommand, MainWindowViewModel.PageConvert);
+        Bind(AppShortcuts.GoLocal, vm.ExecuteGoToPageCommand, MainWindowViewModel.PageLocal);
+        Bind(AppShortcuts.OpenSettings, vm.ExecuteGoToPageCommand, MainWindowViewModel.PageSettings);
+        Bind(AppShortcuts.ShowShortcuts, new CommunityToolkit.Mvvm.Input.RelayCommand(ShowShortcuts));
     }
-    
+
+    /// <summary>Switches to the search page and puts the caret in the search box, ready to type.</summary>
+    public void FocusSearchBox()
+    {
+        if (DataContext is MainWindowViewModel vm)
+        {
+            vm.CurrentPageKey = MainWindowViewModel.PageSearch;
+        }
+
+        Dispatcher.UIThread.Post(() =>
+        {
+            if (SearchPage.FindControl<TextBox>("SearchTextBox") is { } box)
+            {
+                box.Focus();
+                box.SelectAll();
+            }
+        }, DispatcherPriority.Input);
+    }
+
+    /// <summary>Opens the 快捷键 settings section.</summary>
+    public void ShowShortcuts()
+    {
+        if (DataContext is MainWindowViewModel vm) vm.CurrentPageKey = MainWindowViewModel.PageShortcuts;
+    }
+
+    /// <summary>Help rows are actions: SidebarItem has no DataContext, so they are mapped to commands here.</summary>
+    private void OnSidebarItemInvoked(object? sender, SidebarItemInvokedEventArgs e)
+    {
+        if (DataContext is not MainWindowViewModel vm || !e.Item.IsAction)
+        {
+            return;
+        }
+
+        System.Windows.Input.ICommand? command = e.Item.Key switch
+        {
+            "help/home" => vm.ExecuteHomeCommand,
+            "help/wiki" => vm.ExecuteWikiCommand,
+            "help/issue" => vm.ExecuteIssueCommand,
+            _ => null
+        };
+
+        if (command?.CanExecute(null) == true)
+        {
+            command.Execute(null);
+        }
+    }
+
+    /// <summary>Status messages appear as toasts; errors stay longer and read as errors, not only by colour.</summary>
+    private void ShowTip(string message, bool isError)
+    {
+        if (string.IsNullOrWhiteSpace(message))
+        {
+            return;
+        }
+
+        // "Needs login" errors offer the way to fix them: the cookie fields in settings.
+        var action = MainWindowViewModel.IsNeedLoginMessage(message) && DataContext is MainWindowViewModel vm
+            ? new ToastAction(LocalizationService.Get("Login.OpenSettings"), () => vm.ExecuteOpenCookieSettingsCommand.Execute(null))
+            : null;
+        Dispatcher.UIThread.Post(() => Toast.Show(this, message, isError ? ToastKind.Error : ToastKind.Info, action: action));
+    }
+
+    private void BatchItemsOnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e) => UpdateBatchBadge();
+
+    /// <summary>SidebarItem is not in the visual tree, so its badge is set here rather than bound.</summary>
+    private void UpdateBatchBadge()
+    {
+        if (DataContext is not MainWindowViewModel vm)
+        {
+            return;
+        }
+
+        var item = NavSidebar.Sections.SelectMany(s => s.Items)
+            .FirstOrDefault(i => i.Key == MainWindowViewModel.PageBatch);
+        if (item != null)
+        {
+            var count = vm.BatchSearchViewModel.Items.Count;
+            item.Badge = count > 0 ? count.ToString() : null;
+        }
+    }
+
     protected override async void OnClosing(WindowClosingEventArgs e)
     {
         base.OnClosing(e);
@@ -82,31 +155,40 @@ public partial class MainWindow : Window, IWindowProvider
             return;
         }
 
-        if (!vm.SettingBean.Config.ConfirmBeforeExit)
+        // Unsaved lyric edits always ask, even with the exit confirmation turned off.
+        var unsavedEdits = vm.SearchResultViewModel.HasUnsavedEdits;
+        if (_exitConfirmed || (!vm.SettingBean.Config.ConfirmBeforeExit && !unsavedEdits))
         {
+            // Stops a running local scan, match or save; finished results are already on disk.
+            vm.LocalMusicScanViewModel?.Dispose();
             vm.SaveConfig();
             return;
         }
 
         e.Cancel = true;
 
-        var box = MessageBoxManager.GetMessageBoxStandard(
+        var confirmed = await DialogHelper.ConfirmOnAsync(this,
             LocalizationService.Get("Dialog.Exit.Title"),
-            LocalizationService.Get("Dialog.Exit.Confirm"), ButtonEnum.YesNo);
-        var result = await box.ShowAsync();
+            LocalizationService.Get(unsavedEdits ? "Editor.ExitWithEdits" : "Dialog.Exit.Confirm"),
+            LocalizationService.Get("Dialog.Exit.Action"), isDanger: unsavedEdits);
 
-        if (result == ButtonResult.Yes)
+        if (!confirmed)
         {
-            vm.SaveConfig();
-
-            Dispatcher.UIThread.Post(() =>
-            {
-                if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime lifetime)
-                {
-                    lifetime.Shutdown();
-                }
-            });
+            return;
         }
+
+        _exitConfirmed = true;
+        Dispatcher.UIThread.Post(() =>
+        {
+            if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime lifetime)
+            {
+                lifetime.Shutdown();
+            }
+            else
+            {
+                Close();
+            }
+        });
     }
 
     public async Task<IReadOnlyList<IStorageFolder>> OpenFolderPickerAsync(FolderPickerOpenOptions options)
@@ -116,37 +198,14 @@ public partial class MainWindow : Window, IWindowProvider
 
     public async Task SetTextAsync(string? text)
     {
-        await Clipboard?.SetTextAsync(text)!;
+        if (Clipboard != null)
+        {
+            await Clipboard.SetTextAsync(text);
+        }
     }
 
     public async Task<IStorageFolder?> TryGetFolderFromPathAsync(string path)
     {
         return await StorageProvider.TryGetFolderFromPathAsync(path);
-    }
-    
-    private async void SearchTextBox_PointerEntered(object? sender, PointerEventArgs e)
-    {
-        if (DataContext is not MainWindowViewModel vm) return;
-
-        if (!vm.SettingBean.Config.AutoReadClipboard) return;
-        
-        var message = await Clipboard?.GetTextAsync()!;
-        if (message != null)
-        {
-            vm.SearchParamViewModel.SearchText = message;
-        }
-    }
-
-    private void PlaybackSlider_OnTapped(object? sender, TappedEventArgs e)
-    {
-        if (DataContext is not MainWindowViewModel vm)
-        {
-            return;
-        }
-
-        if (vm.ExecuteTogglePlayPauseCommand.CanExecute(null))
-        {
-            vm.ExecuteTogglePlayPauseCommand.Execute(null);
-        }
     }
 }

@@ -289,9 +289,9 @@ public static partial class XmlUtils
             return;
         }
 
-        for (var i = 0; i < xmlNode.ChildNodes.Count; i++)
+        foreach (XmlNode child in xmlNode.ChildNodes)
         {
-            RecursionFindElement(xmlNode.ChildNodes.Item(i), mappingDict, resDict);
+            RecursionFindElement(child, mappingDict, resDict);
         }
     }
 

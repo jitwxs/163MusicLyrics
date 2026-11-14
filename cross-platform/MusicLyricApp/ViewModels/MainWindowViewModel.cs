@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.ComponentModel;
@@ -13,11 +12,10 @@ using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
-using MsBox.Avalonia;
-using MsBox.Avalonia.Enums;
 using NAudio.Wave;
 using MusicLyricApp.Core;
 using MusicLyricApp.Core.Service;
+using MusicLyricApp.Core.Service.Login;
 using MusicLyricApp.Core.Utils;
 using MusicLyricApp.Core.Localization;
 using MusicLyricApp.Models;
@@ -35,9 +33,17 @@ public partial class MainWindowViewModel : ViewModelBase
     
     public SignalLampViewModel LampVm { get; } = new();
 
-    [ObservableProperty] private string _appTitle = "MusicLyricApp v7.5";
+    /// <summary>"MusicLyricApp v{major}.{minor}", from the assembly version set in the project file.</summary>
+    [ObservableProperty] private string _appTitle = AppInfo.Title;
 
-    [ObservableProperty] private string _lastSaveFolderPath = "";
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(LastSaveFolderDisplay))]
+    private string _lastSaveFolderPath = "";
+
+    /// <summary>The save folder as shown: no trailing separator, so a shortened path still ends in the folder name.</summary>
+    public string LastSaveFolderDisplay => string.IsNullOrEmpty(LastSaveFolderPath)
+        ? LastSaveFolderPath
+        : System.IO.Path.TrimEndingDirectorySeparator(LastSaveFolderPath);
     [ObservableProperty] private string _tipTimestamp = "";
     [ObservableProperty] private string _tipNormalMessage = "";
     [ObservableProperty] private string _tipErrorMessage = "";
@@ -67,13 +73,126 @@ public partial class MainWindowViewModel : ViewModelBase
 
     [ObservableProperty] private SettingBean _settingBean;
     
-    private SettingWindow? _settingWindow;
-    
-    private BlurSearchWindow? _blurSearchWindow;
-    
-    private BatchSearchWindow? _batchSearchWindow;
+    /// <summary>Fuzzy search results shown in place of the lyrics preview; null when none are open.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsShowingBlurResults))]
+    private BlurSearchViewModel? _blurResults;
 
-    private FormatConvertWindow? _formatConvertWindow;
+    public bool IsShowingBlurResults => BlurResults != null;
+
+    /// <summary>Raised for every status message; the window shows it as a toast. Args: message, isError.</summary>
+    public event Action<string, bool>? TipRaised;
+
+    // ---- Page navigation (single window with a sidebar) ----
+    public const string PageSearch = "search";
+    public const string PageBatch = "batch";
+    public const string PageConvert = "convert";
+    public const string PageLocal = "local";
+    /// <summary>Settings sections are sidebar children keyed "settings/&lt;section&gt;" (see <see cref="SettingViewModel"/>).</summary>
+    public const string SettingsKeyPrefix = "settings/";
+    public const string PageSettings = SettingsKeyPrefix + SettingViewModel.SectionLyrics;
+
+    public static bool IsSettingsKey(string? key) => key?.StartsWith(SettingsKeyPrefix, StringComparison.Ordinal) == true;
+
+    /// <summary>Key of the page shown in the main window; bound two-way to the sidebar.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsSearchPage), nameof(IsBatchPage), nameof(IsConvertPage), nameof(IsLocalPage), nameof(IsSettingsPage))]
+    private string _currentPageKey = PageSearch;
+
+    public bool IsSearchPage => CurrentPageKey == PageSearch;
+    public bool IsBatchPage => CurrentPageKey == PageBatch;
+    public bool IsConvertPage => CurrentPageKey == PageConvert;
+    public bool IsLocalPage => CurrentPageKey == PageLocal;
+    public bool IsSettingsPage => IsSettingsKey(CurrentPageKey);
+
+    public BatchSearchViewModel BatchSearchViewModel => _downloadManagerViewModel;
+
+    /// <summary>Whether each platform's cookie is signed in; shared by the online lyrics and settings pages.</summary>
+    public LoginStatusViewModel Login { get; }
+
+    /// <summary>The account state of the source picked on the online lyrics page.</summary>
+    public AccountStatusViewModel CurrentLogin => Login.Get(SearchParamViewModel.SearchSource.Value);
+
+    /// <summary>The sign-in button is hidden for sources used without a cookie (Soda Music).</summary>
+    public bool IsCurrentLoginVisible => LoginStatusViewModel.HasAccount(SearchParamViewModel.SearchSource.Value);
+
+    public const string PageCookieSettings = SettingsKeyPrefix + SettingViewModel.SectionExtensions;
+    public const string PageShortcuts = SettingsKeyPrefix + SettingViewModel.SectionShortcuts;
+
+    /// <summary>Created on first visit and kept, so the text being converted survives page switches.</summary>
+    [ObservableProperty] private FormatConvertViewModel? _formatConvertViewModel;
+
+    /// <summary>Created on first visit and kept, so scanned files and confirmed matches survive page switches.</summary>
+    [ObservableProperty] private LocalMusicScanViewModel? _localMusicScanViewModel;
+
+    /// <summary>
+    /// Recreated on entering the settings area (as the old settings window was) and flushed when leaving it;
+    /// moving between settings sections keeps the same instance.
+    /// </summary>
+    [ObservableProperty] private SettingViewModel? _settingViewModel;
+
+    partial void OnCurrentPageKeyChanged(string? oldValue, string newValue)
+    {
+        var wasSettings = IsSettingsKey(oldValue);
+        var isSettings = IsSettingsKey(newValue);
+        if (wasSettings && !isSettings)
+        {
+            FlushSettingsPage();
+        }
+
+        if (isSettings)
+        {
+            var section = newValue[SettingsKeyPrefix.Length..];
+            if (!SettingViewModel.Sections.Contains(section))
+            {
+                CurrentPageKey = PageSettings;
+                return;
+            }
+
+            if (!wasSettings || SettingViewModel == null)
+            {
+                SettingViewModel = new SettingViewModel(SettingBean, _windowProvider, login: Login);
+            }
+
+            SettingViewModel.CurrentSection = section;
+            return;
+        }
+
+        switch (newValue)
+        {
+            case PageConvert:
+                FormatConvertViewModel ??= new FormatConvertViewModel(SettingBean);
+                break;
+            case PageLocal:
+                if (LocalMusicScanViewModel == null)
+                {
+                    LocalMusicScanViewModel = new LocalMusicScanViewModel(SettingBean, _searchService.GetMusicApi);
+                    LocalMusicScanViewModel.TipRaised += (message, isError) => TipRaised?.Invoke(message, isError);
+                }
+                break;
+            case PageSearch or PageBatch:
+                break;
+            default:
+                // Unknown keys (e.g. a cleared sidebar selection) fall back to the search page.
+                CurrentPageKey = PageSearch;
+                break;
+        }
+    }
+
+    /// <summary>Applies what the settings page holds in memory, like closing the old settings window did.</summary>
+    private void FlushSettingsPage()
+    {
+        if (SettingViewModel == null)
+        {
+            return;
+        }
+
+        SettingViewModel.OnClosing();
+        UpdateTheme();
+
+        // Timestamp formats, lyric types and their order all shape the preview.
+        _ = RefreshCurrentConsoleOutputAsync();
+    }
 
     // Parameterless constructor for design-time use
     public MainWindowViewModel()
@@ -81,27 +200,15 @@ public partial class MainWindowViewModel : ViewModelBase
         _settingBean = new StorageService().ReadAppConfig();
         NetworkClientFactory.Configure(_settingBean.Config);
         _searchService = new SearchService(_settingBean);
-        _windowProvider = null;
-        _downloadManagerViewModel = new BatchSearchViewModel(_settingBean, _searchService, new StorageService(), null!);
-        
-        SearchParamViewModel.Bind(_settingBean.Param);
-        LastSaveFolderPath = _settingBean.Config.LastSaveFolderPath;
-        SearchParamViewModel.PropertyChanged += SearchParamViewModelOnPropertyChanged;
-
-        SearchResultViewModel.PropertyChanged += (_, e) =>
-        {
-            if (e.PropertyName == nameof(SearchResultViewModel.SongLink))
-            {
-                RefreshSongLinkState();
-            }
-        };
-
-        _playbackTimer.Tick += (_, _) => UpdatePlaybackProgress();
+        _windowProvider = new DesignWindowProvider();
+        _downloadManagerViewModel = new BatchSearchViewModel(_settingBean, _searchService, new StorageService(), _windowProvider);
+        Login = new LoginStatusViewModel(CookieOf);
+        WireSearchState();
     }
 
     // Main constructor for runtime use
     public MainWindowViewModel(IWindowProvider windowProvider, StorageService? storageService = null,
-        SearchService? searchService = null)
+        SearchService? searchService = null, ILoginProbe? loginProbe = null)
     {
         _windowProvider = windowProvider;
         _storageService = storageService ?? new StorageService();
@@ -114,20 +221,10 @@ public partial class MainWindowViewModel : ViewModelBase
         
         _storageService.SetSearchService(_searchService);
         _downloadManagerViewModel = new BatchSearchViewModel(_settingBean, _searchService, _storageService, _windowProvider);
-
-        SearchParamViewModel.Bind(_settingBean.Param);
-        LastSaveFolderPath = _settingBean.Config.LastSaveFolderPath;
-        SearchParamViewModel.PropertyChanged += SearchParamViewModelOnPropertyChanged;
-
-        SearchResultViewModel.PropertyChanged += (_, e) =>
-        {
-            if (e.PropertyName == nameof(SearchResultViewModel.SongLink))
-            {
-                RefreshSongLinkState();
-            }
-        };
-
-        _playbackTimer.Tick += (_, _) => UpdatePlaybackProgress();
+        Login = new LoginStatusViewModel(CookieOf, loginProbe);
+        // One request per platform with a cookie, so the online lyrics page shows whether it still works.
+        _ = Login.CheckAllAsync();
+        WireSearchState();
         
         WeakReferenceMessenger.Default.Register<BlurSearchResultsMessage>(this, (r, m) =>
         {
@@ -136,10 +233,9 @@ public partial class MainWindowViewModel : ViewModelBase
         
         WeakReferenceMessenger.Default.Register<CloseWindowMessage>(this, (r, m) =>
         {
-            if (m.Value == "BlurSearchWindow" && _blurSearchWindow != null)
+            if (m.Value == "BlurSearchWindow")
             {
-                _blurSearchWindow.Close();
-                _blurSearchWindow = null;
+                BlurResults = null;
             }
         });
 
@@ -154,6 +250,24 @@ public partial class MainWindowViewModel : ViewModelBase
         {
             ThreadPool.QueueUserWorkItem(p => _ = DoVersionCheck(false));
         }
+    }
+
+    /// <summary>State both constructors share: search parameters, the song link and the playback clock.</summary>
+    private void WireSearchState()
+    {
+        SearchParamViewModel.Bind(SettingBean.Param);
+        LastSaveFolderPath = SettingBean.Config.LastSaveFolderPath;
+        SearchParamViewModel.PropertyChanged += SearchParamViewModelOnPropertyChanged;
+
+        SearchResultViewModel.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(SearchResultViewModel.SongLink))
+            {
+                RefreshSongLinkState();
+            }
+        };
+
+        _playbackTimer.Tick += (_, _) => UpdatePlaybackProgress();
     }
 
     private async Task ProcessBlurSearchResults(string ids)
@@ -183,16 +297,30 @@ public partial class MainWindowViewModel : ViewModelBase
         }
     }
 
+    /// <summary>Asks before a new song replaces lyrics with unsaved edits; set by the view, unset in tests.</summary>
+    public Func<Task<bool>>? ConfirmDiscardEditsAsync { get; set; }
+
+    private async Task<bool> MayDiscardEditsAsync() =>
+        !SearchResultViewModel.HasUnsavedEdits || ConfirmDiscardEditsAsync == null || await ConfirmDiscardEditsAsync();
+
     private async Task OpenSongDetailAsync(SongDetailRequest request)
     {
-        IsBlurSearch = false;
-        var sourceItem = SearchParamViewModel.SearchSources.FirstOrDefault(x => x.Value == request.SearchSource);
-        if (sourceItem != null)
+        if (!await MayDiscardEditsAsync())
         {
-            SearchParamViewModel.SelectedSearchSourceItem = sourceItem;
+            return;
         }
 
+        SearchResultViewModel.DiscardEdits();
+        ++_previewRevision;
+        ++_songRevision;
+        IsBlurSearch = false;
+        SearchParamViewModel.SearchSource.Value = request.SearchSource;
+
+        // Download-manager rows always identify a song, even if the previous search was a playlist or album.
+        SearchParamViewModel.SearchType.Value = SearchTypeEnum.SONG_ID;
+        BlurResults = null;
         SearchParamViewModel.SearchText = request.SongId;
+        CurrentPageKey = PageSearch;
 
         ResetPlaybackAndSongLink();
 
@@ -249,12 +377,36 @@ public partial class MainWindowViewModel : ViewModelBase
 
     public void SaveConfig()
     {
+        if (IsSettingsPage)
+        {
+            SettingViewModel?.OnClosing();
+        }
+
         _storageService.SaveConfig(SettingBean);
     }
 
+    /// <summary>Options that change how the lyrics are rendered; the preview follows them at once.</summary>
+    private static readonly HashSet<string> PreviewAffectingParams =
+    [
+        nameof(SearchParamViewModel.OutputFormat),
+        nameof(SearchParamViewModel.LrcType),
+        nameof(SearchParamViewModel.LrcMergeSeparator)
+    ];
+
     private void SearchParamViewModelOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (e.PropertyName != nameof(SearchParamViewModel.SelectedOutputFormatItem))
+        if (e.PropertyName is nameof(SearchParamViewModel.OutputFormat))
+        {
+            OnPropertyChanged(nameof(PreviewFormatLabel));
+        }
+
+        if (e.PropertyName is nameof(SearchParamViewModel.SearchSource))
+        {
+            OnPropertyChanged(nameof(CurrentLogin));
+            OnPropertyChanged(nameof(IsCurrentLoginVisible));
+        }
+
+        if (e.PropertyName == null || !PreviewAffectingParams.Contains(e.PropertyName))
         {
             return;
         }
@@ -262,22 +414,54 @@ public partial class MainWindowViewModel : ViewModelBase
         _ = RefreshCurrentConsoleOutputAsync();
     }
 
+    private int _previewRevision;
+
+    /// <summary>
+    /// Goes up only when another song is loaded (a search or a download-manager row), unlike
+    /// <see cref="_previewRevision"/>, which option changes also move. A song link that arrives late is kept while
+    /// its song is still the one shown.
+    /// </summary>
+    private int _songRevision;
+
     private async Task RefreshCurrentConsoleOutputAsync()
     {
+        var revision = ++_previewRevision;
         if (SearchResultViewModel.SaveVoMap.Count != 1)
         {
             return;
         }
 
         var saveVo = SearchResultViewModel.SaveVoMap.Values.First();
-        if (saveVo.LyricVo.IsEmpty())
+        bool IsCurrent() => revision == _previewRevision &&
+                            SearchResultViewModel.SaveVoMap.Count == 1 &&
+                            ReferenceEquals(SearchResultViewModel.SaveVoMap.Values.First(), saveVo);
+        try
         {
-            SearchResultViewModel.ConsoleOutput = string.Empty;
-            return;
+            var parts = saveVo.LyricVo.IsEmpty()
+                ? new List<string>()
+                : await LyricUtils.GetOutputContent(saveVo.LyricVo, SettingBean);
+            var output = GlobalUtils.MergeStr(parts);
+            // Translation can finish after another option or song has been selected.
+            if (IsCurrent())
+            {
+                var changed = output != SearchResultViewModel.ConsoleOutput;
+                SearchResultViewModel.OutputPartCount = Math.Max(1, parts.Count);
+                SearchResultViewModel.ConsoleOutput = output;
+                if (changed && SearchResultViewModel.IsEdited)
+                {
+                    // The edited text stays as it is; say why the new options do not show.
+                    SetTip(LocalizationService.Get("Editor.OptionsNotApplied"), false);
+                }
+            }
         }
-
-        var content = await LyricUtils.GetOutputContent(saveVo.LyricVo, SettingBean);
-        SearchResultViewModel.ConsoleOutput = GlobalUtils.MergeStr(content);
+        catch (Exception ex)
+        {
+            // Event-triggered refreshes have no awaiting caller to report failures.
+            if (IsCurrent())
+            {
+                SetTip(ex.Message, true);
+            }
+        }
     }
 
     [RelayCommand]
@@ -288,6 +472,18 @@ public partial class MainWindowViewModel : ViewModelBase
             await ExecuteBlurSearchAsync();
             return;
         }
+
+        if (!await MayDiscardEditsAsync())
+        {
+            return;
+        }
+
+        ++_previewRevision;
+        ++_songRevision;
+        SearchResultViewModel.DiscardEdits();
+
+        // An exact search shows its own preview, so any open fuzzy results give way to it.
+        BlurResults = null;
 
         try
         {
@@ -314,19 +510,17 @@ public partial class MainWindowViewModel : ViewModelBase
                     SetTip(ErrorMsgConst.LRC_NOT_EXIST, true);
                 }
 
-                // 自动获取直链
-                await Task.Run(() =>
+                // 自动获取直链: only the request runs in the background. The link is set back on the UI thread, since
+                // it drives bindings and prepares the player, and dropped if another song was loaded meanwhile.
+                var songId0 = SearchParamViewModel.SongIds[0];
+                var song = _songRevision;
+                var musicApi = _searchService.GetMusicApi(songId0.SearchSource);
+                var linkResult = await Task.Run(() => musicApi.GetSongLink(songId0.SongId));
+                if (linkResult.IsSuccess() && song == _songRevision)
                 {
-                    var songId0 = SearchParamViewModel.SongIds[0];
-                    
-                    var musicApi = _searchService.GetMusicApi(songId0.SearchSource);
-                    var linkResult = musicApi.GetSongLink(songId0.SongId);
-                    if (linkResult.IsSuccess())
-                    {
-                        SearchResultViewModel.SongLink = linkResult.Data;
-                        _downloadManagerViewModel.CacheSongLink(songId0.SongId, linkResult.Data);
-                    }
-                });
+                    SearchResultViewModel.SongLink = linkResult.Data;
+                    _downloadManagerViewModel.CacheSongLink(songId0.SongId, linkResult.Data);
+                }
 
                 if (localCacheHitCount > 0)
                 {
@@ -368,33 +562,10 @@ public partial class MainWindowViewModel : ViewModelBase
         {
             var resultVos = _searchService.BlurSearch(SearchParamViewModel, SettingBean);
 
-            if (_blurSearchWindow != null)
-            {
-                if (!_blurSearchWindow.IsVisible)
-                {
-                    // 窗口已经被关闭或隐藏
-                    _blurSearchWindow = null;
-                }
-                else
-                {
-                    _blurSearchWindow.UpdateResults(resultVos);
-
-                    // 窗口还在：如果最小化，恢复正常；否则激活
-                    if (_blurSearchWindow.WindowState == WindowState.Minimized)
-                    {
-                        _blurSearchWindow.WindowState = WindowState.Normal;
-                    }
-
-                    _blurSearchWindow.Activate();
-                    SetTip(LocalizationService.Format("Status.Main.BlurSuccess", resultVos.Count), false);
-                    return;
-                }
-            }
-
-            // 创建新窗口
-            _blurSearchWindow = new BlurSearchWindow(resultVos);
-            _blurSearchWindow.Closed += (_, _) => _blurSearchWindow = null;
-            _blurSearchWindow.Show();
+            var results = new BlurSearchViewModel(resultVos);
+            results.LoadTypeAResults();
+            BlurResults = results;
+            CurrentPageKey = PageSearch;
             SetTip(LocalizationService.Format("Status.Main.BlurSuccess", resultVos.Count), false);
         }
         catch (Exception ex)
@@ -409,6 +580,7 @@ public partial class MainWindowViewModel : ViewModelBase
         try
         {
             var message = await _storageService.SaveResult(SearchResultViewModel, SettingBean, _windowProvider);
+            SearchResultViewModel.MarkSaved();
             LastSaveFolderPath = SettingBean.Config.LastSaveFolderPath;
             SetTip(message, false);
         }
@@ -418,6 +590,27 @@ public partial class MainWindowViewModel : ViewModelBase
             {
                 SetTip(ex.Message, true);
             }
+        }
+    }
+
+    /// <summary>The file type the lyrics are shown and saved in, beside the preview's title ("· lrc").</summary>
+    public string PreviewFormatLabel => "· " + SettingBean.Param.OutputFileFormat.ToDescription().ToLowerInvariant();
+
+    /// <summary>Copies the lyrics as shown, edits included.</summary>
+    [RelayCommand]
+    private async Task ExecuteCopyLyricsAsync()
+    {
+        var text = SearchResultViewModel.PreviewText;
+        if (string.IsNullOrEmpty(text)) return;
+
+        try
+        {
+            await _windowProvider.SetTextAsync(text);
+            SetTip(LocalizationService.Get("Status.Main.LyricsCopied"), false);
+        }
+        catch (Exception ex)
+        {
+            SetTip(LocalizationService.Format("Status.Main.CopyLyricsFailed", ex.Message), true);
         }
     }
 
@@ -543,7 +736,12 @@ public partial class MainWindowViewModel : ViewModelBase
             return;
         }
 
-        if (_audioReader == null && !EnsurePlaybackPrepared())
+        if (_audioReader == null)
+        {
+            EnsurePlaybackPrepared();
+        }
+
+        if (_audioReader == null)
         {
             return;
         }
@@ -728,154 +926,56 @@ public partial class MainWindowViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private static void ExecuteHome()
-    {
-        Process.Start(new ProcessStartInfo
-        {
-            FileName = "https://github.com/jitwxs/163MusicLyrics",
-            UseShellExecute = true
-        });
-    }
+    private static void ExecuteHome() => ShellLauncher.Open(AppInfo.HomeUrl);
 
     [RelayCommand]
     private void ExecuteFormatConvert()
     {
-        if (_formatConvertWindow != null)
-        {
-            if (!_formatConvertWindow.IsVisible)
-            {
-                _formatConvertWindow = null;
-            }
-            else
-            {
-                if (_formatConvertWindow.WindowState == WindowState.Minimized)
-                {
-                    _formatConvertWindow.WindowState = WindowState.Normal;
-                }
+        CurrentPageKey = PageConvert;
+    }
+    
+    [RelayCommand]
+    private static void ExecuteWiki() => ShellLauncher.Open(AppInfo.WikiUrl);
+    
+    [RelayCommand]
+    private static void ExecuteIssue() => ShellLauncher.Open(AppInfo.IssuesUrl);
 
-                _formatConvertWindow.Activate();
-                return;
-            }
+    /// <summary>Opens a page by sidebar key; settings keep the section already open, if any.</summary>
+    [RelayCommand]
+    private void ExecuteGoToPage(string? key)
+    {
+        if (key == null)
+        {
+            return;
         }
 
-        _formatConvertWindow = new FormatConvertWindow(SettingBean);
-        _formatConvertWindow.Closed += (_, _) => _formatConvertWindow = null;
-        _formatConvertWindow.Show();
-    }
-    
-    [RelayCommand]
-    private static void ExecuteWiki()
-    {
-        Process.Start(new ProcessStartInfo
+        if (IsSettingsKey(key) && IsSettingsPage)
         {
-            FileName = "https://github.com/jitwxs/163MusicLyrics/wiki",
-            UseShellExecute = true
-        });
-    }
-    
-    [RelayCommand]
-    private static void ExecuteIssue()
-    {
-        Process.Start(new ProcessStartInfo
-        {
-            FileName = "https://github.com/jitwxs/163MusicLyrics/issues",
-            UseShellExecute = true
-        });
-    }
+            return;
+        }
 
-    [RelayCommand]
-    private async Task ExecuteShortCutAsync()
-    {
-        var sb = new StringBuilder();
-        sb.Append(LocalizationService.Get("Shortcut.ExactSearch")).Append(Environment.NewLine)
-            .Append(LocalizationService.Get("Shortcut.FuzzySearch")).Append(Environment.NewLine)
-            .Append(LocalizationService.Get("Shortcut.Save")).Append(Environment.NewLine);
-        
-        await DialogHelper.ShowMessage(sb.ToString());
+        CurrentPageKey = key;
     }
 
     [RelayCommand]
     private void ExecuteSetting()
     {
-        if (_settingWindow != null)
-        {
-            if (!_settingWindow.IsVisible)
-            {
-                // 窗口已经被关闭或隐藏
-                _settingWindow = null;
-            }
-            else
-            {
-                // 窗口还在：如果最小化，恢复正常；否则激活
-                if (_settingWindow.WindowState == WindowState.Minimized)
-                {
-                    _settingWindow.WindowState = WindowState.Normal;
-                }
-
-                _settingWindow.Activate();
-                return;
-            }
-        }
-
-        // 创建新窗口
-        _settingWindow = new SettingWindow(SettingBean);
-        _settingWindow.Closed += (_, _) => 
-        {
-            if (_settingWindow.DataContext is SettingViewModel vm)
-            {
-                vm.OnClosing();
-                UpdateTheme();
-            }
-            _settingWindow = null;
-        };
-        if (_windowProvider is Window owner)
-        {
-            _settingWindow.Show(owner);
-        }
-        else
-        {
-            _settingWindow.Show();
-        }
+        CurrentPageKey = PageSettings;
     }
     
     private bool _inCheckVersion;
     
-    private bool _showMessageIfNotExistLatestVersion;
-    
     private async Task DoVersionCheck(bool showMessageIfNotExistLatestVersion)
     {
-        _showMessageIfNotExistLatestVersion = showMessageIfNotExistLatestVersion;
-        
         if (_inCheckVersion)
         {
             return;
         }
-        
+
         _inCheckVersion = true;
-        
         try
         {
-            var checkResult = _updateCheckService.CheckLatestVersion(AppTitle);
-            if (checkResult.HasUpdate)
-            {
-                var content = UpdateCheckService.BuildReleaseDescription(checkResult.Info);
-                
-                await Dispatcher.UIThread.InvokeAsync(async () =>
-                {
-                    var box = MessageBoxManager.GetMessageBoxStandard(LocalizationService.Get("Dialog.ReleaseNotes.Title"), content, ButtonEnum.YesNo);
-                    var result = await box.ShowWindowAsync();
-    
-                    if (result == ButtonResult.Yes)
-                    {
-                        Process.Start(new ProcessStartInfo
-                        {
-                            FileName = UpdateCheckService.ReleasePageUrl,
-                            UseShellExecute = true
-                        });
-                    }
-                });
-            }
-            else if (_showMessageIfNotExistLatestVersion)
+            if (!await _updateCheckService.OfferUpdateAsync() && showMessageIfNotExistLatestVersion)
             {
                 SetTip(ErrorMsgConst.THIS_IS_LATEST_VERSION, false);
             }
@@ -892,7 +992,7 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private void UpdateTheme()
     {
-        ((App)Application.Current!).SetTheme(SettingBean.Config.ThemeMode);
+        ThemeService.Apply(SettingBean.Config.ThemeMode);
     }
 
     [RelayCommand]
@@ -917,11 +1017,34 @@ public partial class MainWindowViewModel : ViewModelBase
         }
     }
 
+    [RelayCommand]
+    private void ExecuteCloseBlurResults()
+    {
+        BlurResults = null;
+    }
+
+    private string CookieOf(SearchSourceEnum source) => MusicSources.Get(source).Cookie?.Invoke(SettingBean.Config) ?? "";
+
+    /// <summary>True for the "needs login" error, which the window shows with a shortcut to the cookie settings.</summary>
+    public static bool IsNeedLoginMessage(string? message) =>
+        !string.IsNullOrEmpty(message) && message.Contains(ErrorMsgConst.NEED_LOGIN, StringComparison.Ordinal);
+
+    /// <summary>Opens the cookie settings at the field of the source picked on the online lyrics page.</summary>
+    [RelayCommand]
+    private void ExecuteOpenCookieSettings()
+    {
+        CurrentPageKey = PageCookieSettings;
+        SettingViewModel?.RequestCookieFocus(SearchParamViewModel.SearchSource.Value);
+    }
+
     private void SetTip(string message, bool isError)
     {
+        if (IsNeedLoginMessage(message)) Login.ReportNeedLogin(SearchParamViewModel.SearchSource.Value);
+
         TipTimestamp = DateTime.Now.ToString("HH:mm:ss");
         TipNormalMessage = isError ? "" : message;
         TipErrorMessage = isError ? message : "";
+        TipRaised?.Invoke(message, isError);
     }
 
     partial void OnTipTimestampChanged(string value)
@@ -942,26 +1065,7 @@ public partial class MainWindowViewModel : ViewModelBase
     [RelayCommand]
     private void ExecuteOpenDownloadManager()
     {
-        if (_batchSearchWindow != null)
-        {
-            if (!_batchSearchWindow.IsVisible)
-            {
-                _batchSearchWindow = null;
-            }
-            else
-            {
-                if (_batchSearchWindow.WindowState == WindowState.Minimized)
-                {
-                    _batchSearchWindow.WindowState = WindowState.Normal;
-                }
-                _batchSearchWindow.Activate();
-                return;
-            }
-        }
-
-        _batchSearchWindow = new BatchSearchWindow(_downloadManagerViewModel);
-        _batchSearchWindow.Closed += (_, _) => _batchSearchWindow = null;
-        _batchSearchWindow.Show();
+        CurrentPageKey = PageBatch;
         SetTip(LocalizationService.Get("Status.Main.DownloadOpened"), false);
     }
 }

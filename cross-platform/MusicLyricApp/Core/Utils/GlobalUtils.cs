@@ -1,9 +1,12 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+using MusicLyricApp.Core.Service;
 using MusicLyricApp.Models;
 using NLog;
 
@@ -28,33 +31,6 @@ public static partial class GlobalUtils
         return date.ToString("yyyy-MM-dd HH:mm:ss");
     }
 
-    public static readonly Dictionary<SearchSourceEnum, string> SearchSourceKeywordDict = new()
-    {
-        { SearchSourceEnum.NET_EASE_MUSIC, "163.com" },
-        { SearchSourceEnum.QQ_MUSIC, "qq.com" },
-    };
-
-    public static readonly Dictionary<SearchSourceEnum, Dictionary<SearchTypeEnum, string>> SearchTypeKeywordDict =
-        new()
-        {
-            {
-                SearchSourceEnum.NET_EASE_MUSIC, new Dictionary<SearchTypeEnum, string>
-                {
-                    { SearchTypeEnum.SONG_ID, "song?id=" },
-                    { SearchTypeEnum.ALBUM_ID, "album?id=" },
-                    { SearchTypeEnum.PLAYLIST_ID, "playlist?id=" },
-                }
-            },
-            {
-                SearchSourceEnum.QQ_MUSIC, new Dictionary<SearchTypeEnum, string>
-                {
-                    { SearchTypeEnum.SONG_ID, "songDetail/" },
-                    { SearchTypeEnum.ALBUM_ID, "albumDetail/" },
-                    { SearchTypeEnum.PLAYLIST_ID, "playlist/" },
-                }
-            }
-        };
-
     /// <summary>
     /// 输入参数校验
     /// </summary>
@@ -73,21 +49,21 @@ public static partial class GlobalUtils
         }
 
         // 自动识别音乐提供商
-        foreach (var pair in SearchSourceKeywordDict.Where(pair => input.Contains(pair.Value)))
+        foreach (var source in MusicSources.All.Where(source => input.Contains(source.LinkHost)))
         {
-            searchSource = pair.Key;
+            searchSource = source.Source;
         }
 
         input = ConvertSearchWithShareLink(searchSource, input);
 
         // 自动识别搜索类型
-        foreach (var pair in SearchTypeKeywordDict[searchSource].Where(pair => input.Contains(pair.Value)))
+        foreach (var pair in MusicSources.Get(searchSource).LinkKeywords.Where(pair => input.Contains(pair.Value)))
         {
             searchType = pair.Key;
         }
 
-        // 网易云，纯数字，直接通过
-        if (searchSource == SearchSourceEnum.NET_EASE_MUSIC && CheckNum(input))
+        // 网易云、汽水音乐，纯数字，直接通过
+        if (searchSource is SearchSourceEnum.NET_EASE_MUSIC or SearchSourceEnum.SODA_MUSIC && CheckNum(input))
         {
             return new InputSongId(input, searchSource, searchType);
         }
@@ -99,7 +75,7 @@ public static partial class GlobalUtils
         }
 
         // URL 关键字提取
-        var urlKeyword = SearchTypeKeywordDict[searchSource][searchType];
+        var urlKeyword = MusicSources.Get(searchSource).LinkKeywords[searchType];
         var index = input.IndexOf(urlKeyword, StringComparison.Ordinal);
         if (index != -1)
         {
@@ -118,7 +94,8 @@ public static partial class GlobalUtils
 
             var extractedId = sb.ToString();
             if (string.IsNullOrEmpty(extractedId) ||
-                (searchSource == SearchSourceEnum.NET_EASE_MUSIC && !CheckNum(extractedId)))
+                (searchSource is SearchSourceEnum.NET_EASE_MUSIC or SearchSourceEnum.SODA_MUSIC &&
+                 !CheckNum(extractedId)))
             {
                 throw new MusicLyricException(ErrorMsgConst.INPUT_ID_ILLEGAL);
             }
@@ -129,17 +106,52 @@ public static partial class GlobalUtils
         // QQ 音乐，歌曲短链接
         if (searchSource == SearchSourceEnum.QQ_MUSIC && input.Contains("fcgi-bin/u"))
         {
-            var response = HttpUtils.HttpGet0(input);
-            if (response is { IsSuccessStatusCode: true, RequestMessage: not null } && response.RequestMessage.RequestUri != null)
+            if (ResolveShortLink(input) is { } redirectUrl && !redirectUrl.Contains("fcgi-bin/u"))
             {
-                var redirectUrl = response.RequestMessage.RequestUri.AbsoluteUri;
                 return CheckInputId(redirectUrl, searchSource, searchType);
             }
         }
         
+        // 汽水音乐短链 qishui.douyin.com/s/xxx，跳转到带 track_id/album_id/playlist_id 的分享页
+        if (searchSource == SearchSourceEnum.SODA_MUSIC && input.Contains("qishui.douyin.com/s/"))
+        {
+            var shortLink = SodaShortLinkRegex().Match(input);
+            if (shortLink.Success && ResolveShortLink(shortLink.Value) is { } redirectUrl &&
+                !redirectUrl.Contains("qishui.douyin.com/s/"))
+            {
+                return CheckInputId(redirectUrl, searchSource, searchType);
+            }
+        }
+
         Logger.Warn("GlobalUtils#CheckInputId INPUT_ID_ILLEGAL, input: " + input);
 
         throw new MusicLyricException(ErrorMsgConst.INPUT_ID_ILLEGAL);
+    }
+
+    /// <summary>
+    /// Where a share short link leads, or null when it leads to an error page. A network failure or a timeout
+    /// (10 s, short links answer at once) is reported as such, not as "One or more errors occurred", and text that
+    /// is not a link as an invalid input.
+    /// </summary>
+    public static string? ResolveShortLink(string url, Func<HttpClient>? clientFactory = null)
+    {
+        try
+        {
+            using var client = clientFactory?.Invoke() ?? NetworkClientFactory.CreateHttpClient(10);
+            using var response = client.GetAsync(url).GetAwaiter().GetResult();
+            return response.IsSuccessStatusCode ? response.RequestMessage?.RequestUri?.AbsoluteUri : null;
+        }
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
+        {
+            Logger.Warn(ex, "GlobalUtils#ResolveShortLink failed, url: " + url);
+            throw new MusicLyricException(ErrorMsgConst.SHORT_LINK_UNREACHABLE);
+        }
+        // Not a link at all, such as share text pasted around one.
+        catch (Exception ex) when (ex is InvalidOperationException or UriFormatException)
+        {
+            Logger.Warn(ex, "GlobalUtils#ResolveShortLink not a link: " + url);
+            throw new MusicLyricException(ErrorMsgConst.INPUT_ID_ILLEGAL);
+        }
     }
 
     public static string ConvertSearchWithShareLink(SearchSourceEnum searchSource, string input)
@@ -152,7 +164,7 @@ public static partial class GlobalUtils
             if (songIdMatch.Success)
             {
                 var songId = songIdMatch.Groups[1].Value;
-                var replacement = SearchTypeKeywordDict[searchSource][SearchTypeEnum.SONG_ID];
+                var replacement = MusicSources.Get(searchSource).LinkKeywords[SearchTypeEnum.SONG_ID];
                 return Regex.Replace(input, @"playsong\.html\?songid=[^&]*(&.*)?$", replacement + songId);
             }
 
@@ -161,7 +173,7 @@ public static partial class GlobalUtils
             if (albumIdMatch1.Success)
             {
                 var albumId = albumIdMatch1.Groups[1].Value;
-                var replacement = SearchTypeKeywordDict[searchSource][SearchTypeEnum.ALBUM_ID];
+                var replacement = MusicSources.Get(searchSource).LinkKeywords[SearchTypeEnum.ALBUM_ID];
                 return Regex.Replace(input, @"album\.html\?albummid=[^&]*(&.*)?$", replacement + albumId);
             }
             
@@ -170,7 +182,7 @@ public static partial class GlobalUtils
             if (albumIdMatch2.Success)
             {
                 var albumId = albumIdMatch2.Groups[2].Value;
-                var replacement = SearchTypeKeywordDict[searchSource][SearchTypeEnum.ALBUM_ID];
+                var replacement = MusicSources.Get(searchSource).LinkKeywords[SearchTypeEnum.ALBUM_ID];
                 // 构建替换部分，保留?后albumId前的参数，然后替换为albumDetail页面
                 return Regex.Replace(input, @"album\.html\?.*albumId=[^&]*(&.*)?$", replacement + albumId + "$1");
             }
@@ -180,7 +192,7 @@ public static partial class GlobalUtils
             if (playlistIdMatch.Success)
             {
                 var playlistId = playlistIdMatch.Groups[1].Value;
-                var replacement = SearchTypeKeywordDict[searchSource][SearchTypeEnum.PLAYLIST_ID];
+                var replacement = MusicSources.Get(searchSource).LinkKeywords[SearchTypeEnum.PLAYLIST_ID];
                 return Regex.Replace(input, @"taoge\.html\?id=[^&]*(&.*)?$", replacement + playlistId);
             }
         }
@@ -223,7 +235,7 @@ public static partial class GlobalUtils
             .Replace("${index}", saveVo.Index.ToString())
             .Replace("${id}", songVo.DisplayId)
             .Replace("${name}", ControlLength(songVo.Name))
-            .Replace("${singer}", ControlLength(string.Join(singerSeparator, singers)))
+            .Replace("${singer}", ControlLength(string.Join(singerSeparator, singers ?? [])))
             .Replace("${album}", ControlLength(songVo.Album));
 
         outputName = ResolveCustomFunction(outputName);
@@ -423,6 +435,9 @@ public static partial class GlobalUtils
     [GeneratedRegex("^\\d+$", RegexOptions.Compiled)]
     private static partial Regex NumberRegex();
     
+    [GeneratedRegex(@"https?://qishui\.douyin\.com/s/[A-Za-z0-9]+/?")]
+    private static partial Regex SodaShortLinkRegex();
+
     [GeneratedRegex(@"\$fillLength\([^\)]*\)")]
     private static partial Regex FillLengthRegex();
 }

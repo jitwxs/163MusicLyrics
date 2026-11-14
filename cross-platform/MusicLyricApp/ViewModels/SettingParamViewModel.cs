@@ -11,18 +11,17 @@ namespace MusicLyricApp.ViewModels;
 
 public partial class SettingParamViewModel : ViewModelBase
 {
-    public sealed class LanguageOption(string code, string resourceKey) : INotifyPropertyChanged
+    public sealed class LanguageOption(string code, string resourceKey) : LocalizedObject
     {
         public string Code { get; } = code;
         public string DisplayName => LocalizationService.Get(resourceKey);
-        public event PropertyChangedEventHandler? PropertyChanged;
         public override string ToString() => DisplayName;
-        public void RefreshDisplayName() => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(DisplayName)));
     }
 
     public ObservableCollection<LanguageOption> Languages { get; } =
     [
         new("zh-CN", "Language.SimplifiedChinese"),
+        new("zh-TW", "Language.TraditionalChinese"),
         new("en-US", "Language.English")
     ];
 
@@ -36,49 +35,18 @@ public partial class SettingParamViewModel : ViewModelBase
     }
 
     // -1. 同名文件处理策略
-    public ObservableCollection<EnumDisplayHelper.EnumDisplayItem<FileConflictStrategyEnum>> FileConflictStrategies { get; } =
-        EnumDisplayHelper.GetEnumDisplayCollection<FileConflictStrategyEnum>();
-
-    [ObservableProperty]
-    private EnumDisplayHelper.EnumDisplayItem<FileConflictStrategyEnum> _selectedFileConflictStrategyItem;
+    public EnumChoice<FileConflictStrategyEnum> FileConflictStrategy { get; }
 
     [ObservableProperty]
     private bool _isConflictSuffixEnabled;
 
-    partial void OnSelectedFileConflictStrategyItemChanged(EnumDisplayHelper.EnumDisplayItem<FileConflictStrategyEnum>? value)
-    {
-        if (value == null)
-        {
-            return;
-        }
-
-        _settingBean.Config.FileConflictStrategy = value.Value;
-        IsConflictSuffixEnabled = value.Value == FileConflictStrategyEnum.APPEND_NUMBER;
-    }
-
     // 0. 网络代理模式
-    public ObservableCollection<EnumDisplayHelper.EnumDisplayItem<NetworkProxyModeEnum>> NetworkProxyModes { get; } =
-        EnumDisplayHelper.GetEnumDisplayCollection<NetworkProxyModeEnum>();
+    public EnumChoice<NetworkProxyModeEnum> NetworkProxyMode { get; }
 
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsHttpProxySelected))]
-    private EnumDisplayHelper.EnumDisplayItem<NetworkProxyModeEnum> _selectedNetworkProxyModeItem;
-
-    public bool IsHttpProxySelected => SelectedNetworkProxyModeItem?.Value == NetworkProxyModeEnum.HTTP_PROXY;
-
-    partial void OnSelectedNetworkProxyModeItemChanged(EnumDisplayHelper.EnumDisplayItem<NetworkProxyModeEnum>? value)
-    {
-        if (value == null)
-        {
-            return;
-        }
-
-        _settingBean.Config.NetworkProxyMode = value.Value;
-        NetworkClientFactory.Configure(_settingBean.Config);
-    }
+    public bool IsHttpProxySelected => NetworkProxyMode.Value == NetworkProxyModeEnum.HTTP_PROXY;
 
     // 0.1 HTTP 代理地址
-    [ObservableProperty] private string _proxyHost;
+    [ObservableProperty] private string _proxyHost = string.Empty;
 
     partial void OnProxyHostChanged(string value)
     {
@@ -90,28 +58,10 @@ public partial class SettingParamViewModel : ViewModelBase
     }
 
     // 0.2 HTTP 代理端口
-    [ObservableProperty] private string _proxyPortText;
-
-    [ObservableProperty] private string _proxyPortError;
-
-    partial void OnProxyPortTextChanged(string value)
-    {
-        if (!int.TryParse(value, out var port) || port < 1 || port > 65535)
-        {
-            ProxyPortError = LocalizationService.Get("Message.InvalidPort");
-            return;
-        }
-
-        ProxyPortError = string.Empty;
-        _settingBean.Config.ProxyPort = port;
-        if (IsHttpProxySelected)
-        {
-            NetworkClientFactory.Configure(_settingBean.Config);
-        }
-    }
+    public NumberSetting ProxyPort { get; }
 
     // 0.3 HTTP 代理用户名
-    [ObservableProperty] private string _proxyUsername;
+    [ObservableProperty] private string _proxyUsername = string.Empty;
 
     partial void OnProxyUsernameChanged(string value)
     {
@@ -123,7 +73,7 @@ public partial class SettingParamViewModel : ViewModelBase
     }
 
     // 0.4 HTTP 代理密码
-    [ObservableProperty] private string _proxyPassword;
+    [ObservableProperty] private string _proxyPassword = string.Empty;
 
     partial void OnProxyPasswordChanged(string value)
     {
@@ -135,79 +85,35 @@ public partial class SettingParamViewModel : ViewModelBase
     }
 
     // 1. 毫秒截位规则
-    public ObservableCollection<EnumDisplayHelper.EnumDisplayItem<DotTypeEnum>> DotTypes { get; } =
-        EnumDisplayHelper.GetEnumDisplayCollection<DotTypeEnum>();
-    
-    [ObservableProperty]
-    private EnumDisplayHelper.EnumDisplayItem<DotTypeEnum> _selectedDotTypeItem;
+    public EnumChoice<DotTypeEnum> DotType { get; }
 
-    public DotTypeEnum SelectedDotType => SelectedDotTypeItem?.Value ?? default;
-    
-    partial void OnSelectedDotTypeItemChanged(EnumDisplayHelper.EnumDisplayItem<DotTypeEnum>? value)
-    {
-        if (value != null) _settingBean.Config.DotType = value.Value;
-    }
-    
     // 2. 译文缺省规则
-    public ObservableCollection<EnumDisplayHelper.EnumDisplayItem<TransLyricLostRuleEnum>> TransLyricLostRules { get; } =
-        EnumDisplayHelper.GetEnumDisplayCollection<TransLyricLostRuleEnum>();
-    
-    [ObservableProperty]
-    private EnumDisplayHelper.EnumDisplayItem<TransLyricLostRuleEnum> _selectedTransLyricLostRuleItem;
+    public EnumChoice<TransLyricLostRuleEnum> TransLyricLostRule { get; }
 
-    public TransLyricLostRuleEnum SelectedTransLyricLostRule => SelectedTransLyricLostRuleItem?.Value ?? default;
-    
-    partial void OnSelectedTransLyricLostRuleItemChanged(EnumDisplayHelper.EnumDisplayItem<TransLyricLostRuleEnum>? value)
-    {
-        if (value != null) _settingBean.Config.TransConfig.LostRule = value.Value;
-    }
-    
     // 3. 中文处理策略
-    public ObservableCollection<EnumDisplayHelper.EnumDisplayItem<ChineseProcessRuleEnum>> ChineseProcessRules { get; } =
-        EnumDisplayHelper.GetEnumDisplayCollection<ChineseProcessRuleEnum>();
-    
-    [ObservableProperty]
-    private EnumDisplayHelper.EnumDisplayItem<ChineseProcessRuleEnum> _selectedChineseProcessRuleItem;
+    public EnumChoice<ChineseProcessRuleEnum> ChineseProcessRule { get; }
 
-    public ChineseProcessRuleEnum SelectedChineseProcessRule => SelectedChineseProcessRuleItem?.Value ?? default;
-    
-    partial void OnSelectedChineseProcessRuleItemChanged(
-        EnumDisplayHelper.EnumDisplayItem<ChineseProcessRuleEnum>? oldValue,
-        EnumDisplayHelper.EnumDisplayItem<ChineseProcessRuleEnum>? newValue)
-    {
-        if (newValue != null) _settingBean.Config.ChineseProcessRule = newValue.Value;
-    }
-    
     // 4. 主题
-    public ObservableCollection<EnumDisplayHelper.EnumDisplayItem<ThemeModeEnum>> ThemeModeRules { get; } =
-        EnumDisplayHelper.GetEnumDisplayCollection<ThemeModeEnum>();
-    
-    [ObservableProperty]
-    private EnumDisplayHelper.EnumDisplayItem<ThemeModeEnum> _selectedThemeModeRuleItem;
+    public EnumChoice<ThemeModeEnum> ThemeMode { get; }
 
-    public ThemeModeEnum SelectedThemeModeRule => SelectedThemeModeRuleItem?.Value ?? default;
-    
-    partial void OnSelectedThemeModeRuleItemChanged(
-        EnumDisplayHelper.EnumDisplayItem<ThemeModeEnum>? oldValue,
-        EnumDisplayHelper.EnumDisplayItem<ThemeModeEnum>? newValue)
+    // 5, 6. LRC and SRT timestamp formats
+    public TimestampFormatEditorViewModel LrcTimestamp { get; }
+
+    public TimestampFormatEditorViewModel SrtTimestamp { get; }
+
+    /// <summary>The rounding rule only matters when a format keeps one or two millisecond digits (S, SS).</summary>
+    public bool IsDotTypeApplicable =>
+        TimestampFormatValidator.MillisecondDigits(_settingBean.Config.LrcTimestampFormat) < 3 ||
+        TimestampFormatValidator.MillisecondDigits(_settingBean.Config.SrtTimestampFormat) < 3;
+
+    public string DotTypeHint => LocalizationService.Get(IsDotTypeApplicable
+        ? "Settings.Timestamp.Rounding.Applies"
+        : "Settings.Timestamp.Rounding.Inactive");
+
+    private void OnTimestampFormatCommitted()
     {
-        if (newValue != null) _settingBean.Config.ThemeMode = newValue.Value;
-    }
-    
-    // 5. LRC 时间戳
-    [ObservableProperty] private string _lrcTimestampFormat;
-    
-    partial void OnLrcTimestampFormatChanged(string value)
-    {
-        _settingBean.Config.LrcTimestampFormat = value;
-    }
-    
-    // 6. SRT 时间戳
-    [ObservableProperty] private string _srtTimestampFormat;
-    
-    partial void OnSrtTimestampFormatChanged(string value)
-    {
-        _settingBean.Config.SrtTimestampFormat = value;
+        OnPropertyChanged(nameof(IsDotTypeApplicable));
+        OnPropertyChanged(nameof(DotTypeHint));
     }
     
     // 7. SRT 时间戳
@@ -218,22 +124,9 @@ public partial class SettingParamViewModel : ViewModelBase
         _settingBean.Config.IgnoreEmptyLyric = value;
     }
     
-    // 8. SRT 时间戳
-    public ObservableCollection<EnumDisplayHelper.EnumDisplayItem<VerbatimLyricModeEnum>> VerbatimLyricMode { get; } =
-        EnumDisplayHelper.GetEnumDisplayCollection<VerbatimLyricModeEnum>();
-    
-    [ObservableProperty]
-    private EnumDisplayHelper.EnumDisplayItem<VerbatimLyricModeEnum> _selectedVerbatimLyricModeItem;
+    // 8. 逐字歌词
+    public EnumChoice<VerbatimLyricModeEnum> VerbatimLyricMode { get; }
 
-    public VerbatimLyricModeEnum SelectedTVerbatimLyricMode => SelectedVerbatimLyricModeItem?.Value ?? default;
-    
-    partial void OnSelectedVerbatimLyricModeItemChanged(
-        EnumDisplayHelper.EnumDisplayItem<VerbatimLyricModeEnum>? oldValue,
-        EnumDisplayHelper.EnumDisplayItem<VerbatimLyricModeEnum>? newValue)
-    {
-        if (newValue != null) _settingBean.Config.VerbatimLyricMode = newValue.Value;
-    }
-    
     // 9. 译文匹配精度
     [ObservableProperty] private int _matchPrecisionDeviation;
     
@@ -243,7 +136,7 @@ public partial class SettingParamViewModel : ViewModelBase
     }
 
     // 10. 百度 APP ID
-    [ObservableProperty] private string _baiduAppId;
+    [ObservableProperty] private string _baiduAppId = string.Empty;
     
     partial void OnBaiduAppIdChanged(string value)
     {
@@ -251,7 +144,7 @@ public partial class SettingParamViewModel : ViewModelBase
     }
     
     // 11. 百度密钥
-    [ObservableProperty] private string _baiduSecret;
+    [ObservableProperty] private string _baiduSecret = string.Empty;
     
     partial void OnBaiduSecretChanged(string value)
     {
@@ -259,7 +152,7 @@ public partial class SettingParamViewModel : ViewModelBase
     }
     
     // 12. 彩云小译 Token
-    [ObservableProperty] private string _caiYunToken;
+    [ObservableProperty] private string _caiYunToken = string.Empty;
     
     partial void OnCaiYunTokenChanged(string value)
     {
@@ -283,7 +176,7 @@ public partial class SettingParamViewModel : ViewModelBase
     }
     
     // 15. 保存文件名
-    [ObservableProperty] private string _outputFileNameFormat;
+    [ObservableProperty] private string _outputFileNameFormat = string.Empty;
     
     partial void OnOutputFileNameFormatChanged(string value)
     {
@@ -315,31 +208,32 @@ public partial class SettingParamViewModel : ViewModelBase
     }
     
     // 19. QQ音乐 Cookie
-    [ObservableProperty] private string _qqMusicCookie;
+    [ObservableProperty] private string _qqMusicCookie = string.Empty;
     
     partial void OnQqMusicCookieChanged(string value)
     {
-        _settingBean.Config.QQMusicCookie = value;
+        // Saved without the quotes, "Cookie:" prefix and line breaks a copy from the browser often brings.
+        _settingBean.Config.QQMusicCookie = Core.Service.Login.CookieInspector.Normalize(value);
     }
     
     // 20. 网易云 Cookie
-    [ObservableProperty] private string _netEaseCookie;
+    [ObservableProperty] private string _netEaseCookie = string.Empty;
     
     partial void OnNetEaseCookieChanged(string value)
     {
-        _settingBean.Config.NetEaseCookie = value;
+        _settingBean.Config.NetEaseCookie = Core.Service.Login.CookieInspector.Normalize(value);
     }
     
     // 21. 歌手分隔符
-    [ObservableProperty] private string _singerSeparator;
+    [ObservableProperty] private string _singerSeparator = string.Empty;
     
-    partial void OnSingerSeparatorChanged(string newValue)
+    partial void OnSingerSeparatorChanged(string value)
     {
-        _settingBean.Config.SingerSeparator = newValue;
+        _settingBean.Config.SingerSeparator = value;
     }
 
     // 21.3 同名文件后缀模板
-    [ObservableProperty] private string _fileConflictSuffixPattern;
+    [ObservableProperty] private string _fileConflictSuffixPattern = string.Empty;
 
     partial void OnFileConflictSuffixPatternChanged(string value)
     {
@@ -371,7 +265,7 @@ public partial class SettingParamViewModel : ViewModelBase
     }
 
     // 22. 歌词合并符
-    [ObservableProperty] private string _lrcMergeSeparator;
+    [ObservableProperty] private string _lrcMergeSeparator = string.Empty;
 
     partial void OnLrcMergeSeparatorChanged(string value)
     {
@@ -379,7 +273,7 @@ public partial class SettingParamViewModel : ViewModelBase
     }
 
     // 23. 保存路径
-    [ObservableProperty] private string _saveFolderPath;
+    [ObservableProperty] private string _saveFolderPath = string.Empty;
 
     partial void OnSaveFolderPathChanged(string value)
     {
@@ -395,72 +289,95 @@ public partial class SettingParamViewModel : ViewModelBase
     }
 
     // 25. 搜索缓存目录
-    [ObservableProperty] private string _searchCacheFolderPath;
+    [ObservableProperty] private string _searchCacheFolderPath = string.Empty;
 
     partial void OnSearchCacheFolderPathChanged(string value)
     {
         _settingBean.Config.SearchCacheFolderPath = value;
     }
 
-    // 26. 搜索缓存最大占用（MB）输入文本
-    [ObservableProperty] private string _searchCacheMaxSizeMbText;
+    // 26. 搜索缓存最大占用（MB）
+    public NumberSetting SearchCacheMaxSizeMb { get; }
 
-    // 27. 搜索缓存大小输入错误提示
-    [ObservableProperty] private string _searchCacheSizeError;
+    // 28. 启动时加载到下载管理的缓存歌曲数量
+    public NumberSetting SearchCacheStartupLoadLimit { get; }
 
-    partial void OnSearchCacheMaxSizeMbTextChanged(string value)
-    {
-        if (!int.TryParse(value, out var size))
-        {
-            SearchCacheSizeError = LocalizationService.Get("Status.Settings.CacheNumberInvalid");
-            return;
-        }
-
-        if (size < 1 || size > 2048)
-        {
-            SearchCacheSizeError = LocalizationService.Get("Status.Settings.CacheRangeInvalid");
-            return;
-        }
-
-        SearchCacheSizeError = string.Empty;
-        _settingBean.Config.SearchCacheMaxSizeMb = size;
-    }
-    
-    private SettingBean _settingBean;
+    private SettingBean _settingBean = new();
 
     public SettingParamViewModel()
     {
-        foreach (var language in Languages)
+        var config = () => _settingBean.Config;
+        FileConflictStrategy = new(value =>
         {
-            LocalizationService.Instance.PropertyChanged += (_, _) => language.RefreshDisplayName();
-        }
+            config().FileConflictStrategy = value;
+            IsConflictSuffixEnabled = value == FileConflictStrategyEnum.APPEND_NUMBER;
+        });
+        NetworkProxyMode = new(value =>
+        {
+            config().NetworkProxyMode = value;
+            OnPropertyChanged(nameof(IsHttpProxySelected));
+            NetworkClientFactory.Configure(config());
+        });
+        ProxyPort = new(1, 65535, () => LocalizationService.Get("Message.InvalidPort"), port =>
+        {
+            config().ProxyPort = port;
+            if (IsHttpProxySelected) NetworkClientFactory.Configure(config());
+        });
+        DotType = new(value =>
+        {
+            config().DotType = value;
+            LrcTimestamp?.RefreshPreview();
+            SrtTimestamp?.RefreshPreview();
+        });
+        TransLyricLostRule = new(value => config().TransConfig.LostRule = value);
+        ChineseProcessRule = new(value => config().ChineseProcessRule = value);
+        ThemeMode = new(value => config().ThemeMode = value);
+        VerbatimLyricMode = new(value => config().VerbatimLyricMode = value);
+        SearchCacheMaxSizeMb = new(1, 2048, () => LocalizationService.Get("Status.Settings.CacheRangeInvalid"),
+            size => config().SearchCacheMaxSizeMb = size,
+            notANumber: () => LocalizationService.Get("Status.Settings.CacheNumberInvalid"));
+        SearchCacheStartupLoadLimit = new(0, Constants.MaxStartupCacheLoadLimit,
+            () => LocalizationService.Format("Status.Settings.StartupLoadRangeInvalid", Constants.MaxStartupCacheLoadLimit),
+            limit => config().SearchCacheStartupLoadLimit = limit);
+        LrcTimestamp = new TimestampFormatEditorViewModel(true, () => _settingBean.Config.DotType, format =>
+        {
+            _settingBean.Config.LrcTimestampFormat = format;
+            OnTimestampFormatCommitted();
+        });
+        SrtTimestamp = new TimestampFormatEditorViewModel(false, () => _settingBean.Config.DotType, format =>
+        {
+            _settingBean.Config.SrtTimestampFormat = format;
+            OnTimestampFormatCommitted();
+        });
+        LocalizationService.Observe(this, static vm => vm.OnPropertyChanged(nameof(DotTypeHint)));
+
     }
 
     public void Bind(SettingBean settingBean)
     {
         _settingBean = settingBean;
-        SelectedLanguage = Languages.First(language => language.Code == settingBean.Config.Language);
+        SelectedLanguage = Languages.First(language => language.Code == LocalizationService.NormalizeLanguage(settingBean.Config.Language));
         NetworkClientFactory.Configure(_settingBean.Config);
 
-        SelectedFileConflictStrategyItem = FileConflictStrategies.First(item => Equals(item.Value, _settingBean.Config.FileConflictStrategy));
+        FileConflictStrategy.Value = _settingBean.Config.FileConflictStrategy;
         IsConflictSuffixEnabled = _settingBean.Config.FileConflictStrategy == FileConflictStrategyEnum.APPEND_NUMBER;
         FileConflictSuffixPattern = string.IsNullOrWhiteSpace(_settingBean.Config.FileConflictSuffixPattern)
             ? " ({n})"
             : _settingBean.Config.FileConflictSuffixPattern;
-        SelectedNetworkProxyModeItem = NetworkProxyModes.First(item => Equals(item.Value, _settingBean.Config.NetworkProxyMode));
+        NetworkProxyMode.Value = _settingBean.Config.NetworkProxyMode;
         ProxyHost = _settingBean.Config.ProxyHost;
-        ProxyPortText = (_settingBean.Config.ProxyPort <= 0 ? 80 : _settingBean.Config.ProxyPort).ToString();
-        ProxyPortError = string.Empty;
+        ProxyPort.Load(_settingBean.Config.ProxyPort <= 0 ? 80 : _settingBean.Config.ProxyPort);
         ProxyUsername = _settingBean.Config.ProxyUsername;
         ProxyPassword = _settingBean.Config.ProxyPassword;
-        SelectedDotTypeItem = DotTypes.First(item => Equals(item.Value, _settingBean.Config.DotType));
-        SelectedTransLyricLostRuleItem = TransLyricLostRules.First(item => Equals(item.Value, _settingBean.Config.TransConfig.LostRule));
-        SelectedChineseProcessRuleItem = ChineseProcessRules.First(item => Equals(item.Value, _settingBean.Config.ChineseProcessRule));
-        SelectedThemeModeRuleItem = ThemeModeRules.First(item => Equals(item.Value, _settingBean.Config.ThemeMode));
-        LrcTimestampFormat = _settingBean.Config.LrcTimestampFormat;
-        SrtTimestampFormat = _settingBean.Config.SrtTimestampFormat;
+        DotType.Value = _settingBean.Config.DotType;
+        TransLyricLostRule.Value = _settingBean.Config.TransConfig.LostRule;
+        ChineseProcessRule.Value = _settingBean.Config.ChineseProcessRule;
+        ThemeMode.Value = _settingBean.Config.ThemeMode;
+        LrcTimestamp.Load(_settingBean.Config.LrcTimestampFormat);
+        SrtTimestamp.Load(_settingBean.Config.SrtTimestampFormat);
+        OnTimestampFormatCommitted();
         IgnoreEmptyLyric = _settingBean.Config.IgnoreEmptyLyric;
-        SelectedVerbatimLyricModeItem = VerbatimLyricMode.First(item => Equals(item.Value, _settingBean.Config.VerbatimLyricMode));
+        VerbatimLyricMode.Value = _settingBean.Config.VerbatimLyricMode;
         MatchPrecisionDeviation = _settingBean.Config.TransConfig.MatchPrecisionDeviation;
         BaiduAppId = _settingBean.Config.TransConfig.BaiduTranslateAppId;
         BaiduSecret =  _settingBean.Config.TransConfig.BaiduTranslateSecret;
@@ -481,8 +398,8 @@ public partial class SettingParamViewModel : ViewModelBase
         SaveFolderPath = _settingBean.Config.LastSaveFolderPath;
         DownloadCoverAndSongLinkOnSave = _settingBean.Config.DownloadCoverAndSongLinkOnSave;
         SearchCacheFolderPath = _settingBean.Config.SearchCacheFolderPath;
-        SearchCacheMaxSizeMbText = (_settingBean.Config.SearchCacheMaxSizeMb <= 0 ? 128 : _settingBean.Config.SearchCacheMaxSizeMb).ToString();
-        SearchCacheSizeError = string.Empty;
+        SearchCacheMaxSizeMb.Load(_settingBean.Config.SearchCacheMaxSizeMb <= 0 ? 128 : _settingBean.Config.SearchCacheMaxSizeMb);
+        SearchCacheStartupLoadLimit.Load(_settingBean.Config.SearchCacheStartupLoadLimit);
     }
 }
 

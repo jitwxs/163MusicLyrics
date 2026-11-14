@@ -144,6 +144,11 @@ public class ConfigBean
     public int SearchCacheMaxSizeMb = 128;
 
     /// <summary>
+    /// 启动时从本地搜索缓存加载到下载管理的歌曲数量上限（最新的优先），0 表示不加载
+    /// </summary>
+    public int SearchCacheStartupLoadLimit = Constants.DefaultStartupCacheLoadLimit;
+
+    /// <summary>
     /// 代理模式
     /// </summary>
     public NetworkProxyModeEnum NetworkProxyMode = NetworkProxyModeEnum.SYSTEM_PROXY;
@@ -182,6 +187,11 @@ public class ConfigBean
     /// 网易云音乐 Cookie
     /// </summary>
     public string NetEaseCookie = "";
+
+    /// <summary>
+    /// 汽水音乐游客设备号，首次使用时生成，之后一直复用
+    /// </summary>
+    public string SodaMusicDeviceId = "";
 
     public readonly TransConfigBean TransConfig = new();
 

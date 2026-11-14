@@ -10,19 +10,19 @@ namespace MusicLyricApp.Models;
 public class SearchResult
 {
     /* SearchType = SONG */
-    public Song[] Songs { get; set; }
+    public Song[] Songs { get; set; } = [];
 
     public long SongCount { get; set; }
 
     /* SearchType = ALBUM */
 
-    public Album[] Albums { get; set; }
+    public Album[] Albums { get; set; } = [];
 
     public long AlbumCount { get; set; }
 
     /* SearchType = PLAYLIST */
 
-    public SimplePlaylist[] Playlists { get; set; }
+    public SimplePlaylist[] Playlists { get; set; } = [];
 
     public long PlaylistCount { get; set; }
 
@@ -48,7 +48,7 @@ public class SearchResult
                             DisplayId = song.Id,
                             Title = song.Name,
                             AuthorName = song.Ar.Select(e => e.Name).ToArray(),
-                            AlbumName = song.Al.Name,
+                            AlbumName = song.Al?.Name ?? string.Empty,
                             Duration = song.Dt
                         });
                     }
@@ -81,7 +81,7 @@ public class SearchResult
                         {
                             DisplayId = playlist.Id,
                             PlaylistName = playlist.Name,
-                            AuthorName = playlist.Creator.Nickname,
+                            AuthorName = playlist.Creator?.Nickname ?? string.Empty,
                             Description = playlist.Description,
                             PlayCount = playlist.PlayCount,
                             SongCount = playlist.TrackCount,
@@ -98,23 +98,23 @@ public class SearchResult
 
 public class SongUrls
 {
-    public Datum[] Data { get; set; }
+    public Datum[] Data { get; set; } = [];
     public long Code { get; set; }
 }
 
 public class Datum
 {
-    public string Id { get; set; }
-    public string Url { get; set; }
+    public string Id { get; set; } = string.Empty;
+    public string Url { get; set; } = string.Empty;
     public long Br { get; set; }
     public long Size { get; set; }
-    public string Md5 { get; set; }
+    public string Md5 { get; set; } = string.Empty;
     public long Code { get; set; }
     public long Expi { get; set; }
-    public string Type { get; set; }
+    public string Type { get; set; } = string.Empty;
     public double Gain { get; set; }
     public long Fee { get; set; }
-    public object Uf { get; set; }
+    public object? Uf { get; set; }
     public long Payed { get; set; }
     public long Flag { get; set; }
     public bool CanExtend { get; set; }
@@ -127,10 +127,10 @@ public class LyricResult
     public bool Qfy { get; set; }
     public bool Nolyric { get; set; }
     public bool Uncollected { get; set; }
-    public LyricUser TransUser { get; set; }
-    public LyricUser LyricUser { get; set; }
+    public LyricUser? TransUser { get; set; }
+    public LyricUser? LyricUser { get; set; }
     public Lrc? Lrc { get; set; }
-    public Lrc Klyric { get; set; }
+    public Lrc? Klyric { get; set; }
     public Lrc? Tlyric { get; set; }
     public Lrc? Romalrc { get; set; }
     public Lrc? Yrc { get; set; }
@@ -143,14 +143,14 @@ public class LyricUser
     public long Status { get; set; }
     public long Demand { get; set; }
     public long Userid { get; set; }
-    public string Nickname { get; set; }
+    public string Nickname { get; set; } = string.Empty;
     public long Uptime { get; set; }
 }
 
 public class Lrc
 {
     public long Version { get; set; }
-    public string Lyric { get; set; }
+    public string Lyric { get; set; } = string.Empty;
 }
 
 /// <summary>
@@ -160,28 +160,29 @@ public class PlaylistResult
 {
     public long Code { get; set; }
 
-    public string Urls { get; set; }
+    public string Urls { get; set; } = string.Empty;
 
-    public string RelatedVideos { get; set; }
+    public string RelatedVideos { get; set; } = string.Empty;
 
     /// <summary>
     /// 歌单作者信息
     /// </summary>
-    public Playlist Playlist { get; set; }
+    public Playlist? Playlist { get; set; }
 
     /// <summary>
     /// 歌单歌曲权限信息
     /// </summary>
-    public Privilege[] Privileges { get; set; }
+    public Privilege[] Privileges { get; set; } = [];
 
     public PlaylistVo Convert(SimpleSongVo[] simpleSongVos)
     {
-        var creator = Playlist.Creator;
+        var playlist = Playlist ?? throw new MusicLyricApp.Core.MusicLyricException(ErrorMsgConst.PLAYLIST_NOT_EXIST);
+        var creator = playlist.Creator;
         return new PlaylistVo
         {
-            Name = Playlist.Name,
+            Name = playlist.Name,
             AuthorName = creator == null ? "" : creator.Nickname,
-            Description = Playlist.Description,
+            Description = playlist.Description,
             SimpleSongVos = simpleSongVos
         };
     }
@@ -192,19 +193,20 @@ public class PlaylistResult
 /// </summary>
 public class AlbumResult
 {
-    public Song[] Songs { get; set; }
+    public Song[] Songs { get; set; } = [];
     public long Code { get; set; }
-    public Album Album { get; set; }
+    public Album? Album { get; set; }
 
     public AlbumVo Convert()
     {
+        var album = Album ?? throw new MusicLyricApp.Core.MusicLyricException(ErrorMsgConst.ALBUM_NOT_EXIST);
         return new AlbumVo
         {
-            Name = Album.Name,
-            Company = Album.Company,
-            Desc = Album.Description,
+            Name = album.Name,
+            Company = album.Company,
+            Desc = album.Description,
             SimpleSongVos = Songs.Select(e => e.ConvertSimple()).ToArray(),
-            TimePublic = GlobalUtils.FormatDate(Album.PublishTime)
+            TimePublic = GlobalUtils.FormatDate(album.PublishTime)
         };
     }
 }
@@ -214,17 +216,17 @@ public class AlbumResult
 /// </summary>
 public class SimplePlaylist
 {
-    public string Id { get; set; }
+    public string Id { get; set; } = string.Empty;
 
     /// <summary>
     /// 歌单名
     /// </summary>
-    public string Name { get; set; }
+    public string Name { get; set; } = string.Empty;
 
     /// <summary>
     /// 歌单封面 URL
     /// </summary>
-    public string CoverImgUrl { get; set; }
+    public string CoverImgUrl { get; set; } = string.Empty;
 
     /// <summary>
     /// 创建者 ID
@@ -234,12 +236,12 @@ public class SimplePlaylist
     /// <summary>
     /// 创建者
     /// </summary>
-    public Creator Creator { get; set; }
+    public Creator? Creator { get; set; }
 
     /// <summary>
     /// 歌单描述
     /// </summary>
-    public string Description { get; set; }
+    public string Description { get; set; } = string.Empty;
 
     /// <summary>
     /// 播放数量
@@ -257,16 +259,6 @@ public class SimplePlaylist
 /// </summary>
 public class Playlist : SimplePlaylist
 {
-    /// <summary>
-    /// 歌单名
-    /// </summary>
-    public string Name { get; set; }
-
-    /// <summary>
-    /// 歌单创建者
-    /// </summary>
-    public Creator Creator { get; set; }
-
     /// <summary>
     /// 歌单封面 ID
     /// </summary>
@@ -295,7 +287,7 @@ public class Playlist : SimplePlaylist
     /// <summary>
     /// 歌单歌曲列表信息
     /// </summary>
-    public SimpleTrack[] TrackIds { get; set; }
+    public SimpleTrack[] TrackIds { get; set; } = [];
 }
 
 public class SimpleTrack
@@ -313,67 +305,67 @@ public class Album
     public bool Paid { get; set; }
     public bool OnSale { get; set; }
     public long PicId { get; set; }
-    public object[] Alias { get; set; }
-    public string CommentThreadId { get; set; }
+    public object[] Alias { get; set; } = [];
+    public string CommentThreadId { get; set; } = string.Empty;
     public long PublishTime { get; set; }
-    public string Company { get; set; }
+    public string Company { get; set; } = string.Empty;
     public long CopyrightId { get; set; }
-    public string PicUrl { get; set; }
-    public Artist Artist { get; set; }
-    public object BriefDesc { get; set; }
-    public string Tags { get; set; }
-    public Artist[] Artists { get; set; }
+    public string PicUrl { get; set; } = string.Empty;
+    public Artist? Artist { get; set; }
+    public object? BriefDesc { get; set; }
+    public string Tags { get; set; } = string.Empty;
+    public Artist[] Artists { get; set; } = [];
     public long Status { get; set; }
-    public string Description { get; set; }
-    public object SubType { get; set; }
-    public string BlurPicUrl { get; set; }
+    public string Description { get; set; } = string.Empty;
+    public object? SubType { get; set; }
+    public string BlurPicUrl { get; set; } = string.Empty;
     public long CompanyId { get; set; }
     public long Pic { get; set; }
-    public string Name { get; set; }
+    public string Name { get; set; } = string.Empty;
     public long Id { get; set; }
-    public string Type { get; set; }
+    public string Type { get; set; } = string.Empty;
 
     /// <summary>
     /// 歌曲数量
     /// </summary>
     public long Size { get; set; }
 
-    public string PicIdStr { get; set; }
-    public Info Info { get; set; }
+    public string PicIdStr { get; set; } = string.Empty;
+    public Info? Info { get; set; }
 }
 
 public class Song
 {
-    public string Name { get; set; }
-    public string Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string Id { get; set; } = string.Empty;
     public long Pst { get; set; }
     public long T { get; set; }
-    public List<Ar> Ar { get; set; }
-    public List<object> Alia { get; set; }
+    public List<Ar> Ar { get; set; } = [];
+    public List<object> Alia { get; set; } = [];
     public long Pop { get; set; }
     public long St { get; set; }
-    public string Rt { get; set; }
+    public string Rt { get; set; } = string.Empty;
     public long Fee { get; set; }
     public long V { get; set; }
-    public object Crbt { get; set; }
-    public string Cf { get; set; }
-    public Al Al { get; set; }
+    public object? Crbt { get; set; }
+    public string Cf { get; set; } = string.Empty;
+    public Al? Al { get; set; }
 
     /// <summary>
     /// 时长，单位ms
     /// </summary>
     public long Dt { get; set; }
 
-    public H H { get; set; }
-    public H M { get; set; }
-    public H L { get; set; }
-    public object A { get; set; }
-    public string Cd { get; set; }
+    public H? H { get; set; }
+    public H? M { get; set; }
+    public H? L { get; set; }
+    public object? A { get; set; }
+    public string Cd { get; set; } = string.Empty;
     public long No { get; set; }
-    public object RtUrl { get; set; }
+    public object? RtUrl { get; set; }
     public long Ftype { get; set; }
-    public List<object> RtUrls { get; set; }
-    public object Rurl { get; set; }
+    public List<object> RtUrls { get; set; } = [];
+    public object? Rurl { get; set; }
     public long Rtype { get; set; }
     public long Mst { get; set; }
     public long Cp { get; set; }
@@ -384,7 +376,7 @@ public class Song
     /// </summary>
     public long PublishTime { get; set; }
 
-    public Privilege Privilege { get; set; }
+    public Privilege? Privilege { get; set; }
 
     public SimpleSongVo ConvertSimple()
     {
@@ -400,31 +392,31 @@ public class Song
 
 public class Info
 {
-    public CommentThread CommentThread { get; set; }
-    public object LatestLikedUsers { get; set; }
+    public CommentThread? CommentThread { get; set; }
+    public object? LatestLikedUsers { get; set; }
     public bool Liked { get; set; }
-    public object Comments { get; set; }
+    public object? Comments { get; set; }
     public long ResourceType { get; set; }
     public long ResourceId { get; set; }
     public long CommentCount { get; set; }
     public long LikedCount { get; set; }
     public long ShareCount { get; set; }
-    public string ThreadId { get; set; }
+    public string ThreadId { get; set; } = string.Empty;
 }
 
 public class CommentThread
 {
-    public string Id { get; set; }
-    public ResourceInfo ResourceInfo { get; set; }
+    public string Id { get; set; } = string.Empty;
+    public ResourceInfo? ResourceInfo { get; set; }
     public long ResourceType { get; set; }
     public long CommentCount { get; set; }
     public long LikedCount { get; set; }
     public long ShareCount { get; set; }
     public long HotCount { get; set; }
-    public object LatestLikedUsers { get; set; }
+    public object? LatestLikedUsers { get; set; }
     public long ResourceId { get; set; }
     public long ResourceOwnerId { get; set; }
-    public string ResourceTitle { get; set; }
+    public string ResourceTitle { get; set; } = string.Empty;
 }
 
 public class Artist
@@ -432,14 +424,14 @@ public class Artist
     public long Img1V1Id { get; set; }
     public long TopicPerson { get; set; }
     public long PicId { get; set; }
-    public object BriefDesc { get; set; }
+    public object? BriefDesc { get; set; }
     public long AlbumSize { get; set; }
-    public string Img1V1Url { get; set; }
-    public string PicUrl { get; set; }
-    public List<string> Alias { get; set; }
-    public string Trans { get; set; }
+    public string Img1V1Url { get; set; } = string.Empty;
+    public string PicUrl { get; set; } = string.Empty;
+    public List<string> Alias { get; set; } = [];
+    public string Trans { get; set; } = string.Empty;
     public long MusicSize { get; set; }
-    public string Name { get; set; }
+    public string Name { get; set; } = string.Empty;
     public long Id { get; set; }
     public long PublishTime { get; set; }
     public long MvSize { get; set; }
@@ -459,31 +451,31 @@ public class Creator
     /// <summary>
     /// 昵称
     /// </summary>
-    public string Nickname { get; set; }
+    public string Nickname { get; set; } = string.Empty;
 
     /// <summary>
     /// 个人介绍
     /// </summary>
-    public string Signature { get; set; }
+    public string Signature { get; set; } = string.Empty;
 
     /// <summary>
     /// 描述
     /// </summary>
-    public string Description { get; set; }
+    public string Description { get; set; } = string.Empty;
 
     /// <summary>
     /// 头像地址
     /// </summary>
-    public string AvatarUrl { get; set; }
+    public string AvatarUrl { get; set; } = string.Empty;
 }
 
 public class ResourceInfo
 {
     public long Id { get; set; }
     public long UserId { get; set; }
-    public string Name { get; set; }
-    public object ImgUrl { get; set; }
-    public Creator Creator { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public object? ImgUrl { get; set; }
+    public Creator? Creator { get; set; }
 }
 
 public class Privilege
@@ -506,26 +498,26 @@ public class Privilege
 
 public class DetailResult
 {
-    public Song[] Songs { get; set; }
-    public Privilege[] Privileges { get; set; }
+    public Song[] Songs { get; set; } = [];
+    public Privilege[] Privileges { get; set; } = [];
     public long Code { get; set; }
 }
 
 public class Al
 {
     public long Id { get; set; }
-    public string Name { get; set; }
-    public string PicUrl { get; set; }
-    public List<object> Tns { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string PicUrl { get; set; } = string.Empty;
+    public List<object> Tns { get; set; } = [];
     public long Pic { get; set; }
 }
 
 public class Ar
 {
     public long Id { get; set; }
-    public string Name { get; set; }
-    public List<object> Tns { get; set; }
-    public List<object> Alias { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public List<object> Tns { get; set; } = [];
+    public List<object> Alias { get; set; } = [];
 }
 
 public class H

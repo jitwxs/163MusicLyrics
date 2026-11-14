@@ -8,9 +8,26 @@ using MusicLyricApp.Models;
 
 namespace MusicLyricApp.ViewModels;
 
+/// <summary>How complete the lyrics of the last search are, for the requested output types.</summary>
+public enum LampStateEnum
+{
+    NONE,
+    COMPLETE,
+    PARTIAL,
+    EMPTY
+}
+
 public partial class SignalLampViewModel : ObservableObject
 {
     [ObservableProperty] private IBrush _lampColor = Brushes.Gray;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsComplete), nameof(IsPartial), nameof(IsEmpty))]
+    private LampStateEnum _state = LampStateEnum.NONE;
+
+    public bool IsComplete => State == LampStateEnum.COMPLETE;
+    public bool IsPartial => State == LampStateEnum.PARTIAL;
+    public bool IsEmpty => State == LampStateEnum.EMPTY;
 
     [ObservableProperty] private string _details = "";
 
@@ -51,14 +68,17 @@ public partial class SignalLampViewModel : ObservableObject
         if (totalCnt == 0)
         {
             LampColor = Brushes.Red;
+            State = LampStateEnum.EMPTY;
         }
         else if (totalCnt == outputDict.Keys.Count * resDict.Count)
         {
             LampColor = Brushes.LimeGreen;
+            State = LampStateEnum.COMPLETE;
         }
         else
         {
             LampColor = Brushes.Chocolate;
+            State = LampStateEnum.PARTIAL;
         }
 
         var sb = new StringBuilder();

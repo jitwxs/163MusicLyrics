@@ -131,13 +131,22 @@ public class QQMusicApi : MusicCacheableApi
         return new ResultVo<LyricVo>(vo);
     }
 
+    private const long SearchNeedsLoginCode = 2001;
+
     protected override ResultVo<SearchResultVo> Search0(string keyword, SearchTypeEnum searchType)
     {
         var resp = _api.Search(keyword, searchType);
 
-        if (resp.Code == 0 && resp.Req_1.Code == 0 && resp.Req_1.Data.Code == 0)
+        if (resp.Code == 0 && resp.Req_1 is { Code: 0, Data: { Code: 0, Body: { } body } })
         {
-            return new ResultVo<SearchResultVo>(resp.Req_1.Data.Body.Convert(searchType));
+            return new ResultVo<SearchResultVo>(body.Convert(searchType));
+        }
+
+        // QQ Music answers keyword searches without a signed-in cookie with code 2001 and a link to its login page.
+        // Reported as needing login, the page offers the way to fix it (设置 Cookie) instead of blaming the network.
+        if (resp.Req_1?.Code == SearchNeedsLoginCode)
+        {
+            return ResultVo<SearchResultVo>.Failure(ErrorMsgConst.NEED_LOGIN);
         }
 
         return ResultVo<SearchResultVo>.Failure(ErrorMsgConst.NETWORK_ERROR);

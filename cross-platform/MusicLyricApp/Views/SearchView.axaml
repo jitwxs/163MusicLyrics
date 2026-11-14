@@ -1,0 +1,467 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:arc="https://github.com/AIDotNet/TKCode.Arc"
+             xmlns:vm="using:MusicLyricApp.ViewModels"
+             xmlns:views="using:MusicLyricApp.Views"
+             xmlns:models="using:MusicLyricApp.Models"
+             xmlns:loc="using:MusicLyricApp.Core.Localization"
+             xmlns:ae="using:AvaloniaEdit"
+             mc:Ignorable="d"
+             d:DesignWidth="840" d:DesignHeight="700"
+             x:Class="MusicLyricApp.Views.SearchView"
+             x:DataType="vm:MainWindowViewModel">
+
+    <UserControl.Styles>
+        <!-- A pane is one surface of the page: raised from the background with a subtle edge. -->
+        <Style Selector="Border.pane">
+            <Setter Property="Background" Value="{arc:ArcDesignTokenResource Surface}" />
+            <Setter Property="BorderBrush" Value="{arc:ArcDesignTokenResource BorderSubtle}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="{arc:ArcDesignTokenResource RadiusSurface}" />
+            <Setter Property="Padding" Value="20" />
+        </Style>
+        <Style Selector="TextBlock.secondary">
+            <Setter Property="Foreground" Value="{arc:ArcDesignTokenResource TextSecondary}" />
+            <Setter Property="FontSize" Value="{arc:ArcDesignTokenResource TypeSM}" />
+        </Style>
+        <!-- The sign-in icon takes the state's color, so a cookie that needs a look stands out beside the source. -->
+        <Style Selector="arc|ArcGlyph.login-valid">
+            <Setter Property="Foreground" Value="{arc:ArcDesignTokenResource Success}" />
+        </Style>
+        <Style Selector="arc|ArcGlyph.login-uncertain">
+            <Setter Property="Foreground" Value="{arc:ArcDesignTokenResource Warning}" />
+        </Style>
+    </UserControl.Styles>
+
+    <!-- Key bindings come from Core/AppShortcuts and are added in code-behind. -->
+
+    <Grid Margin="24,16,24,24" RowDefinitions="Auto,*,Auto" RowSpacing="{arc:ArcDesignTokenResource Space4}">
+
+        <!-- Query: where to search, what kind of ID, and the text itself. -->
+        <StackPanel Spacing="{arc:ArcDesignTokenResource Space3}">
+            <WrapPanel ItemSpacing="{arc:ArcDesignTokenResource Space3}" LineSpacing="{arc:ArcDesignTokenResource Space2}">
+                <arc:SegmentedControl Name="SourceSegment"
+                                      AutomationProperties.Name="{loc:Loc Key=UI.SearchSource}"
+                                      SelectedValue="{Binding SearchParamViewModel.SearchSource.SelectedValue, Mode=TwoWay}">
+                    <arc:SegmentedOption Value="{x:Static models:SearchSourceEnum.NET_EASE_MUSIC}"
+                                         Label="{loc:Loc Key=Enum.SearchSourceEnum.NET_EASE_MUSIC}" />
+                    <arc:SegmentedOption Value="{x:Static models:SearchSourceEnum.QQ_MUSIC}"
+                                         Label="{loc:Loc Key=Enum.SearchSourceEnum.QQ_MUSIC}" />
+                    <arc:SegmentedOption Value="{x:Static models:SearchSourceEnum.SODA_MUSIC}"
+                                         Label="{loc:Loc Key=Enum.SearchSourceEnum.SODA_MUSIC}" />
+                </arc:SegmentedControl>
+                <arc:SegmentedControl Name="TypeSegment"
+                                      AutomationProperties.Name="{loc:Loc Key=UI.SearchType}"
+                                      SelectedValue="{Binding SearchParamViewModel.SearchType.SelectedValue, Mode=TwoWay}">
+                    <arc:SegmentedOption Value="{x:Static models:SearchTypeEnum.SONG_ID}"
+                                         Label="{loc:Loc Key=Enum.SearchTypeEnum.SONG_ID}" />
+                    <arc:SegmentedOption Value="{x:Static models:SearchTypeEnum.ALBUM_ID}"
+                                         Label="{loc:Loc Key=Enum.SearchTypeEnum.ALBUM_ID}" />
+                    <arc:SegmentedOption Value="{x:Static models:SearchTypeEnum.PLAYLIST_ID}"
+                                         Label="{loc:Loc Key=Enum.SearchTypeEnum.PLAYLIST_ID}" />
+                </arc:SegmentedControl>
+                <!-- Sign-in state of the picked source; opens the cookie settings. -->
+                <arc:Button Name="LoginStatusButton"
+                            Variant="Ghost"
+                            Size="Small"
+                            VerticalAlignment="Center"
+                            Command="{Binding ExecuteOpenCookieSettingsCommand}"
+                            IsVisible="{Binding IsCurrentLoginVisible}"
+                            ToolTip.Tip="{Binding CurrentLogin.PageTip}"
+                            AutomationProperties.Name="{Binding CurrentLogin.SourceLabel}">
+                    <!-- An expired cookie reads 未登录 here, tinted to ask for a look rather than red as if broken. -->
+                    <StackPanel Orientation="Horizontal" Spacing="{arc:ArcDesignTokenResource Space2}">
+                        <arc:ArcGlyph Name="LoginStatusIcon" Data="{Binding CurrentLogin.PageIcon}" Size="14" VerticalAlignment="Center"
+                                      Classes.login-valid="{Binding CurrentLogin.IsValid}"
+                                      Classes.login-uncertain="{Binding CurrentLogin.NeedsLookOnPage}" />
+                        <TextBlock Name="LoginStatusText" Text="{Binding CurrentLogin.SourceLabel}" VerticalAlignment="Center"
+                                   MaxWidth="260" TextTrimming="CharacterEllipsis" />
+                    </StackPanel>
+                </arc:Button>
+            </WrapPanel>
+
+            <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="{arc:ArcDesignTokenResource Space4}">
+                <arc:SearchField Name="SearchTextBox"
+                                 Label="{loc:Loc Key=UI.Search}"
+                                 IsLabelVisible="False"
+                                 Placeholder="{loc:Loc Key=UI.SearchPlaceholder}"
+                                 ClearText="{loc:Loc Key=Search.Clear}"
+                                 Text="{Binding SearchParamViewModel.SearchText}" />
+                <arc:Switch Grid.Column="1"
+                            Name="FuzzySwitch"
+                            VerticalAlignment="Center"
+                            Content="{loc:Loc Key=Search.Fuzzy}"
+                            IsChecked="{Binding IsBlurSearch}" />
+                <arc:Button Grid.Column="2"
+                            Name="SearchButton"
+                            Variant="Secondary"
+                            Content="{loc:Loc Key=UI.Search}"
+                            Command="{Binding ExecuteSearchCommand}" />
+            </Grid>
+        </StackPanel>
+
+        <!-- The lyrics are the page: a compact song strip on top, the preview filling the rest. -->
+        <Grid Grid.Row="1" RowDefinitions="Auto,*" RowSpacing="{arc:ArcDesignTokenResource Space3}">
+
+            <!-- Song strip: cover, title, people, facts, link and per-song actions on one band. -->
+            <Border Name="SongPlaybackPanel" Classes="pane" Padding="16,12"
+                    IsVisible="{Binding SearchResultViewModel.HasSong}">
+            <arc:ContextMenu.Menu>
+                <arc:MenuSurface>
+                    <arc:MenuEntry Header="{loc:Loc Key=UI.CopySongLink}"
+                                   Icon="{x:Static arc:ArcIcons.Link}"
+                                   Command="{Binding ExecuteCopySongLinkCommand}"
+                                   IsEnabled="{Binding HasSongLink}" />
+                    <arc:MenuEntry Header="{loc:Loc Key=UI.CopyCoverLink}"
+                                   Icon="{x:Static arc:ArcIcons.Image}"
+                                   Command="{Binding ExecuteCopySongPicCommand}" />
+                    <arc:MenuEntry Header="{loc:Loc Key=UI.DownloadLink}"
+                                   Icon="{x:Static arc:ArcIcons.Download}"
+                                   HasSeparatorBefore="True"
+                                   Command="{Binding ExecuteSongLinkCommand}" />
+                    <arc:MenuEntry Header="{loc:Loc Key=UI.DownloadCover}"
+                                   Icon="{x:Static arc:ArcIcons.FileImage}"
+                                   Command="{Binding ExecuteSongPicCommand}" />
+                    <arc:MenuEntry Header="{loc:Loc Key=UI.PlaySong}"
+                                   Icon="{x:Static arc:ArcIcons.Play}"
+                                   HasSeparatorBefore="True"
+                                   Command="{Binding ExecutePlaySongCommand}"
+                                   IsEnabled="{Binding HasSongLink}"
+                                   IsVisible="{Binding IsPlaybackSupported}" />
+                    <arc:MenuEntry Header="{loc:Loc Key=UI.StopSong}"
+                                   Icon="{x:Static arc:ArcIcons.Square}"
+                                   Command="{Binding ExecuteStopSongCommand}"
+                                   IsEnabled="{Binding IsPlayingSong}"
+                                   IsVisible="{Binding IsPlaybackSupported}" />
+                </arc:MenuSurface>
+            </arc:ContextMenu.Menu>
+
+                <Grid ColumnDefinitions="Auto,*,Auto" RowDefinitions="Auto,Auto"
+                      ColumnSpacing="{arc:ArcDesignTokenResource Space4}"
+                      RowSpacing="{arc:ArcDesignTokenResource Space2}">
+                    <Border Width="64" Height="64"
+                            VerticalAlignment="Center"
+                            ClipToBounds="True"
+                            Background="{arc:ArcDesignTokenResource SurfaceMuted}"
+                            CornerRadius="{arc:ArcDesignTokenResource RadiusControl}">
+                        <Panel>
+                            <arc:ArcGlyph Data="{x:Static arc:ArcIcons.Music}"
+                                          Size="20"
+                                          Foreground="{arc:ArcDesignTokenResource TextMuted}"
+                                          HorizontalAlignment="Center"
+                                          VerticalAlignment="Center" />
+                            <Image Name="AlbumCoverImage" Stretch="UniformToFill" />
+                        </Panel>
+                    </Border>
+
+                    <StackPanel Grid.Column="1" Spacing="{arc:ArcDesignTokenResource Space1}" VerticalAlignment="Center">
+                        <TextBlock Name="SongTitle"
+                                   Text="{Binding SearchResultViewModel.SongName, Mode=OneWay}"
+                                   ToolTip.Tip="{Binding SearchResultViewModel.SongName, Mode=OneWay}"
+                                   FontSize="{arc:ArcDesignTokenResource TypeBase}"
+                                   FontWeight="SemiBold"
+                                   TextWrapping="Wrap"
+                                   MaxLines="2"
+                                   TextTrimming="CharacterEllipsis"
+                                   Foreground="{arc:ArcDesignTokenResource Foreground}" />
+                        <TextBlock Classes="secondary"
+                                   TextTrimming="CharacterEllipsis"
+                                   ToolTip.Tip="{Binding SearchResultViewModel.Album, Mode=OneWay}">
+                            <Run Text="{Binding SearchResultViewModel.Singer, Mode=OneWay}" />
+                            <Run Text=" · " />
+                            <Run Text="{Binding SearchResultViewModel.Album, Mode=OneWay}" />
+                        </TextBlock>
+                        <WrapPanel ItemSpacing="{arc:ArcDesignTokenResource Space2}"
+                                   LineSpacing="{arc:ArcDesignTokenResource Space2}">
+                            <arc:Badge Size="Small"
+                                       Content="{Binding SearchResultViewModel.SongDuration, Mode=OneWay}"
+                                       ToolTip.Tip="{loc:Loc Key=UI.Duration}">
+                                <arc:Badge.Icon><arc:ArcGlyph Data="{x:Static arc:ArcIcons.Clock}" /></arc:Badge.Icon>
+                            </arc:Badge>
+                            <arc:Badge Size="Small"
+                                       Content="{Binding SearchResultViewModel.PublishDate, Mode=OneWay}"
+                                       ToolTip.Tip="{loc:Loc Key=UI.Release}">
+                                <arc:Badge.Icon><arc:ArcGlyph Data="{x:Static arc:ArcIcons.Calendar}" /></arc:Badge.Icon>
+                            </arc:Badge>
+                            <arc:Badge Size="Small"
+                                       Content="{Binding SearchResultViewModel.SongSource, Mode=OneWay}"
+                                       ToolTip.Tip="{loc:Loc Key=UI.Source}">
+                                <arc:Badge.Icon><arc:ArcGlyph Data="{x:Static arc:ArcIcons.Globe}" /></arc:Badge.Icon>
+                            </arc:Badge>
+                            <!-- Lyric completeness: tone plus words, never colour alone. -->
+                            <arc:Badge Name="LampCompleteBadge" Size="Small" Tone="Success"
+                                       Content="{loc:Loc Key=Search.Lamp.Complete}"
+                                       ToolTip.Tip="{Binding LampVm.Details}"
+                                       IsVisible="{Binding LampVm.IsComplete}">
+                                <arc:Badge.Icon><arc:ArcGlyph Data="{x:Static arc:ArcIcons.CircleCheck}" /></arc:Badge.Icon>
+                            </arc:Badge>
+                            <arc:Badge Name="LampPartialBadge" Size="Small" Tone="Warning"
+                                       Content="{loc:Loc Key=Search.Lamp.Partial}"
+                                       ToolTip.Tip="{Binding LampVm.Details}"
+                                       IsVisible="{Binding LampVm.IsPartial}">
+                                <arc:Badge.Icon><arc:ArcGlyph Data="{x:Static arc:ArcIcons.TriangleAlert}" /></arc:Badge.Icon>
+                            </arc:Badge>
+                            <arc:Badge Name="LampEmptyBadge" Size="Small" Tone="Danger"
+                                       Content="{loc:Loc Key=Search.Lamp.Empty}"
+                                       ToolTip.Tip="{Binding LampVm.Details}"
+                                       IsVisible="{Binding LampVm.IsEmpty}">
+                                <arc:Badge.Icon><arc:ArcGlyph Data="{x:Static arc:ArcIcons.CircleX}" /></arc:Badge.Icon>
+                            </arc:Badge>
+                        </WrapPanel>
+                        <TextBlock Name="SongLinkText"
+                                   Classes="secondary"
+                                   IsVisible="{Binding SearchResultViewModel.HasSongLinkText}"
+                                   TextTrimming="CharacterEllipsis"
+                                   FontFamily="{arc:ArcDesignTokenResource MonoFontFamily}"
+                                   ToolTip.Tip="{Binding SearchResultViewModel.SongLink, Mode=OneWay}">
+                            <Run Text="{loc:Loc Key=UI.DirectLink}" />
+                            <Run Text="{Binding SearchResultViewModel.SongLink, Mode=OneWay}" />
+                        </TextBlock>
+                        <TextBlock Classes="secondary"
+                                   Text="{loc:Loc Key=Search.NoLink}"
+                                   IsVisible="{Binding !SearchResultViewModel.HasSongLinkText}" />
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="2"
+                                Orientation="Horizontal"
+                                VerticalAlignment="Center"
+                                Spacing="{arc:ArcDesignTokenResource Space2}">
+                        <arc:Button Variant="Secondary" Size="Small"
+                                    Content="{loc:Loc Key=UI.DownloadLink}"
+                                    Command="{Binding ExecuteSongLinkCommand}" />
+                        <arc:Button Variant="Secondary" Size="Small"
+                                    Content="{loc:Loc Key=UI.DownloadCover}"
+                                    Command="{Binding ExecuteSongPicCommand}" />
+                            <arc:DropdownMenu Label="{loc:Loc Key=Search.MoreActions}">
+                                <arc:DropdownMenu.Trigger>
+                                    <arc:Button Variant="Ghost" Size="Small" IsPressScaleEnabled="False"
+                                                ToolTip.Tip="{loc:Loc Key=Search.MoreActions}"
+                                                AutomationProperties.Name="{loc:Loc Key=Search.MoreActions}">
+                                        <arc:ArcGlyph Data="{x:Static arc:ArcIcons.Ellipsis}" />
+                                    </arc:Button>
+                                </arc:DropdownMenu.Trigger>
+                                <arc:MenuEntry Header="{loc:Loc Key=UI.CopySongLink}"
+                                               Icon="{x:Static arc:ArcIcons.Link}"
+                                               Command="{Binding ExecuteCopySongLinkCommand}"
+                                               IsEnabled="{Binding HasSongLink}" />
+                                <arc:MenuEntry Header="{loc:Loc Key=UI.CopyCoverLink}"
+                                               Icon="{x:Static arc:ArcIcons.Image}"
+                                               Command="{Binding ExecuteCopySongPicCommand}" />
+                                <arc:MenuEntry Header="{loc:Loc Key=UI.StopSong}"
+                                               Icon="{x:Static arc:ArcIcons.Square}"
+                                               HasSeparatorBefore="True"
+                                               Command="{Binding ExecuteStopSongCommand}"
+                                               IsEnabled="{Binding IsPlayingSong}"
+                                               IsVisible="{Binding IsPlaybackSupported}" />
+                            </arc:DropdownMenu>
+                    </StackPanel>
+
+                    <!-- Playback (Windows only) spans the strip under the song details. -->
+                    <Panel Grid.Row="1" Grid.ColumnSpan="3" IsVisible="{Binding IsPlaybackSupported}">
+                        <arc:Slider Name="PlaybackSlider"
+                                    IsVisible="{Binding IsPlaybackSupported}"
+                                    AutomationProperties.Name="{loc:Loc Key=Search.PlayPause}"
+                                    Minimum="0"
+                                    Maximum="{Binding PlaybackDurationSeconds}"
+                                    Value="{Binding PlaybackPositionSeconds, Mode=TwoWay}"
+                                    IsEnabled="{Binding HasSongLink}"
+                                    IsValueVisible="False">
+                            <arc:Slider.StartContent>
+                                <arc:Button Name="PlayPauseButton"
+                                            Variant="Ghost"
+                                            Size="Small"
+                                            Command="{Binding ExecuteTogglePlayPauseCommand}"
+                                            IsEnabled="{Binding HasSongLink}"
+                                            ToolTip.Tip="{loc:Loc Key=Search.PlayPause}"
+                                            AutomationProperties.Name="{loc:Loc Key=Search.PlayPause}">
+                                    <Panel>
+                                        <arc:ArcGlyph Data="{x:Static arc:ArcIcons.Play}" IsVisible="{Binding !IsPlayingSong}" />
+                                        <arc:ArcGlyph Data="{x:Static arc:ArcIcons.Pause}" IsVisible="{Binding IsPlayingSong}" />
+                                    </Panel>
+                                </arc:Button>
+                            </arc:Slider.StartContent>
+                            <arc:Slider.EndContent>
+                                <TextBlock Classes="secondary"
+                                           VerticalAlignment="Center"
+                                           FontFamily="{arc:ArcDesignTokenResource MonoFontFamily}"
+                                           Text="{Binding PlaybackProgressText}" />
+                            </arc:Slider.EndContent>
+                        </arc:Slider>
+                    </Panel>
+                </Grid>
+            </Border>
+
+            <!-- Lyrics preview and editor, or the fuzzy search results in their place. The results table draws its
+                 own frame; the lyrics pane and the empty states are cards (no frame inside a frame). -->
+                <Panel Grid.Row="1">
+                    <Panel IsVisible="{Binding !IsShowingBlurResults}">
+                        <Border Classes="pane"
+                                Padding="12"
+                                IsVisible="{Binding !SearchResultViewModel.HasConsoleOutput}">
+                            <Panel>
+                        <arc:EmptyState Name="SongEmptyState"
+                                        IsVisible="{Binding SearchResultViewModel.ShowIdleState}"
+                                        Icon="{x:Static arc:ArcIcons.Music}"
+                                        Title="{loc:Loc Key=Search.EmptyTitle}" />
+                        <arc:EmptyState Name="PreviewEmptyState"
+                                        IsVisible="{Binding SearchResultViewModel.ShowNoLyricsState}"
+                                        Icon="{x:Static arc:ArcIcons.FileText}"
+                                        Title="{loc:Loc Key=Search.Lamp.Empty}"
+                                        Description="{loc:Loc Key=Search.NoLyricsDescription}" />
+                            </Panel>
+                        </Border>
+                        <!-- The lyrics: one AvaloniaEdit editor, read-only as the preview and writable while
+                             editing. The editor has no frame of its own, so this pane draws it. -->
+                        <Border Name="LyricPane"
+                                Classes="pane"
+                                Padding="0"
+                                ClipToBounds="True"
+                                IsVisible="{Binding SearchResultViewModel.HasConsoleOutput}">
+                            <Grid RowDefinitions="Auto,*">
+                                <Grid Margin="16,8,8,8"
+                                      ColumnDefinitions="Auto,Auto,*,Auto"
+                                      ColumnSpacing="{arc:ArcDesignTokenResource Space2}">
+                                    <arc:ArcGlyph VerticalAlignment="Center"
+                                                  Foreground="{arc:ArcDesignTokenResource TextSecondary}"
+                                                  Data="{x:Static arc:ArcIcons.FileText}" />
+                                    <TextBlock Name="LyricTitle" Grid.Column="1"
+                                               VerticalAlignment="Center"
+                                               FontWeight="SemiBold"
+                                               Text="{Binding SearchResultViewModel.PreviewTitle}" />
+                                    <TextBlock Grid.Column="2"
+                                               Classes="secondary"
+                                               VerticalAlignment="Center"
+                                               FontFamily="{arc:ArcDesignTokenResource MonoFontFamily}"
+                                               Text="{Binding PreviewFormatLabel}" />
+
+                                    <!-- Preview: find, edit, copy. -->
+                                    <StackPanel Grid.Column="3"
+                                                Orientation="Horizontal"
+                                                Spacing="{arc:ArcDesignTokenResource Space2}"
+                                                IsVisible="{Binding !SearchResultViewModel.IsEditing}">
+                                        <arc:Button Name="FindInLyricsButton"
+                                                    Variant="Ghost" Size="Small"
+                                                    AutomationProperties.Name="{loc:Loc Key=Shortcuts.FindInLyrics}"
+                                                    Click="OnFindInLyricsClick">
+                                            <arc:ArcGlyph Data="{x:Static arc:ArcIcons.Search}" />
+                                        </arc:Button>
+                                        <arc:Button Name="EditLyricsButton"
+                                                    Variant="Secondary" Size="Small"
+                                                    ToolTip.ShowOnDisabled="True"
+                                                    Content="{loc:Loc Key=Editor.Edit}"
+                                                    Command="{Binding SearchResultViewModel.BeginEditCommand}" />
+                                        <arc:Button Name="CopyLyricsButton"
+                                                    Variant="Ghost" Size="Small"
+                                                    Content="{loc:Loc Key=Search.CopyPreview}"
+                                                    Command="{Binding ExecuteCopyLyricsCommand}" />
+                                    </StackPanel>
+
+                                    <!-- Editing: find and replace, revert everything, cancel this session, done. -->
+                                    <StackPanel Grid.Column="3"
+                                                Orientation="Horizontal"
+                                                Spacing="{arc:ArcDesignTokenResource Space2}"
+                                                IsVisible="{Binding SearchResultViewModel.IsEditing}">
+                                        <arc:Button Name="FindReplaceButton"
+                                                    Variant="Ghost" Size="Small"
+                                                    Content="{loc:Loc Key=Editor.FindReplace}"
+                                                    Click="OnFindReplaceClick" />
+                                        <arc:Button Name="RevertEditsButton"
+                                                    Variant="Ghost" Size="Small"
+                                                    Content="{loc:Loc Key=Editor.Revert}"
+                                                    ToolTip.Tip="{loc:Loc Key=Editor.RevertTip}"
+                                                    IsVisible="{Binding SearchResultViewModel.IsEdited}"
+                                                    Command="{Binding SearchResultViewModel.RevertEditsCommand}" />
+                                        <arc:Button Name="CancelEditButton"
+                                                    Variant="Secondary" Size="Small"
+                                                    Content="{loc:Loc Key=Editor.Cancel}"
+                                                    ToolTip.Tip="{loc:Loc Key=Editor.CancelTip}"
+                                                    Command="{Binding SearchResultViewModel.CancelEditCommand}" />
+                                        <arc:Button Name="FinishEditButton"
+                                                    Variant="Secondary" Size="Small"
+                                                    Content="{loc:Loc Key=Editor.Done}"
+                                                    Command="{Binding SearchResultViewModel.FinishEditCommand}" />
+                                    </StackPanel>
+                                </Grid>
+                                <Border Grid.Row="1"
+                                        BorderBrush="{arc:ArcDesignTokenResource BorderSubtle}"
+                                        BorderThickness="0,1,0,0">
+                                    <ae:TextEditor Name="LyricPreview"
+                                                   IsReadOnly="True"
+                                                   AutomationProperties.Name="{loc:Loc Key=Editor.Label}" />
+                                </Border>
+                            </Grid>
+                        </Border>
+                    </Panel>
+
+                    <views:BlurSearchView Name="BlurResultsView"
+                                          DataContext="{Binding BlurResults}"
+                                          IsVisible="{Binding $parent[views:SearchView].((vm:MainWindowViewModel)DataContext).IsShowingBlurResults}" />
+                </Panel>
+        </Grid>
+
+        <!-- Output: how the lyrics are written, where, and the one primary action of the page. -->
+        <Border Grid.Row="2" Classes="pane" Padding="16,12" IsVisible="{Binding !IsShowingBlurResults}">
+            <Grid ColumnDefinitions="Auto,Auto,Auto,*,Auto" ColumnSpacing="{arc:ArcDesignTokenResource Space3}">
+                <arc:Select Name="LrcTypeSelect"
+                            IsEnabled="{Binding !SearchResultViewModel.IsEdited}"
+                            ToolTip.Tip="{Binding SearchResultViewModel.FormatLockedTip}"
+                            ToolTip.ShowOnDisabled="True"
+                            MinWidth="132"
+                            Size="Small"
+                            Label="{loc:Loc Key=UI.LyricFormat}"
+                            ItemsSource="{Binding SearchParamViewModel.LrcType.Items}"
+                            SelectedItem="{Binding SearchParamViewModel.LrcType.Selected}"
+                            DisplayMemberBinding="{ReflectionBinding DisplayName}" />
+                <arc:Select Grid.Column="1"
+                            Name="OutputFormatSelect"
+                            IsEnabled="{Binding !SearchResultViewModel.IsEdited}"
+                            ToolTip.Tip="{Binding SearchResultViewModel.FormatLockedTip}"
+                            ToolTip.ShowOnDisabled="True"
+                            MinWidth="112"
+                            Size="Small"
+                            Label="{loc:Loc Key=UI.OutputFormat}"
+                            ItemsSource="{Binding SearchParamViewModel.OutputFormat.Items}"
+                            SelectedItem="{Binding SearchParamViewModel.OutputFormat.Selected}"
+                            DisplayMemberBinding="{ReflectionBinding DisplayName}" />
+                <arc:Select Grid.Column="2"
+                            Name="EncodingSelect"
+                            MinWidth="132"
+                            Size="Small"
+                            Label="{loc:Loc Key=UI.Encoding}"
+                            ItemsSource="{Binding SearchParamViewModel.OutputEncoding.Items}"
+                            SelectedItem="{Binding SearchParamViewModel.OutputEncoding.Selected}"
+                            DisplayMemberBinding="{ReflectionBinding DisplayName}" />
+
+                <!-- The folder takes what width is left; a long path shortens by whole folders. The button fills
+                     the column and code-behind caps the text at the button's inner width, because an Arc button
+                     lays out its content at full width and clips it instead of trimming. -->
+                <StackPanel Grid.Column="3"
+                            MaxWidth="280"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Bottom"
+                            Spacing="{arc:ArcDesignTokenResource Space1}">
+                    <!-- Inset to line up with the text inside the ghost button below. -->
+                    <TextBlock Classes="secondary" Text="{loc:Loc Key=Search.SaveFolder}" Margin="12,0,0,0" />
+                    <arc:Button Name="SaveFolderButton"
+                                Variant="Ghost"
+                                Size="Small"
+                                HorizontalAlignment="Stretch"
+                                HorizontalContentAlignment="Left"
+                                Command="{Binding ExecuteSelectOutputFolderCommand}"
+                                ToolTip.Tip="{loc:Loc Key=Search.ChangeFolder}">
+                        <TextBlock Name="SaveFolderText" Text="{Binding LastSaveFolderDisplay}" TextTrimming="PathSegmentEllipsis" />
+                    </arc:Button>
+                </StackPanel>
+
+                <arc:Button Grid.Column="4"
+                            Name="SaveButton"
+                            Variant="Primary"
+                            VerticalAlignment="Bottom"
+                            Content="{loc:Loc Key=Search.SaveLyrics}"
+                            Command="{Binding ExecuteSaveCommand}" />
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

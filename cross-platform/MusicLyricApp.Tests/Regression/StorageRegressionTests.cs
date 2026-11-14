@@ -153,6 +153,47 @@ public class StorageRegressionTests
         Assert.Equal(url, Assert.Single(handler.Requests).AbsoluteUri);
     }
 
+    [Theory]
+    [InlineData("${name} - ${singer}", "测试歌曲123 - 歌手甲,歌手乙")]
+    [InlineData("${singer} - ${name}", "歌手甲,歌手乙 - 测试歌曲123")]
+    public async Task LyricsAudioAndCoverShareOneFileName(string format, string stem)
+    {
+        using var ws = new TestWorkspace();
+        ws.Settings.Config.OutputFileNameFormat = format;
+        var handler = new ResponseHandler(r => r.RequestUri!.AbsolutePath.EndsWith(".png")
+            ? ResponseHandler.Bytes([137, 80], "image/png")
+            : ResponseHandler.Bytes([1, 2], "audio/mpeg"));
+        var storage = ws.Storage(_ => new HttpClient(handler, false));
+        var song = TestWorkspace.Song();
+        song.SongVo.Pics = "https://test.invalid/cover.png";
+        var result = TestWorkspace.Result(song);
+        result.SongLink = "https://test.invalid/song.mp3";
+
+        await storage.SaveResult(result, ws.Settings, ws.Window.Object);
+        await storage.DownloadSongLink(result, ws.Settings, ws.Window.Object);
+        await storage.DownloadSongPic(result, ws.Settings, ws.Window.Object);
+
+        Assert.Equal(new[] { stem + ".lrc", stem + ".mp3", stem + "-cover.png" },
+            ws.CreatedFiles.Select(Path.GetFileName));
+    }
+
+    [Fact]
+    public async Task DownloadingAudioWithoutALinkAsksTheSongsOwnSource()
+    {
+        using var ws = new TestWorkspace();
+        var handler = new ResponseHandler(_ => ResponseHandler.Bytes([1], "audio/mpeg"));
+        var qq = new Moq.Mock<IMusicApi>(Moq.MockBehavior.Strict);
+        qq.Setup(x => x.GetSongLink("123")).Returns(new ResultVo<string>("https://test.invalid/qq.mp3"));
+        // The page has NetEase picked, but the song came from QQ Music; NetEase must not be asked.
+        ws.Settings.Param.SearchSource = SearchSourceEnum.NET_EASE_MUSIC;
+        var storage = new StorageService(() => ws.ConfigPath, _ => new HttpClient(handler, false));
+        storage.SetSearchService(ws.Search(new(Moq.MockBehavior.Strict), qq));
+        var result = TestWorkspace.Result(TestWorkspace.Song(source: SearchSourceEnum.QQ_MUSIC));
+
+        await storage.DownloadSongLink(result, ws.Settings, ws.Window.Object);
+        Assert.Equal("https://test.invalid/qq.mp3", Assert.Single(handler.Requests).AbsoluteUri);
+    }
+
     [Fact]
     public async Task DownloadCoverWritesExactBytes()
     {
