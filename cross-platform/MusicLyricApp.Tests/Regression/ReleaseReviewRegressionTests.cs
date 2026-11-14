@@ -211,6 +211,32 @@ public class ReleaseReviewRegressionTests
         Assert.Equal(1, resets);
     }
 
+    private sealed class CannedQqSearch(string json) : QQMusicNativeApi(() => "")
+    {
+        public override QQMusicBean.MusicFcgApiResult Search(string keyword, SearchTypeEnum searchType) =>
+            json.ToEntity<QQMusicBean.MusicFcgApiResult>();
+    }
+
+    [Fact]
+    public void QqKeywordSearchWithoutSignInAsksForLoginRatherThanBlamingTheNetwork()
+    {
+        // What QQ Music returns today to a keyword search without a signed-in cookie (trimmed).
+        const string needsLogin = """
+            {"code":0,"req_1":{"code":2001,"data":{"body":{"song":{"list":[]}},"code":0,
+             "feedbackURL":"https://y.qq.com/wk_v17/common_login.html#/login?QQAppid=100497308"}}}
+            """;
+        var result = new QQMusicApi(() => "", new CannedQqSearch(needsLogin)).Search("needs login " + Guid.NewGuid(), SearchTypeEnum.SONG_ID);
+        Assert.False(result.IsSuccess());
+        Assert.Equal(ErrorMsgConst.NEED_LOGIN, result.ErrorMsg);
+        // The page shows this with a 设置 Cookie action.
+        Assert.True(MainWindowViewModel.IsNeedLoginMessage(result.ErrorMsg));
+
+        // Anything else unexpected is still reported as a network failure.
+        const string broken = """{"code":0,"req_1":{"code":500001}}""";
+        Assert.Equal(ErrorMsgConst.NETWORK_ERROR,
+            new QQMusicApi(() => "", new CannedQqSearch(broken)).Search("broken " + Guid.NewGuid(), SearchTypeEnum.SONG_ID).ErrorMsg);
+    }
+
     [AvaloniaFact]
     public void TheSignInStateNamesTheSourceAsTheSourcePickerDoes() => TestWorkspace.WithLanguage("en-US", () =>
     {

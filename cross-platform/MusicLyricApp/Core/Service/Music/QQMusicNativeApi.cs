@@ -40,7 +40,7 @@ public class QQMusicNativeApi(Func<string> cookieFunc) : BaseNativeApi(cookieFun
         });
     }
 
-    public QQMusicBean.MusicFcgApiResult Search(string keyword, SearchTypeEnum searchType)
+    public virtual QQMusicBean.MusicFcgApiResult Search(string keyword, SearchTypeEnum searchType)
     {
         // 0单曲 2专辑 1歌手 3歌单 7歌词 12mv
         int type;

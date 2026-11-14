@@ -85,7 +85,7 @@
                         <ScrollViewer IsVisible="{Binding HasOutput}">
                             <arc:CodeBlock Name="OutputBlock"
                                            Code="{Binding OutputText}"
-                                           Language="lrc"
+                                           Language="{Binding OutputLanguage}"
                                            FileName="{loc:Loc Key=Convert.Output}"
                                            ShowLineNumbers="True"
                                            CopyLabel="{loc:Loc Key=Convert.CopyOutput}" />

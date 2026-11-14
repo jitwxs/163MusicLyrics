@@ -412,7 +412,7 @@
   "LocalScan.Scan": "Scan",
   "LocalScan.Recursive": "Include subfolders",
   "LocalScan.Preferred": "Preferred source",
-  "LocalScan.Fallback": "Try other source if needed",
+  "LocalScan.Fallback": "Try other sources if needed",
   "LocalScan.IdMode": "Filename is a song ID",
   "LocalScan.Beside": "Save beside audio",
   "LocalScan.OutputFolder": "Output folder",

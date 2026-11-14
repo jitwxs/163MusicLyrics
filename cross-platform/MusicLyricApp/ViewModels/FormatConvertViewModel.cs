@@ -18,7 +18,12 @@ public partial class FormatConvertViewModel : ViewModelBase
         EnumDisplayHelper.GetEnumDisplayCollection<OutputFormatEnum>();
 
     [ObservableProperty] private EnumDisplayHelper.EnumDisplayItem<OutputFormatEnum> _sourceFormatItem;
-    [ObservableProperty] private EnumDisplayHelper.EnumDisplayItem<OutputFormatEnum> _targetFormatItem;
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(OutputLanguage))]
+    private EnumDisplayHelper.EnumDisplayItem<OutputFormatEnum> _targetFormatItem;
+
+    /// <summary>The result's file type beside its title ("lrc" or "srt"), following the output format.</summary>
+    public string OutputLanguage => TargetFormatItem.Value.ToDescription().ToLowerInvariant();
 
     [ObservableProperty] private string _inputText = "";
     [ObservableProperty]

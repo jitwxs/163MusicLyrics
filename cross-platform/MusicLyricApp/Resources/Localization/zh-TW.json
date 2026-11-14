@@ -412,7 +412,7 @@
   "LocalScan.Scan": "開始掃描",
   "LocalScan.Recursive": "包含子資料夾",
   "LocalScan.Preferred": "優先平台",
-  "LocalScan.Fallback": "必要時嘗試另一平台",
+  "LocalScan.Fallback": "必要時嘗試其他平台",
   "LocalScan.IdMode": "檔名是歌曲 ID",
   "LocalScan.Beside": "儲存至音樂旁邊",
   "LocalScan.OutputFolder": "指定輸出目錄",

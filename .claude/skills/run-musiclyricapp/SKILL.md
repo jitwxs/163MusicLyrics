@@ -59,7 +59,7 @@ Positions move when the layout changes: measure from a fresh screenshot before r
 | ⌘/ (shortcuts dialog) | 44 cmd | ⌘S (save lyrics) | 1 cmd |
 | ⌘A / ⌘V | 0 / 9 cmd | | |
 
-Sample inputs: NetEase song `186016` (晴天), album `18903` (七里香, 11 songs), QQ Music fuzzy search `晴天`. NetEase
+Sample inputs: NetEase song `186016` (晴天), album `18903` (七里香, 10 songs), QQ Music fuzzy search `晴天`. NetEase
 fuzzy search needs a valid login cookie. Without one it fails with "本请求需要登陆信息", which is not a UI bug.
 
 ## Safety: this is the user's machine and data
@@ -72,8 +72,9 @@ fuzzy search needs a valid login cookie. Without one it fails with "本请求需
   `python3 -c "import json;c=json.load(open('<path>',encoding='utf-8-sig'));print(c['Config']['ThemeMode'])"`.
 - **Changes persist.** The config file is written when the window closes (through the exit dialog), and at once by
   应用代理 and by picking the cache or save folder. Each write saves every in-memory change made so far. Leaving the
-  settings area writes nothing (it only applies the theme and refreshes the preview), and a kill (`stop.sh`) saves
-  nothing. To try a setting without keeping it, change it, look, then stop with `stop.sh`, and do not trigger any of
+  settings area writes nothing (it only applies the theme and refreshes the preview), and `stop.sh` saves nothing
+  because it sends SIGKILL. A plain `kill` (SIGTERM) is a normal quit to Avalonia and does save, so never stop the app
+  that way. To keep the user's settings out of reach entirely, start with `MUSICLYRICAPP_DATA_DIR=<scratch folder>`. To try a setting without keeping it, change it, look, then stop with `stop.sh`, and do not trigger any of
   those writes first. Otherwise set every changed setting back before the write. Confirm the saved fields afterwards.
 - **Real data.** 删除所选 in the download manager deletes the user's local cache files, and saving writes `.lrc`
   files to their save folder (usually `~/Downloads`). Open the delete dialog only to look at it and cancel it with

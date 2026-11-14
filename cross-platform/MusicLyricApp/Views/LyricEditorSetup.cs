@@ -3,6 +3,7 @@ using System.Globalization;
 using System.IO;
 using System.Xml;
 using Avalonia.Controls;
+using Avalonia.Threading;
 using Avalonia.VisualTree;
 using Avalonia.Media;
 using AvaloniaEdit;
@@ -45,10 +46,15 @@ public static class LyricEditorSetup
 
         // Tokens resolve only once the editor is in a window's tree.
         editor.AttachedToVisualTree += (_, _) => ApplyTheme(editor);
-        editor.ActualThemeVariantChanged += (_, _) =>
+        // The variant changes before Arc's tokens follow it, so read them once the switch has settled; reading
+        // them at once gave the previous theme's colors (dark text on the dark theme).
+        editor.ActualThemeVariantChanged += (_, _) => Dispatcher.UIThread.Post(() =>
         {
             if (editor.IsAttachedToVisualTree()) ApplyTheme(editor);
-        };
+        }, DispatcherPriority.Background);
+        // Text and line numbers follow the tokens directly, so they are never a theme behind.
+        ArcTokens.Bind(editor, TextEditor.ForegroundProperty, ArcDesignTokenKind.Foreground);
+        ArcTokens.Bind(editor, TextEditor.LineNumbersForegroundProperty, ArcDesignTokenKind.TextMuted);
     }
 
     /// <summary>Find and replace buttons call the panel directly (see Views/LyricSearchPanelTheme.axaml).</summary>
@@ -80,9 +86,7 @@ public static class LyricEditorSetup
 
         editor.FontFamily = ArcTokens.Get<FontFamily>(editor, ArcDesignTokenKind.MonoFontFamily);
         editor.FontSize = ArcTokens.Get<double>(editor, ArcDesignTokenKind.TypeSM);
-        editor.Foreground = B(ArcDesignTokenKind.Foreground);
         editor.Background = Brushes.Transparent;
-        editor.LineNumbersForeground = B(ArcDesignTokenKind.TextMuted);
         editor.TextArea.TextView.CurrentLineBackground = B(ArcDesignTokenKind.SurfaceMuted);
         editor.TextArea.TextView.CurrentLineBorder = new Pen(Brushes.Transparent);
         editor.TextArea.CaretBrush = B(ArcDesignTokenKind.Foreground);

@@ -30,6 +30,25 @@ public class CacheAndSettingsRegressionTests
     }
 
     [Fact]
+    public void ADataFolderVariableMovesTheSettingsAndCache()
+    {
+        using var ws = new TestWorkspace();
+        var folder = Path.Combine(ws.Root, "profile");
+        var previous = Environment.GetEnvironmentVariable(Constants.DataDirVariable);
+        try
+        {
+            Environment.SetEnvironmentVariable(Constants.DataDirVariable, folder);
+            Assert.Equal(Path.Combine(folder, "MusicLyricAppSetting.json"), Constants.GetConfigFilePath());
+            Assert.Equal(Path.Combine(folder, "cache"), Constants.GetDefaultSearchCacheFolderPath());
+            Assert.True(Directory.Exists(folder));
+
+            Environment.SetEnvironmentVariable(Constants.DataDirVariable, "");
+            Assert.EndsWith(Path.Combine("MusicLyricApp", "MusicLyricAppSetting.json"), Constants.GetConfigFilePath());
+        }
+        finally { Environment.SetEnvironmentVariable(Constants.DataDirVariable, previous); }
+    }
+
+    [Fact]
     public void MissingConfigUsesDefaults()
     {
         using var ws = new TestWorkspace();

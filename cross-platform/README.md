@@ -35,7 +35,7 @@
 侧边栏的「本地搜索」页（快捷键 ⌘4 / Ctrl+4）用于为本地音乐文件匹配并保存歌词：
 
 1. 选择音乐目录，按需包含子目录，点击「开始扫描」。支持 MP3、FLAC、M4A、OGG、WAV；优先读取歌名、歌手、专辑和时长标签，缺失标签时从 `歌手 - 歌名` 等文件名补充信息。不会修改音频文件，也不跟随符号链接。
-2. 勾选文件并点击「匹配所选」。可指定网易云或 QQ 音乐为优先来源，必要时尝试另一平台。扫描固定按单曲查询，不受主搜索页的歌单／专辑模式影响。「文件名是歌曲 ID」为显式兼容模式，仅在指定平台按歌曲 ID 查询。
+2. 勾选文件并点击「匹配所选」。可指定优先平台；勾选「必要时尝试其他平台」后，按 `MusicSources` 的顺序依次尝试其余平台，某个平台超时只记一条警告。扫描固定按单曲查询，不受主搜索页的歌单／专辑模式影响。「文件名是歌曲 ID」为显式兼容模式，仅在指定平台按歌曲 ID 查询。
 3. 歌名、歌手以及时长／专辑足够吻合且候选差距明显时，标记为待保存；其余候选需手动选择并确认。点击文件行可修改搜索关键词、重新搜索、预览歌词或打开歌曲页面。Live、伴奏等版本信息参与比较。
 4. 点击「保存已确认歌词」。默认在音乐旁边生成同名 `.lrc`／`.srt`，也可指定输出目录并保留相对目录层级。格式、编码、翻译、逐字歌词和独立输出规则沿用设置页的当前设置（每次扫描、匹配或保存开始时读取）；独立歌词使用 `文件名-0.lrc` 等后缀。
 
@@ -98,8 +98,9 @@ dotnet run -c Debug --no-build
 
 启动前切换到项目目录，确保入口使用的相对路径 `NLog.config` 能被找到。
 第一次启动前需完成上面的 Debug 编译；修改源码后去掉 `--no-build` 即可自动编译。
-日志位于 `MusicLyricApp/bin/Debug/net9.0/MusicLyricApp-日期.log`。
+日志按天写入系统日志目录：Windows `%LOCALAPPDATA%\MusicLyricApp\logs`、macOS `~/Library/Logs/MusicLyricApp`、Linux `$XDG_STATE_HOME/MusicLyricApp/logs`（默认 `~/.local/state/...`），见 `Constants.GetLogFolderPath`。
 设置保存在系统用户应用数据目录的 `MusicLyricApp/MusicLyricAppSetting.json`，默认查询缓存位于同目录下的 `cache/`。
+设置环境变量 `MUSICLYRICAPP_DATA_DIR=<目录>` 后，设置和缓存改放到该目录，适合便携使用、测试，或用干净的配置截图而不碰自己的数据。
 
 macOS/Linux 的内置音频试听当前未启用：`MainWindowViewModel.IsPlaybackSupported` 仅对 Windows 返回 true。
 
@@ -131,7 +132,7 @@ publish/MusicLyricApp-8.0.0-osx-arm64.tar.gz
 
 只打当前平台包使用 `sh app.sh package`；只打指定平台包使用 `sh app.sh package osx-arm64` 或 `sh app.sh package osx-x64`；验证当前平台发布版使用 `sh app.sh run-package`。
 
-`publish.sh <version>` 用于发布全部目标平台，并清理已有 `publish/` 输出。在 Mac 上会直接生成完整 `.app` 及最终压缩包；在其他系统上，macOS 目标只生成 `-mid.tar.gz` 中间包。将这些中间包放入 Mac 上本项目的 `cross-platform/publish/`，然后执行 `bash build-macos-app.sh <version>` 完成封装。
+`publish.sh <version>` 用于发布全部目标平台：版本号（如 `8.0.0`，可带 `v` 前缀）通过 `-p:Version` 写入程序，界面显示和检查更新都使用它；参数检查通过后才会清理已有 `publish/` 输出。在 Mac 上会直接生成完整 `.app` 及最终压缩包；在其他系统上，macOS 目标只生成 `-mid.tar.gz` 中间包。将这些中间包放入 Mac 上本项目的 `cross-platform/publish/`，然后执行 `bash build-macos-app.sh <version>` 完成封装。
 
 两个入口共用 `package-macos-app.sh`，统一生成应用元数据、复制图标、设置执行权限及进行 ad-hoc 签名。可执行文件和动态库放在 `Contents/MacOS`，其他资源放在 `Contents/Resources`，并通过相对符号链接保留原有查找路径，避免非代码文件的签名依赖扩展属性。最终归档会再次解压并验签，全部成功后才输出。正式 Release 只能上传包含 `.app` 的最终压缩包，不能将原始发布目录或 `-mid.tar.gz` 当作最终 macOS 资产。ad-hoc 签名不是 Apple Developer ID 签名或公证，下载后仍可能遇到 Gatekeeper 提示。
 

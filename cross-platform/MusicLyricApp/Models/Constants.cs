@@ -14,14 +14,20 @@ public static class Constants
     private const string ConfigFileName = "MusicLyricAppSetting.json";
 
     /// <summary>
+    /// Folder for the settings and the search cache instead of the user's own, when set: a portable copy, a test,
+    /// or screenshots taken with a clean profile.
+    /// </summary>
+    public const string DataDirVariable = "MUSICLYRICAPP_DATA_DIR";
+
+    /// <summary>
     /// 获取用户配置文件的完整路径，确保目录存在。
     /// </summary>
     public static string GetConfigFilePath()
     {
-        string basePath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-
         // macOS/Linux 会自动转换为 ~/Library/Application Support 或 ~/.config
-        string configDir = Path.Combine(basePath, AppFolderName);
+        var configDir = Environment.GetEnvironmentVariable(DataDirVariable) is { Length: > 0 } custom
+            ? Path.GetFullPath(custom)
+            : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), AppFolderName);
 
         // 确保目录存在
         Directory.CreateDirectory(configDir);

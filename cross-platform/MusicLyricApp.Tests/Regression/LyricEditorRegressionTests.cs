@@ -13,7 +13,9 @@ using MusicLyricApp.Core.Service.Music;
 using MusicLyricApp.Models;
 using MusicLyricApp.ViewModels;
 using MusicLyricApp.Views;
+using Avalonia.Media;
 using TKCode.Arc;
+using TKCode.Arc.DesignTokens;
 
 namespace MusicLyricAppTest.Regression;
 
@@ -357,6 +359,37 @@ public class LyricEditorRegressionTests
         scope.Click("CancelEditButton");
         Assert.EndsWith("[00:03.000]new line", editor.Text);
         Assert.True(editor.IsReadOnly);
+    }
+
+    [AvaloniaFact]
+    public void TheLyricsFollowAThemeSwitchWhileTheAppRuns()
+    {
+        using var scope = new Scope();
+        scope.LoadSong(TwoLines);
+        var editor = scope.Editor;
+        Color Token(ArcDesignTokenKind kind) => ArcTokens.GetColor(editor, kind);
+        Color Fore() => ((Avalonia.Media.ISolidColorBrush)editor.Foreground!).Color;
+        try
+        {
+            foreach (var mode in new[] { ThemeModeEnum.DARK, ThemeModeEnum.LIGHT, ThemeModeEnum.DARK })
+            {
+                MusicLyricApp.Core.Service.ThemeService.Apply(mode);
+                Dispatcher.UIThread.RunJobs();
+                // Readable text: the current theme's foreground, never the previous theme's.
+                Assert.Equal(Token(ArcDesignTokenKind.Foreground), Fore());
+                Assert.Equal(Token(ArcDesignTokenKind.TextMuted),
+                    ((Avalonia.Media.ISolidColorBrush)editor.LineNumbersForeground).Color);
+            }
+
+            // The timestamps' quieter color comes from the theme in force too.
+            var time = editor.SyntaxHighlighting!.GetNamedColor("Time")!.Foreground!.GetColor(null!);
+            Assert.Equal(Token(ArcDesignTokenKind.TextSecondary), time);
+        }
+        finally
+        {
+            MusicLyricApp.Core.Service.ThemeService.Apply(ThemeModeEnum.LIGHT);
+            Dispatcher.UIThread.RunJobs();
+        }
     }
 
     [AvaloniaFact]

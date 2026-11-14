@@ -416,6 +416,13 @@ public class SettingsAndConvertPageRegressionTests
             Assert.False(empty.IsEffectivelyVisible);
             Assert.Contains("00:00:01,000", output.Code);
             Assert.False(vm.IsTipError);
+            // The result is labelled with the output format, not always "lrc".
+            Assert.Equal("srt", output.Language);
+            vm.SwapFormatCommand.Execute(null);
+            Dispatcher.UIThread.RunJobs();
+            Assert.Equal("lrc", output.Language);
+            vm.SwapFormatCommand.Execute(null);
+            Dispatcher.UIThread.RunJobs();
 
             vm.SourceFormatItem = vm.Formats.Single(x => x.Value == OutputFormatEnum.SRT);
             vm.TargetFormatItem = vm.Formats.Single(x => x.Value == OutputFormatEnum.LRC);
