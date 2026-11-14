@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using MusicLyricApp.Core.Localization;
@@ -11,12 +11,14 @@ namespace MusicLyricApp.Core;
 /// <param name="LinkKeywords">The part of a link before the id, for each search type.</param>
 /// <param name="SongPageUrl">The web page of a song, from its id.</param>
 /// <param name="Cookie">The cookie setting the source signs in with; null when it is used signed out.</param>
+/// <param name="WebUrl">The source's website, where people sign in to copy the cookie; null without an account.</param>
 public sealed record MusicSourceInfo(
     SearchSourceEnum Source,
     string LinkHost,
     IReadOnlyDictionary<SearchTypeEnum, string> LinkKeywords,
     Func<string, string> SongPageUrl,
-    Func<ConfigBean, string>? Cookie)
+    Func<ConfigBean, string>? Cookie,
+    string? WebUrl = null)
 {
     /// <summary>Display name in the current UI language.</summary>
     public string Name => LocalizationService.Get($"Enum.{nameof(SearchSourceEnum)}.{Source}");
@@ -38,11 +40,13 @@ public static class MusicSources
         new(SearchSourceEnum.NET_EASE_MUSIC, "163.com",
             Keywords("song?id=", "album?id=", "playlist?id="),
             id => $"https://music.163.com/#/song?id={Uri.EscapeDataString(id)}",
-            config => config.NetEaseCookie),
+            config => config.NetEaseCookie,
+            "https://music.163.com/"),
         new(SearchSourceEnum.QQ_MUSIC, "qq.com",
             Keywords("songDetail/", "albumDetail/", "playlist/"),
             id => $"https://y.qq.com/n/ryqq/songDetail/{Uri.EscapeDataString(id)}",
-            config => config.QQMusicCookie),
+            config => config.QQMusicCookie,
+            "https://y.qq.com/"),
         // qishui.douyin.com/s/ short links and music.douyin.com/qishui/share/ pages both contain "qishui".
         new(SearchSourceEnum.SODA_MUSIC, "qishui",
             Keywords("track_id=", "album_id=", "playlist_id="),

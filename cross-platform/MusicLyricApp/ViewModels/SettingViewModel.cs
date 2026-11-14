@@ -109,6 +109,7 @@ public partial class SettingViewModel : ViewModelBase
     private readonly SettingBean _settingBean;
     private readonly IWindowProvider? _windowProvider;
     private readonly Action<string> _openDirectory;
+    private readonly Action<string> _openLink;
     private readonly StorageService _storageService = new();
     private readonly UpdateCheckService _updateCheckService = new();
     
@@ -118,8 +119,10 @@ public partial class SettingViewModel : ViewModelBase
     public LoginStatusViewModel? Login { get; }
 
     public SettingViewModel(SettingBean settingBean, IWindowProvider? windowProvider = null,
-        Action<string>? openDirectory = null, LoginStatusViewModel? login = null, string? logFolderPath = null)
+        Action<string>? openDirectory = null, LoginStatusViewModel? login = null, string? logFolderPath = null,
+        Action<string>? openLink = null)
     {
+        _openLink = openLink ?? ShellLauncher.Open;
         _settingBean = settingBean;
         LogFolderPath = logFolderPath ?? Constants.GetLogFolderPath();
         RefreshLogUsage();
@@ -229,6 +232,23 @@ public partial class SettingViewModel : ViewModelBase
         {
             Logger.Error(ex, "OpenConfigPath error");
             throw new MusicLyricException(ErrorMsgConst.STORAGE_FOLDER_ERROR);
+        }
+    }
+
+    /// <summary>Opens the source's website in the browser, to sign in there and copy the cookie.</summary>
+    [RelayCommand]
+    private void OpenSourceWebsite(SearchSourceEnum source)
+    {
+        if (MusicSources.Get(source).WebUrl is not { } url) return;
+
+        try
+        {
+            _openLink(url);
+        }
+        catch (Exception ex)
+        {
+            Logger.Error(ex, "OpenSourceWebsite error");
+            SettingTips = LocalizationService.Format("Login.OpenWebsiteFailed", url);
         }
     }
 

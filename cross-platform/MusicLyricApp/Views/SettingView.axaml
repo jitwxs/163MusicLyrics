@@ -238,6 +238,11 @@
                                                 IsLoading="{Binding Login.NetEase.IsChecking, FallbackValue=False}"
                                                 Command="{Binding Login.CheckCommand, FallbackValue={x:Null}}"
                                                 CommandParameter="{x:Static models:SearchSourceEnum.NET_EASE_MUSIC}" />
+                                    <arc:Button Name="NetEaseWebsiteButton" Variant="Ghost" Size="Small"
+                                                Content="{loc:Loc Key=Login.OpenWebsite}"
+                                                ToolTip.Tip="{loc:Loc Key=Login.OpenWebsiteTip}"
+                                                Command="{Binding OpenSourceWebsiteCommand}"
+                                                CommandParameter="{x:Static models:SearchSourceEnum.NET_EASE_MUSIC}" />
                                 </StackPanel>
                             </StackPanel>
                         </arc:SettingsRow>
@@ -262,6 +267,11 @@
                                                 Content="{loc:Loc Key=Login.Recheck}"
                                                 IsLoading="{Binding Login.QQ.IsChecking, FallbackValue=False}"
                                                 Command="{Binding Login.CheckCommand, FallbackValue={x:Null}}"
+                                                CommandParameter="{x:Static models:SearchSourceEnum.QQ_MUSIC}" />
+                                    <arc:Button Name="QqWebsiteButton" Variant="Ghost" Size="Small"
+                                                Content="{loc:Loc Key=Login.OpenWebsite}"
+                                                ToolTip.Tip="{loc:Loc Key=Login.OpenWebsiteTip}"
+                                                Command="{Binding OpenSourceWebsiteCommand}"
                                                 CommandParameter="{x:Static models:SearchSourceEnum.QQ_MUSIC}" />
                                 </StackPanel>
                             </StackPanel>

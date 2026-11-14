@@ -257,4 +257,32 @@ public class LoginStatusRegressionTests
         }
         finally { window.Close(); WeakReferenceMessenger.Default.UnregisterAll(vm); }
     }
+
+    [AvaloniaFact]
+    public void EachCookieRowOpensItsWebsite()
+    {
+        using var ws = new TestWorkspace();
+        var opened = new List<string>();
+        var login = new LoginStatusViewModel(_ => "", new Mock<MusicLyricApp.Core.Service.Login.ILoginProbe>().Object);
+        var vm = new SettingViewModel(ws.Settings, login: login, openLink: opened.Add)
+            { CurrentSection = SettingViewModel.SectionExtensions };
+        var view = new SettingView();
+        var window = TestWorkspace.Host(view, vm);
+        try
+        {
+            window.Show();
+            Dispatcher.UIThread.RunJobs();
+            foreach (var name in new[] { "NetEaseWebsiteButton", "QqWebsiteButton" })
+            {
+                var button = view.GetVisualDescendants().OfType<TKCode.Arc.Button>().Single(b => b.Name == name);
+                Assert.True(button.IsEffectivelyVisible);
+                button.Command!.Execute(button.CommandParameter);
+            }
+
+            Assert.Equal(new[] { "https://music.163.com/", "https://y.qq.com/" }, opened);
+            // Soda Music signs in with no cookie, so it has no website to sign in on.
+            Assert.Null(MusicLyricApp.Core.MusicSources.Get(SearchSourceEnum.SODA_MUSIC).WebUrl);
+        }
+        finally { window.Close(); }
+    }
 }

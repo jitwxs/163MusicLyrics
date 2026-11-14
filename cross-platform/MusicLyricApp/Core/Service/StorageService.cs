@@ -164,8 +164,9 @@ public class StorageService : IStorageService
         var link = searchResult.SongLink;
         if (string.IsNullOrWhiteSpace(link))
         {
+            // The song's own source: the source picked on the page may have changed since the search.
             var musicApi = (_searchService ?? throw new InvalidOperationException("Search service has not been configured."))
-            .GetMusicApi(settingBean.Param.SearchSource);
+                .GetMusicApi(saveVo.LyricVo.SearchSource);
             var linkResult = musicApi.GetSongLink(saveVo.SongVo.DisplayId);
             if (!linkResult.IsSuccess())
             {
@@ -181,7 +182,7 @@ public class StorageService : IStorageService
         resp.EnsureSuccessStatusCode();
 
         var ext = ResolveAudioExt(link, resp.Content.Headers.ContentType?.MediaType);
-        var file = await CreateOutputFileAsync(folder, $"{GetSafeFileStem(saveVo.SongVo.Name)}.{ext}", settingBean);
+        var file = await CreateOutputFileAsync(folder, $"{OutputStem(saveVo, settingBean)}.{ext}", settingBean);
         await using var output = await file.OpenWriteAsync();
         await using var input = await resp.Content.ReadAsStreamAsync();
         await input.CopyToAsync(output);
@@ -206,7 +207,7 @@ public class StorageService : IStorageService
 
         var folder = await ResolveSaveFolderAsync(settingBean, windowProvider);
         var ext = GetImageExt(saveVo.SongVo.Pics);
-        var file = await CreateOutputFileAsync(folder, $"{GetSafeFileStem(saveVo.SongVo.Name)}-cover.{ext}", settingBean);
+        var file = await CreateOutputFileAsync(folder, $"{OutputStem(saveVo, settingBean)}-cover.{ext}", settingBean);
 
         using var client = CreateHttpClient();
         var bytes = await client.GetByteArrayAsync(saveVo.SongVo.Pics);
@@ -279,8 +280,7 @@ public class StorageService : IStorageService
             return;
         }
 
-        var baseName = GlobalUtils.GetOutputName(saveVo, settingBean.Config.OutputFileNameFormat,
-            settingBean.Config.SingerSeparator, settingBean.Config.SingerCountLimit);
+        var baseName = OutputStem(saveVo, settingBean);
 
         try
         {
@@ -389,17 +389,13 @@ public class StorageService : IStorageService
         SaveConfig(settingBean);
     }
 
-    private static string GetSafeFileStem(string name)
-    {
-        if (string.IsNullOrWhiteSpace(name))
-        {
-            return "song";
-        }
-
-        var invalid = Path.GetInvalidFileNameChars();
-        var chars = name.Select(c => invalid.Contains(c) ? '_' : c).ToArray();
-        return new string(chars);
-    }
+    /// <summary>
+    /// The file name, without extension, that a song's lyrics, audio and cover share: the 保存文件名 format from the
+    /// settings, e.g. "晴天 - 周杰伦" for "晴天 - 周杰伦.lrc", ".mp3" and "-cover.jpg".
+    /// </summary>
+    internal static string OutputStem(SaveVo saveVo, SettingBean settingBean) =>
+        GlobalUtils.GetOutputName(saveVo, settingBean.Config.OutputFileNameFormat,
+            settingBean.Config.SingerSeparator, settingBean.Config.SingerCountLimit);
 
     private static string GetImageExt(string url)
     {
@@ -444,8 +440,7 @@ public class StorageService : IStorageService
     {
         var extension = settingBean.Param.OutputFileFormat.ToDescription().ToLower();
         var encoding = GlobalUtils.GetEncoding(settingBean.Param.Encoding);
-        var filename = GlobalUtils.GetOutputName(saveVo, settingBean.Config.OutputFileNameFormat,
-            settingBean.Config.SingerSeparator, settingBean.Config.SingerCountLimit);
+        var filename = OutputStem(saveVo, settingBean);
 
         var res = editedContent != null
             ? [editedContent]
