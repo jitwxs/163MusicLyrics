@@ -1,8 +1,9 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
+using System.Threading.Tasks;
 using MusicLyricApp.Core.Utils;
 using MusicLyricApp.Models;
 using Newtonsoft.Json.Linq;
@@ -148,7 +149,8 @@ public class SodaMusicNativeApi(Func<string> deviceIdFunc, Func<HttpClient>? htt
 
             _logger.Warn("SodaMusic client token failed: {ErrNo} {Msg}", result.ErrNo, result.ErrMsg);
         }
-        catch (Exception ex) when (ex is HttpRequestException or Newtonsoft.Json.JsonException)
+        // TaskCanceledException is HttpClient's timeout: a slow token server must not fail the search either.
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or Newtonsoft.Json.JsonException)
         {
             _logger.Warn(ex, "SodaMusic client token failed");
         }

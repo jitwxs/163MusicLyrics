@@ -123,6 +123,7 @@
   "Error.MUST_SEARCH_BEFORE_GET_SONG_PIC": "您必須先搜尋，才能取得歌曲封面",
   "Error.INPUT_CONENT_EMPLT": "輸入內容不能為空",
   "Error.INPUT_ID_ILLEGAL": "您輸入的ID不合法",
+  "Error.SHORT_LINK_UNREACHABLE": "無法開啟分享短連結，請檢查網路後重試，或貼上完整的歌曲連結",
   "Error.PLAYLIST_NOT_EXIST": "歌單資訊暫未被收錄或查詢失敗",
   "Error.ALBUM_NOT_EXIST": "專輯資訊暫未被收錄或查詢失敗",
   "Error.SONG_NOT_EXIST": "歌曲資訊暫未被收錄或查詢失敗",

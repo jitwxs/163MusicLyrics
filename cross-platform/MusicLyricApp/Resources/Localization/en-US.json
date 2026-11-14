@@ -123,6 +123,7 @@
   "Error.MUST_SEARCH_BEFORE_GET_SONG_PIC": "Search before getting the cover URL.",
   "Error.INPUT_CONENT_EMPLT": "Input cannot be empty.",
   "Error.INPUT_ID_ILLEGAL": "The ID is invalid.",
+  "Error.SHORT_LINK_UNREACHABLE": "Could not open the share link. Check your network and try again, or paste the full song link.",
   "Error.PLAYLIST_NOT_EXIST": "Playlist not found or the lookup failed.",
   "Error.ALBUM_NOT_EXIST": "Album not found or the lookup failed.",
   "Error.SONG_NOT_EXIST": "Song not found or the lookup failed.",

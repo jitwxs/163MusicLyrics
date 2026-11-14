@@ -472,6 +472,22 @@ public class LyricEditorRegressionTests
     });
 
     [AvaloniaFact]
+    public void EnterIsDrawnAsTheReturnGlyphAndReadAsAWord()
+    {
+        var exact = AppShortcuts.Get(AppShortcuts.ExactSearch);
+        var row = Avalonia.LogicalTree.LogicalExtensions.GetLogicalDescendants(ShortcutList.Build())
+            .OfType<SettingsRow>().Single(r => Equals(r.Header, exact.Label));
+        var caps = Avalonia.LogicalTree.LogicalExtensions.GetLogicalDescendants(row).ToList();
+
+        var glyph = Assert.Single(caps.OfType<ArcGlyph>(), g => g.Name == "EnterKeyGlyph");
+        Assert.Same(ArcIcons.CornerDownLeft, glyph.Data);
+        Assert.DoesNotContain(caps.OfType<TextBlock>(), t => t.Text == AppShortcuts.EnterKeyName);
+        // Screen readers and tooltips still say the word.
+        Assert.Contains(AppShortcuts.EnterKeyName, Avalonia.Automation.AutomationProperties.GetName(row));
+        Assert.Contains(AppShortcuts.EnterKeyName, exact.KeysText);
+    }
+
+    [AvaloniaFact]
     public void ShortcutListShowsTheLyricsKeysInTheirOwnGroup()
     {
         var groups = Avalonia.LogicalTree.LogicalExtensions.GetLogicalDescendants(ShortcutList.Build())

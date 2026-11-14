@@ -130,6 +130,51 @@ public class LocalMusicScanRegressionTests
     }
 
     [Fact]
+    public async Task FallbackTriesEverySourceAfterThePreferredOne()
+    {
+        // Preferred QQ Music finds nothing reliable, NetEase neither; only Soda Music has the song.
+        var asked = new List<SearchSourceEnum>();
+        Mock<IMusicApi> Api(SearchSourceEnum source, SearchResultVo result)
+        {
+            var api = new Mock<IMusicApi>(MockBehavior.Strict);
+            api.Setup(x => x.Search("园游会 周杰伦", SearchTypeEnum.SONG_ID)).Returns(() =>
+            {
+                asked.Add(source);
+                return new ResultVo<SearchResultVo>(result);
+            });
+            return api;
+        }
+
+        var apis = new Dictionary<SearchSourceEnum, Mock<IMusicApi>>
+        {
+            [SearchSourceEnum.QQ_MUSIC] = Api(SearchSourceEnum.QQ_MUSIC, Results(Candidate(artist: "其他歌手")).Data),
+            [SearchSourceEnum.NET_EASE_MUSIC] = Api(SearchSourceEnum.NET_EASE_MUSIC, Results(Candidate(artist: "其他歌手")).Data),
+            [SearchSourceEnum.SODA_MUSIC] = Api(SearchSourceEnum.SODA_MUSIC, Results(Candidate()).Data),
+        };
+        var matcher = new LocalSongMatcher(s => apis[s].Object, TimeSpan.Zero);
+        var result = await matcher.MatchAsync(Audio(), "园游会 周杰伦", SearchSourceEnum.QQ_MUSIC, true, false, Token);
+
+        Assert.Equal(new[] { SearchSourceEnum.QQ_MUSIC, SearchSourceEnum.NET_EASE_MUSIC, SearchSourceEnum.SODA_MUSIC }, asked);
+        Assert.Equal(SearchSourceEnum.SODA_MUSIC, result.Automatic!.Source);
+    }
+
+    [Fact]
+    public async Task ASourceThatTimesOutIsAWarningAndTheNextSourceIsTried()
+    {
+        // HttpClient reports a timeout as TaskCanceledException; after the retries it must not end the match.
+        var net = new Mock<IMusicApi>(MockBehavior.Strict);
+        net.Setup(x => x.Search("园游会 周杰伦", SearchTypeEnum.SONG_ID)).Throws(new TaskCanceledException("timeout"));
+        var qq = new Mock<IMusicApi>(MockBehavior.Strict);
+        qq.Setup(x => x.Search("园游会 周杰伦", SearchTypeEnum.SONG_ID)).Returns(Results(Candidate()));
+        var matcher = new LocalSongMatcher(s => s == SearchSourceEnum.NET_EASE_MUSIC ? net.Object : qq.Object, TimeSpan.Zero);
+
+        var result = await matcher.MatchAsync(Audio(), "园游会 周杰伦", SearchSourceEnum.NET_EASE_MUSIC, true, false, Token);
+
+        Assert.Equal(SearchSourceEnum.QQ_MUSIC, result.Automatic!.Source);
+        Assert.Contains(MusicLyricApp.Core.MusicSources.Get(SearchSourceEnum.NET_EASE_MUSIC).Name, result.Warning);
+    }
+
+    [Fact]
     public async Task ReliablePreferredMatchAvoidsUnnecessaryRequests()
     {
         var api = new Mock<IMusicApi>(MockBehavior.Strict);

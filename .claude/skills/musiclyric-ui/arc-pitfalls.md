@@ -37,7 +37,8 @@ one is wrong.
   own Enter, `SearchSubmitted`, then never comes). Give such a binding a command whose `CanExecute` is false while
   focus is where the key means something else; `SearchView` does this for the lyric editor.
 - **`SearchField.ClearText`** and the `Table` labels default to English. Set them from localization.
-- **Arrow glyphs such as ↩** render badly in the Arc fonts. Name keys with words ("Enter").
+- **Arrow glyphs such as ↩** render badly in the Arc fonts. Name keys with words ("Enter") in text; where a key
+  is drawn, use an icon (`ArcIcons.CornerDownLeft` for Enter in the shortcut key caps).
 
 ## AvaloniaEdit (the lyrics editor)
 

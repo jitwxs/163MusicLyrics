@@ -7,6 +7,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Avalonia.Platform.Storage;
+using MusicLyricApp.Core.Service.Music;
 using MusicLyricApp.Core.Utils;
 using MusicLyricApp.Core.Localization;
 using MusicLyricApp.Models;
@@ -80,15 +81,17 @@ public class StorageService : IStorageService
     public string SaveSongLink(SearchResultViewModel searchResult, SettingBean settingBean,
         IWindowProvider windowProvider)
     {
-        var musicApi = (_searchService ?? throw new InvalidOperationException("Search service has not been configured."))
-            .GetMusicApi(settingBean.Param.SearchSource);
+        // Each song's own source: the source picked on the page may differ (a pasted link names its source).
+        var searchService = _searchService ?? throw new InvalidOperationException("Search service has not been configured.");
+        IMusicApi ApiOf(SaveVo saveVo) => searchService.GetMusicApi(saveVo.LyricVo.SearchSource);
 
         switch (searchResult.SaveVoMap.Count)
         {
             case 0:
                 throw new MusicLyricException(ErrorMsgConst.MUST_SEARCH_BEFORE_GET_SONG_URL);
             case 1:
-                var link = musicApi.GetSongLink(searchResult.SaveVoMap.Keys.First());
+                var (songKey, single) = searchResult.SaveVoMap.First();
+                var link = ApiOf(single).GetSongLink(songKey);
                 if (link.IsSuccess())
                 {
                     windowProvider.SetTextAsync(link.Data);
@@ -103,10 +106,13 @@ public class StorageService : IStorageService
                 csv.AddColumn("id");
                 csv.AddColumn("songLink");
 
-                foreach (var songId in searchResult.SaveVoMap.Values.Select(saveVo => saveVo.SongVo.DisplayId))
+                foreach (var saveVo in searchResult.SaveVoMap.Values)
                 {
+                    var songId = saveVo.SongVo.DisplayId;
                     csv.AddData(songId);
-                    csv.AddData(musicApi.GetSongLink(songId).Data);
+                    // A song without a link (VIP only, delisted) leaves its cell empty instead of ending the export.
+                    var songLink = ApiOf(saveVo).GetSongLink(songId);
+                    csv.AddData(songLink.IsSuccess() ? songLink.Data : "");
                     csv.NextLine();
                 }
 

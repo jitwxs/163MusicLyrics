@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -18,7 +18,7 @@ public sealed record LocalSongCandidate(SearchSourceEnum Source, string Id, stri
 {
     public override string ToString() => string.Join(" · ", new[]
     {
-        Source.ToDescription(),
+        MusicSources.Get(Source).Name,
         string.Join(" — ", new[] { Title, Artist }.Where(x => !string.IsNullOrWhiteSpace(x))),
         Album,
         Duration > 0 ? TimeSpan.FromMilliseconds(Duration).ToString(@"mm\:ss") : "",
@@ -83,8 +83,9 @@ public sealed class LocalSongMatcher(Func<SearchSourceEnum, IMusicApi> api, Time
     {
         var candidates = new List<LocalSongCandidate>();
         var warnings = new List<string>();
+        // The preferred source first, then every other source in the order of the source table.
         var sources = useFallback && !filenameIsId
-            ? new[] { preferred, preferred == SearchSourceEnum.NET_EASE_MUSIC ? SearchSourceEnum.QQ_MUSIC : SearchSourceEnum.NET_EASE_MUSIC }
+            ? MusicSources.All.Select(x => x.Source).Where(x => x != preferred).Prepend(preferred).ToArray()
             : new[] { preferred };
         foreach (var source in sources)
         {
@@ -115,9 +116,12 @@ public sealed class LocalSongMatcher(Func<SearchSourceEnum, IMusicApi> api, Time
                     }
                 }
             }
-            catch (Exception ex) when (ex is not OperationCanceledException)
+            // One source failing, a timeout included (HttpClient reports it as a TaskCanceledException), is a warning
+            // and the next source is tried; only the user's cancellation stops the match.
+            catch (Exception ex) when (ex is not OperationCanceledException ||
+                                       ex is TaskCanceledException && !ct.IsCancellationRequested)
             {
-                warnings.Add($"{source.ToDescription()}: {ex.Message}");
+                warnings.Add($"{MusicSources.Get(source).Name}: {ex.Message}");
             }
             var ranked = Rank(candidates);
             if (new LocalMatchResult(ranked).Automatic != null) break;

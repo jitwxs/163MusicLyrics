@@ -123,6 +123,7 @@
   "Error.MUST_SEARCH_BEFORE_GET_SONG_PIC": "您必须先搜索，才能获取歌曲封面",
   "Error.INPUT_CONENT_EMPLT": "输入内容不能为空",
   "Error.INPUT_ID_ILLEGAL": "您输入的ID不合法",
+  "Error.SHORT_LINK_UNREACHABLE": "无法打开分享短链，请检查网络后重试，或粘贴完整的歌曲链接",
   "Error.PLAYLIST_NOT_EXIST": "歌单信息暂未被收录或查询失败",
   "Error.ALBUM_NOT_EXIST": "专辑信息暂未被收录或查询失败",
   "Error.SONG_NOT_EXIST": "歌曲信息暂未被收录或查询失败",

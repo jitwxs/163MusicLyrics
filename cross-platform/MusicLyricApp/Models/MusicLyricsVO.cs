@@ -150,6 +150,7 @@ public static class ErrorMsgConst
     public static string MUST_SEARCH_BEFORE_GET_SONG_PIC => T("Error.MUST_SEARCH_BEFORE_GET_SONG_PIC");
     public static string INPUT_CONENT_EMPLT => T("Error.INPUT_CONENT_EMPLT");
     public static string INPUT_ID_ILLEGAL => T("Error.INPUT_ID_ILLEGAL");
+    public static string SHORT_LINK_UNREACHABLE => T("Error.SHORT_LINK_UNREACHABLE");
     public static string PLAYLIST_NOT_EXIST => T("Error.PLAYLIST_NOT_EXIST");
     public static string ALBUM_NOT_EXIST => T("Error.ALBUM_NOT_EXIST");
     public static string SONG_NOT_EXIST => T("Error.SONG_NOT_EXIST");

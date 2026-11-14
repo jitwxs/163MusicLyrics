@@ -1,12 +1,18 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using MusicLyricApp.Models;
 
 namespace MusicLyricApp.Core;
 
+/// <summary>
+/// In-memory results of the music APIs. Thread-safe: the online lyrics page reads and writes it on the UI thread
+/// while local search matches songs on background threads. A value two threads miss at once may be fetched twice;
+/// the fetch runs outside any lock, so one slow request never holds up the others.
+/// </summary>
 public static class GlobalCache
 {
-    private static readonly Dictionary<CacheType, Dictionary<object, object>> Cache = new();
+    private static readonly ConcurrentDictionary<CacheType, ConcurrentDictionary<string, object>> Cache = new();
 
     public static ResultVo<T> Process<T>(object keyPrefix, CacheType cacheType, string key, Func<ResultVo<T>> cacheFunc)
     {
@@ -53,7 +59,7 @@ public static class GlobalCache
     {
         var key = AddPrefix(keyPrefix, originKey);
 
-        if (Cache.TryGetValue(cacheType, out var dictionary) && dictionary.TryGetValue(key, out object? result))
+        if (Cache.TryGetValue(cacheType, out var dictionary) && dictionary.TryGetValue(key, out var result))
         {
             return (T)result;
         }
@@ -75,13 +81,8 @@ public static class GlobalCache
 
     public static void DoCache(object keyPrefix, CacheType cacheType, string originKey, object value)
     {
-        if (!Cache.TryGetValue(cacheType, out var dictionary))
-        {
-            dictionary = new Dictionary<object, object>();
-            Cache.Add(cacheType, dictionary);
-        }
-
-        dictionary[AddPrefix(keyPrefix, originKey)] = value;
+        Cache.GetOrAdd(cacheType, static _ => new ConcurrentDictionary<string, object>())
+            [AddPrefix(keyPrefix, originKey)] = value;
     }
 
     private static string AddPrefix(object prefix, string key)

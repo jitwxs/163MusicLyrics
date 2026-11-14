@@ -2,8 +2,11 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+using MusicLyricApp.Core.Service;
 using MusicLyricApp.Models;
 using NLog;
 
@@ -103,10 +106,8 @@ public static partial class GlobalUtils
         // QQ 音乐，歌曲短链接
         if (searchSource == SearchSourceEnum.QQ_MUSIC && input.Contains("fcgi-bin/u"))
         {
-            var response = HttpUtils.HttpGet0(input);
-            if (response is { IsSuccessStatusCode: true, RequestMessage: not null } && response.RequestMessage.RequestUri != null)
+            if (ResolveShortLink(input) is { } redirectUrl && !redirectUrl.Contains("fcgi-bin/u"))
             {
-                var redirectUrl = response.RequestMessage.RequestUri.AbsoluteUri;
                 return CheckInputId(redirectUrl, searchSource, searchType);
             }
         }
@@ -115,20 +116,42 @@ public static partial class GlobalUtils
         if (searchSource == SearchSourceEnum.SODA_MUSIC && input.Contains("qishui.douyin.com/s/"))
         {
             var shortLink = SodaShortLinkRegex().Match(input);
-            if (shortLink.Success)
+            if (shortLink.Success && ResolveShortLink(shortLink.Value) is { } redirectUrl &&
+                !redirectUrl.Contains("qishui.douyin.com/s/"))
             {
-                using var response = HttpUtils.HttpGet0(shortLink.Value);
-                var redirectUrl = response.RequestMessage?.RequestUri?.AbsoluteUri;
-                if (redirectUrl != null && !redirectUrl.Contains("qishui.douyin.com/s/"))
-                {
-                    return CheckInputId(redirectUrl, searchSource, searchType);
-                }
+                return CheckInputId(redirectUrl, searchSource, searchType);
             }
         }
 
         Logger.Warn("GlobalUtils#CheckInputId INPUT_ID_ILLEGAL, input: " + input);
 
         throw new MusicLyricException(ErrorMsgConst.INPUT_ID_ILLEGAL);
+    }
+
+    /// <summary>
+    /// Where a share short link leads, or null when it leads to an error page. A network failure or a timeout
+    /// (10 s, short links answer at once) is reported as such, not as "One or more errors occurred", and text that
+    /// is not a link as an invalid input.
+    /// </summary>
+    public static string? ResolveShortLink(string url, Func<HttpClient>? clientFactory = null)
+    {
+        try
+        {
+            using var client = clientFactory?.Invoke() ?? NetworkClientFactory.CreateHttpClient(10);
+            using var response = client.GetAsync(url).GetAwaiter().GetResult();
+            return response.IsSuccessStatusCode ? response.RequestMessage?.RequestUri?.AbsoluteUri : null;
+        }
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
+        {
+            Logger.Warn(ex, "GlobalUtils#ResolveShortLink failed, url: " + url);
+            throw new MusicLyricException(ErrorMsgConst.SHORT_LINK_UNREACHABLE);
+        }
+        // Not a link at all, such as share text pasted around one.
+        catch (Exception ex) when (ex is InvalidOperationException or UriFormatException)
+        {
+            Logger.Warn(ex, "GlobalUtils#ResolveShortLink not a link: " + url);
+            throw new MusicLyricException(ErrorMsgConst.INPUT_ID_ILLEGAL);
+        }
     }
 
     public static string ConvertSearchWithShareLink(SearchSourceEnum searchSource, string input)

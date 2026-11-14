@@ -60,7 +60,8 @@ anything does. Tests that switch language are `[AvaloniaFact]`, because observer
 
 **Shortcuts.** Add or change a shortcut only in `AppShortcuts` (id, scope, gesture, label key). Key bindings,
 tooltips, placeholder hints and the shortcuts dialog all read from it. Show keys the way the platform does: ⌘ on
-macOS and Ctrl elsewhere, and "Enter" (never "Return" or ↩).
+macOS and Ctrl elsewhere. In texts (tooltips, hints) Enter is the word "Enter", never "Return" or ↩; the key caps
+of the 快捷键 settings section draw it as the `ArcIcons.CornerDownLeft` glyph (`ShortcutList.KeyCap`).
 
 **Feedback.** Status messages go through the view model's `TipRaised` event, and `MainWindow` shows them as a
 `Toast`. Do not add status text blocks to pages. Questions use `DialogHelper.ConfirmOnAsync(owner, ...)`; pass

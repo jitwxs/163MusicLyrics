@@ -54,15 +54,32 @@ public static class ShortcutList
         return row;
     }
 
-    /// <summary>A key drawn as a small cap, like a key on the keyboard.</summary>
+    /// <summary>
+    /// A key drawn as a small cap, like a key on the keyboard. Enter is drawn as the return glyph, as on the key
+    /// itself; the ↩ character renders badly in the Arc fonts, so it is an icon. Texts and screen readers keep the
+    /// word (see <see cref="AutomationExtensions"/>).
+    /// </summary>
     private static Control KeyCap(string key)
     {
-        var text = new TextBlock { Text = key, HorizontalAlignment = HorizontalAlignment.Center };
-        ArcTokens.Bind(text, TextBlock.FontFamilyProperty, ArcDesignTokenKind.MonoFontFamily);
-        ArcTokens.Bind(text, TextBlock.FontSizeProperty, ArcDesignTokenKind.TypeSM);
-        ArcTokens.Bind(text, TextBlock.ForegroundProperty, ArcDesignTokenKind.Foreground);
+        Control face;
+        if (key == AppShortcuts.EnterKeyName)
+        {
+            var glyph = new ArcGlyph { Data = ArcIcons.CornerDownLeft, Size = 14, Name = "EnterKeyGlyph" };
+            ArcTokens.Bind(glyph, ArcGlyph.ForegroundProperty, ArcDesignTokenKind.Foreground);
+            face = glyph;
+        }
+        else
+        {
+            var text = new TextBlock { Text = key };
+            ArcTokens.Bind(text, TextBlock.FontFamilyProperty, ArcDesignTokenKind.MonoFontFamily);
+            ArcTokens.Bind(text, TextBlock.FontSizeProperty, ArcDesignTokenKind.TypeSM);
+            ArcTokens.Bind(text, TextBlock.ForegroundProperty, ArcDesignTokenKind.Foreground);
+            face = text;
+        }
 
-        var cap = new Border { MinWidth = 28, Padding = new Thickness(8, 2), BorderThickness = new Thickness(1), Child = text };
+        face.HorizontalAlignment = HorizontalAlignment.Center;
+        face.VerticalAlignment = VerticalAlignment.Center;
+        var cap = new Border { MinWidth = 28, MinHeight = 24, Padding = new Thickness(8, 2), BorderThickness = new Thickness(1), Child = face };
         ArcTokens.Bind(cap, Border.BackgroundProperty, ArcDesignTokenKind.SurfaceMuted);
         ArcTokens.Bind(cap, Border.BorderBrushProperty, ArcDesignTokenKind.Border);
         ArcTokens.Bind(cap, Border.CornerRadiusProperty, ArcDesignTokenKind.RadiusControl);

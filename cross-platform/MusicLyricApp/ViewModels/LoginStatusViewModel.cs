@@ -55,7 +55,7 @@ public partial class AccountStatusViewModel(SearchSourceEnum source) : ViewModel
     /// reads 未登录 there: searching still works as a guest, and "已失效" read as if the feature itself were broken.
     /// The settings page keeps the exact state.
     /// </summary>
-    public string SourceLabel => LocalizationService.Format("Login.SourceState", Source.ToDescription(),
+    public string SourceLabel => LocalizationService.Format("Login.SourceState", MusicSources.Get(Source).Name,
         IsInvalid ? LocalizationService.Get("Login.State.NotConfigured") : Label);
 
     /// <summary>On the online lyrics page an expired cookie shows the signed-out icon, tinted to ask for a look.</summary>

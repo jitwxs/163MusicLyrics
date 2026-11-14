@@ -312,6 +312,7 @@ public partial class MainWindowViewModel : ViewModelBase
 
         SearchResultViewModel.DiscardEdits();
         ++_previewRevision;
+        ++_songRevision;
         IsBlurSearch = false;
         SearchParamViewModel.SearchSource.Value = request.SearchSource;
 
@@ -415,6 +416,13 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private int _previewRevision;
 
+    /// <summary>
+    /// Goes up only when another song is loaded (a search or a download-manager row), unlike
+    /// <see cref="_previewRevision"/>, which option changes also move. A song link that arrives late is kept while
+    /// its song is still the one shown.
+    /// </summary>
+    private int _songRevision;
+
     private async Task RefreshCurrentConsoleOutputAsync()
     {
         var revision = ++_previewRevision;
@@ -471,6 +479,7 @@ public partial class MainWindowViewModel : ViewModelBase
         }
 
         ++_previewRevision;
+        ++_songRevision;
         SearchResultViewModel.DiscardEdits();
 
         // An exact search shows its own preview, so any open fuzzy results give way to it.
@@ -501,19 +510,17 @@ public partial class MainWindowViewModel : ViewModelBase
                     SetTip(ErrorMsgConst.LRC_NOT_EXIST, true);
                 }
 
-                // 自动获取直链
-                await Task.Run(() =>
+                // 自动获取直链: only the request runs in the background. The link is set back on the UI thread, since
+                // it drives bindings and prepares the player, and dropped if another song was loaded meanwhile.
+                var songId0 = SearchParamViewModel.SongIds[0];
+                var song = _songRevision;
+                var musicApi = _searchService.GetMusicApi(songId0.SearchSource);
+                var linkResult = await Task.Run(() => musicApi.GetSongLink(songId0.SongId));
+                if (linkResult.IsSuccess() && song == _songRevision)
                 {
-                    var songId0 = SearchParamViewModel.SongIds[0];
-                    
-                    var musicApi = _searchService.GetMusicApi(songId0.SearchSource);
-                    var linkResult = musicApi.GetSongLink(songId0.SongId);
-                    if (linkResult.IsSuccess())
-                    {
-                        SearchResultViewModel.SongLink = linkResult.Data;
-                        _downloadManagerViewModel.CacheSongLink(songId0.SongId, linkResult.Data);
-                    }
-                });
+                    SearchResultViewModel.SongLink = linkResult.Data;
+                    _downloadManagerViewModel.CacheSongLink(songId0.SongId, linkResult.Data);
+                }
 
                 if (localCacheHitCount > 0)
                 {

@@ -140,6 +140,26 @@ public partial class BatchSearchViewModel : ViewModelBase
         OnPropertyChanged(nameof(FilterCountText));
     }
 
+    /// <summary>
+    /// Runs <paramref name="change"/> with the shown rows left alone, then refreshes them once. Each change to
+    /// <see cref="Items"/> otherwise rebuilds them, which makes a bulk change cost the square of the list size.
+    /// </summary>
+    private void InOneRefresh(System.Action change)
+    {
+        var outer = _suspendVisibleRefresh;
+        _suspendVisibleRefresh = true;
+        try
+        {
+            change();
+        }
+        finally
+        {
+            _suspendVisibleRefresh = outer;
+        }
+
+        RefreshVisibleItems();
+    }
+
     /// <summary>Puts a row at <paramref name="index"/>, adding it or moving it there.</summary>
     private void PlaceAt(BatchSearchItemViewModel item, int index)
     {
@@ -167,52 +187,55 @@ public partial class BatchSearchViewModel : ViewModelBase
         var added = 0;
         var position = 0;
 
-        foreach (var input in inputSongIds)
+        // One refresh at the end: names are known only then, so the filter is matched again there too.
+        InOneRefresh(() =>
         {
-            if (!resDict.TryGetValue(input.SongId, out var result))
+            foreach (var input in inputSongIds)
             {
-                continue;
+                if (!resDict.TryGetValue(input.SongId, out var result))
+                {
+                    continue;
+                }
+
+                if (!existing.TryGetValue(input.SongId, out var item))
+                {
+                    item = new BatchSearchItemViewModel { SongId = input.SongId };
+                    existing[input.SongId] = item;
+                    added++;
+                }
+
+                PlaceAt(item, position++);
+
+                if (result.IsSuccess())
+                {
+                    var saveVo = result.Data;
+                    _saveMap[input.SongId] = saveVo;
+                    LocalSongCacheService.SaveCache(_settingBean, input.SearchSource, input.SongId, saveVo);
+
+                    item.SongName = saveVo.SongVo.Name;
+                    item.SourceEnum = input.SearchSource;
+                    item.Singer = string.Join(_settingBean.Config.SingerSeparator, saveVo.SongVo.Singer);
+                    item.Album = saveVo.SongVo.Album;
+                    item.State = BatchItemStateEnum.READY;
+                    item.Error = saveVo.LyricVo.IsEmpty() ? ErrorMsgConst.LRC_NOT_EXIST : "";
+                    item.Progress = 100;
+                }
+                else
+                {
+                    _saveMap.Remove(input.SongId);
+                    _songLinkMap.Remove(input.SongId);
+
+                    item.SongName = "";
+                    item.SourceEnum = input.SearchSource;
+                    item.Singer = "";
+                    item.Album = "";
+                    item.State = BatchItemStateEnum.FAILED;
+                    item.Error = result.ErrorMsg;
+                    item.Progress = 0;
+                }
             }
+        });
 
-            if (!existing.TryGetValue(input.SongId, out var item))
-            {
-                item = new BatchSearchItemViewModel { SongId = input.SongId };
-                existing[input.SongId] = item;
-                added++;
-            }
-
-            PlaceAt(item, position++);
-
-            if (result.IsSuccess())
-            {
-                var saveVo = result.Data;
-                _saveMap[input.SongId] = saveVo;
-                LocalSongCacheService.SaveCache(_settingBean, input.SearchSource, input.SongId, saveVo);
-
-                item.SongName = saveVo.SongVo.Name;
-                item.SourceEnum = input.SearchSource;
-                item.Singer = string.Join(_settingBean.Config.SingerSeparator, saveVo.SongVo.Singer);
-                item.Album = saveVo.SongVo.Album;
-                item.State = BatchItemStateEnum.READY;
-                item.Error = saveVo.LyricVo.IsEmpty() ? ErrorMsgConst.LRC_NOT_EXIST : "";
-                item.Progress = 100;
-            }
-            else
-            {
-                _saveMap.Remove(input.SongId);
-                _songLinkMap.Remove(input.SongId);
-
-                item.SongName = "";
-                item.SourceEnum = input.SearchSource;
-                item.Singer = "";
-                item.Album = "";
-                item.State = BatchItemStateEnum.FAILED;
-                item.Error = result.ErrorMsg;
-                item.Progress = 0;
-            }
-        }
-
-        RefreshVisibleItems(); // names are known only now, so match the filter again
         RefreshStats();
         SetTip(LocalizationService.Format("Status.Batch.Sync", added), false);
     }
@@ -237,8 +260,7 @@ public partial class BatchSearchViewModel : ViewModelBase
         }
 
         var existing = Items.Select(i => i.SongId).ToHashSet();
-        _suspendVisibleRefresh = true;
-        try
+        InOneRefresh(() =>
         {
             foreach (var song in songs)
             {
@@ -266,13 +288,8 @@ public partial class BatchSearchViewModel : ViewModelBase
                     Progress = 100
                 });
             }
-        }
-        finally
-        {
-            _suspendVisibleRefresh = false;
-        }
+        });
 
-        RefreshVisibleItems();
         RefreshStats();
     }
 
@@ -311,12 +328,15 @@ public partial class BatchSearchViewModel : ViewModelBase
         }
 
         var cacheTargets = toRemove.Select(item => (item.SourceEnum, item.SongId)).ToList();
-        foreach (var item in toRemove)
+        InOneRefresh(() =>
         {
-            _saveMap.Remove(item.SongId);
-            _songLinkMap.Remove(item.SongId);
-            Items.Remove(item);
-        }
+            foreach (var item in toRemove)
+            {
+                _saveMap.Remove(item.SongId);
+                _songLinkMap.Remove(item.SongId);
+                Items.Remove(item);
+            }
+        });
 
         RefreshStats();
         await Task.Run(() =>

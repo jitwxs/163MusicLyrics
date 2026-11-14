@@ -54,6 +54,9 @@ public static class AppShortcuts
     public const string OpenSettings = "open-settings";
     public const string ShowShortcuts = "show-shortcuts";
 
+    /// <summary>How Enter is written in texts; the shortcut list draws it as the return glyph instead.</summary>
+    public const string EnterKeyName = "Enter";
+
     private static bool IsMac => OperatingSystem.IsMacOS();
 
     /// <summary>⌘ on macOS, Ctrl elsewhere — the platform's usual modifier for app commands.</summary>
@@ -132,7 +135,7 @@ public static class AppShortcuts
 
     private static string KeyName(Key key) => key switch
     {
-        Key.Enter => "Enter",
+        Key.Enter => EnterKeyName,
         Key.OemComma => ",",
         Key.Oem2 => "/",
         >= Key.D0 and <= Key.D9 => ((int)(key - Key.D0)).ToString(),

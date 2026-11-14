@@ -310,6 +310,23 @@ public class SodaMusicApiTests
         Assert.False(fake.Requests.Last().Headers.Contains("access-token"));
     }
 
+    [Fact]
+    public void SearchStillRunsWhenTheTokenRequestTimesOut()
+    {
+        // HttpClient reports its timeout as TaskCanceledException.
+        var fake = new Fake
+        {
+            Respond = (r, _) => r.RequestUri!.Host == "open.qishui.com"
+                ? throw new TaskCanceledException("token request timed out")
+                : Json(Fixture("search"))
+        };
+
+        var result = fake.Api().Search("token timeout " + FreshId(), SearchTypeEnum.SONG_ID).Assert().Data;
+
+        Assert.Equal(3, result.SongVos.Count);
+        Assert.False(fake.Requests.Last().Headers.Contains("access-token"));
+    }
+
     [Theory]
     [InlineData(SearchTypeEnum.ALBUM_ID)]
     [InlineData(SearchTypeEnum.PLAYLIST_ID)]
