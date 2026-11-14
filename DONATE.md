@@ -7,6 +7,11 @@ maintained personally, all features are free. If you would like to treat the cre
 
 | username     | donate    | platform | date       |
 |:-------------|:----------|:-------|:-----------|
+| * 华  | 100 CNY     | wechat | 2026-08-01 |
+| * 吞  | 10 CNY     | wechat | 2026-07-19 |
+| * 杰  | 20 CNY     | wechat | 2026-06-07 |
+| * 瑞  | 5 CNY     | wechat | 2026-03-18 |
+| * 二  | 2 CNY     | wechat | 2026-03-16 |
 | * 罗  | 2 CNY     | wechat | 2026-02-27 |
 | 河虾茛  | 15 CNY     | alipay | 2026-02-02 |
 | * 果  | 50 CNY     | wechat | 2026-01-31 |
