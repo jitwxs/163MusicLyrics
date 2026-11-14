@@ -267,8 +267,17 @@ public class SettingsAndConvertPageRegressionTests
             Dispatcher.UIThread.RunJobs();
             var headers = view.GetVisualDescendants().OfType<SettingsGroup>().Where(g => g.IsEffectivelyVisible).Select(g => g.Header).ToList();
             Assert.DoesNotContain(LocalizationService.Get("UI.Shortcuts"), headers);
-            var config = Assert.Single(view.GetVisualDescendants().OfType<SettingsRow>(), r => r.Classes.Contains("path") && r.IsEffectivelyVisible);
-            Assert.True(config.IsStacked);
+            // The config file and the log folder sit together in one group.
+            var group = Assert.Single(view.GetVisualDescendants().OfType<SettingsGroup>(),
+                g => g.IsEffectivelyVisible && Equals(g.Header, LocalizationService.Get("Settings.Group.ConfigAndLogs")));
+            var appPaths = group.GetVisualDescendants().OfType<SettingsRow>().Where(r => r.Classes.Contains("path")).ToList();
+            Assert.Equal(new object?[] { LocalizationService.Get("UI.Extra34"), LocalizationService.Get("Settings.LogFolder") },
+                appPaths.Select(r => r.Header));
+            Assert.All(appPaths, r => Assert.True(r.IsStacked));
+            Assert.Contains(group.GetVisualDescendants().OfType<SettingsRow>(),
+                r => Equals(r.Header, LocalizationService.Get("UI.EnableFileLogging")));
+            var logInput = view.GetVisualDescendants().OfType<Control>().Single(c => c.Name == "LogFolderInput");
+            Assert.True(logInput.IsEffectivelyVisible);
         }
         finally { window.Close(); }
     }

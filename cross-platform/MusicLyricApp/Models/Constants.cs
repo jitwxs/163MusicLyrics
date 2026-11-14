@@ -29,6 +29,41 @@ public static class Constants
         return Path.Combine(configDir, ConfigFileName);
     }
 
+    /// <summary>
+    /// Where file logs go, following each platform's convention instead of the program folder, which may be
+    /// read-only (Program Files, /opt) or a signed .app bundle:
+    /// Windows <c>%LOCALAPPDATA%\MusicLyricApp\logs</c> (logs do not roam with the profile),
+    /// macOS <c>~/Library/Logs/MusicLyricApp</c> (shown by Console.app),
+    /// Linux <c>$XDG_STATE_HOME/MusicLyricApp/logs</c>, falling back to <c>~/.local/state</c>.
+    /// The folder is created by the logger when it first writes.
+    /// </summary>
+    public static string GetLogFolderPath() => ResolveLogFolderPath(
+        OperatingSystem.IsWindows() ? LogPlatform.Windows :
+        OperatingSystem.IsMacOS() ? LogPlatform.MacOS : LogPlatform.Linux,
+        Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+        Environment.GetEnvironmentVariable("XDG_STATE_HOME"));
+
+    public enum LogPlatform { Windows, MacOS, Linux }
+
+    public static string ResolveLogFolderPath(LogPlatform platform, string home, string localAppData,
+        string? xdgStateHome)
+    {
+        switch (platform)
+        {
+            case LogPlatform.Windows:
+                return Path.Combine(localAppData, AppFolderName, "logs");
+            case LogPlatform.MacOS:
+                return Path.Combine(home, "Library", "Logs", AppFolderName);
+            default:
+                // The XDG spec ignores relative values.
+                var stateHome = !string.IsNullOrWhiteSpace(xdgStateHome) && Path.IsPathRooted(xdgStateHome)
+                    ? xdgStateHome
+                    : Path.Combine(home, ".local", "state");
+                return Path.Combine(stateHome, AppFolderName, "logs");
+        }
+    }
+
     public static string GetDefaultSearchCacheFolderPath()
     {
         var configDir = Path.GetDirectoryName(GetConfigFilePath()) ?? Environment.CurrentDirectory;

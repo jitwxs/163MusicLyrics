@@ -449,10 +449,6 @@
                             <arc:Switch AutomationProperties.Name="{loc:Loc Key=UI.Extra27}"
                                         IsChecked="{Binding SettingParamViewModel.ConfirmBeforeExit, Mode=TwoWay}" />
                         </arc:SettingsRow>
-                        <arc:SettingsRow Header="{loc:Loc Key=UI.EnableFileLogging}">
-                            <arc:Switch AutomationProperties.Name="{loc:Loc Key=UI.EnableFileLogging}"
-                                        IsChecked="{Binding SettingParamViewModel.EnableFileLogging, Mode=TwoWay}" />
-                        </arc:SettingsRow>
                         <arc:SettingsRow Header="{loc:Loc Key=UI.Extra26}">
                             <StackPanel Orientation="Horizontal" Spacing="{arc:ArcDesignTokenResource Space3}">
                                 <arc:Button Variant="Secondary" Size="Small"
@@ -466,13 +462,32 @@
                     </arc:SettingsGroup>
 
 
-                    <arc:SettingsGroup Header="{loc:Loc Key=UI.Extra34}">
+                    <arc:SettingsGroup Header="{loc:Loc Key=Settings.Group.ConfigAndLogs}">
                         <arc:SettingsRow Header="{loc:Loc Key=UI.Extra34}" Classes="path" ContentAlignment="Stretch">
                             <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{arc:ArcDesignTokenResource Space2}">
                                 <arc:Input Width="NaN" Label="{loc:Loc Key=UI.Extra34}" Text="{Binding ConfigPath}" IsReadOnly="True" />
                                 <arc:Button Grid.Column="1" Variant="Ghost" Size="Small"
                                             Content="{loc:Loc Key=Settings.OpenConfig}"
                                             Command="{Binding OpenConfigPathCommand}" />
+                            </Grid>
+                        </arc:SettingsRow>
+                        <arc:SettingsRow Header="{loc:Loc Key=UI.EnableFileLogging}"
+                                         Description="{loc:Loc Key=Settings.FileLoggingHint}">
+                            <arc:Switch AutomationProperties.Name="{loc:Loc Key=UI.EnableFileLogging}"
+                                        IsChecked="{Binding SettingParamViewModel.EnableFileLogging, Mode=TwoWay}" />
+                        </arc:SettingsRow>
+                        <arc:SettingsRow Name="LogFolderRow" Header="{loc:Loc Key=Settings.LogFolder}"
+                                         Description="{Binding LogUsageText}"
+                                         Classes="path" ContentAlignment="Stretch">
+                            <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="{arc:ArcDesignTokenResource Space2}">
+                                <arc:Input Name="LogFolderInput" Width="NaN" Label="{loc:Loc Key=Settings.LogFolder}"
+                                           Text="{Binding LogFolderPath, Mode=OneWay}" IsReadOnly="True" />
+                                <arc:Button Grid.Column="1" Variant="Ghost" Size="Small"
+                                            Content="{loc:Loc Key=Settings.OpenFolder}"
+                                            Command="{Binding OpenLogFolderCommand}" />
+                                <arc:Button Name="DeleteOldLogsButton" Grid.Column="2" Variant="Ghost" Size="Small"
+                                            Content="{loc:Loc Key=Settings.DeleteOldLogs}"
+                                            Command="{Binding DeleteOldLogsCommand}" />
                             </Grid>
                         </arc:SettingsRow>
                     </arc:SettingsGroup>

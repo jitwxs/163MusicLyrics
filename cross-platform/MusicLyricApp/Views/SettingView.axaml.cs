@@ -4,6 +4,9 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.VisualTree;
+using MusicLyricApp.Core;
+using MusicLyricApp.Core.Localization;
+using MusicLyricApp.Core.Service;
 using MusicLyricApp.Core.Utils;
 using MusicLyricApp.Models;
 using MusicLyricApp.ViewModels;
@@ -40,6 +43,11 @@ public partial class SettingView : UserControl
         if (_viewModel != null)
         {
             _viewModel.PropertyChanged += OnViewModelPropertyChanged;
+            _viewModel.ConfirmDeleteOldLogsAsync = usage => DialogHelper.ConfirmOnAsync(this,
+                LocalizationService.Get("Settings.DeleteOldLogs.Title"),
+                LocalizationService.Format("Settings.DeleteOldLogs.Message", usage.OldFiles,
+                    LoggingService.FormatSize(usage.OldBytes)),
+                LocalizationService.Get("Settings.DeleteOldLogs"), isDanger: true);
         }
     }
 

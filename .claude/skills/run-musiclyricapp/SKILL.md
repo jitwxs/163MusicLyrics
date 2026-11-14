@@ -82,8 +82,8 @@ fuzzy search needs a valid login cookie. Without one it fails with "本请求需
 
 ## Logs
 
-The app writes `cross-platform/MusicLyricApp/bin/Debug/net10.0/MusicLyricApp-<yyyy-MM-dd>.log` (search, cache and save
-events, warnings). The process's own output is in `$MLA_STATE/app.log`. Check both when something does not happen.
+The app writes `~/Library/Logs/MusicLyricApp/MusicLyricApp-<yyyy-MM-dd>.log` on macOS (search, cache and save
+events, warnings; see `Constants.GetLogFolderPath` for Windows and Linux). The process's own output is in `$MLA_STATE/app.log`. Check both when something does not happen.
 
 ## Reporting
 

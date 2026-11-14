@@ -68,6 +68,28 @@ public partial class SettingViewModel : ViewModelBase
     
     [ObservableProperty] private string _configPath = Constants.GetConfigFilePath();
 
+    /// <summary>Folder the daily log files are written to; see <see cref="Constants.GetLogFolderPath"/>.</summary>
+    public string LogFolderPath { get; }
+
+    /// <summary>Asks before old logs are deleted, given what would go; set by the view, left unset in tests.</summary>
+    public Func<LogUsage, Task<bool>>? ConfirmDeleteOldLogsAsync { get; set; }
+
+    /// <summary>What the log folder holds, read when the page opens and after a clean-up.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(LogUsageText))]
+    [NotifyCanExecuteChangedFor(nameof(DeleteOldLogsCommand))]
+    private LogUsage _logUsage;
+
+    /// <summary>"共 3 个日志文件，占用 1.2 MB，其中旧日志 1.1 MB", or a note that there are none.</summary>
+    public string LogUsageText => LogUsage.Files == 0
+        ? LocalizationService.Get("Settings.LogUsage.None")
+        : LogUsage.OldFiles == 0
+            ? LocalizationService.Format("Settings.LogUsage", LogUsage.Files, LoggingService.FormatSize(LogUsage.Bytes))
+            : LocalizationService.Format("Settings.LogUsage.WithOld", LogUsage.Files,
+                LoggingService.FormatSize(LogUsage.Bytes), LoggingService.FormatSize(LogUsage.OldBytes));
+
+    private bool CanDeleteOldLogs => LogUsage.OldFiles > 0;
+
     public SettingParamViewModel SettingParamViewModel { get; } = new();
 
     private readonly SettingBean _settingBean;
@@ -82,9 +104,12 @@ public partial class SettingViewModel : ViewModelBase
     public LoginStatusViewModel? Login { get; }
 
     public SettingViewModel(SettingBean settingBean, IWindowProvider? windowProvider = null,
-        Action<string>? openDirectory = null, LoginStatusViewModel? login = null)
+        Action<string>? openDirectory = null, LoginStatusViewModel? login = null, string? logFolderPath = null)
     {
         _settingBean = settingBean;
+        LogFolderPath = logFolderPath ?? Constants.GetLogFolderPath();
+        RefreshLogUsage();
+        LocalizationService.Observe(this, static vm => vm.OnPropertyChanged(nameof(LogUsageText)));
         _windowProvider = windowProvider;
         _openDirectory = openDirectory ?? ShellLauncher.Open;
         LocalSongCacheService.EnsureConfigDefaults(_settingBean);
@@ -191,6 +216,46 @@ public partial class SettingViewModel : ViewModelBase
             Logger.Error(ex, "OpenConfigPath error");
             throw new MusicLyricException(ErrorMsgConst.STORAGE_FOLDER_ERROR);
         }
+    }
+
+    [RelayCommand]
+    private void OpenLogFolder()
+    {
+        try
+        {
+            // The logger only creates the folder on its first write, so it may not exist yet.
+            Directory.CreateDirectory(LogFolderPath);
+            _openDirectory(LogFolderPath);
+        }
+        catch (Exception ex)
+        {
+            Logger.Error(ex, "OpenLogFolder error");
+            throw new MusicLyricException(ErrorMsgConst.STORAGE_FOLDER_ERROR);
+        }
+    }
+
+    public void RefreshLogUsage() => LogUsage = LoggingService.GetLogUsage(LogFolderPath, DateTime.Now);
+
+    [RelayCommand(CanExecute = nameof(CanDeleteOldLogs))]
+    private async Task DeleteOldLogsAsync()
+    {
+        RefreshLogUsage();
+        if (LogUsage.OldFiles == 0)
+        {
+            SettingTips = LocalizationService.Get("Status.Settings.NoOldLogs");
+            return;
+        }
+
+        if (ConfirmDeleteOldLogsAsync != null && !await ConfirmDeleteOldLogsAsync(LogUsage))
+        {
+            return;
+        }
+
+        var (files, bytes) = LoggingService.DeleteOldLogs(LogFolderPath, DateTime.Now);
+        RefreshLogUsage();
+        SettingTips = files > 0
+            ? LocalizationService.Format("Status.Settings.OldLogsDeleted", files, LoggingService.FormatSize(bytes))
+            : LocalizationService.Get("Status.Settings.NoOldLogs");
     }
 
     [RelayCommand]

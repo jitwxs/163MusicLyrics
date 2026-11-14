@@ -21,7 +21,7 @@ sealed class Program
         {
             var settings = new StorageService().ReadAppConfig();
             LoggingService.Initialize(Path.Combine(AppContext.BaseDirectory, "NLog.config"),
-                settings.Config.EnableFileLogging);
+                Constants.GetLogFolderPath(), settings.Config.EnableFileLogging);
             LogManager.GetCurrentClassLogger().Info("Application starting...");
             
             BuildAvaloniaApp(settings.Config.ThemeMode).StartWithClassicDesktopLifetime(args);
