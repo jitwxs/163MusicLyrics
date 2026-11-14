@@ -228,7 +228,8 @@ public class StorageService : IStorageService
             throw new MusicLyricException(preCheck);
         }
 
-        await WriteToFile(await ResolveSaveFolderAsync(settingBean, windowProvider), saveVo, settingBean);
+        await WriteToFile(await ResolveSaveFolderAsync(settingBean, windowProvider), saveVo, settingBean,
+            searchResult.EditedTextForSave);
         await DownloadExtraResourcesIfEnabled(saveVo, settingBean, windowProvider);
 
         return string.Format(ErrorMsgConst.SAVE_COMPLETE, 1, 0);
@@ -436,14 +437,19 @@ public class StorageService : IStorageService
         };
     }
 
-    private static async Task WriteToFile(IStorageFolder folder, SaveVo saveVo, SettingBean settingBean)
+    /// <param name="editedContent">The lyrics as edited on the online lyrics page, written as they are instead of
+    /// being generated again; null to generate them.</param>
+    private static async Task WriteToFile(IStorageFolder folder, SaveVo saveVo, SettingBean settingBean,
+        string? editedContent = null)
     {
         var extension = settingBean.Param.OutputFileFormat.ToDescription().ToLower();
         var encoding = GlobalUtils.GetEncoding(settingBean.Param.Encoding);
         var filename = GlobalUtils.GetOutputName(saveVo, settingBean.Config.OutputFileNameFormat,
             settingBean.Config.SingerSeparator, settingBean.Config.SingerCountLimit);
 
-        var res = await LyricUtils.GetOutputContent(saveVo.LyricVo, settingBean);
+        var res = editedContent != null
+            ? [editedContent]
+            : await LyricUtils.GetOutputContent(saveVo.LyricVo, settingBean);
 
         var isSingle = res.Count == 1;
 

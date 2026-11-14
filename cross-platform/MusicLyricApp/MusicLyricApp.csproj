@@ -14,15 +14,16 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Avalonia" Version="12.1.4"/>
-        <PackageReference Include="Avalonia.Desktop" Version="12.1.4"/>
-        <PackageReference Include="Avalonia.Fonts.Inter" Version="12.1.4"/>
+        <PackageReference Include="Avalonia" Version="12.1.4" />
+        <PackageReference Include="Avalonia.AvaloniaEdit" Version="12.0.0" />
+        <PackageReference Include="Avalonia.Desktop" Version="12.1.4" />
+        <PackageReference Include="Avalonia.Fonts.Inter" Version="12.1.4" />
         <PackageReference Include="TagLibSharp" Version="2.3.0" />
         <PackageReference Include="TKCode.Arc" Version="1.0.0" />
         <PackageReference Include="TKCode.Arc.Blocks" Version="1.0.0" />
         <PackageReference Include="TKCode.Arc.Fonts" Version="1.0.0" />
         <PackageReference Include="TKCode.Arc.Icons.Lucide" Version="1.0.0" />
-        <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.1"/>
+        <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.1" />
         <PackageReference Include="hyjiacan.py4n" Version="4.0.0" />
         <PackageReference Include="NAudio" Version="2.2.1" />
         <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />

@@ -175,6 +175,16 @@ public class SettingsAndConvertPageRegressionTests
             Assert.Equal(reachable.Count, reachable.Distinct().Count());
         }
 
+        // The lyric editor sits in the search page. Its keys never clash with the page's, and the only global key
+        // it takes over is ⌘F, which finds in the lyrics there.
+        string[] Keys(MusicLyricApp.Core.ShortcutScope scope) => all.Where(s => s.Scope == scope)
+            .SelectMany(s => s.AllGestures).Select(g => g.ToString()).ToArray();
+        var editor = Keys(MusicLyricApp.Core.ShortcutScope.Editor);
+        Assert.Equal(editor.Length, editor.Distinct().Count());
+        Assert.Empty(editor.Intersect(Keys(MusicLyricApp.Core.ShortcutScope.Search)));
+        var focusSearch = MusicLyricApp.Core.AppShortcuts.Get(MusicLyricApp.Core.AppShortcuts.FocusSearch).Gesture.ToString();
+        Assert.Equal(new[] { focusSearch }, editor.Intersect(Keys(MusicLyricApp.Core.ShortcutScope.Global)));
+
         var save = MusicLyricApp.Core.AppShortcuts.Get(MusicLyricApp.Core.AppShortcuts.Save);
         Assert.Equal(MusicLyricApp.Core.AppShortcuts.CommandModifier, save.Gesture.KeyModifiers);
         Assert.Equal(OperatingSystem.IsMacOS() ? "⌘ S" : "Ctrl + S", save.KeysText);

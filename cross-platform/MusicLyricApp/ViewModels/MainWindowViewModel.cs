@@ -36,7 +36,14 @@ public partial class MainWindowViewModel : ViewModelBase
     /// <summary>"MusicLyricApp v{major}.{minor}", from the assembly version set in the project file.</summary>
     [ObservableProperty] private string _appTitle = AppInfo.Title;
 
-    [ObservableProperty] private string _lastSaveFolderPath = "";
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(LastSaveFolderDisplay))]
+    private string _lastSaveFolderPath = "";
+
+    /// <summary>The save folder as shown: no trailing separator, so a shortened path still ends in the folder name.</summary>
+    public string LastSaveFolderDisplay => string.IsNullOrEmpty(LastSaveFolderPath)
+        ? LastSaveFolderPath
+        : System.IO.Path.TrimEndingDirectorySeparator(LastSaveFolderPath);
     [ObservableProperty] private string _tipTimestamp = "";
     [ObservableProperty] private string _tipNormalMessage = "";
     [ObservableProperty] private string _tipErrorMessage = "";
@@ -289,8 +296,20 @@ public partial class MainWindowViewModel : ViewModelBase
         }
     }
 
+    /// <summary>Asks before a new song replaces lyrics with unsaved edits; set by the view, unset in tests.</summary>
+    public Func<Task<bool>>? ConfirmDiscardEditsAsync { get; set; }
+
+    private async Task<bool> MayDiscardEditsAsync() =>
+        !SearchResultViewModel.HasUnsavedEdits || ConfirmDiscardEditsAsync == null || await ConfirmDiscardEditsAsync();
+
     private async Task OpenSongDetailAsync(SongDetailRequest request)
     {
+        if (!await MayDiscardEditsAsync())
+        {
+            return;
+        }
+
+        SearchResultViewModel.DiscardEdits();
         ++_previewRevision;
         IsBlurSearch = false;
         SearchParamViewModel.SearchSource.Value = request.SearchSource;
@@ -374,6 +393,11 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private void SearchParamViewModelOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
+        if (e.PropertyName is nameof(SearchParamViewModel.OutputFormat))
+        {
+            OnPropertyChanged(nameof(PreviewFormatLabel));
+        }
+
         if (e.PropertyName is nameof(SearchParamViewModel.SearchSource))
         {
             OnPropertyChanged(nameof(CurrentLogin));
@@ -404,13 +428,21 @@ public partial class MainWindowViewModel : ViewModelBase
                             ReferenceEquals(SearchResultViewModel.SaveVoMap.Values.First(), saveVo);
         try
         {
-            var output = saveVo.LyricVo.IsEmpty()
-                ? string.Empty
-                : GlobalUtils.MergeStr(await LyricUtils.GetOutputContent(saveVo.LyricVo, SettingBean));
+            var parts = saveVo.LyricVo.IsEmpty()
+                ? new List<string>()
+                : await LyricUtils.GetOutputContent(saveVo.LyricVo, SettingBean);
+            var output = GlobalUtils.MergeStr(parts);
             // Translation can finish after another option or song has been selected.
             if (IsCurrent())
             {
+                var changed = output != SearchResultViewModel.ConsoleOutput;
+                SearchResultViewModel.OutputPartCount = Math.Max(1, parts.Count);
                 SearchResultViewModel.ConsoleOutput = output;
+                if (changed && SearchResultViewModel.IsEdited)
+                {
+                    // The edited text stays as it is; say why the new options do not show.
+                    SetTip(LocalizationService.Get("Editor.OptionsNotApplied"), false);
+                }
             }
         }
         catch (Exception ex)
@@ -432,7 +464,13 @@ public partial class MainWindowViewModel : ViewModelBase
             return;
         }
 
+        if (!await MayDiscardEditsAsync())
+        {
+            return;
+        }
+
         ++_previewRevision;
+        SearchResultViewModel.DiscardEdits();
 
         // An exact search shows its own preview, so any open fuzzy results give way to it.
         BlurResults = null;
@@ -534,6 +572,7 @@ public partial class MainWindowViewModel : ViewModelBase
         try
         {
             var message = await _storageService.SaveResult(SearchResultViewModel, SettingBean, _windowProvider);
+            SearchResultViewModel.MarkSaved();
             LastSaveFolderPath = SettingBean.Config.LastSaveFolderPath;
             SetTip(message, false);
         }
@@ -543,6 +582,27 @@ public partial class MainWindowViewModel : ViewModelBase
             {
                 SetTip(ex.Message, true);
             }
+        }
+    }
+
+    /// <summary>The file type the lyrics are shown and saved in, beside the preview's title ("· lrc").</summary>
+    public string PreviewFormatLabel => "· " + SettingBean.Param.OutputFileFormat.ToDescription().ToLowerInvariant();
+
+    /// <summary>Copies the lyrics as shown, edits included.</summary>
+    [RelayCommand]
+    private async Task ExecuteCopyLyricsAsync()
+    {
+        var text = SearchResultViewModel.PreviewText;
+        if (string.IsNullOrEmpty(text)) return;
+
+        try
+        {
+            await _windowProvider.SetTextAsync(text);
+            SetTip(LocalizationService.Get("Status.Main.LyricsCopied"), false);
+        }
+        catch (Exception ex)
+        {
+            SetTip(LocalizationService.Format("Status.Main.CopyLyricsFailed", ex.Message), true);
         }
     }
 

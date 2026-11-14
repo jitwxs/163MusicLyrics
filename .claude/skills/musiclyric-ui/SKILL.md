@@ -18,6 +18,7 @@ Paths below are relative to `cross-platform/MusicLyricApp/`.
 |---|---|
 | Shell, sidebar, page switching, global shortcuts, exit confirmation | `Views/MainWindow.axaml(.cs)`, `ViewModels/MainWindowViewModel.cs` (page keys `PageSearch`, `PageBatch`, `PageConvert`, `PageLocal`, `settings/<section>`) |
 | Online lyrics, 在线歌词 (query row, song strip, preview, fuzzy results, output bar) | `Views/SearchView.axaml(.cs)`, `Views/BlurSearchView.axaml(.cs)`, `ViewModels/SearchResultViewModel.cs`, `BlurSearchViewModel.cs` |
+| Lyrics preview and editor on the online lyrics page (one AvaloniaEdit `TextEditor`, read-only as the preview; 编辑歌词 / 取消 / 完成 / 还原, find and replace, unsaved-edit prompts) | `LyricPane` in `Views/SearchView.axaml(.cs)`, `Views/LyricEditorSetup.cs` (tokens, highlighting, find buttons), `Views/LyricSearchPanelTheme.axaml` (find panel in Arc controls), editing state in `ViewModels/SearchResultViewModel.cs`; saving the edited text in `StorageService.SaveSingleResult` |
 | Download manager (UI name 下载管理 / Download manager; code name `Batch*`) | `Views/BatchSearchView.axaml(.cs)`, `ViewModels/BatchSearchViewModel.cs`, `BatchSearchItemViewModel.cs` |
 | Format conversion | `Views/FormatConvertView.axaml(.cs)`, `ViewModels/FormatConvertViewModel.cs` |
 | Sign-in state of the cookies (settings rows, online lyrics status button, "needs login" toast action) | `ViewModels/LoginStatusViewModel.cs` (shared `MainWindowViewModel.Login`), `Core/Service/Login/LoginProbe.cs` |

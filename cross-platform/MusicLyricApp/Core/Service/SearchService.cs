@@ -202,13 +202,16 @@ public class SearchService : ISearchService
             var saveVo = resDict[songId].Assert().Data;
 
             searchResult.SaveVoMap.Add(songId, saveVo);
+            searchResult.NotifySongsChanged();
 
             // render UI
             var lyricVo = saveVo.LyricVo;
 
+            var parts = lyricVo.IsEmpty() ? new List<string>() : await LyricUtils.GetOutputContent(lyricVo, settingBean);
+            searchResult.OutputPartCount = Math.Max(1, parts.Count);
             searchResult.ConsoleOutput = lyricVo.IsEmpty()
                 ? ErrorMsgConst.LRC_NOT_EXIST
-                : GlobalUtils.MergeStr(await LyricUtils.GetOutputContent(lyricVo, settingBean));
+                : GlobalUtils.MergeStr(parts);
             searchResult.Singer = string.Join(settingBean.Config.SingerSeparator, saveVo.SongVo.Singer);
             searchResult.Album = saveVo.SongVo.Album;
             searchResult.SongName = saveVo.SongVo.Name;

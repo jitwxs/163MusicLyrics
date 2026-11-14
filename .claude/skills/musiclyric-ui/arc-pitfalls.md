@@ -28,8 +28,36 @@ one is wrong.
   have their own action buttons.
 - **Framed controls.** `Table`, `CodeBlock`, `Textarea` and `Input` already draw a border and radius. Wrapping them in
   a card shows two stacked panels.
+- **`Button` lays out its content at full width.** A long text in a button is centred and clipped, not trimmed,
+  even with `TextTrimming`, because the label slot measures it without a width limit. Cap the text at the
+  button's inner width (width minus `Padding` and `BorderThickness`) when the button resizes; the save folder
+  button in `SearchView` does this.
+- **Key bindings run before the focused control.** In Avalonia 12 a `KeyBinding` on an ancestor handles a key before
+  a focused `TextBox` sees it, so a page-wide Enter binding also fires from a text area or a `SearchField` (whose
+  own Enter, `SearchSubmitted`, then never comes). Give such a binding a command whose `CanExecute` is false while
+  focus is where the key means something else; `SearchView` does this for the lyric editor.
 - **`SearchField.ClearText`** and the `Table` labels default to English. Set them from localization.
 - **Arrow glyphs such as ↩** render badly in the Arc fonts. Name keys with words ("Enter").
+
+## AvaloniaEdit (the lyrics editor)
+
+- **Its Fluent and Simple themes need those themes.** They `StaticResource` Fluent or Simple keys and fail to load
+  under Arc. App.axaml merges only `avares://AvaloniaEdit/Themes/Base.xaml`; `LyricEditorSetup` supplies the
+  resources Base asks for (`TextAreaSelectionBrush`, `SearchPanel*`) from Arc tokens, again on theme changes.
+- **Its find panel theme fails as the panel opens** (`Static resource 'ToggleButton' not found`): its buttons are
+  `BasedOn="{StaticResource {x:Type ToggleButton}}"`, which Arc does not register. `LyricSearchPanelTheme.axaml`
+  replaces the panel's theme with Arc controls, keeping `PART_searchTextBox`, `PART_replaceTextBox`,
+  `PART_MessageView` and `PART_MessageContent`.
+- **Its routed `SearchCommands` stay disabled in Arc buttons** (替换 and 全部替换 never enabled). Name the buttons and
+  call the panel's methods on Click (`LyricEditorSetup.WireFindButtons`). Tests must click the buttons; calling
+  `panel.ReplaceAll()` directly hides this.
+- **`TextEditor` installs its own `SearchPanel`** when it gets its template. Installing another gives two panels,
+  and settings go to the one never shown. Set `TextEditor.SearchResultsBrush`; the editor passes it on.
+- **Arc tokens resolve only in a tree.** `ArcTokens.Get/GetColor` on a control that is not attached throws; apply
+  them on `AttachedToVisualTree`.
+- **Its own texts follow `AvaloniaEdit.SR.Culture`**, not the app's language ("2 of 5"). It ships zh-Hans only.
+- **`TextEditor.Text = ...` clears undo; `Document.Replace(0, length, text)` is one undoable change.** The page uses
+  the first for a new song or new options and the second for 还原 while editing.
 
 ## Dialogs and toasts
 

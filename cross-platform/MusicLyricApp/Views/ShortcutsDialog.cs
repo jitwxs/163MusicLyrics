@@ -1,4 +1,4 @@
-using Avalonia;
+﻿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Layout;
 using Avalonia.Media;
@@ -17,6 +17,7 @@ public static class ShortcutsDialog
         var root = new StackPanel { MinWidth = 360 };
         ArcTokens.Bind(root, StackPanel.SpacingProperty, ArcDesignTokenKind.Space5);
         root.Children.Add(Group("Shortcuts.Group.Search", "Shortcuts.Group.SearchHint", ShortcutScope.Search));
+        root.Children.Add(Group("Shortcuts.Group.Editor", "Shortcuts.Group.EditorHint", ShortcutScope.Editor));
         root.Children.Add(Group("Shortcuts.Group.Global", "Shortcuts.Group.GlobalHint", ShortcutScope.Global));
         return root;
     }

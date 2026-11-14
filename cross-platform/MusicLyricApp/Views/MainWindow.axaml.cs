@@ -153,7 +153,9 @@ public partial class MainWindow : ArcWindow, IWindowProvider
             return;
         }
 
-        if (_exitConfirmed || !vm.SettingBean.Config.ConfirmBeforeExit)
+        // Unsaved lyric edits always ask, even with the exit confirmation turned off.
+        var unsavedEdits = vm.SearchResultViewModel.HasUnsavedEdits;
+        if (_exitConfirmed || (!vm.SettingBean.Config.ConfirmBeforeExit && !unsavedEdits))
         {
             // Stops a running local scan, match or save; finished results are already on disk.
             vm.LocalMusicScanViewModel?.Dispose();
@@ -165,8 +167,8 @@ public partial class MainWindow : ArcWindow, IWindowProvider
 
         var confirmed = await DialogHelper.ConfirmOnAsync(this,
             LocalizationService.Get("Dialog.Exit.Title"),
-            LocalizationService.Get("Dialog.Exit.Confirm"),
-            LocalizationService.Get("Dialog.Exit.Action"));
+            LocalizationService.Get(unsavedEdits ? "Editor.ExitWithEdits" : "Dialog.Exit.Confirm"),
+            LocalizationService.Get("Dialog.Exit.Action"), isDanger: unsavedEdits);
 
         if (!confirmed)
         {

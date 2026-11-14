@@ -7,6 +7,7 @@
              xmlns:views="using:MusicLyricApp.Views"
              xmlns:models="using:MusicLyricApp.Models"
              xmlns:loc="using:MusicLyricApp.Core.Localization"
+             xmlns:ae="using:AvaloniaEdit"
              mc:Ignorable="d"
              d:DesignWidth="840" d:DesignHeight="700"
              x:Class="MusicLyricApp.Views.SearchView"
@@ -295,8 +296,8 @@
                 </Grid>
             </Border>
 
-            <!-- Lyrics preview, or the fuzzy search results in its place. The code block and the results table
-                 draw their own frame, so only the empty states sit in a card (no frame inside a frame). -->
+            <!-- Lyrics preview and editor, or the fuzzy search results in their place. The results table draws its
+                 own frame; the lyrics pane and the empty states are cards (no frame inside a frame). -->
                 <Panel Grid.Row="1">
                     <Panel IsVisible="{Binding !IsShowingBlurResults}">
                         <Border Classes="pane"
@@ -314,14 +315,87 @@
                                         Description="{loc:Loc Key=Search.NoLyricsDescription}" />
                             </Panel>
                         </Border>
-                        <ScrollViewer IsVisible="{Binding SearchResultViewModel.HasConsoleOutput}">
-                            <arc:CodeBlock Name="LyricPreview"
-                                           Code="{Binding SearchResultViewModel.ConsoleOutput, Mode=OneWay}"
-                                           Language="lrc"
-                                           FileName="{loc:Loc Key=Search.PreviewTitle}"
-                                           ShowLineNumbers="True"
-                                           CopyLabel="{loc:Loc Key=Search.CopyPreview}" />
-                        </ScrollViewer>
+                        <!-- The lyrics: one AvaloniaEdit editor, read-only as the preview and writable while
+                             editing. The editor has no frame of its own, so this pane draws it. -->
+                        <Border Name="LyricPane"
+                                Classes="pane"
+                                Padding="0"
+                                ClipToBounds="True"
+                                IsVisible="{Binding SearchResultViewModel.HasConsoleOutput}">
+                            <Grid RowDefinitions="Auto,*">
+                                <Grid Margin="16,8,8,8"
+                                      ColumnDefinitions="Auto,Auto,*,Auto"
+                                      ColumnSpacing="{arc:ArcDesignTokenResource Space2}">
+                                    <arc:ArcGlyph VerticalAlignment="Center"
+                                                  Foreground="{arc:ArcDesignTokenResource TextSecondary}"
+                                                  Data="{x:Static arc:ArcIcons.FileText}" />
+                                    <TextBlock Name="LyricTitle" Grid.Column="1"
+                                               VerticalAlignment="Center"
+                                               FontWeight="SemiBold"
+                                               Text="{Binding SearchResultViewModel.PreviewTitle}" />
+                                    <TextBlock Grid.Column="2"
+                                               Classes="secondary"
+                                               VerticalAlignment="Center"
+                                               FontFamily="{arc:ArcDesignTokenResource MonoFontFamily}"
+                                               Text="{Binding PreviewFormatLabel}" />
+
+                                    <!-- Preview: find, edit, copy. -->
+                                    <StackPanel Grid.Column="3"
+                                                Orientation="Horizontal"
+                                                Spacing="{arc:ArcDesignTokenResource Space2}"
+                                                IsVisible="{Binding !SearchResultViewModel.IsEditing}">
+                                        <arc:Button Name="FindInLyricsButton"
+                                                    Variant="Ghost" Size="Small"
+                                                    AutomationProperties.Name="{loc:Loc Key=Shortcuts.FindInLyrics}"
+                                                    Click="OnFindInLyricsClick">
+                                            <arc:ArcGlyph Data="{x:Static arc:ArcIcons.Search}" />
+                                        </arc:Button>
+                                        <arc:Button Name="EditLyricsButton"
+                                                    Variant="Secondary" Size="Small"
+                                                    ToolTip.ShowOnDisabled="True"
+                                                    Content="{loc:Loc Key=Editor.Edit}"
+                                                    Command="{Binding SearchResultViewModel.BeginEditCommand}" />
+                                        <arc:Button Name="CopyLyricsButton"
+                                                    Variant="Ghost" Size="Small"
+                                                    Content="{loc:Loc Key=Search.CopyPreview}"
+                                                    Command="{Binding ExecuteCopyLyricsCommand}" />
+                                    </StackPanel>
+
+                                    <!-- Editing: find and replace, revert everything, cancel this session, done. -->
+                                    <StackPanel Grid.Column="3"
+                                                Orientation="Horizontal"
+                                                Spacing="{arc:ArcDesignTokenResource Space2}"
+                                                IsVisible="{Binding SearchResultViewModel.IsEditing}">
+                                        <arc:Button Name="FindReplaceButton"
+                                                    Variant="Ghost" Size="Small"
+                                                    Content="{loc:Loc Key=Editor.FindReplace}"
+                                                    Click="OnFindReplaceClick" />
+                                        <arc:Button Name="RevertEditsButton"
+                                                    Variant="Ghost" Size="Small"
+                                                    Content="{loc:Loc Key=Editor.Revert}"
+                                                    ToolTip.Tip="{loc:Loc Key=Editor.RevertTip}"
+                                                    IsVisible="{Binding SearchResultViewModel.IsEdited}"
+                                                    Command="{Binding SearchResultViewModel.RevertEditsCommand}" />
+                                        <arc:Button Name="CancelEditButton"
+                                                    Variant="Secondary" Size="Small"
+                                                    Content="{loc:Loc Key=Editor.Cancel}"
+                                                    ToolTip.Tip="{loc:Loc Key=Editor.CancelTip}"
+                                                    Command="{Binding SearchResultViewModel.CancelEditCommand}" />
+                                        <arc:Button Name="FinishEditButton"
+                                                    Variant="Secondary" Size="Small"
+                                                    Content="{loc:Loc Key=Editor.Done}"
+                                                    Command="{Binding SearchResultViewModel.FinishEditCommand}" />
+                                    </StackPanel>
+                                </Grid>
+                                <Border Grid.Row="1"
+                                        BorderBrush="{arc:ArcDesignTokenResource BorderSubtle}"
+                                        BorderThickness="0,1,0,0">
+                                    <ae:TextEditor Name="LyricPreview"
+                                                   IsReadOnly="True"
+                                                   AutomationProperties.Name="{loc:Loc Key=Editor.Label}" />
+                                </Border>
+                            </Grid>
+                        </Border>
                     </Panel>
 
                     <views:BlurSearchView Name="BlurResultsView"
@@ -334,6 +408,9 @@
         <Border Grid.Row="2" Classes="pane" Padding="16,12" IsVisible="{Binding !IsShowingBlurResults}">
             <Grid ColumnDefinitions="Auto,Auto,Auto,*,Auto" ColumnSpacing="{arc:ArcDesignTokenResource Space3}">
                 <arc:Select Name="LrcTypeSelect"
+                            IsEnabled="{Binding !SearchResultViewModel.IsEdited}"
+                            ToolTip.Tip="{Binding SearchResultViewModel.FormatLockedTip}"
+                            ToolTip.ShowOnDisabled="True"
                             MinWidth="132"
                             Size="Small"
                             Label="{loc:Loc Key=UI.LyricFormat}"
@@ -342,6 +419,9 @@
                             DisplayMemberBinding="{ReflectionBinding DisplayName}" />
                 <arc:Select Grid.Column="1"
                             Name="OutputFormatSelect"
+                            IsEnabled="{Binding !SearchResultViewModel.IsEdited}"
+                            ToolTip.Tip="{Binding SearchResultViewModel.FormatLockedTip}"
+                            ToolTip.ShowOnDisabled="True"
                             MinWidth="112"
                             Size="Small"
                             Label="{loc:Loc Key=UI.OutputFormat}"
@@ -357,7 +437,11 @@
                             SelectedItem="{Binding SearchParamViewModel.OutputEncoding.Selected}"
                             DisplayMemberBinding="{ReflectionBinding DisplayName}" />
 
+                <!-- The folder takes what width is left; a long path shortens by whole folders. The button fills
+                     the column and code-behind caps the text at the button's inner width, because an Arc button
+                     lays out its content at full width and clips it instead of trimming. -->
                 <StackPanel Grid.Column="3"
+                            MaxWidth="280"
                             HorizontalAlignment="Right"
                             VerticalAlignment="Bottom"
                             Spacing="{arc:ArcDesignTokenResource Space1}">
@@ -366,11 +450,11 @@
                     <arc:Button Name="SaveFolderButton"
                                 Variant="Ghost"
                                 Size="Small"
-                                MaxWidth="280"
-                                HorizontalAlignment="Right"
+                                HorizontalAlignment="Stretch"
+                                HorizontalContentAlignment="Left"
                                 Command="{Binding ExecuteSelectOutputFolderCommand}"
                                 ToolTip.Tip="{loc:Loc Key=Search.ChangeFolder}">
-                        <TextBlock Text="{Binding LastSaveFolderPath}" TextTrimming="PathSegmentEllipsis" />
+                        <TextBlock Name="SaveFolderText" Text="{Binding LastSaveFolderDisplay}" TextTrimming="PathSegmentEllipsis" />
                     </arc:Button>
                 </StackPanel>
 

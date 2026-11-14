@@ -64,12 +64,12 @@ public class SearchPageRegressionTests
             vm.SearchParamViewModel.LrcType.Items.Single(x => x.Value == ShowLrcTypeEnum.MERGE);
         vm.SearchParamViewModel.LrcMergeSeparator = " / ";
         Dispatcher.UIThread.RunJobs();
-        Assert.Equal("[00:01.000]hello / 你好", scope.Find<CodeBlock>("LyricPreview").Code);
+        Assert.Equal("[00:01.000]hello / 你好", scope.Find<AvaloniaEdit.TextEditor>("LyricPreview").Text);
 
         scope.Find<Select>("OutputFormatSelect").SelectedItem =
             vm.SearchParamViewModel.OutputFormat.Items.Single(x => x.Value == OutputFormatEnum.SRT);
         Dispatcher.UIThread.RunJobs();
-        Assert.Contains("00:00:01,000 -->", scope.Find<CodeBlock>("LyricPreview").Code);
+        Assert.Contains("00:00:01,000 -->", scope.Find<AvaloniaEdit.TextEditor>("LyricPreview").Text);
         Assert.Contains("hello / 你好", vm.SearchResultViewModel.ConsoleOutput);
 
         scope.Find<Select>("OutputFormatSelect").SelectedItem =
@@ -78,7 +78,7 @@ public class SearchPageRegressionTests
             vm.SearchParamViewModel.LrcType.Items.Single(x => x.Value == ShowLrcTypeEnum.STAGGER);
         Dispatcher.UIThread.RunJobs();
         Assert.Equal(string.Join(Environment.NewLine, "[00:01.000]hello", "[00:01.000]你好"),
-            scope.Find<CodeBlock>("LyricPreview").Code);
+            scope.Find<AvaloniaEdit.TextEditor>("LyricPreview").Text);
         Assert.Same(song, vm.SearchResultViewModel.SaveVoMap["123"]);
         Assert.Equal(song.SongVo.Name, vm.SearchResultViewModel.SongName);
         Assert.Empty(vm.TipErrorMessage);
@@ -102,7 +102,7 @@ public class SearchPageRegressionTests
         vm.CurrentPageKey = MainWindowViewModel.PageSearch;
         Dispatcher.UIThread.RunJobs();
         Assert.Equal(string.Join(Environment.NewLine, "[00:01]你好", "[00:01]hello"),
-            scope.Find<CodeBlock>("LyricPreview").Code);
+            scope.Find<AvaloniaEdit.TextEditor>("LyricPreview").Text);
         Assert.Empty(vm.TipErrorMessage);
     }
 
@@ -197,7 +197,7 @@ public class SearchPageRegressionTests
         Dispatcher.UIThread.RunJobs();
         Assert.False(songEmpty.IsVisible);
         Assert.False(previewEmpty.IsVisible);
-        Assert.Equal("[00:01.000]hello", scope.Find<CodeBlock>("LyricPreview").Code);
+        Assert.Equal("[00:01.000]hello", scope.Find<AvaloniaEdit.TextEditor>("LyricPreview").Text);
         Assert.Equal("song", scope.Find<TextBlock>("SongTitle").Text);
         // A long title stays within two lines so the lyrics keep the room.
         Assert.Equal(2, scope.Find<TextBlock>("SongTitle").MaxLines);

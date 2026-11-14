@@ -1,0 +1,99 @@
+<!--
+    AvaloniaEdit's find and replace panel in Arc controls. Its own theme builds its buttons on
+    {StaticResource {x:Type ToggleButton}}, a resource Arc does not register, and so fails as the panel opens.
+    This theme replaces it (App.axaml merges it after AvaloniaEdit's base templates) and keeps the parts and
+    commands the panel's code relies on: PART_searchTextBox, PART_replaceTextBox, PART_MessageView,
+    PART_MessageContent. Its buttons are wired to the panel's methods in Views/LyricEditorSetup: AvaloniaEdit's routed
+    SearchCommands decide whether they can run from where focus is, and in Arc buttons the replace pair stayed
+    disabled.
+-->
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:arc="https://github.com/AIDotNet/TKCode.Arc"
+                    xmlns:search="using:AvaloniaEdit.Search"
+                    xmlns:loc="using:MusicLyricApp.Core.Localization">
+
+    <ControlTheme x:Key="{x:Type search:SearchPanel}" TargetType="search:SearchPanel">
+        <Setter Property="Focusable" Value="True" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Name="PART_Border"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Top"
+                        Margin="0,8,20,0"
+                        Padding="10"
+                        Background="{arc:ArcDesignTokenResource SurfaceRaised}"
+                        BorderBrush="{arc:ArcDesignTokenResource Border}"
+                        BorderThickness="1"
+                        CornerRadius="{arc:ArcDesignTokenResource RadiusPanel}"
+                        BoxShadow="{arc:ArcDesignTokenResource ShadowRaised}">
+                    <StackPanel Spacing="{arc:ArcDesignTokenResource Space2}">
+                        <!-- Find: Enter and Shift+Enter move through the matches, Escape closes. -->
+                        <StackPanel Orientation="Horizontal" Spacing="{arc:ArcDesignTokenResource Space1}">
+                            <arc:Input Name="PART_searchTextBox"
+                                       Width="220"
+                                       Size="Small"
+                                       Label="{loc:Loc Key=Editor.Find}"
+                                       IsLabelVisible="False"
+                                       Placeholder="{loc:Loc Key=Editor.Find}"
+                                       Text="{Binding SearchPattern, RelativeSource={RelativeSource TemplatedParent}}" />
+                            <arc:Button Variant="Ghost" Size="Small"
+                                        ToolTip.Tip="{loc:Loc Key=Shortcuts.FindPrevious}"
+                                        AutomationProperties.Name="{loc:Loc Key=Shortcuts.FindPrevious}"
+                                        Name="FindPreviousButton">
+                                <arc:ArcGlyph Data="{x:Static arc:ArcIcons.ChevronUp}" />
+                            </arc:Button>
+                            <arc:Button Variant="Ghost" Size="Small"
+                                        ToolTip.Tip="{loc:Loc Key=Shortcuts.FindNext}"
+                                        AutomationProperties.Name="{loc:Loc Key=Shortcuts.FindNext}"
+                                        Name="FindNextButton">
+                                <arc:ArcGlyph Data="{x:Static arc:ArcIcons.ChevronDown}" />
+                            </arc:Button>
+                            <arc:Button Variant="Ghost" Size="Small"
+                                        ToolTip.Tip="{loc:Loc Key=Editor.CloseFind}"
+                                        AutomationProperties.Name="{loc:Loc Key=Editor.CloseFind}"
+                                        Name="CloseFindButton">
+                                <arc:ArcGlyph Data="{x:Static arc:ArcIcons.X}" />
+                            </arc:Button>
+                        </StackPanel>
+
+                        <!-- Replace: only while editing. -->
+                        <StackPanel Orientation="Horizontal"
+                                    Spacing="{arc:ArcDesignTokenResource Space1}"
+                                    IsVisible="{Binding IsReplaceMode, RelativeSource={RelativeSource TemplatedParent}}">
+                            <arc:Input Name="PART_replaceTextBox"
+                                       Width="220"
+                                       Size="Small"
+                                       Label="{loc:Loc Key=Editor.ReplaceWith}"
+                                       IsLabelVisible="False"
+                                       Placeholder="{loc:Loc Key=Editor.ReplaceWith}"
+                                       Text="{Binding ReplacePattern, RelativeSource={RelativeSource TemplatedParent}}" />
+                            <arc:Button Variant="Secondary" Size="Small"
+                                        Content="{loc:Loc Key=Editor.Replace}"
+                                        Name="ReplaceNextButton" />
+                            <arc:Button Variant="Secondary" Size="Small"
+                                        Content="{loc:Loc Key=Editor.ReplaceAll}"
+                                        Name="ReplaceAllButton" />
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal" Spacing="{arc:ArcDesignTokenResource Space4}">
+                            <arc:Checkbox Content="{loc:Loc Key=Editor.MatchCase}"
+                                          IsChecked="{Binding MatchCase, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" />
+                            <arc:Checkbox Content="{loc:Loc Key=Editor.WholeWords}"
+                                          IsChecked="{Binding WholeWords, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" />
+                            <arc:Checkbox Content="{loc:Loc Key=Editor.UseRegex}"
+                                          IsChecked="{Binding UseRegex, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" />
+                        </StackPanel>
+
+                        <!-- The panel shows its own messages here, such as no matches or an invalid pattern. -->
+                        <StackPanel Name="PART_MessageView" IsVisible="False">
+                            <TextBlock Name="PART_MessageContent"
+                                       Foreground="{arc:ArcDesignTokenResource TextSecondary}"
+                                       FontSize="{arc:ArcDesignTokenResource TypeXS}" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+</ResourceDictionary>

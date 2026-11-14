@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using Avalonia.Input;
@@ -6,10 +6,14 @@ using MusicLyricApp.Core.Localization;
 
 namespace MusicLyricApp.Core;
 
-/// <summary>Where a shortcut works: only inside the lyrics search page, or anywhere in the window.</summary>
+/// <summary>
+/// Where a shortcut works: inside the lyrics search page, inside its lyrics pane (where it may take over a global
+/// key, as ⌘F finds in the lyrics there), or anywhere in the window.
+/// </summary>
 public enum ShortcutScope
 {
     Search,
+    Editor,
     Global
 }
 
@@ -37,6 +41,11 @@ public static class AppShortcuts
     public const string ExactSearch = "exact-search";
     public const string FuzzySearch = "fuzzy-search";
     public const string Save = "save";
+    public const string EditLyrics = "edit-lyrics";
+    public const string FindInLyrics = "find-in-lyrics";
+    public const string ReplaceInLyrics = "replace-in-lyrics";
+    public const string FindNext = "find-next";
+    public const string FindPrevious = "find-previous";
     public const string FocusSearch = "focus-search";
     public const string GoSearch = "go-search";
     public const string GoBatch = "go-batch";
@@ -73,6 +82,19 @@ public static class AppShortcuts
             S(ExactSearch, "Shortcuts.ExactSearch", ShortcutScope.Search, Key.Enter, KeyModifiers.None),
             S(FuzzySearch, "Shortcuts.FuzzySearch", ShortcutScope.Search, Key.Enter, cmd, LegacyCtrl(Key.Enter)),
             S(Save, "Shortcuts.Save", ShortcutScope.Search, Key.S, cmd, LegacyCtrl(Key.S)),
+            S(EditLyrics, "Shortcuts.EditLyrics", ShortcutScope.Search, Key.E, cmd),
+            // Inside the lyric editor ⌘F finds in the lyrics; everywhere else it focuses the song search box.
+            S(FindInLyrics, "Shortcuts.FindInLyrics", ShortcutScope.Editor, Key.F, cmd),
+            IsMac
+                ? S(ReplaceInLyrics, "Shortcuts.ReplaceInLyrics", ShortcutScope.Editor, Key.F, cmd | KeyModifiers.Alt)
+                : S(ReplaceInLyrics, "Shortcuts.ReplaceInLyrics", ShortcutScope.Editor, Key.H, cmd),
+            // Each platform's usual keys: ⌘G and ⇧⌘G on macOS, F3 and Shift+F3 elsewhere.
+            IsMac
+                ? S(FindNext, "Shortcuts.FindNext", ShortcutScope.Editor, Key.G, cmd)
+                : S(FindNext, "Shortcuts.FindNext", ShortcutScope.Editor, Key.F3, KeyModifiers.None),
+            IsMac
+                ? S(FindPrevious, "Shortcuts.FindPrevious", ShortcutScope.Editor, Key.G, cmd | KeyModifiers.Shift)
+                : S(FindPrevious, "Shortcuts.FindPrevious", ShortcutScope.Editor, Key.F3, KeyModifiers.Shift),
             S(FocusSearch, "Shortcuts.FocusSearch", ShortcutScope.Global, Key.F, cmd),
             S(GoSearch, "Shortcuts.GoSearch", ShortcutScope.Global, Key.D1, cmd),
             S(GoBatch, "Shortcuts.GoBatch", ShortcutScope.Global, Key.D2, cmd),
