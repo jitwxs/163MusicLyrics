@@ -78,18 +78,6 @@ No .NET install is needed; unpack and run. The macOS app is not notarized by App
 
 Built with .NET 10, Avalonia, TKCode.Arc and AvaloniaEdit. See [cross-platform/README.md](./cross-platform/README.md) to build, test and package.
 
-### 参与贡献 Contribution
-
-您可访问 [163MusicLyrics Projects](https://github.com/users/jitwxs/projects/1) 了解项目当前阶段的工作计划，如您愿意在其中贡献力量，您可以：
-
-- 将您的想法或发现的 bug 填写在 [Issues](https://github.com/jitwxs/163MusicLyrics/issues) 中，我将不定期进行处理
-- Fork 项目，并提交您的 Pull Requests
-
-You can visit [163MusicLyrics Projects](https://github.com/users/jitwxs/projects/1) to see what the project is working on. If you would like to contribute, you can:
-
-- Write feature suggestions or bug reports in [Issues](https://github.com/jitwxs/163MusicLyrics/issues); I will go through them from time to time
-- Fork the project and submit your pull requests
-
 ### Stargazers over time
 
 <a href="https://trendshift.io/repositories/12366?utm_source=repository-badge&amp;utm_medium=badge&amp;utm_campaign=badge-repository-12366" target="_blank" rel="noopener noreferrer"><img src="https://trendshift.io/api/badge/repositories/12366" alt="jitwxs%2F163MusicLyrics | Trendshift" width="250" height="55"/></a>
@@ -126,9 +114,3 @@ If you choose to donate, remember to note your nickname, I will register it to  
     <img src="https://cdn.jsdelivr.net/gh/jitwxs/cdn/blog/configuration/alipay_donate_full.jpg" height="200" style="float:left;margin-right:20px;margin-left: 310px">
     <img src="https://cdn.jsdelivr.net/gh/jitwxs/cdn/blog/configuration/wechat_donate_full.jpg" height="200" style="float:left">
 </div>
-
-最后，感谢 JetBrains 为开源项目提供免费的 IDE 支持。
-
-Lastly, thanks to JetBrains for sponsoring the IDE for open-sources project.
-
-![Rider logo](https://resources.jetbrains.com/storage/products/company/brand/logos/Rider_icon.svg)
