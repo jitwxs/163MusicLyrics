@@ -407,7 +407,7 @@
   "Dialog.DeleteSongs.Message": "{0} songs will be removed from the download manager and their local cache cleared. Searching for them again will fetch them from the network.",
   "Dialog.DeleteSongs.Action": "Delete",
   "Search.Clear": "Clear search",
-  "LocalScan.Help": "Scan MP3, FLAC, M4A, OGG and WAV, match their tags to songs, then confirm and save lyrics.",
+  "LocalScan.Help": "Scan MP3, FLAC, M4A, OGG, WAV, WMA, APE, DSF and DFF, match their tags to songs, then confirm and save lyrics.",
   "LocalScan.Folder": "Music folder",
   "LocalScan.Scan": "Scan",
   "LocalScan.Recursive": "Include subfolders",

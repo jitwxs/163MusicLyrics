@@ -66,17 +66,17 @@ public class LocalMusicScanRegressionTests
     {
         using var ws = new TestWorkspace();
         var nested = Directory.CreateDirectory(Path.Combine(ws.Root, "nested")).FullName;
-        foreach (var name in new[] { "a.MP3", "b.flac", "c.m4a", "d.ogg", "e.wav", "ignore.txt", "ignore.lrc" })
+        foreach (var name in new[] { "a.MP3", "b.flac", "c.m4a", "d.ogg", "e.wav", "f.wma", "g.ape", "h.dsf", "i.dff", "ignore.txt", "ignore.lrc" })
             File.WriteAllText(Path.Combine(ws.Root, name), "fixture");
         File.WriteAllText(Path.Combine(nested, "broken.mp3"), "broken");
         var scanner = new LocalAudioScanner(new Reader(p => Path.GetFileName(p) == "broken.mp3" ? throw new IOException("broken tags") : Audio(p)));
         var files = new List<LocalAudioFile>();
         var issues = new List<string>();
         scanner.Scan(ws.Root, false, new InlineProgress<LocalAudioFile>(files.Add), new InlineProgress<string>(issues.Add), Token);
-        Assert.Equal(5, files.Count);
+        Assert.Equal(9, files.Count);
         files.Clear();
         scanner.Scan(ws.Root, true, new InlineProgress<LocalAudioFile>(files.Add), new InlineProgress<string>(issues.Add), Token);
-        Assert.Equal(6, files.Count);
+        Assert.Equal(10, files.Count);
         Assert.Equal("broken tags", Assert.Single(files, x => x.Error != null).Error);
         Assert.Empty(issues);
         scanner.Scan(Path.Combine(ws.Root, "missing"), true, new InlineProgress<LocalAudioFile>(files.Add), new InlineProgress<string>(issues.Add), Token);
@@ -603,6 +603,48 @@ public class LocalMusicScanRegressionTests
         Assert.Equal(LocalScanState.Saved, Assert.Single(vm.Items).State);
         Assert.True(File.Exists(Path.Combine(ws.Root, "local.srt")));
         Assert.Equal(OutputFormatEnum.SRT, ws.Settings.Param.OutputFileFormat);
+    }
+
+    [Theory]
+    [InlineData("周杰伦 - 晴天.dff")]
+    [InlineData("周杰伦 - 晴天.ape")]
+    [InlineData("周杰伦 - 晴天.dsf")]
+    public void UnsupportedOrBrokenContainerFallsBackToFilename(string name)
+    {
+        using var ws = new TestWorkspace();
+        var path = Path.Combine(ws.Root, name);
+        File.WriteAllText(path, "not a real audio file");
+        var audio = new AudioMetadataReader().Read(path);
+        // Never surfaces a fatal Error for a recognized extension; filename fallback applies.
+        Assert.Null(audio.Error);
+        Assert.Equal("晴天", audio.Title);
+        Assert.Equal("周杰伦", audio.Artist);
+    }
+
+    [Fact]
+    public void DffWithEmbeddedId3v2ReadsTagsViaFallback()
+    {
+        using var ws = new TestWorkspace();
+        var path = Path.Combine(ws.Root, "wrong - name.dff");
+        // Minimal ID3v2.3 tag: TIT2=园游会, TPE1=周杰伦, TALB=七里香, prefixed by DSDIFF 'FRM8' marker.
+        var id3 = new byte[]
+        {
+            0x49, 0x44, 0x33, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x3C,
+            0x54, 0x49, 0x54, 0x32, 0x00, 0x00, 0x00, 0x0A, 0x00, 0x00, 0x03, 0xE5, 0x9B, 0xAD, 0xE6, 0xB8, 0xB8, 0xE4, 0xBC, 0x9A,
+            0x54, 0x50, 0x45, 0x31, 0x00, 0x00, 0x00, 0x0A, 0x00, 0x00, 0x03, 0xE5, 0x91, 0xA8, 0xE6, 0x9D, 0xB0, 0xE4, 0xBC, 0xA6,
+            0x54, 0x41, 0x4C, 0x42, 0x00, 0x00, 0x00, 0x0A, 0x00, 0x00, 0x03, 0xE4, 0xB8, 0x83, 0xE9, 0x87, 0x8C, 0xE9, 0xA6, 0x99
+        };
+        using (var fs = File.Create(path))
+        {
+            fs.Write(Encoding.ASCII.GetBytes("FRM8"));
+            fs.Write(new byte[16]);
+            fs.Write(id3);
+        }
+        var audio = new AudioMetadataReader().Read(path);
+        Assert.Null(audio.Error);
+        Assert.Equal("园游会", audio.Title);
+        Assert.Equal("周杰伦", audio.Artist);
+        Assert.Equal("七里香", audio.Album);
     }
 
     private static void WriteWave(string path)

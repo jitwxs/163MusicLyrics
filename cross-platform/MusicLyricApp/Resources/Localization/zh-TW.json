@@ -407,7 +407,7 @@
   "Dialog.DeleteSongs.Message": "將從下載管理中刪除 {0} 首歌曲，並清理它們的本地快取。之後再搜尋這些歌曲需要重新聯網取得。",
   "Dialog.DeleteSongs.Action": "刪除",
   "Search.Clear": "清除搜尋",
-  "LocalScan.Help": "掃描 MP3、FLAC、M4A、OGG、WAV，讀取標籤並比對歌曲；確認後再儲存歌詞。",
+  "LocalScan.Help": "掃描 MP3、FLAC、M4A、OGG、WAV、WMA、APE、DSF、DFF，讀取標籤並比對歌曲；確認後再儲存歌詞。",
   "LocalScan.Folder": "音樂資料夾",
   "LocalScan.Scan": "開始掃描",
   "LocalScan.Recursive": "包含子資料夾",
